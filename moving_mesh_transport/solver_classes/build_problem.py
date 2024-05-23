@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 26 07:24:05 2022
+
+@author: William Bennett
+"""
+import numpy as np
+from numba import int64, float64, jit, njit, deferred_type
+from numba.experimental import jitclass
+from numba import types, typed
+import numba as nb
+# from main import IC_func 
+from .mesh import mesh_class
+from .functions import normPn, normTn
+from .mutables import IC_func
+# from .cubic_spline import cubic_spline
+params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
+
+
+
+import yaml
+from pathlib import Path
+import numba as nb
+
+###############################################################################
+mesh_class_type = deferred_type()
+mesh_class_type.define(mesh_class.class_type.instance_type)
+IC_func_type = deferred_type()
+IC_func_type.define(IC_func.class_type.instance_type)
+# cubic_spline_type = deferred_type()
+# cubic_spline_type.define(cubic_spline.class_type.instance_type)
+
+
+
+data = [('N_ang', int64), 
+        ('N_space', int64),
+        ('M', int64),
+        ('tfinal', float64),
+        ('sigma_t', float64),
+        ('sigma_s', float64),
+        ('IC', float64[:,:,:]),
+        ('mus', float64[:]),
+        ('ws', float64[:]),
+        ('xs_quad', float64[:]),
+        ('ws_quad', float64[:]),
+        ('x0', float64),
+        ('t0', float64),
+        ("source_type", int64[:]),
+        ("uncollided", int64),
+        ("moving", int64),
+        ("move_type", int64[:]),
+        ("argument", float64[:]),
+        ("temp", float64),
+        ("t_quad", float64[:]),
+        ("t_ws", float64[:]),
+        ('scattering_ratio', float64),
+        ('thermal_couple', nb.typeof(params_default)),
+        ('temp_function', int64[:]),
+        ('e_init', float64),
+        ('sigma', float64),
+        ('particle_v', float64),
+        ('edge_v', float64),
+        ('cv0', float64),
+        ('thick', int64),
+        ('wave_loc_array', float64[:,:,:]),
+        ('source_strength', float64),
+        ('move_factor', float64),
+        ('sigma_a', float64),
+        ('l', float64),
+        ('save_wave_loc', int64),
+        ('pad', float64),
+        ('leader_pad', float64),
+        ('quad_thick_source', float64[:]),
+        ('quad_thick_edge', float64[:]),
+        ('boundary_on', int64[:]), 
+        ('boundary_source_strength', float64),
+        ('boundary_source', int64),
+        # ('sigma_func', int64[:]),
+        ('sigma_func', nb.typeof(params_default)),
+        ('geometry', nb.typeof(params_default)),
+        ('Msigma', int64),
+        ('domain_width', float64),
+        ('finite_domain', int64),
+        ('fake_sedov_v0', float64),
+        ('x01', float64),
+        ('test_dimensional_rhs', int64),
+        ('epsilon', float64),
+        ('eval_array', float64[:]),
+        ('f_fun', float64[:]),
+        ('g_fun', float64[:]),
+        ('l_fun', float64[:])
+        ]
+
+###############################################################################
+
+@jitclass(data)
+class build(object):
+    def __init__(self, N_ang, N_space, M, tfinal, x0, t0, mus, ws, xs_quad, ws_quad, sigma_t, sigma_s, 
+    source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
+    edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
+     quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
+     fake_sedov_v0, test_dimensional_rhs, epsilon, eval_array, geometry, f_fun, g_fun, l_fun):
+
+        self.N_ang = N_ang
+        self.N_space = N_space
+        self.M = M
+        self.tfinal = tfinal
+        self.sigma_t = sigma_t
+        self.sigma_s = sigma_s
+        self.sigma_a = sigma_t-sigma_s
+        self.scattering_ratio = self.sigma_s / self.sigma_t
+        self.mus = mus
+        self.ws = ws/np.sum(ws)
+        self.xs_quad = xs_quad
+        self.ws_quad = ws_quad
+        self.x0 = x0
+        self.source_type = np.array(list(source_type), dtype = np.int64)
+        self.uncollided = uncollided 
+        self.moving = moving
+        self.move_type = np.array(list(move_type), dtype = np.int64)
+        self.t_quad = t_quad
+        self.t_ws = t_ws
+        self.t0 = t0
+        # self.sigma_func = np.array(list(sigma_func), dtype = np.int64)
+        self.sigma_func = sigma_func
+
+        self.test_dimensional_rhs = test_dimensional_rhs
+
+        self.thermal_couple = thermal_couple
+        self.temp_function = np.array(list(temp_function), dtype = np.int64)
+        self.sigma = sigma
+        self.particle_v = particle_v
+        self.edge_v = edge_v
+        self.cv0 = cv0
+        self.thick = thick
+        self.wave_loc_array = wave_loc_array
+        self.source_strength = source_strength
+        self.move_factor = move_factor
+        self.l = l
+        self.save_wave_loc = save_wave_loc
+        self.pad = pad
+        self.leader_pad = leader_pad
+        self.quad_thick_source = quad_thick_source
+        self.quad_thick_edge = quad_thick_edge
+        self.boundary_on = np.array(list(boundary_on), dtype = np.int64)
+        self.boundary_source = boundary_source
+        self.boundary_source_strength = boundary_source_strength
+        self.Msigma = Msigma
+        self.finite_domain = finite_domain
+        self.domain_width = domain_width
+        self.fake_sedov_v0 = fake_sedov_v0
+        self.eval_array = eval_array
+        
+        if self.thermal_couple['none'] == 1:
+            self.IC = np.zeros((N_ang, N_space, M+1))
+        elif self.thermal_couple['none'] != 1:
+            self.IC = np.zeros((N_ang + 1, N_space, M+1))
+        self.epsilon = epsilon
+        self.geometry = geometry
+       
+        self.e_init = e_initial
+        self.f_fun = f_fun
+        self.g_fun = g_fun
+        self.l_fun = l_fun
+        # self.e_initial = 1e-4
+        
+        
+    def integrate_quad(self, a, b, ang, space, j, ic):
+        argument = (b-a)/2*self.xs_quad + (a+b)/2
+        mu = self.mus[ang]
+        self.IC[ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * ic.function(argument, mu) * normPn(j, argument, a, b))
+    
+    def integrate_quad_remesh(self, a, b, ang, space, j, old_psi_evaluated):
+        argument = (b-a)/2*self.xs_quad + (a+b)/2
+        mu = self.mus[ang]
+        psi_eval = old_psi_evaluated[ang, space, :]
+        self.IC[ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * psi_eval * normPn(j, argument, a, b))
+
+        
+
+    def integrate_e(self, a, b, space, j):
+        argument = (b-a)/2*self.xs_quad + (a+b)/2
+        if b == a:
+            assert(0)
+        self.IC[self.N_ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) * normPn(j, argument, a, b))
+    
+    def IC_e_func(self,x):
+        return np.ones(x.size) * self.e_init
+                
+    def make_IC(self, edges_init):
+        # edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
+        # self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
+        # self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.eval_array, self.geometry, self.sigma_func)
+
+        # edges_init = edges.edges
+
+        # The current method for handling delta functions
+        if self.moving == False and self.source_type[0] == 1 and self.uncollided == False and self.N_space%2 == 0:
+            if self.geometry['slab'] == True:
+                right_edge_index = int(self.N_space/2 + 1)
+                left_edge_index = int(self.N_space/2 - 1)
+                self.x0 = edges_init[right_edge_index] - edges_init[left_edge_index]
+            # temp = (edges_init[int(self.N_space/2 + 1)] - edges_init[self.N_space/2 - 1]) 
+            elif self.geometry['sphere'] == True:
+                self.x0 = edges_init[1] - edges_init[0]
+                print(self.x0, 'x0')
+            
+        if self.thermal_couple['none'] != 1:
+            for space in range(self.N_space):
+                for j in range(self.M + 1):
+                    self.integrate_e(edges_init[space], edges_init[space+1], space, j)
+
+        if self.moving == False and self.source_type[0] == 2 and self.uncollided == False and self.N_space%2 == 0:
+            i = 0
+            it = 0
+            while i==0:
+                if edges_init[it] <= -self.x0 <= edges_init[it+1]:
+                    i = 1
+                else:
+                    it += 1
+                if it > edges_init.size:
+                    assert(0)
+
+            x1 = edges_init[int(self.N_space/2)] - edges_init[int(self.N_space/2)+1]
+            ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, x1, self.geometry)
+        
+        else:
+            ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry)
+
+
+        for ang in range(self.N_ang):
+            for space in range(self.N_space):
+                for j in range(self.M + 1):
+                    if self.geometry['slab'] == True:
+                        self.integrate_quad(edges_init[space], edges_init[space+1], ang, space, j, ic)
+                    elif self.geometry['sphere'] == True:
+                        # self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
+                        assert(0)
+    
+    def make_IC_from_solution(self, old_psi_evaluated, edges_init):
+
+        # edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
+        # self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
+        # self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.eval_array, self.geometry, self.sigma_func)
+        # edges_init = edges.edges
+        print(edges_init, 'new_edges')
+
+        #this is the cubic interpolation method. Suffers from oscillations 
+        # for ang in range(self.N_ang):
+        #     psi_interp_ob = cubic_spline(xs, psi[ang,:])
+        #     for space in range(self.N_space):
+        #         for j in range(self.M + 1):
+        #             self.integrate_quad_remesh(edges_init[space], edges_init[space+1], ang, space, j, psi_interp_ob)
+        for ang in range(self.N_ang):
+            for space in range(self.N_space):
+                for j in range(self.M + 1):
+                    self.integrate_quad_remesh(edges_init[space], edges_init[space+1], ang, space, j, old_psi_evaluated)
+        
+        
+        
+        

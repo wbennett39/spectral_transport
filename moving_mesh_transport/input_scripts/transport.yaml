@@ -1,0 +1,118 @@
+# parameters shared by all source types
+'all':
+    'problem_name': 'transport'
+    'tfinal': 5.0
+    'c_scaling': False
+    'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
+    'epsilon': 1.0
+    'sigma_t': 0.000005
+    'sigma_s': 0.00000
+    't0': 2.5                       # time the source is turned off
+    'N_spaces': [64]                   # number of cells
+    'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
+    'Ms': [2]                         # number of basis functions -1
+    'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
+    'rt': 5e-9                         # rel tolerance for ODE integrator
+    'at': 1e-7                        # abs tolerance for ODE integrator
+    'mxstp': 0.5
+    'major': 'cells'                       # whether the solver iterates over spaces or M's
+    'radiative_transfer': {none: True}             # material temperature feedback. 1-True, 0 - False
+    'temperature_dependence': [0] # first slot is Su-Olson problem
+    'e_initial': 0.0
+    'weights': 'gauss_lobatto'          # usually 'gauss_lobatto'. Set to 'gauss_legendre' for S2 calculations
+    'save_solution': True
+    'particle_v': 'one' #does this do anything?
+    'edge_v': 'one'
+    'cv_const': 0.0
+    'estimate_wavespeed': False # this never really worked
+    'thick': False            # optically thick or thin
+    'integrator': 'DOP853'
+    'geometry': {slab: True, sphere: False}
+    
+# plane pulse source
+'plane_IC':
+    'x0': [1e-11]
+    'l': 1.0
+    'source_strength': 1.0                    # source initial width/2
+    'source_type': [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    'N_angles': [128]    # corresponds to N_spaces
+    'move_type': [1,0,0]              # moving mesh function selector
+    'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE
+    
+# square pulse source
+'square_IC':
+    'x0': [0.5]
+    'source_strength': 1.0
+    'source_type': [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    'N_angles': [8, 256,256]
+    'move_type': [1,0]              # moving mesh function selector
+    'benchmarking': False
+    
+# square source
+'square_source':
+    'x0': [2.5]
+    'source_strength': 1.0
+    'source_type': [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]
+    'N_angles': [2048]
+    'move_type': [1,0]              # moving mesh function selector
+    'bench_type': 'full'          # 'S2' or 'full'
+    'benchmarking': False
+    
+# gaussian pulse source
+'gaussian_IC':
+    'sigma': 4.0
+    'l': 1.0
+    'source_strength': 1.0
+    
+    'x0': [225.5, 2.5, 2.5, 2.5, 2.5] # location of last mesh edge
+#    'x0': [2.9, 2.9, 2.9, 2.9, 3.0, 2.8]
+    'source_type': [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0] #set last entry 4 to 1 for non-isotropic IC
+    'N_angles': [16]
+    'move_type': [1,0,0,0,0]
+    'benchmarking': False
+    
+# gaussian  source
+'gaussian_source':
+    'sigma': 0.5
+    'x0': [3,3,3,3,3]
+    'source_type': [0,0,0,0,0,1,0,0,0,0,0,0,0,0,0]
+    'N_angles': [64,128,128,256,512]
+    'move_type': [1,0]              # moving mesh function selector
+    'bench_type': 'full'          # 'S2' or 'full'
+    'benchmarking': True
+
+# manufactured problem
+'MMS':
+    'x0': [0.1]
+    'source_type': [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0]
+    'N_angles': [64, 64, 64]
+    'move_type': [1,0]              # moving mesh function selector
+    'benchmarking': True
+    
+'boundary_source':
+    'x0': [0.5]  # Here x0 is half the domain width
+    'source_strength': 1.0
+    'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    'N_angles': [512]
+    'move_type': [1,0,0]              # moving mesh function selector
+    'bench_type': 'full'          # 'S2' or 'full'
+    'benchmarking': False
+    
+
+'dipole':
+    'x0': [0.25]
+    'l': 1.0
+    'source_strength': 1.0                    # source initial width/2
+    'source_type': [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    'N_angles': [2]    # corresponds to N_spaces
+    'move_type': [0,0,1]              # moving mesh function selector
+    'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE
+
+'self_sim_plane':
+    'x0': [0.1]
+    'l': 1.0
+    'source_strength': 1.0                   # source initial width/2
+    'source_type': [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    'N_angles': [2]    # corresponds to N_spaces
+    'move_type': [0,0,1]              # moving mesh function selector
+    'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

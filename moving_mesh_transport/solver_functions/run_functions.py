@@ -40,7 +40,7 @@ class run:
     def __init__(self):
         self.data_folder = Path("moving_mesh_transport/input_scripts")
     
-    def load(self, problem_type = 'transport'):
+    def load(self, problem_type = 'marshak'):
         config_file_path = self.data_folder / f"{problem_type}.yaml"
         mesh_config_file_path = self.data_folder / "mesh_parameters.yaml"
         with open(config_file_path, 'r') as file:
@@ -74,6 +74,27 @@ class run:
         # plt.title("plane IC")
         # plt.legend()
         # plt.show(block = False)
+
+    def marshak(self, uncollided = True, moving = True, All = False):
+        plt.ion()
+        # plt.figure(1)
+        source_name = "marshak"
+        print("---  ---  ---  ---  ---  ---  ---")
+        print("running Marshak Wave problem")
+        print("---  ---  ---  ---  ---  ---  ---")
+        
+        solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        if All == True:
+            solver.main(True, True)
+            solver.main(False, True)
+            solver.main(True, False)
+            solver.main(False, False)
+        else:
+            solver.main(uncollided, moving)
+            self.get_results(solver)
+        # plt.title("plane IC")
+        # plt.legend()
+        # plt.show(block = False)
         
     def square_IC(self, uncollided = True, moving = True, All = False):
         plt.ion()
@@ -91,6 +112,12 @@ class run:
         else:
             solver.main(uncollided, moving)
             self.get_results(solver)
+
+        if self.parameters['all']['radiative_transfer']['none'] == False :
+            # plt.plot(self.xs, self.phi, '-.', label = 'scalar flux', mfc = 'none')
+            plt.plot(self.xs, self.e, '-.', label = 'energy density', mfc = 'none')
+            plt.legend()
+            plt.show()
 
         # plt.title("square IC")
         # plt.legend()
@@ -116,6 +143,11 @@ class run:
             self.olson_henderson_bench(self.tfinal)
             plt.figure(9)
             plt.plot(self.xs, self.phi, '-.', label = 'scalar flux', mfc = 'none')
+            plt.legend()
+            plt.show()
+
+        if self.parameters['all']['radiative_transfer']['none'] == False :
+            plt.plot(self.xs, self.e, '-.', label = 'energy density', mfc = 'none')
             plt.legend()
             plt.show()
      
@@ -204,17 +236,17 @@ class run:
             f = lambda x: np.exp(-x**2 /(2 * 0.5**2))
             fsol = lambda x, mu: np.exp(x * 1/mu) 
             plt.figure(3)
-            if solver.sigma_func['constant'] == 1:
+            if solver.sigma_func[0] == 1:
                 # plt.plot(self.xs, self.psi[-1,:], '-^')
                 plt.plot(self.xs, fsol(self.xs+self.x0, -1), 'rx')
                 plt.show()
-            elif solver.sigma_func['gaussian'] == 1:
+            elif solver.sigma_func[1] == 1:
                 self.steady_state_gaussian_benchmark()
             
-            elif solver.sigma_func['siewert1'] == 1 or solver.sigma_func['siewert2'] == 1:
+            elif solver.sigma_func[2] == 1 or solver.sigma_func[3] == 1:
                 self.siewert_bench(solver.sigma_func)
             
-            elif solver.sigma_func['fake_sedov'] == 1:
+            elif solver.sigma_func[4] == 1:
                 plt.figure(4)
                 mu2 = self.mus[np.argmin(np.abs(self.mus - 0.6))]
                 # plt.plot(self.xs[-1], self.psi[-1,-1], '--', label = 'mu = 1 from solver')
@@ -425,11 +457,7 @@ class run:
         elif tfinal == 5.0:
             self.phi_bench=np.array([0.051, 0.138, 0.290, 0.562, 1.035, 1.968, 2.900, 3.371, 3.636, 3.771, 
             3.812, 3.771, 3.636, 3.371, 2.900, 1.968, 1.035, 0.562, 0.290, 0.138, 0.051])
-
-        elif self.tfinal == 10:
-            self.phi_bench = np.array([0.0, 0.0, 0, 0, 0.052, 0.476, 0.899, 0.952, 0.952, 0.952, 0.952, 0.952, 0.952, 0.952, 0.899, 0.476, 0.052, 0,
-                                    0, 0, 0]) 
-        plt.figure(1)
+        plt.figure(9)
         plt.plot(self.xs_bench, self.phi_bench, 'kx', label = 'benchmark scalar flux')
         plt.legend()
         plt.xlabel('x')
@@ -461,7 +489,7 @@ class run:
         x02 = 0.0
         sqrt_pi = math.sqrt(math.pi)
         kappa = 2
-        rho0 = 0.1
+        rho0 = 0.2
         # beta = c1 * (v0-1) - v0 * (x0/mu + t0)
         
         # b2 =  v0 * (-x0/mu - t0 + c1) / (1+v0/mu)

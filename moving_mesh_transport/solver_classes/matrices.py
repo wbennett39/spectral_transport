@@ -55,7 +55,8 @@ data = [("M", int64),
         ]
 @jitclass(data)
 class G_L:
-    def __init__(self, build):
+    def __init__(self, build, Mass_denom, J_denom, G_denom, L_denom, VV_denom, Mass_coeff_even, Mass_coeff_odd, 
+                J_coeff, G_coeff, L_coeff_even, L_coeff_odd, VV_coeff_even, VV_coeff_odd):
         self.M = build.M
         self.L = np.zeros((self.M+1, self.M+1))
         self.L_const = np.zeros((self.M+1, self.M+1))
@@ -65,19 +66,19 @@ class G_L:
         self.VV = np.zeros((self.N+1, self.M+1, self.M+1))
         self.MPRIME = np.zeros((self.M+1, self.M+1))
 
-        # self.Mass_denom = Mass_denom[:]
-        # self.J_denom = J_denom[:]
-        # self.G_denom = G_denom[:]
-        # self.L_denom = L_denom[:]
-        # self.VV_denom = VV_denom[:]
-        # self.Mass_coeff_even = Mass_coeff_even[:]
-        # self.Mass_coeff_odd = Mass_coeff_odd[:]
-        # self.J_coeff = J_coeff[:]
-        # self.G_coeff = G_coeff
-        # self.L_coeff_even = L_coeff_even[:]
-        # self.L_coeff_odd = L_coeff_odd[:]
-        # self.VV_coeff_even = VV_coeff_even
-        # self.VV_coeff_odd = VV_coeff_odd
+        self.Mass_denom = Mass_denom[:]
+        self.J_denom = J_denom[:]
+        self.G_denom = G_denom[:]
+        self.L_denom = L_denom[:]
+        self.VV_denom = VV_denom[:]
+        self.Mass_coeff_even = Mass_coeff_even[:]
+        self.Mass_coeff_odd = Mass_coeff_odd[:]
+        self.J_coeff = J_coeff[:]
+        self.G_coeff = G_coeff
+        self.L_coeff_even = L_coeff_even[:]
+        self.L_coeff_odd = L_coeff_odd[:]
+        self.VV_coeff_even = VV_coeff_even
+        self.VV_coeff_odd = VV_coeff_odd
         self.geometry = build.geometry
         self.N = build.Msigma
 

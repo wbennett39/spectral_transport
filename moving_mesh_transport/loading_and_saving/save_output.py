@@ -153,7 +153,7 @@ class save_output:
                 dset[5] = energy_RMS_list
                 f.close()
                 
-    def save_solution(self, xs, phi, e, sol_matrix, edges,  x0_or_sigma, ws, N_space, s2, psi, epsilon, mus, exit_phi):
+    def save_solution(self, xs, phi, e, sol_matrix, edges,  x0_or_sigma, ws, N_space, s2, psi, epsilon, mus):
         print("saving solution")
         "transport or transfer/source_name/t = {tfinal}/c = {c}/ x0(or sigma) = {val}"
         epsilon = self.epsilon
@@ -205,20 +205,14 @@ class save_output:
             del f[folder_name][full_str]['psi']
         if f[folder_name][full_str].__contains__('mus'):
             del f[folder_name][full_str]['mus']
-        if f[folder_name][full_str].__contains__('exit_phi'):
-            del f[folder_name][full_str]['exit_phi']
-
         print("saving solution")
         dset[0] = xs
         dset[1] = phi
         if folder_name != 'transport':
             dset[2] = e
         
-        
         dsetpsi = f[folder_name][full_str].create_dataset('psi', data = psi)
         dsetmus = f[folder_name][full_str].create_dataset('mus', data = mus)
-        dsetexitphi = f[folder_name][full_str].create_dataset('exit_phi', data = exit_phi)
-
         # dsetpsi = psi
         # dset[3] = psi
         # dset[2] = self.ws

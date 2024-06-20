@@ -77,27 +77,27 @@ class main_class(parameter_load_class):
         print("uncollided  = ", uncollided)
         print("moving mesh = ", moving)
         print("---  ---  ---  ---  ---  ---  ---")
-        if self.move_type[1] == 1:
-            if (self.thick == True and self.source_type[2] == 1 and self.move_type[1] == 1): # make this a separate function
-                sol_loader = load_sol(self.problem_type, 'square_s','transfer', self.scattering_ratio, self.N_angles[0]==2, self.cv0)
-                sol_loader.call_wavepoints(self.tfinal)
-                self.tpnts_wave = sol_loader.tpnts
-                self.left_wave = sol_loader.left
-                self.right_wave = sol_loader.right
-                self.T_wave = sol_loader.T_wave
-                self.wave_loc_array = np.array([[(self.tpnts_wave)], [(self.left_wave)], [(self.right_wave)], [(self.T_wave)]])
-                print(self.wave_loc_array)
+        # if self.move_type[1] == 1:
+        #     if (self.thick == True and self.source_type[2] == 1 and self.move_type[1] == 1): # make this a separate function
+        #         sol_loader = load_sol(self.problem_type, 'square_s','transfer', self.scattering_ratio, self.N_angles[0]==2, self.cv0)
+        #         sol_loader.call_wavepoints(self.tfinal)
+        #         self.tpnts_wave = sol_loader.tpnts
+        #         self.left_wave = sol_loader.left
+        #         self.right_wave = sol_loader.right
+        #         self.T_wave = sol_loader.T_wave
+        #         self.wave_loc_array = np.array([[(self.tpnts_wave)], [(self.left_wave)], [(self.right_wave)], [(self.T_wave)]])
+        #         print(self.wave_loc_array)
 
-            elif (self.thick == True and self.source_type[5] == 1):
-                sol_loader = load_sol(self.problem_type, 'gaussian_s','transfer', self.scattering_ratio, self.N_angles[0]==2, self.cv0)
-                sol_loader.call_wavepoints(self.tfinal)
-                self.tpnts_wave = sol_loader.tpnts
-                self.left_wave = sol_loader.left
-                self.right_wave = sol_loader.right
-                self.T_wave = sol_loader.T_wave
-                self.wave_loc_array = np.array([[(self.tpnts_wave)], [(self.left_wave)], [(self.right_wave)], [(self.T_wave)]])
-        else:
-            self.wave_loc_array = np.zeros((1,1,1))
+        #     elif (self.thick == True and self.source_type[5] == 1):
+        #         sol_loader = load_sol(self.problem_type, 'gaussian_s','transfer', self.scattering_ratio, self.N_angles[0]==2, self.cv0)
+        #         sol_loader.call_wavepoints(self.tfinal)
+        #         self.tpnts_wave = sol_loader.tpnts
+        #         self.left_wave = sol_loader.left
+        #         self.right_wave = sol_loader.right
+        #         self.T_wave = sol_loader.T_wave
+        #         self.wave_loc_array = np.array([[(self.tpnts_wave)], [(self.left_wave)], [(self.right_wave)], [(self.T_wave)]])
+        
+        self.wave_loc_array = np.zeros((1,1,1))
 
     
         
@@ -122,7 +122,6 @@ class main_class(parameter_load_class):
                     choose_xs = False
                     specified_xs = 0.0
                 print(self.finite_domain, 'finite domain')
-                
                 xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus = solve(self.tfinal,N_space, N_ang, M, x0_new, self.t0, self.sigma_t, 
                 self.sigma_s, self.t_nodes, self.source_type, uncollided, moving, self.move_type,
                 self.thermal_couple,self.temp_function, self.rt, self.at, self.e_initial, choose_xs, specified_xs, 
@@ -130,8 +129,7 @@ class main_class(parameter_load_class):
                 self.thick, self.mxstp, self.wave_loc_array, self.find_edges_tol, self.source_strength, self.move_factor, 
                 self.integrator, self.l, self.save_wave_loc, self.pad, self.leader_pad, self.xs_quad, self.eval_times, self.eval_array,
                 self.boundary_on, self.boundary_source_strength, self.boundary_source, self.sigma_func, self.Msigma, self.finite_domain,
-                self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.remesh, self.geometry)
-
+                self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry)
                 print(edges, 'final edges')
                 # print(edges, "edges")
                 print(wave_tpnts, wave_xpnts, "wave points")
@@ -159,7 +157,7 @@ class main_class(parameter_load_class):
                         s2 = False
                     
                     if self.eval_times ==False:
-                        saving.save_solution(xs, phi, e, sol_matrix, edges, x0_or_sigma, ws, N_space, s2 , psi, self.epsilon, mus, exit_phi )
+                        saving.save_solution(xs, phi, e, sol_matrix, edges, x0_or_sigma, ws, N_space, s2 , psi, self.epsilon, mus )
                     else:
                         for it, tt in enumerate(self.eval_array):
                             saving = save_output(tt, self.N_spaces, self.Ms, self.source_type, 
@@ -167,7 +165,7 @@ class main_class(parameter_load_class):
                             self.temp_function, self.scattering_ratio, self.sigma,
                             self.x0, self.cv0, self.problem_type, self.N_angles, self.epsilon)
 
-                            saving.save_solution(xs[it], phi[it], e, sol_matrix, edges, x0_or_sigma, ws, N_space, s2, psi[it, :, :], self.epsilon, mus, exit_phi)
+                            saving.save_solution(xs[it], phi[it], e, sol_matrix, edges, x0_or_sigma, ws, N_space, s2, psi[it, :, :], self.epsilon, mus)
                 
                 
                 self.r_times[count] += (time)/self.N_runs
@@ -181,8 +179,8 @@ class main_class(parameter_load_class):
                         plt.plot(xs, benchmark(np.abs(xs))[0], '-k')
 
                 else:
-                    plt.plot(xs[-1], phi[-1,:], "-o", label = f"{N_space} spatial cells, t = {self.eval_array[-1]}", mfc = "none")
-                    plt.plot(xs[0], phi[0,:], "-o", label = f"{N_space} spatial cells, t = {self.eval_array[0]}", mfc = "none")
+                    plt.plot(xs[-1], phi[-1,:], "-o", label = f"{N_space} spatial cells", mfc = "none")
+                    plt.plot(xs[0], phi[0,:], "-o", label = f"{N_space} spatial cells", mfc = "none")
                     if self.benchmarking == True:
                         plt.plot(xs, benchmark(np.abs(xs))[0], '-k')
 

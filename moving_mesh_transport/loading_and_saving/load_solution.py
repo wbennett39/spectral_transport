@@ -32,7 +32,7 @@ class load_sol:
             self.problem_name = f'transfer_const_cv={self.cv0}'
         
         
-        # print('file_name', file_name)
+        print('file_name', file_name)
     
     def call_sol(self, tfinal, M, x0_or_sigma, N_space, mat_or_rad, uncollided, moving, epsilon = 1.0):
         # full_str = self.rad_or_transfer
@@ -51,12 +51,9 @@ class load_sol:
         self.e = sol_data[2]
 
         self.psi = f[self.problem_name][full_str]['psi'][:,:]
+        print(self.psi)
 
         self.mus = f[self.problem_name][full_str]['mus'][:]
-        
-        self.exit_phi = f[self.problem_name][full_str]['exit_phi'][:]
-
-        # self.eval_array = f[self.problem_name][full_str]['tpnts'][:]
 
       
         self.ws = f[self.problem_name]['weights/' + full_str][:]

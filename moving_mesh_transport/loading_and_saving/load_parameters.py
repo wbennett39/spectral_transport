@@ -134,7 +134,6 @@ class parameter_load_class:
         self.finite_domain = int(mesh_parameters['finite'])
         self.domain_width = -1
         self.fake_sedov_v0 = float(mesh_parameters['fake_sedov_v0'])
-        self.remesh = int(mesh_parameters['remesh'])
         if self.finite_domain == True:
             self.domain_width = float(mesh_parameters['domain_width'])
 

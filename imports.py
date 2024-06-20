@@ -2,8 +2,7 @@
 
 import sys
 import matplotlib.pyplot as plt
-sys.path.append('/Users/bennett/Documents/Github/transport_benchmarks/')
-sys.path.append('/Users/bennett/Documents/Github/exactpack/')
+#sys.path.append('/Users/bennett/Documents/Github/transport_benchmarks/')
 from numba.core.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaPerformanceWarning
 import warnings
 
@@ -11,7 +10,7 @@ warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPerformanceWarning)
                       
-from benchmarks import integrate_greens as intg
+#from benchmarks import integrate_greens as intg
 from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
@@ -31,8 +30,6 @@ import matplotlib.pyplot as plt
 # from moving_mesh_transport.table_script import make_all_tables as mat
 from moving_mesh_transport.solver_classes.functions import test_square_sol
 from moving_mesh_transport.solver_classes.functions import test_s2_sol
-from exactpack.solvers.sedov.sedov_similarity_variables import sedov
-#from exactpack.examples import sedov_density_tests_v3
 #from moving_mesh_transport.tests.test_functions import test_interpolate_point_source
 # from moving_mesh_transport.mesh_tester import test_square_mesh as test_mesh
 # from moving_mesh_transport.solution_plotter import make_tables_su_olson as tab_sus

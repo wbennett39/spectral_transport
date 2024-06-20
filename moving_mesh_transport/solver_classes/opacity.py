@@ -1,18 +1,15 @@
 import numpy as np
 import math
 from .build_problem import build
-from .sedov_funcs import sedov_class
+
 from numba.experimental import jitclass
 from numba import int64, float64, deferred_type, prange
 from .functions import Pn, normPn
 from numba import types, typed
 import numba as nb
-import matplotlib.pyplot as plt
 
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
-sedov_type = deferred_type()
-sedov_type.define(sedov_class.class_type.instance_type)
 kv_ty = (types.int64, types.unicode_type)
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
 
@@ -40,7 +37,6 @@ data = [('N_ang', int64),
         ('moving', float64),
         ('sigma_v', float64), 
         ('fake_sedov_v0', float64),
-        ('csP', float64[:,:])
 
         ]
 
@@ -58,11 +54,10 @@ class sigma_integrator():
         self.Msigma = build.Msigma
         self.xs_quad = build.xs_quad
         self.ws_quad = build.ws_quad
-        self.std = 2.0
+        self.std = 2
         self.N_space = build.N_space
         self.edges = np.zeros(self.N_space + 1)
         self.cs = np.zeros((self.N_space, self.Msigma+ 1))
-        self.csP = np.zeros((self.N_space, self.Msigma+ 1))
         self.VV = np.zeros(self.M+1)
         self.VP = np.zeros(self.M+1)
         self.AAA = np.zeros((self.M+1, self.M + 1, self.Msigma + 1))
@@ -71,7 +66,6 @@ class sigma_integrator():
         #     self.moving = True
         # self.sigma_v = 0.005
         self.sigma_v = build.fake_sedov_v0
-        # assert(self.sigma_v == 0.0035)
 
         # initialize integrals of Basis Legendre polynomials
         self.create_integral_matrices()
@@ -81,12 +75,10 @@ class sigma_integrator():
         fact = np.sqrt(2*i + 1) * np.sqrt(2*j + 1) * np.sqrt(2*k + 1) / 2
         self.AAA[i,j,k] = fact * (b-a)/2 * np.sum(self.ws_quad *  Pn(i, argument, a, b) * Pn(j, argument, a, b) * Pn(k, argument, a, b))
     
-    def integrate_moments(self, a, b, j, k, t, sedov, rho_interp):
+    def integrate_moments(self, a, b, j, k, t):
         argument = (b-a)/2 * self.xs_quad + (a+b)/2
-        self.cs[k, j] = (b-a)/2 * np.sum(self.ws_quad * self.sigma_function(argument, t, sedov, rho_interp,'absorption' ) * normPn(j, argument, a, b))
-        self.csP[k, j] = (b-a)/2 * np.sum(self.ws_quad * self.sigma_function(argument, t, sedov,rho_interp, 'scattering' ) * normPn(j, argument, a, b))
+        self.cs[k, j] = (b-a)/2 * np.sum(self.ws_quad * self.sigma_function(argument, t) * normPn(j, argument, a, b))
 
-        
     def both_even_or_odd(self, i, j, k):
         if i % 2 == 0:
             if (j + k) % 2 == 0:
@@ -111,11 +103,11 @@ class sigma_integrator():
                         self.integrate_quad(-1, 1, i, j, k)
         # print(self.AAA)
     
-    def sigma_moments(self, edges, t, sedov, rho_interp):
+    def sigma_moments(self, edges, t):
         for i in range(self.N_space):
             if (edges[i] != self.edges[i]) or (edges[i+1] != self.edges[i+1]) or self.moving == True :
                 for j in range(self.Msigma + 1):
-                    self.integrate_moments(edges[i], edges[i+1], j, i, t, sedov, rho_interp)
+                    self.integrate_moments(edges[i], edges[i+1], j, i, t)
         self.edges = edges
     
     def xi2(self, x, t, x0, c1, v0tilde):
@@ -134,7 +126,8 @@ class sigma_integrator():
                 return_array[ix] = 0.0
         return return_array
 
-    def sigma_function(self, x, t, sedov, rho_interp, type = 'absorption'):
+    def sigma_function(self, x, t):
+
         if self.sigma_func['constant'] == 1:
             return x * 0 + 1.0
         elif self.sigma_func['gaussian'] == 1:
@@ -148,42 +141,26 @@ class sigma_integrator():
             # return np.exp(-(x- self.sigma_v * t)**2/(2*self.std**2))
             c1 = 1
             xi2x = self.xi2(x, t, 0, c1, self.sigma_v)
-            rho2 = 0.1
+            rho2 = 0.2
             res = np.exp(-xi2x**2/self.std**2) * self.heaviside_vector(-xi2x - c1) + rho2*self.heaviside_vector(xi2x + c1)
             # vec_test = self.heaviside_vector(-xi2x - c1)
             # found = False
             # index = 0
-            # if np.any(vec_test == 1):
-            #     if np.any(x < 0):
-            #         print(vec_test)
-            #         print(x, t)
-                
+            # if np.any(vec_test == 0):
+            #     while found == False and index < x.size:
+            #         if vec_test[index] == 1:
+            #             found == True
+            #             print(x[index], 'location of shock', t, 't')
+            #             print(vec_test)
+            #             print(-self.sigma_v*t - x[index])
+            #             print("#--- --- --- --- --- --- ---#")
+            #         index += 1
 
-            #     if np.am y(vec_test == 0):
-            #         while found == False and index < x.size:
-            #             if vec_test[index] == 1:
-            #                 found == True
-            #                 print(x[index], 'location of shock', t, 't')
-            #                 print(vec_test)
-            #                 print(-self.sigma_v*t - x[index])
-            #                 print("#--- --- --- --- --- --- ---#")
-            #             index += 1
+
             return res
-        elif self.sigma_func['TaylorSedov'] == 1:
-            lambda1 = 1.75
-            if type == 'absorption':
-                # plt.figure(79)
-                # plt.ion()
-                # plt.plot(x, sedov.interpolate_self_similar(t, x, rho_interp) ** lambda1)
-                return sedov.interpolate_self_similar(t, x, rho_interp) ** lambda1
-            elif type == 'scattering':
-                return sedov.interpolate_self_similar(t, x, rho_interp)
-            else:
-                assert(0)
-        
     
     def make_vectors(self, edges, u, space):
-        self.VV = u * 0
+
         # self.sigma_moments(edges) # take moments of the opacity
         xL = edges[space]
         xR = edges[space+1]
@@ -191,12 +168,10 @@ class sigma_integrator():
         if self.sigma_func['constant'] == True:
             self.VV = u * self.sigma_t
         else:
-            # self.VV = u * self.sigma_t
             for i in range(self.M + 1):
                 for j in range(self.M + 1):
                     for k in range(self.Msigma + 1):
-                        self.VV[i] +=  (self.sigma_a / self.sigma_t) * self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
-                        self.VV[i] +=  (self.sigma_s / self.sigma_t) * self.csP[space, k] * u[j] * self.AAA[i, j, k] / dx
+                        self.VV[i] +=   (self.sigma_a + self.sigma_s) * self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
 
 
 

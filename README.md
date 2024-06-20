@@ -136,4 +136,3 @@ In ``config.yaml`` certain parameters may be easily changed, such as the final e
 
 ### Testing
 before invoking python, run ``pytest`` in the top level folder.
-# SpectralTransport

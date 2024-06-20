@@ -12,10 +12,6 @@ from functools import partial
 from scipy.special import roots_legendre
 import numpy.polynomial as poly
 import scipy.special as sps
-import sys
-sys.path.append('/Users/bennett/Documents/Github/exactpack/')
-from exactpack.solvers.sedov.doebling import Sedov as SedovDoebling
-
 
 
 
@@ -576,35 +572,72 @@ def finite_diff_uneven_2(x, ix, u, left = False, right = False):
     return res
 
 @njit
-def finite_diff_uneven(x, ix, psi, left = False, right = False):
+def finite_diff_uneven_diamond(x, ix, psi, left = False, right = False, origin = False):
     # if left == False and right == False:
     #     h = (x[ix+1] - x[ix]) / (x[ix] - x[ix-1])
     #     res = (u[ix + 1] - h**2 * u[ix-1] - (1-h**2) * u[ix]) / (x[ix+1]- x[ix]) / (1+h)
     
     # elif left == True:
     # if right != True:
+        if left == False and right == False:
+            psip = 0.5 * (psi[ix+1] + psi[ix])
+            psim = 0.5 * (psi[ix] + psi[ix-1])
+            # mup = (x[ix+1] - x[ix])*0.5 + x[ix]
+            mup = (x[ix+1] + x[ix]) * 0.5
+            # mum = (x[ix] - x[ix-1])*0.5 + x[ix-1]
+            mum = (x[ix] + x[ix-1]) * 0.5
+            deltamu = mup - mum
+            res = ((1-mup**2) * psip - (1-mum**2) * psim) / deltamu
+        elif left == True:
+            psip = 0.5 * (psi[ix+1] + psi[ix])
+            # mup = (x[ix+1] - x[ix])*0.5 + x[ix]
+            mup = (x[ix+1] + x[ix]) * 0.5
+            mum =  -1
+            deltamu = mup - mum
+            res = ((1-mup**2) * psip ) / deltamu
+        elif right == True:
+            mup = 1
+            # mum =  (x[ix] - x[ix-1])*0.5 + x[ix-1]
+            mum = (x[ix] + x[ix-1]) * 0.5
+            psim = 0.5 * (psi[ix] + psi[ix-1])
+            deltamu = mup - mum
+            res = (-(1-mum**2) * psim ) / deltamu
+        return res
+@njit
+def finite_diff_uneven_diamond_2(x, ix, psi, alphams, ws, left = False, right = False):
+    # if left == False and right == False:
+    #     h = (x[ix+1] - x[ix]) / (x[ix] - x[ix-1])
+    #     res = (u[ix + 1] - h**2 * u[ix-1] - (1-h**2) * u[ix]) / (x[ix+1]- x[ix]) / (1+h)
+    
+    # elif left == True:
+    # if right != True:
+    # ws = 2 * ws
+    alpham = alphams[ix]
+    alphap = alphams[ix + 1]
+    assert(abs(alphap - (alpham - ws[ix]*x[ix])) <= 1e-8)
     if left == False and right == False:
         psip = 0.5 * (psi[ix+1] + psi[ix])
         psim = 0.5 * (psi[ix] + psi[ix-1])
-        mup = (x[ix+1] - x[ix])*0.5 + x[ix]
-        mum = (x[ix] - x[ix-1])*0.5 + x[ix-1]
-        deltamu = mup - mum
-        res = ((1-mup**2) * psip - (1-mum**2) * psim) / deltamu
+        # mup = (x[ix+1] + x[ix])*0.5 
+        # mum = (x[ix] - x[ix-1])*0.5 + x[ix-1] 
     elif left == True:
+        #  alpham = 0.0
+         assert(alpham == 0.0)
          psip = 0.5 * (psi[ix+1] + psi[ix])
-         mup = (x[ix+1] - x[ix])*0.5 + x[ix]
-         mum =  -1
-         deltamu = mup - mum
-         res = ((1-mup**2) * psip ) / deltamu
+        #  mup = (x[ix+1] + x[ix])*0.5 
+        #  mum =  -1
+         psim = psi[ix]
     elif right == True:
-         mup = 1
-         mum =  (x[ix] - x[ix-1])*0.5 + x[ix-1]
+        #  mup = 1.0
+        #  mum =  (x[ix] + x[ix-1])*0.5 
          psim = 0.5 * (psi[ix] + psi[ix-1])
-         deltamu = mup - mum
-         res = (-(1-mum**2) * psim ) / deltamu
+         psip = 0.5 * (0.0 + psi[ix])
+    
 
- 
-    return res
+    res = (2 / ws[ix]) * (alphap * psip - alpham * psim)
+    # res = (2 / ws[ix]  ) * (2 * alphap * psi[ix]  - (alphap + alpham) * psim) 
+    
+    return res 
 
 # @njit
 # def gauss_quadrature(integrand, xs_quad, ws_quad, a, b):
@@ -739,20 +772,4 @@ def rttwo_mistake_undoer(i,j):
     else:
         assert(0)
         
-def get_sedov_funcs():
-    '''
-    This guy calls exactpack to rip off the self-similar solution to the sedov function
-    '''
-    eblast = 0.851072
-    # eblast = 0.0673185
-    npts = 25
-    solver_doebling_pla = SedovDoebling(geometry=1, eblast=eblast,
-                                    gamma=1.4, omega=0.)
-    rlist = np.linspace(0,1.2, npts)
-    solution_doebling_pla_1 = solver_doebling_pla(r=rlist, t=1.0)
-    g_fun = np.array(solver_doebling_pla.g_fun_list)
-    l_fun  = np.array(solver_doebling_pla.l_fun_list)
-    # h_fun = np.array(solver_doebling_pla.h_fun_list)
-    f_fun = np.array(solver_doebling_pla.f_fun_list)
 
-    return f_fun, g_fun, l_fun

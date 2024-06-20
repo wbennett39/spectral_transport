@@ -13,18 +13,14 @@ from .matrices import G_L
 from .sources import source_class
 from .phi_class import scalar_flux
 from .uncollided_solutions import uncollided_solution
-from .sedov_funcs import sedov_class
-from .sedov_uncollided import sedov_uncollided_solutions
 from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper 
-from .cubic_spline import cubic_spline_ob as cubic_spline
 
 from numba.experimental import jitclass
 from numba import int64, float64, deferred_type, prange
 from numba import types, typed 
-
 import numba as nb
 
 build_type = deferred_type()
@@ -43,13 +39,6 @@ transfer_class_type = deferred_type()
 transfer_class_type.define(T_function.class_type.instance_type)
 sigma_class_type = deferred_type()
 sigma_class_type.define(sigma_integrator.class_type.instance_type)
-sedov_type = deferred_type()
-sedov_type.define(sedov_class.class_type.instance_type)
-spline_type = deferred_type()
-spline_type.define(cubic_spline.class_type.instance_type)
-sedovuncol_type = deferred_type()
-sedovuncol_type.define(sedov_uncollided_solutions.class_type.instance_type)
-
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
 
 
@@ -120,9 +109,10 @@ class rhs_class():
         self.sigma_a = build.sigma_a
         self.particle_v = build.particle_v
         self.geometry = build.geometry
+       
         self.c_a = build.sigma_a / build.sigma_t
         self.mean_free_time = 1/build.sigma_t
-        self.division = 3000
+        self.division = 1000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -141,47 +131,13 @@ class rhs_class():
         if self.counter == self.division:
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
             if self.N_space <= 32:
-                print(mesh.edges)
+                print(mesh.edges[int(self.N_space/2):])
             print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')
             self.delta_tavg = 0.0
             self.counter = 0
         else:
             self.counter += 1
         self.told = t
-    
-    def interpolate_sedov(self, t, sedov_class):
-        if self.sigma_func['TaylorSedov'] == 1:
-            density, velocity, rs = sedov_class.physical(t)
-            rs2 = np.flip(rs)
-            rs2[0] = 0.0
-            density2 = np.flip(density)
-            density2[0] = 0.0
-            # density2[-1] = sedov_class.gpogm
-            rs2[-1] = sedov_class.r2
-            interpolated_density = cubic_spline(rs2, density2)
-            interpolated_velocity = cubic_spline(rs2, np.flip(velocity))
-        else:
-            interpolated_density = cubic_spline(np.linspace(0,1,2), np.linspace(0,1,2))
-            interpolated_velocity = cubic_spline(np.linspace(0,1,2), np.linspace(0,1,2))
-        return interpolated_density, interpolated_velocity
-
-    def interp_sedov_selfsim(self, sedov_class):
-         if self.sigma_func['TaylorSedov'] == 1:
-             g_fun = sedov_class.g_fun
-             l_fun = sedov_class.l_fun
-             l_fun = np.flip(l_fun)
-             l_fun[0] = 0.0
-             l_fun[-1] = 1.0
-             g_fun = np.flip(g_fun)
-            #  g_fun[-1] = sedov_class.gpogm
-            #  l_fun[-1] = 1.0 
-
-             interpolated_g = cubic_spline(l_fun, g_fun)
-
-             return interpolated_g
-
-
-
 
         
     def derivative_saver(self, t,  space, transfer_class):
@@ -202,26 +158,18 @@ class rhs_class():
             self.times_list = np.append(self.times_list,t)
             # print(heat_wave_loc, 'wave x')
         
-    def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class, sedov_class, g_interp, sedov_uncol):
+    def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
         self.time_step_counter(t, mesh)
-
-        if self.thermal_couple['none'] == 1:
+        if self. thermal_couple['none'] == 1:
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
         elif self.thermal_couple['none'] == 0:
             V_new = V.copy().reshape((self.N_ang + 1, self.N_space, self.M+1))
         V_old = V_new.copy()
-
         mesh.move(t)
-       
-        # rho_interp, v_interp = self.interpolate_sedov(t, sedov_class)
-        # g_interp = self.interp_sedov_selfsim(sedov_class)
-
-        sigma_class.sigma_moments(mesh.edges, t, sedov_class, g_interp)
+        sigma_class.sigma_moments(mesh.edges, t)
         flux.get_coeffs(sigma_class)
-        if self.sigma_func['TaylorSedov'] == 1:
-            sedov_class.physical(t)
-            mesh.get_shock_location_TS(sedov_class.r2, sedov_class.vr2)
-        for space in range(self.N_space):
+
+        for space in range(self.N_space):            
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]
             dxR = mesh.Dedges[space+1]
@@ -231,17 +179,16 @@ class rhs_class():
             matrices.make_all_matrices(xL, xR, dxL, dxR)
             L = matrices.L
             G = matrices.G
-            # flux.make_P(V_old[:,space,:], space, xL, xR)
+            flux.make_P(V_old[:,space,:], space, xL, xR)
+
             if (self.sigma_func['constant'] == 1) or (self.c == 0.0):
                 P = flux.P
             else:
                 flux.make_P(V_old[:, space, :], space, xL, xR)
-            if self.source_type[4] != 1: # MMS source 
-                if self.sigma_func['TaylorSedov'] != 1:
-                    source.make_source(t, xL, xR, uncollided_sol, sigma_class, sedov_class, g_interp)
-                else:
-                    source.make_source_TS(t, xL, xR, uncollided_sol, sigma_class, sedov_class, g_interp, sedov_uncol)
 
+
+            if self.source_type[4] != 1: # MMS source 
+                source.make_source(t, xL, xR, uncollided_sol)
             if self.thermal_couple['none'] == 0:
                 transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :])
                 H = transfer_class.H
@@ -249,7 +196,9 @@ class rhs_class():
                 H = np.zeros(self.M+1)
 
             self.derivative_saver(t, space, transfer_class)
+
             S = source.S
+
             ######### solve thermal couple ############
             if self.thermal_couple['none'] == 0:
                 U = np.zeros(self.M+1).transpose()
@@ -309,7 +258,7 @@ class rhs_class():
                         elif self.uncollided == True:
                             RHS = np.dot(G,U)  - LU + mul*np.dot(L,U) - U + self.c * (P + 0.5*S)
 
-                    elif self.sigma_func['siewert1']== 1 or self.sigma_func['siewert2']== 1: #siewert problem
+                    elif self.sigma_func['siewert']== 1: #siewert problem
                         VV = sigma_class.make_vectors(mesh.edges, V_old[angle,space,:], space)
                         PV = flux.call_P_noncon(xL, xR)
                         # Q = np.zeros(PV.size) # this is for testing the steady state source problem
@@ -319,10 +268,7 @@ class rhs_class():
                     else:
                         sigma_class.make_vectors(mesh.edges, V_old[angle,space,:], space)
                         VV = sigma_class.VV
-                        if self.c != 0.0:
-                            PV = flux.call_P_noncon(xL, xR)
-                        else:
-                            PV = VV * 0
+                        PV = flux.call_P_noncon(xL, xR)
                         # PV =  self.sigma_s*flux.P
                         # PV = VV*0
                         # print(np.abs(PV-flux.P))
@@ -330,37 +276,33 @@ class rhs_class():
                         # if (np.abs(self.sigma_s * flux.P - PV).all() > 1e-6):
                         #     print(flux.P - PV)
 
-                        # A = np.dot(G,U)  
-                        # A -= LU 
-                        # A += mul*np.dot(L,U)
-                        # A -= VV
+                        A = np.dot(G,U)  
+                        A-= LU 
+                        A+= mul*np.dot(L,U)
+                        A -= VV
 
-                        # A += PV 
-                        # A += 0.5*self.c*S
-                        # RHS = A
-                        RHS = np.dot(G,U)  - LU + mul*np.dot(L,U) - VV + PV  + 0.5 * self.c * S
-                        RHS = RHS 
+                        A += PV 
+                        A+= 0.5*self.c*S
+                        RHS = A
                     V_new[angle,space,:] = RHS
                     
-                # elif self.thermal_couple['none'] == 0:
+                elif self.thermal_couple['none'] == 0:
 
-                #     deg_freedom = (self.N_ang + 1) * self.N_space * (self.M+1)
+                    deg_freedom = (self.N_ang + 1) * self.N_space * (self.M+1)
                     
-                #     if self.N_ang == 2:
-                #         if self.uncollided == True:
-                #             RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c * (P/self.l + 0.5*S/self.l) + self.c_a*0.5*H/self.l
-                #         elif self.uncollided == False:
-                #             RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c*P/self.l + 0.5*S/self.l + self.c_a*0.5*H/self.l
-                #     elif self.N_ang !=2:
-                #         if self.uncollided == True:
-                #             RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c * (P + S*0.5)/self.l + self.c_a*0.5*H/self.l
-                #         elif self.uncollided == False:
-                #             if self.test_dimensional_rhs == True:
-                #                 RHS_transport = np.dot(G,U) - LU + 299.98*mul*np.dot(L,U) - 299.98*U + 299.98*self.c * P + 299.98 * S*0.5 + 299.98*self.c_a*0.5*H
-                #             else:
-                #                 RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c * P /self.l + S*0.5/self.l + self.c_a*0.5*H/self.l
-                #     V_new[angle,space,:] = RHS_transport 
+                    if self.N_ang == 2:
+                        if self.uncollided == True:
+                            RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c * (P/self.l + 0.5*S/self.l) + self.c_a*0.5*H/self.l
+                        elif self.uncollided == False:
+                            RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c*P/self.l + 0.5*S/self.l + self.c_a*0.5*H/self.l
+                    elif self.N_ang !=2:
+                        if self.uncollided == True:
+                            RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c * (P + S*0.5)/self.l + self.c_a*0.5*H/self.l
+                        elif self.uncollided == False:
+                            if self.test_dimensional_rhs == True:
+                                RHS_transport = np.dot(G,U) - LU + 299.98*mul*np.dot(L,U) - 299.98*U + 299.98*self.c * P + 299.98 * S*0.5 + 299.98*self.c_a*0.5*H
+                            else:
+                                RHS_transport = np.dot(G,U) - LU + mul*np.dot(L,U) - U/self.l + self.c * P /self.l + S*0.5/self.l + self.c_a*0.5*H/self.l
+                    V_new[angle,space,:] = RHS_transport 
                     
         return V_new.reshape(deg_freedom)
-    
-       

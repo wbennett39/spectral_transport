@@ -44,9 +44,6 @@ class make_output:
         self.geometry = geometry 
 
     def basis(self, i, x, a, b):
-        if b-a <=1e-15: 
-            print(b, a)
-            assert(0)
         if self.geometry['slab'] == True:
             return normPn(i, x, a, b)
         elif self.geometry['sphere'] == True:
@@ -54,7 +51,6 @@ class make_output:
 
 
     def make_phi(self, uncollided_solution):
-        
         output = self.xs*0
         psi = np.zeros((self.N_ang, self.xs.size))
         for ang in range(self.N_ang):
@@ -66,16 +62,10 @@ class make_output:
                     idx = self.edges.size - 1
                 if self.edges[0] <= self.xs[count] <= self.edges[-1]:
                     for i in range(self.M+1):
-
                         psi[ang, count] += self.u[ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
-
-
         output = np.sum(np.multiply(psi.transpose(), self.ws), axis = 1)
-
         if self.uncollided == True:
-
             uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
-            # uncol = self.xs * 0
             output += uncol 
         self.psi_out = psi
         self.phi_out = output
@@ -100,7 +90,7 @@ class make_output:
     
     def get_exit_dist(self, uncollided_solution):
         psi = np.zeros((self.N_ang, 2))
-        output = np.zeros(2)
+        phi = np.zeros(2)
         self.exit_dist = np.zeros((self.N_ang, 2))
         x_eval = np.array([self.edges[0], self.edges[-1]])
         for ang in range(self.N_ang):
@@ -112,18 +102,13 @@ class make_output:
                     idx = self.edges.size - 1
                 if self.edges[0] <= x_eval[count] <= self.edges[-1]:
                     for i in range(self.M+1):
-                        psi[ang, count] += self.u[ang,idx-1,i] * normPn(i,x_eval[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
-
-
- 
+                        psi[ang, count] += self.u[ang,idx-1,i] * self.basis(i,x_eval[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+        
         self.exit_dist = psi
-        output[0] = np.sum(np.multiply(psi[0:int(self.N_ang/2), 0], self.ws[0:int(self.N_ang/2)]))
-        output[1] = np.sum(np.multiply(psi[int(self.N_ang/2):, 1], self.ws[int(self.N_ang/2):]))
+        output = np.sum(np.multiply(psi.transpose(), self.ws), axis = 1)
         if self.uncollided == True:
-            uncolLeft = uncollided_solution.uncollided_solution(np.array([x_eval[0]]), self.t, True, 0)
-            uncolRight = uncollided_solution.uncollided_solution(np.array([x_eval[1]]), self.t, True, 1)
-            output[0] += uncolLeft[0]
-            output[1] += uncolRight[0]
+            uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
+            output += uncol
         return self.exit_dist, output
         
 

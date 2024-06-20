@@ -9,7 +9,9 @@ Created on Thu May  5 10:42:11 2022
 """
 
 from .build_problem import build
-from .functions import normPn
+from .functions import normPn, normTn
+#from build_problem import build
+#from functions import normPn, normTn
 
 from numba.experimental import jitclass
 from numba import int64, float64, deferred_type, prange
@@ -17,7 +19,7 @@ import numpy as np
 import math
 from numba import types, typed
 import numba as nb
-
+ 
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
 kv_ty = (types.int64, types.unicode_type)
@@ -44,6 +46,7 @@ data = [('temp_function', int64[:]),
         ('xs_points', float64[:]),
         ('e_points', float64[:]),
         ('thermal_couple', nb.typeof(params_default)),
+        ('geometry', nb.typeof(params_default))
 
 
         ]
@@ -59,9 +62,17 @@ class T_function(object):
         self.a = 0.0137225 # GJ/cm$^3$/keV$^4
         self.alpha = 4 * self.a
         self.clight = 299.98
+
+        self.geometry = build.geometry
         
-        self.xs_quad = build.xs_quad
-        self.ws_quad = build.ws_quad
+        if self.geometry['slab'] == True:
+            self.xs_quad = build.xs_quad
+            self.ws_quad = build.ws_quad
+        
+        if self.geometry['sphere'] == True:
+            self.xs_quad = build.t_quad
+            self.ws_quad = build.t_ws
+
         self.cv0 = build.cv0 / self.a 
         if (self.cv0) != 0.0:
             print('cv0 is ', self.cv0)
@@ -74,16 +85,23 @@ class T_function(object):
         temp = xs*0
         for ix in range(xs.size):
             for j in range(self.M+1):
-                temp[ix] += normPn(j, xs[ix:ix+1], a, b)[0] * self.e_vec[j] 
+                if self.geometry['slab'] == True:
+                    temp[ix] += normPn(j, xs[ix:ix+1], a, b)[0] * self.e_vec[j] 
+                elif self.geometry['sphere'] == True:
+                    temp[ix] += normTn(j, xs[ix:ix+1], a, b)[0] * self.e_vec[j]
         return temp 
     
     def integrate_quad(self, a, b, j):
-        if self.thermal_couple['none'] != True:
-            argument = (b-a)/2 * self.xs_quad + (a+b)/2
-            self.H[j] = (b-a)/2 * np.sum(self.ws_quad * self.T_func(argument, a, b) * normPn(j, argument, a, b))
-        else:
-             self.H[j] = 0
-        
+        argument = (b-a)/2 * self.xs_quad + (a+b)/2
+        self.H[j] = (b-a)/2 * np.sum(self.ws_quad * self.T_func(argument, a, b) * normPn(j, argument, a, b))
+
+
+    def integrate_quad_sphere(self, a, b, j):
+        argument = (b-a)/2*self.xs_quad + (a+b)/2
+        # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
+        self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
+        #assert(0)
+
     def T_func(self, argument, a, b):
         e = self.make_e(argument, a, b)
 
@@ -92,6 +110,7 @@ class T_function(object):
         if self.temp_function[0] == 1:
             T = self.su_olson_source(e, argument, a, b)
             return self.a * np.power(T,4) * self.fudge_factor
+            #return np.sin(argument) 
 
         elif self.temp_function[1] == 1:
             if self.test_dimensional_rhs == True:
@@ -103,7 +122,6 @@ class T_function(object):
         else:
             assert(0)
 
-        
 
         
     def su_olson_source(self, e, x, a, b):
@@ -126,7 +144,20 @@ class T_function(object):
     def make_H(self, xL, xR, e_vec):
         self.e_vec = e_vec
             
-        for j in range(self.M+1):
-            self.integrate_quad(xL, xR, j)
+        # Lines commented out are the original lines of code
 
+        #for j in range(self.M+1):
+            #self.integrate_quad(xL, xR, j)
+
+        if self.thermal_couple['none'] != True:
+
+            if self.geometry['slab'] == True:
+
+                for j in range(self.M+1):
+                    self.integrate_quad(xL, xR, j)
+
+            elif self.geometry['sphere'] == True:
+
+                for j in range(self.M+1):
+                    self.integrate_quad_sphere(xL, xR, j)
         

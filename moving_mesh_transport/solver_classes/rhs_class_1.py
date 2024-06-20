@@ -17,9 +17,9 @@ from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
-from .functions import angular_deriv, finite_diff_uneven
+from .functions import finite_diff_uneven_diamond 
 import numba as nb
-
+from numba import prange
 from numba.experimental import jitclass
 from numba import int64, float64, deferred_type, prange
 from numba import types, typed
@@ -93,6 +93,9 @@ data = [('N_ang', int64),
         ('epsilon', float64),
         ('deg_freedom', int64[:]),
         ('geometry', nb.typeof(params_default)),
+        ('alphams', float64[:]),
+        ('radiative_transfer', nb.typeof(params_default)),
+        ('test', float64)
 
 
         ]
@@ -116,9 +119,10 @@ class rhs_class():
         self.told = 0.0
         self.sigma_s = build.sigma_s
         self.sigma_a = build.sigma_a
-        self.c = build.sigma_s / build.sigma_t
+        self.c = build.sigma_s 
         self.particle_v = build.particle_v
         self.geometry = build.geometry
+        self.radiative_transfer = build.thermal_couple
        
         self.c_a = build.sigma_a / build.sigma_t
         
@@ -134,6 +138,11 @@ class rhs_class():
         self.save_derivative = build.save_wave_loc
         self.sigma_func = build.sigma_func
         self.deg_freedom = shaper(self.N_ang, self.N_space, self.M + 1, self.thermal_couple)
+        self.alphams = np.zeros(self.N_ang + 1)
+        self.x0 = build.x0
+        
+        for angle2 in range(1, self.N_ang + 1):
+            self.alphams[angle2] = self.alphams[angle2-1] - self.ws[angle2-1] * self.mus[angle2-1]
 
     
     def time_step_counter(self, t, mesh):
@@ -176,9 +185,17 @@ class rhs_class():
         # print out timesteps
         self.time_step_counter(t, mesh) 
         # allocate arrays
-        # V_new = V.copy().reshape((self.deg_freedom[0], self.deg_freedom[1], self.deg_freedom[2]))
-        V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
-        V_old = V_new.copy()
+
+        # My (Stephen's) attempt at adding radiative transfer to this code
+
+        # Not sure if this is correct
+        if self.radiative_transfer['none'] == False :  
+            V_new = V.copy().reshape((self.N_ang + 1, self.N_space, self.M+1))
+            V_old = V_new.copy()
+        else:
+            # V_new = V.copy().reshape((self.deg_freedom[0], self.deg_freedom[1], self.deg_freedom[2]))
+            V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
+            V_old = V_new.copy()
         # move mesh to time t 
         mesh.move(t)
         # represent opacity as a polynomial expansion
@@ -200,26 +217,75 @@ class rhs_class():
              # special matrices for spherical geometries
             if self.geometry['sphere'] == True:
                 Mass = matrices.Mass
+                Minv = np.linalg.inv(Mass)
                 J = matrices.J
                 VVs = matrices.VV
             # make P if there is any scattering
-            if self.c != 0:
+            if self.radiative_transfer['none'] == False:
+                flux.make_P(V_old[:-1,space,:], space, xL, xR)
+            else:
                 flux.make_P(V_old[:,space,:], space, xL, xR)
             PV = flux.scalar_flux_term
             # integrate the source
             source.make_source(t, xL, xR, uncollided_sol)
+            #print(source.make_source(t, xL, xR, uncollided_sol))
             S = source.S
 
+            
+            #if ( (S[0]!=0.0) or (S[1]!=0.0) ):
+                #print("Nonzero source.S in rhs_class: ", S)
+
             # radiative transfer term
-            # transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :])
-            # H = transfer_class.H
-        
+            
+            def testsoln(a, b):
+                """ Calculates the value of the analytic solution for H when a simple function is used,
+                to test whether the temperature function is being integrated properly."""
+                test = np.sqrt(1/(np.pi*(b-a)) ) * ((a**2 - 2)*np.cos(a) - 2*a*np.sin(a) - (b**2 - 2)*np.cos(b) + 2*b*np.sin(b))
+                return test
 
-            ######### solve thermal couple ############
+            if self.radiative_transfer['none'] == False:
+                transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :])
+                H = transfer_class.H
+                #print("The radiative transfer term of rhs_class_1 is being called.")
+                #for k in range(H.size):
+                #    print(testsoln(xL, xR))
+                #    diff = abs(H[k] - testsoln(xL, xR))
+                #    if diff > 1e-5:
+                #        print("Solutions have diverged, numerical temperature integration differs from analytical solution by", diff)
+                #        assert(0)
 
+                #print(H) # This is just for checking temperatures
+                #print("c_a = ", self.c_a)
                 
+                #if np.abs(np.max(H)) > 1e-8:
+                    #print(H)
+                    #assert(0)
+
+                ######### solve thermal couple ############
+
+                U = V_old[-1,space,:]
+
+                num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :]*0)
+                RU = num_flux.LU
+
+                RHS_transfer = U*0
+
+                if self.uncollided == True:
+                    RHS_transfer += self.c_a *source.S * 2 
+                    #RHS_transfer += source.S * 2
+
+                #print("source.S = ", source.S)
+
+                RHS_transfer -= RU
+                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H
+                RHS_transfer = np.dot(RHS_transfer, Minv)
+                RHS_transfer += self.c_a*PV*2
+
+                V_new[-1,space,:] = RHS_transfer
+
             ########## Loop over angle ############
             for angle in range(self.N_ang):
+                
                 mul = self.mus[angle]
                 # calculate numerical flux
                 refl_index = 0
@@ -260,19 +326,20 @@ class rhs_class():
                 # elif self.geometry['slab'] == True:
                 #      RHS += 0.5*S 
 
-                if self.geometry['sphere'] == True:
-                    Minv = np.linalg.inv(Mass) 
+             
 
                     # if self.M == 0:
                     #     a = xL
                     #     b = xR
                     #     # print(Minv,  3 * math.pi/ (a*b + b**2 + a**2))
                     #     assert(np.abs(Minv[0,0] - 3 * math.pi/ (a*b + b**2 + a**2)) <=1e-8)
-                    dterm = U*0
-                    for j in range(self.M+1):
-                        # vec = (1-self.mus**2) * V_old[:, space, j]
-                        # if angle != 0 and angle != self.N_ang-1:
-                        dterm[j] = finite_diff_uneven(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1))
+                dterm = U*0
+                for j in prange(self.M+1):
+                    # vec = (1-self.mus**2) * V_old[:, space, j]
+                    # if angle != 0 and angle != self.N_ang-1:
+                        
+                    # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
+                    dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
 
                     # Minv = np.copy(M)
                     # Minv[0,0] = 1/ M[0,0]
@@ -304,38 +371,31 @@ class rhs_class():
                     a = xL
                     b = xR
                     RHS = V_old[angle, space, :]*0
-
                     RHS -=  LU
-                    # if self.M ==0:
-                    #     assert(np.abs(RHS[0] + 3 * math.pi  * LU[0]  /  (a*b + b**2 + a**2) )<=1e-8)
                     RHS +=  mul*np.dot(L,U)
                     mu_derivative =  np.dot(J, dterm)
-                    # if self.M == RHS -= V_old[angle, space,:] 0:
-                    #     assert(abs(mu_derivative[0] -(3 * (a+b) / 2 / (a*b + b**2 + a**2)) * dterm[0])<=1e-8)
                     RHS -= mu_derivative
-                    # if space == 2 and dxR >0:
-                    #     if abs(G[0,0] - (a**2 + a*b + b**2)/(6*a*math.pi - 6*b*math.pi))>=1e-6:
-                    #         print(abs(G[0,0] - (a**2 + a*b + b**2)/(6*a*math.pi - 6*b*math.pi)))
-                    #         print(t)
-                    #         assert(0)
                     RHS += np.dot(G, U)
-                    RHS += 0.5 * S * self.c 
-                    # if self.M == 0:
-                    #     a = xL
-                    #     b = xR
-                    #     ap = dxL
-                    #     bp = dxR
-                        # assert(abs(G2[0] - U[0]*(-ap + bp)/(2.*(a - b))) <=1e-6)
-                        # RHS -= np.dot(Minv, (ap*(2*a + b) + (a + 2*b)*bp)/(3.*math.pi) * U)
+                    # RHS += 0.5 * S * self.c #(commented this out because c is included)
+                    RHS += 0.5 * S
+                    RHS += self.c_a * H
                     RHS -= np.dot(MPRIME, U)
                     RHS = np.dot(Minv, RHS)
-                    PV2 = U * 0
-                    # for ii in range(self.M+1):
-                    #     PV2[ii] = np.sum(np.multiply(V_old[:,space,ii],self.ws)) #* (self.c) 
-                    # if max(np.abs(PV - PV2)) >= 1e-10:
-                    #     assert(0)
+                    #RHS += PV * self.c
                     RHS += PV * self.c
                     RHS -= U
+
+                    #--------------------------------------------------------------
+
+                    # These three lines were for checking if the square source was integrating correctly
+                    # with uncollided off.
+
+                    #Z = (math.sqrt(1/(-a + b))*(-0.3333333333333333*a**3 + b**3/3.))/math.sqrt(math.pi)
+
+                    #if b < self.x0:
+                        #print(S[0] - Z) 
+
+                    #--------------------------------------------------------------
 
                     # RHS2 -= (3 * (a+b) / 2 / (a*b + b**2 + a**2)) * dterm 
 
@@ -363,7 +423,15 @@ class rhs_class():
                     
                     V_new[angle,space,:] = RHS  
 
-        return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
+        # print(V_new.shape)
+
+        if self.radiative_transfer['none'] == False:
+
+            return V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
+
+        else:
+
+            return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
         
     
        

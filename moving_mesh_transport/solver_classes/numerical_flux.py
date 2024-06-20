@@ -163,8 +163,8 @@ class LU_surf(object):
         returnval = False
         if self.source_type[4] == 1:
             returnval = True
-        elif self.thermal_couple == 1:
-            returnval = True
+        #elif self.thermal_couple == 1:
+        #    returnval = True
         elif self.boundary_source == True:
             if self.uncollided == False:
                 if t <= self.t0:
@@ -177,7 +177,7 @@ class LU_surf(object):
         return returnval
 
 
-    def make_sol(self, space, u, t):
+    def make_sol(self, space, u, t, u_refl):
         for j in range(self.M+1):
                 if space != 0:
                     self.v0 += self.B_LR_func(j, self.hm)[1]*(u[space-1,j])
@@ -185,8 +185,9 @@ class LU_surf(object):
                 elif space == 0 and self.is_boundary_source_on(space, t): # special MMS case
                     self.v0 += self.integrate_quad(t, self.xL_minus, self.edges[space], j, "l") * self.B_LR_func(j, self.h)[1] 
                 
-                # elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
-                #     self.v0 += self.B_LR_func(j, self.h)[0]*(u_refl[j])
+                elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
+                    self.v0 += self.B_LR_func(j, self.h)[0]*(u_refl[j])
+
                     
                 self.v1 += self.B_LR_func(j, self.h)[0]*(u[space, j])
                 self.v2 += self.B_LR_func(j, self.h)[1]*(u[space, j])
@@ -199,7 +200,7 @@ class LU_surf(object):
                     self.v3 += self.integrate_quad(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0] 
             
     
-    def make_LU(self, t, mesh_class, u, space, mul):
+    def make_LU(self, t, mesh_class, u, space, mul, u_refl):
         self.v0 = 0 
         self.v1 = 0
         self.v2 = 0
@@ -210,15 +211,12 @@ class LU_surf(object):
         xL = self.edges[space]
         xR = self.edges[space + 1]
         
-
-        leftspeed = self.speed * mul -  self.Dedges[space]
-        rightspeed = self.speed * mul - self.Dedges[space+1]
-
-
+        leftspeed = self.speed * mul -  self.Dedges[space] 
+        rightspeed = self.speed * mul -  self.Dedges[space+1]
         
         self.make_h(space)
         self.extend_mesh(space)
-        self.make_sol(space, u, t)
+        self.make_sol(space, u, t, u_refl)
 
 
 

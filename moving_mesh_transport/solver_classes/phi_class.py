@@ -41,7 +41,6 @@ data = [("P", float64[:]),
         ('sigma_func', nb.typeof(params_default)),
         ('scalar_flux_term', float64[:]),
         ('geometry', nb.typeof(params_default)),
-        ('sigma_t', float64)
         ]
 ###############################################################################
 @jitclass(data)
@@ -54,7 +53,6 @@ class scalar_flux(object):
         self.thermal_couple = build.thermal_couple
         self.sigma_func = build.sigma_func
         self.sigma_s = build.sigma_s
-        self.sigma_t = build.sigma_t
         self.N_ang = build.N_ang
         self.Msigma = build.Msigma
         self.scalar_flux_term = np.zeros(self.M+1)
@@ -74,7 +72,7 @@ class scalar_flux(object):
             for i in range(0, self.M+1):
                 self.P[i]  = np.sum(np.multiply(u[:,i],self.ws))
             if self.geometry['slab'] == True:
-                self.scalar_flux_term = (self.sigma_s / self.sigma_t) * self.P
+                self.scalar_flux_term = self.P
             elif self.geometry['sphere'] == True:
                 self.scalar_flux_term = self.P 
 
@@ -84,7 +82,7 @@ class scalar_flux(object):
                 for l in range(self.N_ang):
                     for j in range(self.M+1):
                         for k in range(self.Msigma + 1):
-                            self.PV[i] += (self.sigma_s / self.sigma_t) * self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
+                            self.PV[i] += (self.sigma_s) * self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
             self.scalar_flux_term = self.PV / math.sqrt(xR-xL)
                             # self.PV[i] += self.ws[l] * u[l,i]
 
@@ -101,7 +99,7 @@ class scalar_flux(object):
 
 
     def get_coeffs(self, opacity_class):
-        self.cs = opacity_class.csP
+        self.cs = opacity_class.cs
 
     
 

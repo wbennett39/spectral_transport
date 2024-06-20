@@ -13,14 +13,15 @@ data = [('datax', float64[:]),
         ('coef', float64[:])
         ]
 @jitclass(data) 
-class cubic_spline_ob(object):
+class cubic_spline(object):
     def __init__(self, datax, datay):
         self.datax = datax
         self.datay = datay
         self.n = datay.size - 1
-        # print(self.n, 'n')
+        print(self.n, 'n')
         self.coeff_array = np.zeros((4*self.n, 4*self.n))
         self.rhs = np.zeros(4*self.n)
+        
         self.solve_coefficients()
 
     def solve_coefficients(self):  
@@ -121,8 +122,7 @@ class cubic_spline_ob(object):
                 if self.datax[knot]<=x[i]<=self.datax[knot+1]:
                     y_interp[i] = np.sum(self.coef[4*knot:(4*knot+4)] * np.array([1,x[i],x[i] **2,x[i]**3]))
                     break #exit for loop
-        return y_interp 
-        # return self.datay
+        return y_interp
         
 
 def test_spline():
@@ -130,7 +130,7 @@ def test_spline():
     x = np.array([0, pi/2, pi, 3*pi/2, 2*pi, 5*pi/2 ])
     x = np.linspace(0, 2*pi, 50)
     y = np.sin(x)
-    spline_object = cubic_spline_ob(x, y)
+    spline_object = cubic_spline(x, y)
     rmc_coef, rmc_rhs = mcclarren_spline()
     coeffs = GaussElim(rmc_coef, rmc_rhs)
     
@@ -156,7 +156,7 @@ def test_spline():
     # y = np.array([1.0, 3.0, 2.0])
     f1 = lambda x: x**2 * np.exp(-x/4) * np.heaviside(0.5-np.abs(x),0)
     y = f1(x)
-    spline_object = cubic_spline_ob(x, y)
+    spline_object = cubic_spline(x, y)
     xtest = np.linspace(-1, 1, 100)
     ytest = spline_object.eval_spline(xtest)
     plt.plot(xtest,f1(xtest))
@@ -444,6 +444,6 @@ def GaussElim(A,b,LOUD=0):
     return x
 
 
-# test_spline()
+test_spline()
 
 

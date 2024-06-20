@@ -9,15 +9,15 @@ import numpy as np
 from numba import int64, float64, jit, njit, deferred_type
 from numba.experimental import jitclass
 from numba import types, typed
-import numba as nb
 # from main import IC_func 
+#from mesh import mesh_class
 from .mesh import mesh_class
+#from functions import normPn, normTn
 from .functions import normPn, normTn
 from .mutables import IC_func
-# from .cubic_spline import cubic_spline
-params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
-
-
+from .functions import weight_func_Tn
+# from mutables import IC_func
+# from functions import weight_func_Tn
 
 import yaml
 from pathlib import Path
@@ -28,10 +28,9 @@ mesh_class_type = deferred_type()
 mesh_class_type.define(mesh_class.class_type.instance_type)
 IC_func_type = deferred_type()
 IC_func_type.define(IC_func.class_type.instance_type)
-# cubic_spline_type = deferred_type()
-# cubic_spline_type.define(cubic_spline.class_type.instance_type)
-
-
+kv_ty = (types.int64, types.unicode_type)
+# Explicitly define the types of the key and value:
+params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
 
 data = [('N_ang', int64), 
         ('N_space', int64),
@@ -78,20 +77,15 @@ data = [('N_ang', int64),
         ('boundary_source', int64),
         # ('sigma_func', int64[:]),
         ('sigma_func', nb.typeof(params_default)),
-        ('geometry', nb.typeof(params_default)),
         ('Msigma', int64),
         ('domain_width', float64),
         ('finite_domain', int64),
         ('fake_sedov_v0', float64),
         ('x01', float64),
         ('test_dimensional_rhs', int64),
-        ('epsilon', float64),
-        ('eval_array', float64[:]),
-        ('f_fun', float64[:]),
-        ('g_fun', float64[:]),
-        ('l_fun', float64[:])
+        ('epsilon', float64), 
+        ('geometry', nb.typeof(params_default)),
         ]
-
 ###############################################################################
 
 @jitclass(data)
@@ -100,8 +94,7 @@ class build(object):
     source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
      quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
-     fake_sedov_v0, test_dimensional_rhs, epsilon, eval_array, geometry, f_fun, g_fun, l_fun):
-
+     fake_sedov_v0, test_dimensional_rhs, epsilon, geometry):
         self.N_ang = N_ang
         self.N_space = N_space
         self.M = M
@@ -150,7 +143,6 @@ class build(object):
         self.finite_domain = finite_domain
         self.domain_width = domain_width
         self.fake_sedov_v0 = fake_sedov_v0
-        self.eval_array = eval_array
         
         if self.thermal_couple['none'] == 1:
             self.IC = np.zeros((N_ang, N_space, M+1))
@@ -160,40 +152,32 @@ class build(object):
         self.geometry = geometry
        
         self.e_init = e_initial
-        self.f_fun = f_fun
-        self.g_fun = g_fun
-        self.l_fun = l_fun
         # self.e_initial = 1e-4
         
         
     def integrate_quad(self, a, b, ang, space, j, ic):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         mu = self.mus[ang]
-        self.IC[ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * ic.function(argument, mu) * normPn(j, argument, a, b))
-    
-    def integrate_quad_remesh(self, a, b, ang, space, j, old_psi_evaluated):
+        self.IC[ang,space,j] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu) * normPn(j, argument, a, b))
+
+    def integrate_quad_sphere(self, a, b, ang, space, j, ic):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         mu = self.mus[ang]
-        psi_eval = old_psi_evaluated[ang, space, :]
-        self.IC[ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * psi_eval * normPn(j, argument, a, b))
-
+        self.IC[ang,space,j] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu) * 2.0 * normTn(j, argument, a, b))
         
 
     def integrate_e(self, a, b, space, j):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
-        if b == a:
-            assert(0)
         self.IC[self.N_ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) * normPn(j, argument, a, b))
     
     def IC_e_func(self,x):
         return np.ones(x.size) * self.e_init
                 
-    def make_IC(self, edges_init):
-        # edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
-        # self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
-        # self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.eval_array, self.geometry, self.sigma_func)
-
-        # edges_init = edges.edges
+    def make_IC(self):
+        edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
+        self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
+        self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.geometry)
+        edges_init = edges.edges
 
         # The current method for handling delta functions
         if self.moving == False and self.source_type[0] == 1 and self.uncollided == False and self.N_space%2 == 0:
@@ -233,29 +217,13 @@ class build(object):
             for space in range(self.N_space):
                 for j in range(self.M + 1):
                     if self.geometry['slab'] == True:
+                        print("Inside slab if statement.")
                         self.integrate_quad(edges_init[space], edges_init[space+1], ang, space, j, ic)
                     elif self.geometry['sphere'] == True:
-                        # self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
-                        assert(0)
+                        self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
+
     
-    def make_IC_from_solution(self, old_psi_evaluated, edges_init):
-
-        # edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
-        # self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
-        # self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.eval_array, self.geometry, self.sigma_func)
-        # edges_init = edges.edges
-        print(edges_init, 'new_edges')
-
-        #this is the cubic interpolation method. Suffers from oscillations 
-        # for ang in range(self.N_ang):
-        #     psi_interp_ob = cubic_spline(xs, psi[ang,:])
-        #     for space in range(self.N_space):
-        #         for j in range(self.M + 1):
-        #             self.integrate_quad_remesh(edges_init[space], edges_init[space+1], ang, space, j, psi_interp_ob)
-        for ang in range(self.N_ang):
-            for space in range(self.N_space):
-                for j in range(self.M + 1):
-                    self.integrate_quad_remesh(edges_init[space], edges_init[space+1], ang, space, j, old_psi_evaluated)
+        
         
         
         

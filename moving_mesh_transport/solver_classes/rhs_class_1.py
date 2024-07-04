@@ -95,7 +95,10 @@ data = [('N_ang', int64),
         ('geometry', nb.typeof(params_default)),
         ('alphams', float64[:]),
         ('radiative_transfer', nb.typeof(params_default)),
-        ('test', float64)
+        ('test', float64),
+        ('xs_quad', float64[:]),
+        ('T_old', float64[:,:])
+
 
 
         ]
@@ -111,6 +114,7 @@ class rhs_class():
         self.M = build.M
         self.mus = build.mus
         self.ws = build.ws
+        self.xs_quad = build.xs_quad
         self.source_type = np.array(list(build.source_type), dtype = np.int64) 
 
         self.thermal_couple = build.thermal_couple
@@ -140,6 +144,7 @@ class rhs_class():
         self.deg_freedom = shaper(self.N_ang, self.N_space, self.M + 1, self.thermal_couple)
         self.alphams = np.zeros(self.N_ang + 1)
         self.x0 = build.x0
+        self.T_old = np.zeros((self.N_space, self.xs_quad.size))
         
         for angle2 in range(1, self.N_ang + 1):
             self.alphams[angle2] = self.alphams[angle2-1] - self.ws[angle2-1] * self.mus[angle2-1]
@@ -199,7 +204,7 @@ class rhs_class():
         # move mesh to time t 
         mesh.move(t)
         # represent opacity as a polynomial expansion
-        sigma_class.sigma_moments(mesh.edges, t)
+        sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
         flux.get_coeffs(sigma_class)
 
         # iterate over all cells
@@ -225,6 +230,7 @@ class rhs_class():
                 flux.make_P(V_old[:-1,space,:], space, xL, xR)
             else:
                 flux.make_P(V_old[:,space,:], space, xL, xR)
+            # I need to make different functions to call the scattering and absorbing scalar flux
             PV = flux.scalar_flux_term
             # integrate the source
             source.make_source(t, xL, xR, uncollided_sol)
@@ -237,30 +243,26 @@ class rhs_class():
 
             # radiative transfer term
             
-            def testsoln(a, b):
-                """ Calculates the value of the analytic solution for H when a simple function is used,
-                to test whether the temperature function is being integrated properly."""
-                test = np.sqrt(1/(np.pi*(b-a)) ) * ((a**2 - 2)*np.cos(a) - 2*a*np.sin(a) - (b**2 - 2)*np.cos(b) + 2*b*np.sin(b))
-                return test
+            # def testsoln(a, b):
+            #     """ Calculates the value of the analytic solution for H when a simple function is used,
+            #     to test whether the temperature function is being integrated properly."""
+            #     test = np.sqrt(1/(np.pi*(b-a)) ) * ((a**2 - 2)*np.cos(a) - 2*a*np.sin(a) - (b**2 - 2)*np.cos(b) + 2*b*np.sin(b))
+            #     return test
 
             if self.radiative_transfer['none'] == False:
-                transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :])
+
+                # print(V_old[self.N_ang, space, :], 'v old')
+                transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :], sigma_class, space)
+
                 H = transfer_class.H
-                #print("The radiative transfer term of rhs_class_1 is being called.")
-                #for k in range(H.size):
-                #    print(testsoln(xL, xR))
-                #    diff = abs(H[k] - testsoln(xL, xR))
-                #    if diff > 1e-5:
-                #        print("Solutions have diverged, numerical temperature integration differs from analytical solution by", diff)
-                #        assert(0)
-
-                #print(H) # This is just for checking temperatures
-                #print("c_a = ", self.c_a)
-                
-                #if np.abs(np.max(H)) > 1e-8:
-                    #print(H)
-                    #assert(0)
-
+                a = xL
+                b = xR
+                argument = (b-a)/2*self.xs_quad + (a+b)/2
+                #T_old saves the temperature at the zeros of the interpolating polynomial
+                # print(H)
+                self.T_old[space] = transfer_class.make_T(argument, a, b) 
+                # print(self.T_old[space], 'T old')
+    
                 ######### solve thermal couple ############
 
                 U = V_old[-1,space,:]
@@ -277,11 +279,14 @@ class rhs_class():
                 #print("source.S = ", source.S)
 
                 RHS_transfer -= RU
-                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H
-                RHS_transfer = np.dot(RHS_transfer, Minv)
+                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H * 2 
                 RHS_transfer += self.c_a*PV*2
-
+                RHS_transfer = np.dot(RHS_transfer, Minv)
                 V_new[-1,space,:] = RHS_transfer
+                if np.isnan(V_new[-1, space, :]).any():
+                    print('rhstransfer is nan')
+                    assert(0)
+                # print(RHS_transfer, 'rhs transfer')
 
             ########## Loop over angle ############
             for angle in range(self.N_ang):
@@ -302,6 +307,7 @@ class rhs_class():
                     
                 LU = num_flux.LU
                 # Get absorption term
+                # sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
                 sigma_class.make_vectors(mesh.edges, V_old[angle,space,:], space)
                 VV = sigma_class.VV
                 # Initialize solution vector, RHS
@@ -309,22 +315,6 @@ class rhs_class():
                 # assert(abs(G[0,0]  + 0.16666666666666666*((xL**2 + xL*xR + xR**2)*(dxL - dxR))/((xL - xR)*math.pi))<=1e-10)
                 U[:] = V_old[angle,space,:]
                 # RHS = np.zeros_like(V_new[angle,space,:])
-
-                # Spatial derivative term
-               
-                    
-                # RHS = U*0
-                # # Drift term
-                # RHS += np.dot(G,U)
-                # # numerical flux
-                # RHS -=  LU
-                # # Nspatial derivative
-                # RHS += mul*np.dot(L,U)
-                # # suource term
-                # if self.geometry['sphere'] == True:
-                #     RHS += S / 4 / math.pi
-                # elif self.geometry['slab'] == True:
-                #      RHS += 0.5*S 
 
              
 
@@ -340,30 +330,6 @@ class rhs_class():
                         
                     # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
                     dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
-
-                    # Minv = np.copy(M)
-                    # Minv[0,0] = 1/ M[0,0]
-                #     RHS -= dterm * np.dot(J,U) 
-                #     if self.M == 0:
-                #         if abs(Minv[0,0] - 3/(xR**3-xL**3)) >1e-10:
-                #             print(Minv[0,0])
-                #             print(np.array([[3/(xR**3-xL**3)]]),'analytic')
-                #             print('error')
-                #     # Minv = np.array([[3/(xR**3-xL**3)]])
-                #     # Minv = np.identity(self.M+1)
-                #     # RHS = np.dot(Minv, RHS)
-        
-                # # Absorption term
-                # RHS -= VV
-                # # Scalar flux
-                # RHS += PV
-
-                # RHS = np.dot(G,U)  - LU + mul*np.dot(L,U) - VV + PV + 0.5*self.c*S
-                # if space != 0:
-                #     if abs(LU[0]) >1e-10:
-                #         print(LU, 'Lu', space)
-                #         print(VV, "VV")
-                # RHS =  np.dot(G,U)  -  LU + mul*np.dot(L,U) - np.dot(M, VV) + np.dot(M, PV) +  0.5*self.c*S/4/math.pi - dterm * np.dot(J,U)
                      
 
 
@@ -378,48 +344,22 @@ class rhs_class():
                     RHS += np.dot(G, U)
                     # RHS += 0.5 * S * self.c #(commented this out because c is included)
                     RHS += 0.5 * S
-                    RHS += self.c_a * H
+                    RHS += self.c_a * H /4/math.pi
+                    RHS += PV * self.c
+                    # print(VV, 'VV')
+                    # print(V_old[angle, space,:], 'vold')
+                    
+                    # print(VV,'vv')
+                    # print(np.dot(Mass, U), 'MU')
+                    # VV[0] = U[0]*(math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL)
+                    # assert(abs(VV[0] - U[0]*(math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3 )
+                    # assert(abs(Mass[0,0] -  (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3)
+                    # assert(abs((VV-np.dot(Mass, U))[0])<=1e-3)
+                    RHS -= VV
                     RHS -= np.dot(MPRIME, U)
                     RHS = np.dot(Minv, RHS)
-                    #RHS += PV * self.c
-                    RHS += PV * self.c
-                    RHS -= U
 
-                    #--------------------------------------------------------------
-
-                    # These three lines were for checking if the square source was integrating correctly
-                    # with uncollided off.
-
-                    #Z = (math.sqrt(1/(-a + b))*(-0.3333333333333333*a**3 + b**3/3.))/math.sqrt(math.pi)
-
-                    #if b < self.x0:
-                        #print(S[0] - Z) 
-
-                    #--------------------------------------------------------------
-
-                    # RHS2 -= (3 * (a+b) / 2 / (a*b + b**2 + a**2)) * dterm 
-
-                    # if self.M == 0:
-
-                    # #hard code M=0 RHS
-                    #     a = xL
-                    #     b = xR
-                    #     RHS2 = U*0
-                    #     RHS2 -= 3 * math.pi  * LU  /  (a*b + b**2 + a**2)
-                    #     if space == 0:
-                    #         if mul > 0:
-                    #             analytic_flux = (3 * math.sqrt(math.pi) / (a*b + b**2 + a**2) / math.sqrt(b-a) * (-mul) * V_old[angle, space, 0] * 1 / math.sqrt(b-a) / math.sqrt(math.pi) * b**2)
-                    #             # print(analytic_flux)
-                    #             # if abs(RHS[0] - analytic_flux) >= 1e-7:
-                    #             #     print(abs(RHS[0] - analytic_flux) )
-                    #             #     assert(0)
-                    #     RHS2 -= (3 * (a+b) / 2 / (a*b + b**2 + a**2)) * dterm 
-                    #     RHS2 -= V_old[angle, space,:] 
-                    #     # assert(abs(np.sum(self.ws) - 1) <=1e-8)
-                    #     PV = np.sum(np.multiply(V_old[:, space, 0], self.ws)) * (self.c /2 / math.pi) 
-                    #     RHS2[0] +=  PV
-
-                    #     assert(np.abs(RHS[0] - RHS2[0]) <= 1e-8)
+               
                     
                     V_new[angle,space,:] = RHS  
 

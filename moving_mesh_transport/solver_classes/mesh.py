@@ -763,6 +763,11 @@ class mesh_class(object):
 
             # print(self.delta_t, 'delta_t')
 
+    def menis_init(self):
+        self.edges = np.linspace(0, self.x0, self.N_space + 1)
+        self.Dedges = self.edges * 0
+        self.edges0 = self.edges
+        self.Dedges_const = self.Dedges
 
 
     def boundary_source_init_func(self, v0):
@@ -813,7 +818,6 @@ class mesh_class(object):
             self.simple_moving_init_func()
 
         if self.thick == False:     # thick and thin sources have different moving functions
-
             # if self.problem_type in ['gaussian_IC', 'gaussian_source']:
             if self.source_type[3] == 1 or self.source_type[5] == 1:
                 self.simple_moving_init_func()
@@ -837,10 +841,14 @@ class mesh_class(object):
                     self.edges = np.sort(self.edges)
                     self.Dedges = self.edges * 0
                     self.shell_source()    
-            
+             
             elif np.all(self.source_type == 0):
-                self.boundary_source_init_func(self.vnaught)
+                if self.geometry['sphere'] == True:
+                    self.menis_init()
+                else:
+                    self.boundary_source_init_func(self.vnaught)
                 # boundary_source_init_func_outside(self.vnaught, self.N_space, self.x0, self.tfinal) 
+                
                 print('calling boundary source func')
             # if self.
 

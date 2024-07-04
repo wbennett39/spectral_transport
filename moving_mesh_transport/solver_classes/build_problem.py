@@ -85,6 +85,8 @@ data = [('N_ang', int64),
         ('test_dimensional_rhs', int64),
         ('epsilon', float64), 
         ('geometry', nb.typeof(params_default)),
+        ('boundary_temp', float64[:]),
+        ('boundary_time', float64[:])
         ]
 ###############################################################################
 
@@ -115,7 +117,6 @@ class build(object):
         self.t_quad = t_quad
         self.t_ws = t_ws
         self.t0 = t0
-        # self.sigma_func = np.array(list(sigma_func), dtype = np.int64)
         self.sigma_func = sigma_func
 
         self.test_dimensional_rhs = test_dimensional_rhs
@@ -143,6 +144,8 @@ class build(object):
         self.finite_domain = finite_domain
         self.domain_width = domain_width
         self.fake_sedov_v0 = fake_sedov_v0
+    
+
         
         if self.thermal_couple['none'] == 1:
             self.IC = np.zeros((N_ang, N_space, M+1))
@@ -159,6 +162,10 @@ class build(object):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         mu = self.mus[ang]
         self.IC[ang,space,j] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu) * normPn(j, argument, a, b))
+    
+    def grab_converging_boundary_data(self, boundary_temp, boundary_time):
+        self.boundary_temp = boundary_temp
+        self.boundary_time = boundary_time
 
     def integrate_quad_sphere(self, a, b, ang, space, j, ic):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
@@ -225,6 +232,6 @@ class build(object):
     
         
         
-        
+
         
         

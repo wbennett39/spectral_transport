@@ -13,7 +13,7 @@ from numba import types, typed
 import numba as nb
 
 from .mesh import mesh_class
-from .functions import normPn
+from .functions import normPn, normTn
 from .build_problem import build
 ###############################################################################
 mesh_class_type = deferred_type()
@@ -54,7 +54,12 @@ data = [("M", int64),
         ('boundary_source', int64),
         ('uncollided', int64),
         ('t0', float64),
-        ('geometry', nb.typeof(params_default))
+        ('geometry', nb.typeof(params_default)),
+        ('opacity_func', nb.typeof(params_default)),
+        ('converging_temp_array', float64[:]),
+        ('converging_time_array', float64[:]),
+        ('a', float64),
+        ('cspeed', float64)
         ]
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
@@ -66,9 +71,17 @@ class LU_surf(object):
         self.LU = np.zeros(build.M+1).transpose()
         self.M = build.M
         self.source_type = np.array(list(build.source_type), dtype = np.int64)
+        self.geometry = build.geometry 
+
         self.ws_quad = build.ws_quad
         self.xs_quad = build.xs_quad
+
         self.N_space = build.N_space
+        
+        self.opacity_func = build.sigma_func
+        if self.opacity_func['converging'] == True:
+            self.converging_time_array = build.boundary_time
+            self.converging_temp_array = build.boundary_temp
         self.t0 = build.t0
         self.v0 = 0.0 
         self.v1 = 0.0
@@ -84,7 +97,10 @@ class LU_surf(object):
         self.boundary_on = np.array(list(build.boundary_on), dtype = np.int64) # [left, right]
         self.boundary_source_strength = build.boundary_source_strength
         self.uncollided = build.uncollided
-        self.geometry = build.geometry
+        self.a = 0.0137225
+        self.cspeed = 29.98
+
+        
         # if build.test_dimensional_rhs == True:
         #     self.speed = build.particle_v
 
@@ -93,6 +109,11 @@ class LU_surf(object):
     def integrate_quad(self, t, a, b, j, side):
         argument = (b-a)/2 * self.xs_quad + (a+b)/2
         res = (b-a)/2 * np.sum(self.ws_quad * self.BC_func(argument, t) * normPn(j, argument, a, b))
+        return res
+    
+    def integrate_quad_sphere(self, t, a, b, j, side):
+        argument = (b-a)/2 * self.xs_quad + (a+b)/2
+        res = 0.5 * (b-a) * np.sum(self.ws_quad * self.BC_func(argument, t) * 2.0 * normTn(j, argument, a, b))
         return res
         
     def B_LR_func(self, i, h):
@@ -126,10 +147,14 @@ class LU_surf(object):
         temp = xs*0
         if self.source_type[4] == 1:
             temp = np.exp(-xs*xs/2)/(t + 1)/2.0
-        elif (self.thermal_couple == 1) and (self.moving == 1):
-            temp = np.ones(xs.size) * self.e_init 
+        # elif (self.thermal_couple == 1) and (self.moving == 1):
+        #     temp = np.ones(xs.size) * self.e_init 
         elif self.boundary_source == True:
-            temp = np.ones(xs.size) * self.boundary_source_strength
+            if self.opacity_func['converging'] == True:
+                temp = self.interpolate_heat_wave(t) * np.ones(xs.size) 
+            else:
+                temp = np.ones(xs.size) * self.boundary_source_strength
+            
 
         return temp
     
@@ -158,6 +183,13 @@ class LU_surf(object):
         dx = xR - xL
         self.xL_minus = self.edges[0] - dx
         self.xR_plus = self.edges[-1] + dx
+    
+    def interpolate_heat_wave(self, t):
+        t_arg = np.argmin(np.abs(self.converging_time_array - t))
+        # print(self.converging_time_array[t_arg],t)
+        return 1/ 4 / math.pi * self.converging_temp_array[t_arg] ** 4
+
+    
         
     def is_boundary_source_on(self, space, t):
         returnval = False
@@ -188,6 +220,7 @@ class LU_surf(object):
                 elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
                     self.v0 += self.B_LR_func(j, self.h)[0]*(u_refl[j])
 
+
                     
                 self.v1 += self.B_LR_func(j, self.h)[0]*(u[space, j])
                 self.v2 += self.B_LR_func(j, self.h)[1]*(u[space, j])
@@ -197,7 +230,11 @@ class LU_surf(object):
                     self.v3 += self.B_LR_func(j, self.hp)[0]*(u[space+1,j])
                     
                 elif space == self.N_space - 1 and self.is_boundary_source_on(space, t):
-                    self.v3 += self.integrate_quad(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0] 
+                    if self.geometry['slab'] == True:
+                        self.v3 += self.integrate_quad(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0] 
+                    elif self.geometry['sphere'] == True:
+                        self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0]
+
             
     
     def make_LU(self, t, mesh_class, u, space, mul, u_refl):

@@ -10,6 +10,7 @@ Created on Thu May  5 10:42:11 2022
 
 from .build_problem import build
 from .functions import normPn, normTn
+
 #from build_problem import build
 #from functions import normPn, normTn
 
@@ -19,9 +20,13 @@ import numpy as np
 import math
 from numba import types, typed
 import numba as nb
+from .opacity import sigma_integrator
  
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
+
+sigma_class_type = deferred_type()
+sigma_class_type.define(sigma_integrator.class_type.instance_type)
 kv_ty = (types.int64, types.unicode_type)
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
 
@@ -46,7 +51,11 @@ data = [('temp_function', int64[:]),
         ('xs_points', float64[:]),
         ('e_points', float64[:]),
         ('thermal_couple', nb.typeof(params_default)),
-        ('geometry', nb.typeof(params_default))
+        ('geometry', nb.typeof(params_default)),
+        ('temperature', float64[:,:]),
+        ('space', int64),
+        ('sigma_a_vec', float64[:])
+
 
 
         ]
@@ -61,7 +70,7 @@ class T_function(object):
         
         self.a = 0.0137225 # GJ/cm$^3$/keV$^4
         self.alpha = 4 * self.a
-        self.clight = 299.98
+        self.clight = 29.98
 
         self.geometry = build.geometry
         
@@ -79,7 +88,8 @@ class T_function(object):
         self.test_dimensional_rhs = False
         self.save_derivative = build.save_wave_loc
         self.thermal_couple = build.thermal_couple
-
+        self.temperature = np.zeros((build.N_space, self.xs_quad.size))
+        self.e_vec = np.zeros(self.M+1)
         
     def make_e(self, xs, a, b):
         temp = xs*0
@@ -91,34 +101,68 @@ class T_function(object):
                     temp[ix] += normTn(j, xs[ix:ix+1], a, b)[0] * self.e_vec[j]
         return temp 
     
-    def integrate_quad(self, a, b, j):
+    def integrate_quad(self, a, b, j, sigma_class):
         argument = (b-a)/2 * self.xs_quad + (a+b)/2
-        self.H[j] = (b-a)/2 * np.sum(self.ws_quad * self.T_func(argument, a, b) * normPn(j, argument, a, b))
+        self.H[j] = (b-a)/2 * np.sum(self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space, self.temperature[self.space]) * normPn(j, argument, a, b))
 
 
-    def integrate_quad_sphere(self, a, b, j):
+    def integrate_quad_sphere(self, a, b, j, sigma_class):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
-        self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
+        self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space, self.temperature[self.space]) * 1 * normTn(j, argument, a, b))
         #assert(0)
+    
+    def get_sigma_a_vec(self, x, sigma_class, temperature):
+        self.sigma_a_vec = sigma_class.sigma_function(x, 0.0, temperature)
 
-    def T_func(self, argument, a, b):
+    def make_T(self, argument, a, b):
         e = self.make_e(argument, a, b)
-
-        self.xs_points = argument
-        self.e_points = e
         if self.temp_function[0] == 1:
             T = self.su_olson_source(e, argument, a, b)
-            return self.a * np.power(T,4) * self.fudge_factor
+        elif self.temp_function[1] == 1:
+             T =  e / self.cv0
+        elif self.temp_function[2] == 1:
+            #  if np.max(e) <= 1e-20:
+            #     T = np.zeros(e.size) + 1e-12
+            #  else:
+                T = (np.abs(e * self.a * self.clight/1e13))**(1/1.6) 
+                # T = e / 0.1
+                if np.isnan(T).any():
+                    print('###                                ###')
+                    print('nonreal temperature')
+                    print(e, 'e solution')
+                    print(self.e_vec, 'e vector')
+                    print('###                                ###')
+                    assert(0)
+                print(T)
+        return T
+             
+
+    def T_func(self, argument, a, b, sigma_class, space, temperature_old):
+        T = self.make_T(argument, a, b)
+        self.get_sigma_a_vec(argument, sigma_class, temperature_old)
+        # self.xs_points = argument
+        # self.e_points = e
+
+        if self.temp_function[0] == 1:
+            self.temperature[space,:] = T
+            return self.a * np.power(T,4) * self.fudge_factor  * self.sigma_a_vec
             #return np.sin(argument) 
 
         elif self.temp_function[1] == 1:
-            if self.test_dimensional_rhs == True:
-                T =  e / self.cv0
-                return np.power(T,4) * self.a * self.clight
-            else:
-                T =  e / self.cv0 
-                return np.power(T,4)
+        
+                self.temperature[space,:] = T
+                return np.power(T,4)  * self.sigma_a_vec
+        
+        # elif self.temp_function[2] == 1:
+        #     return f * T ** beta * rho ** (1-mu)- self.a * T**4
+
+        elif self.temp_function[2] == 1:
+            # print(self.sigma_a_vec)
+            return np.power(T,4) * self.sigma_a_vec
+        
+            
+
         else:
             assert(0)
 
@@ -141,8 +185,9 @@ class T_function(object):
         return np.power(t1,0.25)
         
         
-    def make_H(self, xL, xR, e_vec):
+    def make_H(self, xL, xR, e_vec, sigma_class, space):
         self.e_vec = e_vec
+        self.space = space
             
         # Lines commented out are the original lines of code
 
@@ -154,10 +199,10 @@ class T_function(object):
             if self.geometry['slab'] == True:
 
                 for j in range(self.M+1):
-                    self.integrate_quad(xL, xR, j)
+                    self.integrate_quad(xL, xR, j, sigma_class)
 
             elif self.geometry['sphere'] == True:
 
                 for j in range(self.M+1):
-                    self.integrate_quad_sphere(xL, xR, j)
+                    self.integrate_quad_sphere(xL, xR, j, sigma_class)
         

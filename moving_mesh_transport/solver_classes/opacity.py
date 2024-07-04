@@ -1,15 +1,19 @@
 import numpy as np
 import math
 from .build_problem import build
+# from .radiative_transfer import T_function
 
 from numba.experimental import jitclass
 from numba import int64, float64, deferred_type, prange
-from .functions import Pn, normPn
+from .functions import Pn, normPn, normTn
 from numba import types, typed
 import numba as nb
+from .GMAT_sphere import VV_matrix
 
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
+# RT_type = deferred_type()
+# RT_type.define(T_function.class_type.instance_type)
 kv_ty = (types.int64, types.unicode_type)
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
 
@@ -37,6 +41,12 @@ data = [('N_ang', int64),
         ('moving', float64),
         ('sigma_v', float64), 
         ('fake_sedov_v0', float64),
+        ('geometry', nb.typeof(params_default)),
+        ('T', float64[:]),
+        ('V_old', float64[:,:]),
+        ('current_space', int64),
+        ('opacity_vec', float64[:,:]),
+        ('a', float64)
 
         ]
 
@@ -51,6 +61,7 @@ class sigma_integrator():
         print(self.sigma_a,'sigma_a')
         self.sigma_func = build.sigma_func
         self.M = build.M
+        self.a = 0.0137225
         self.Msigma = build.Msigma
         self.xs_quad = build.xs_quad
         self.ws_quad = build.ws_quad
@@ -66,7 +77,8 @@ class sigma_integrator():
         #     self.moving = True
         # self.sigma_v = 0.005
         self.sigma_v = build.fake_sedov_v0
-
+        self.geometry = build.geometry
+        
         # initialize integrals of Basis Legendre polynomials
         self.create_integral_matrices()
 
@@ -75,9 +87,17 @@ class sigma_integrator():
         fact = np.sqrt(2*i + 1) * np.sqrt(2*j + 1) * np.sqrt(2*k + 1) / 2
         self.AAA[i,j,k] = fact * (b-a)/2 * np.sum(self.ws_quad *  Pn(i, argument, a, b) * Pn(j, argument, a, b) * Pn(k, argument, a, b))
     
-    def integrate_moments(self, a, b, j, k, t):
+    def integrate_moments(self, a, b, j, k, t, T_old):
         argument = (b-a)/2 * self.xs_quad + (a+b)/2
-        self.cs[k, j] = (b-a)/2 * np.sum(self.ws_quad * self.sigma_function(argument, t) * normPn(j, argument, a, b))
+        opacity = self.sigma_function(argument, t, T_old)
+        self.cs[k, j] = (b-a)/2 * np.sum(self.ws_quad * opacity * normPn(j, argument, a, b))
+     
+    def integrate_moments_sphere(self, a, b, j, k, t, T_old):
+        argument = (b-a)/2*self.xs_quad + (a+b)/2
+        opacity = self.sigma_function(argument, t, T_old) 
+        self.cs[j,k] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
+        # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5)
+        
 
     def both_even_or_odd(self, i, j, k):
         if i % 2 == 0:
@@ -103,11 +123,16 @@ class sigma_integrator():
                         self.integrate_quad(-1, 1, i, j, k)
         # print(self.AAA)
     
-    def sigma_moments(self, edges, t):
+    def sigma_moments(self, edges, t, T_old, V_old):
+        self.V_old = V_old
         for i in range(self.N_space):
-            if (edges[i] != self.edges[i]) or (edges[i+1] != self.edges[i+1]) or self.moving == True :
-                for j in range(self.Msigma + 1):
-                    self.integrate_moments(edges[i], edges[i+1], j, i, t)
+            self.current_space = int(i)
+            # if (edges[i] != self.edges[i]) or (edges[i+1] != self.edges[i+1]) or self.moving == True:
+            for j in range(self.Msigma + 1):
+                if self.geometry['slab'] == True:
+                    self.integrate_moments(edges[i], edges[i+1], j, i, t, T_old[self.current_space])
+                elif self.geometry['sphere'] == True:
+                    self.integrate_moments_sphere(edges[i], edges[i+1], j, i, t, T_old[self.current_space])
         self.edges = edges
     
     def xi2(self, x, t, x0, c1, v0tilde):
@@ -126,10 +151,26 @@ class sigma_integrator():
                 return_array[ix] = 0.0
         return return_array
 
-    def sigma_function(self, x, t):
+    def sigma_function(self, x, t, T_old):
 
         if self.sigma_func['constant'] == 1:
             return x * 0 + 1.0
+        
+        elif self.sigma_func['converging'] == 1:
+            # self.get_temp(x, a, b, RT)
+            if np.isnan(T_old).any() or np.isinf(T_old).any():
+                assert(0)
+            res = 5 * 10**(3) * (T_old +1e-8) ** -1.5 
+            if np.isnan(res).any() or np.isinf(res).any():
+                assert(0)
+             
+            # for ix, xx in enumerate(res):
+            #     if abs(res[ix]) >1e16:
+            #         res[ix] = 1e16
+            
+            # res = 1 * 10**(2) + x*0
+            return res
+        
         elif self.sigma_func['gaussian'] == 1:
             return np.exp(- x**2 /(2* self.std**2))  # probably shouldn't have sigma_a here
             # return x * 0 + 1.0
@@ -156,11 +197,31 @@ class sigma_integrator():
             #             print("#--- --- --- --- --- --- ---#")
             #         index += 1
 
-
             return res
-    
-    def make_vectors(self, edges, u, space):
 
+       
+            
+            # # assert(0)
+            # # self.T = x 
+            #
+            # res = x * 0 + 1.0
+            # return res
+
+        else:
+            raise Exception('no opacity function selected')
+
+        
+
+    # def get_temp(self, x, a, b, RT):
+    #     e = self.V_old[self.current_space,:]
+    #     RT.make_H(a, b, e)
+    #     self.T = RT.T_func(x, a, b)
+
+
+
+
+    def make_vectors(self, edges, u, space):
+        self.VV = u * 0
         # self.sigma_moments(edges) # take moments of the opacity
         xL = edges[space]
         xR = edges[space+1]
@@ -171,7 +232,16 @@ class sigma_integrator():
             for i in range(self.M + 1):
                 for j in range(self.M + 1):
                     for k in range(self.Msigma + 1):
-                        self.VV[i] +=   (self.sigma_a + self.sigma_s) * self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
+                        if self.geometry['slab'] == True:
+                            self.VV[i] +=   self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
+                        elif self.geometry['sphere'] == True:
+                            # self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
+                            # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(xR-xL))<=1e-5)
+                            self.VV[i] +=  self.cs[space, k] * u[j]  / (math.pi**1.5) * (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3
+            # self.VV = u * 1
+
+
+                        
 
 
 

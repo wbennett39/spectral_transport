@@ -10,6 +10,7 @@ import math
 
 from .build_problem import build
 from .opacity import sigma_integrator
+from .GMAT_sphere import VV_matrix
 
 from numba import float64, int64, deferred_type
 from numba.experimental import jitclass
@@ -82,8 +83,14 @@ class scalar_flux(object):
                 for l in range(self.N_ang):
                     for j in range(self.M+1):
                         for k in range(self.Msigma + 1):
-                            self.PV[i] += (self.sigma_s) * self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
-            self.scalar_flux_term = self.PV / math.sqrt(xR-xL)
+                            if self.geometry['slab'] == True:
+                                self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
+                            elif self.geometry['sphere'] == True:
+                                self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(k, i, j, xL, xR) / (math.pi**1.5)
+            if self.geometry['slab'] == True:                    
+                self.scalar_flux_term = self.PV / math.sqrt(xR-xL)
+            elif self.geometry['sphere'] == True:
+                self.scalar_flux_term = self.PV
                             # self.PV[i] += self.ws[l] * u[l,i]
 
         # print(self.PV)

@@ -8,6 +8,7 @@ Created on Mon May 16 07:02:38 2022
 import numpy as np
 import scipy.integrate as integrate
 from numba import njit
+import h5py
 # import quadpy 
 import matplotlib.pyplot as plt
 import math
@@ -109,6 +110,9 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     #     mus = quadpy.c1.gauss_legendre(N_ang).points
     #     ws = quadpy.c1.gauss_legendre(N_ang).weights
     # if N_ang == 2:
+
+
+    speed_of_light = 29.98 # cm/ns
     mus, ws = quadrature(N_ang, weights, testing = True)
     #     print("mus =", mus)
 
@@ -141,6 +145,17 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
                         quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
                         finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry)
+
+
+    if sigma_func['converging'] == 1:
+        f = h5py.File('heat_wavepos.h5', 'r+')
+        boundary_temp = f['temperature'][:] / 10 # convert from HeV to keV
+        boundary_time = (f['times'][:] - f['times'][0]) * speed_of_light
+        # print(f['times'][:], 'times')
+        f.close()
+        # print(boundary_temp**4 * 0.0137225 * 29.98/4/math.pi)
+        # print(boundary_time, 'boundary time array')
+        initialize.grab_converging_boundary_data(boundary_temp, boundary_time)
 
 
     initialize.make_IC()
@@ -220,6 +235,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     elif thermal_couple['none'] != 1:
         extra_deg_freedom = 1
         sol_last = sol.y[:,-1].reshape((N_ang+1,N_space,M+1))
+        print(sol_last[-1,:,:])
         if eval_times == True:
             sol_array = sol.y.reshape((eval_array.size, N_ang+1,N_space,M+1)) 
 
@@ -244,8 +260,10 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         psi = output.psi_out # this is the collided psi
         exit_dist, exit_phi = output.get_exit_dist(uncollided_sol)
         xs_ret = xs
-        if thermal_couple['none'] == 0:
+        if thermal_couple['none'] == False:
+            # print('reconstructing energy density solution')
             e = output.make_e()
+            print(e,'energy density')
         else:
             e = phi*0
     else:
@@ -258,7 +276,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
             mesh.move(tt)
             edges = mesh.edges
             if choose_xs == False:
-                xs = find_nodes(edges, M)
+                xs = find_nodes(edges, M, geometry)
             elif choose_xs == True:
                 xs = specified_xs
             output = make_output(tt, N_ang, ws, xs, sol.y[:,it].reshape((N_ang+extra_deg_freedom,N_space,M+1)), M, edges, uncollided, geometry)
@@ -266,8 +284,9 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
             psi[it, :, :] = output.psi_out # this is the collided psi
             exit_dist[it], exit_phi[it] = output.get_exit_dist(uncollided_sol)
             xs_ret[it] = xs
-            if thermal_couple == 1:
+            if thermal_couple['none'] == False:
                 e = output.make_e()
+                
             else:
                 e = phi*0
     computation_time = end-start

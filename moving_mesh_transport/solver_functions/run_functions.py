@@ -232,45 +232,61 @@ class run:
         else:
             solver.main(uncollided, moving)
             self.get_results(solver)
-            import numpy as np
-            f = lambda x: np.exp(-x**2 /(2 * 0.5**2))
-            fsol = lambda x, mu: np.exp(x * 1/mu) 
-            plt.figure(3)
-            if solver.sigma_func[0] == 1:
-                # plt.plot(self.xs, self.psi[-1,:], '-^')
-                plt.plot(self.xs, fsol(self.xs+self.x0, -1), 'rx')
-                plt.show()
-            elif solver.sigma_func[1] == 1:
-                self.steady_state_gaussian_benchmark()
-            
-            elif solver.sigma_func[2] == 1 or solver.sigma_func[3] == 1:
-                self.siewert_bench(solver.sigma_func)
-            
-            elif solver.sigma_func[4] == 1:
-                plt.figure(4)
-                mu2 = self.mus[np.argmin(np.abs(self.mus - 0.6))]
-                # plt.plot(self.xs[-1], self.psi[-1,-1], '--', label = 'mu = 1 from solver')
-                # plt.plot(self.xs[-1], self.psi[-1,np.argmin(np.abs(self.mus - 0.6))], '--', label = f'mu = {round(mu2,2)} from solver')
-                plt.plot(self.xs[-1], self.phi[-1])
-                plt.legend()
-                plt.show()
-                self.fake_sedov_benchmark()
-                print(self.mus[-1], 'last mu')
+            # import numpy as np
+            # f = lambda x: np.exp(-x**2 /(2 * 0.5**2))
+            # fsol = lambda x, mu: np.exp(x * 1/mu) 
+            # plt.figure(3)
 
-                plt.figure(5)
-                plt.plot(self.eval_array, self.exit_phi[:,0], '-ob', mfc = 'none', label = 'left exit distribution')
-                plt.xlabel('t')
-                plt.legend()
-                plt.show()
-                # plt.plot(self.exit_dist[-1], "right exit")
-                # plt.show()
+            plt.plot(self.xs, self.e, '-^', label = 'energy density')
+            plt.legend()
 
-                plt.figure(6)
-                plt.plot(self.eval_array, self.exit_phi[:,-1], '-ob', mfc = 'none', label = f'right exit distribution')
-                plt.legend()
-                plt.xlabel('t')
-                plt.show()
-                # plt.plot(self.exit_dist[0], "left exit")
+
+            # if parameters.sigma_func['converging'] == True:
+            plt.figure(5)
+            a = 0.0137225 
+            c = 29.98
+            # T = np.power((np.abs(self.e * a * c/1e13)),(1/1.6))
+            T = self.e * a * c / 0.1
+            plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
+            plt.plot(self.xs, T**4, label = r'$T^4$')
+            plt.legend()
+            plt.show()
+
+            # if solver.sigma_func[0] == 1:
+            #     # plt.plot(self.xs, self.psi[-1,:], '-^')
+            #     plt.plot(self.xs, fsol(self.xs+self.x0, -1), 'rx')
+            #     plt.show()
+            # elif solver.sigma_func[1] == 1:
+            #     self.steady_state_gaussian_benchmark()
+            
+            # elif solver.sigma_func[2] == 1 or solver.sigma_func[3] == 1:
+            #     self.siewert_bench(solver.sigma_func)
+            
+            # elif solver.sigma_func[4] == 1:
+            #     plt.figure(4)
+            #     mu2 = self.mus[np.argmin(np.abs(self.mus - 0.6))]
+            #     # plt.plot(self.xs[-1], self.psi[-1,-1], '--', label = 'mu = 1 from solver')
+            #     # plt.plot(self.xs[-1], self.psi[-1,np.argmin(np.abs(self.mus - 0.6))], '--', label = f'mu = {round(mu2,2)} from solver')
+            #     plt.plot(self.xs[-1], self.phi[-1])
+            #     plt.legend()
+            #     plt.show()
+            #     self.fake_sedov_benchmark()
+            #     print(self.mus[-1], 'last mu')
+
+            #     plt.figure(5)
+            #     plt.plot(self.eval_array, self.exit_phi[:,0], '-ob', mfc = 'none', label = 'left exit distribution')
+            #     plt.xlabel('t')
+            #     plt.legend()
+            #     plt.show()
+            #     # plt.plot(self.exit_dist[-1], "right exit")
+            #     # plt.show()
+
+            #     plt.figure(6)
+            #     plt.plot(self.eval_array, self.exit_phi[:,-1], '-ob', mfc = 'none', label = f'right exit distribution')
+            #     plt.legend()
+            #     plt.xlabel('t')
+            #     plt.show()
+            #     # plt.plot(self.exit_dist[0], "left exit")
 
 
 

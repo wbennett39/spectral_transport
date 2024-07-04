@@ -1007,3 +1007,953 @@ def MPRIME(i, j, a, b, ap, bp):
         elif j == 10:
 
             return (2*(51806*a*ap + 26003*ap*b + 26003*a*bp + 51806*b*bp))/156009.
+@njit
+def VV_matrix(i, j, k, a, b):
+  if i == 0:
+      if j == 0:
+
+           if k == 0:
+
+              return (math.sqrt(1/(-a + b))*(a**2 + a*b + b**2))/3.
+
+           elif k == 1:
+
+              return (-a**2 + b**2)/(3.*math.sqrt(2)*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return -0.06666666666666667*(math.sqrt(2)*(a**2 + 3*a*b + b**2))/math.sqrt(-a + b)
+
+           elif k == 3:
+
+              return -0.2*(math.sqrt(-a + b)*(a + b))/math.sqrt(2)
+
+           elif k == 4:
+
+              return -0.009523809523809525*(math.sqrt(2)*(5*a**2 - 3*a*b + 5*b**2))/math.sqrt(-a + b)
+
+           elif k == 5:
+
+              return -0.047619047619047616*(math.sqrt(-a + b)*(a + b))/math.sqrt(2)
+
+      elif j == 1:
+
+           if k == 0:
+
+              return (-a**2 + b**2)/(3.*math.sqrt(2)*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*(2*a**2 + a*b + 2*b**2))/(15.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (-a**2 + b**2)/(15.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (-2*(2*a**2 + 3*a*b + 2*b**2))/(35.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-13*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 5:
+
+              return (-2*(2*a**2 - a*b + 2*b**2))/(63.*math.sqrt(-a + b))
+
+      elif j == 2:
+
+           if k == 0:
+
+              return -0.06666666666666667*(math.sqrt(2)*(a**2 + 3*a*b + b**2))/math.sqrt(-a + b)
+
+           elif k == 1:
+
+              return (-a**2 + b**2)/(15.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (2*(15*a**2 + 19*a*b + 15*b**2))/(105.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (-a**2 + b**2)/(7.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-2*(13*a**2 + 31*a*b + 13*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return -0.1111111111111111*(math.sqrt(-a + b)*(a + b))
+
+      elif j == 3:
+
+           if k == 0:
+
+              return -0.2*(math.sqrt(-a + b)*(a + b))/math.sqrt(2)
+
+           elif k == 1:
+
+              return (-2*(2*a**2 + 3*a*b + 2*b**2))/(35.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (-a**2 + b**2)/(7.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (2*(50*a**2 + 53*a*b + 50*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (7*math.sqrt(-a + b)*(a + b))/45.
+
+           elif k == 5:
+
+              return (-2*(26*a**2 + 69*a*b + 26*b**2))/(693.*math.sqrt(-a + b))
+
+      elif j == 4:
+
+           if k == 0:
+
+              return -0.009523809523809525*(math.sqrt(2)*(5*a**2 - 3*a*b + 5*b**2))/math.sqrt(-a + b)
+
+           elif k == 1:
+
+              return (-13*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 2:
+
+              return (-2*(13*a**2 + 31*a*b + 13*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (7*math.sqrt(-a + b)*(a + b))/45.
+
+           elif k == 4:
+
+              return (2*(563*a**2 + 579*a*b + 563*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (37*(-a**2 + b**2))/(231.*math.sqrt(-a + b))
+
+      elif j == 5:
+
+           if k == 0:
+
+              return -0.047619047619047616*(math.sqrt(-a + b)*(a + b))/math.sqrt(2)
+
+           elif k == 1:
+
+              return (-2*(2*a**2 - a*b + 2*b**2))/(63.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return -0.1111111111111111*(math.sqrt(-a + b)*(a + b))
+
+           elif k == 3:
+
+              return (-2*(26*a**2 + 69*a*b + 26*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (37*(-a**2 + b**2))/(231.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (2*(1478*a**2 + 1503*a*b + 1478*b**2))/(9009.*math.sqrt(-a + b))
+
+  elif i == 1:
+
+    if j == 0:
+
+           if k == 0:
+
+              return (-a**2 + b**2)/(3.*math.sqrt(2)*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*(2*a**2 + a*b + 2*b**2))/(15.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (-a**2 + b**2)/(15.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (-2*(2*a**2 + 3*a*b + 2*b**2))/(35.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-13*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 5:
+
+              return (-2*(2*a**2 - a*b + 2*b**2))/(63.*math.sqrt(-a + b))
+
+    elif j == 1:
+
+           if k == 0:
+
+              return (2*(2*a**2 + a*b + 2*b**2))/(15.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/5.
+
+           elif k == 2:
+
+              return (2*math.sqrt(2)*(4*a**2 - a*b + 4*b**2))/(105.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return -0.02857142857142857*(math.sqrt(2)*math.sqrt(-a + b)*(a + b))
+
+           elif k == 4:
+
+              return (-2*math.sqrt(2)*(14*a**2 + 11*a*b + 14*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (-5*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+    elif j == 2:
+
+           if k == 0:
+
+              return (-a**2 + b**2)/(15.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(4*a**2 - a*b + 4*b**2))/(105.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (11*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 3:
+
+              return (2*math.sqrt(2)*(16*a**2 + 13*a*b + 16*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(24*a**2 + 29*a*b + 24*b**2))/(693.*math.sqrt(-a + b))
+
+    elif j == 3:
+
+           if k == 0:
+
+              return (-2*(2*a**2 + 3*a*b + 2*b**2))/(35.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return -0.02857142857142857*(math.sqrt(2)*math.sqrt(-a + b)*(a + b))
+
+           elif k == 2:
+
+              return (2*math.sqrt(2)*(16*a**2 + 13*a*b + 16*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (47*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/315.
+
+           elif k == 4:
+
+              return (2*math.sqrt(2)*(30*a**2 + 17*a*b + 30*b**2))/(495.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (17*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/693.
+
+    elif j == 4:
+
+           if k == 0:
+
+              return (-13*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 1:
+
+              return (-2*math.sqrt(2)*(14*a**2 + 11*a*b + 14*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 3:
+
+              return (2*math.sqrt(2)*(30*a**2 + 17*a*b + 30*b**2))/(495.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (547*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/3465.
+
+           elif k == 5:
+
+              return (2*math.sqrt(2)*(190*a**2 + 101*a*b + 190*b**2))/(3003.*math.sqrt(-a + b))
+
+    elif j == 5:
+
+           if k == 0:
+
+              return (-2*(2*a**2 - a*b + 2*b**2))/(63.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (-5*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 2:
+
+              return (-2*math.sqrt(2)*(24*a**2 + 29*a*b + 24*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (17*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/693.
+
+           elif k == 4:
+
+              return (2*math.sqrt(2)*(190*a**2 + 101*a*b + 190*b**2))/(3003.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (1453*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/9009.
+
+  elif i == 2:
+
+      if j == 0:
+
+           if k == 0:
+
+              return -0.06666666666666667*(math.sqrt(2)*(a**2 + 3*a*b + b**2))/math.sqrt(-a + b)
+
+           elif k == 1:
+
+              return (-a**2 + b**2)/(15.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (2*(15*a**2 + 19*a*b + 15*b**2))/(105.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (-a**2 + b**2)/(7.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-2*(13*a**2 + 31*a*b + 13*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return -0.1111111111111111*(math.sqrt(-a + b)*(a + b))
+
+      elif j == 1:
+
+           if k == 0:
+
+              return (-a**2 + b**2)/(15.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(4*a**2 - a*b + 4*b**2))/(105.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (11*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 3:
+
+              return (2*math.sqrt(2)*(16*a**2 + 13*a*b + 16*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(24*a**2 + 29*a*b + 24*b**2))/(693.*math.sqrt(-a + b))
+
+      elif j == 2:
+
+           if k == 0:
+
+              return (2*(15*a**2 + 19*a*b + 15*b**2))/(105.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (11*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 2:
+
+              return (-2*math.sqrt(2)*(17*a**2 + 47*a*b + 17*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return -0.022222222222222223*(math.sqrt(2)*math.sqrt(-a + b)*(a + b))
+
+           elif k == 4:
+
+              return (2*math.sqrt(2)*(199*a**2 + 339*a*b + 199*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (13*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/231.
+
+      elif j == 3:
+
+           if k == 0:
+
+              return (-a**2 + b**2)/(7.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(16*a**2 + 13*a*b + 16*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return -0.022222222222222223*(math.sqrt(2)*math.sqrt(-a + b)*(a + b))
+
+           elif k == 3:
+
+              return (-2*math.sqrt(2)*(164*a**2 + 321*a*b + 164*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/55.
+
+           elif k == 5:
+
+              return (2*math.sqrt(2)*(596*a**2 + 823*a*b + 596*b**2))/(9009.*math.sqrt(-a + b))
+
+      elif j == 4:
+
+           if k == 0:
+
+              return (-2*(13*a**2 + 31*a*b + 13*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 2:
+
+              return (2*math.sqrt(2)*(199*a**2 + 339*a*b + 199*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/55.
+
+           elif k == 4:
+
+              return (-94*math.sqrt(2)*(37*a**2 + 95*a*b + 37*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/39.
+
+      elif j == 5:
+
+           if k == 0:
+
+              return -0.1111111111111111*(math.sqrt(-a + b)*(a + b))
+
+           elif k == 1:
+
+              return (-2*math.sqrt(2)*(24*a**2 + 29*a*b + 24*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (13*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/231.
+
+           elif k == 3:
+
+              return (2*math.sqrt(2)*(596*a**2 + 823*a*b + 596*b**2))/(9009.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/39.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(1636*a**2 + 4493*a*b + 1636*b**2))/(45045.*math.sqrt(-a + b))
+
+  elif i == 3:
+
+      if j == 0:
+
+           if k == 0:
+
+              return -0.2*(math.sqrt(-a + b)*(a + b))/math.sqrt(2)
+
+           elif k == 1:
+
+              return (-2*(2*a**2 + 3*a*b + 2*b**2))/(35.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (-a**2 + b**2)/(7.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (2*(50*a**2 + 53*a*b + 50*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (7*math.sqrt(-a + b)*(a + b))/45.
+
+           elif k == 5:
+
+              return (-2*(26*a**2 + 69*a*b + 26*b**2))/(693.*math.sqrt(-a + b))
+
+      elif j == 1:
+
+           if k == 0:
+
+              return (-2*(2*a**2 + 3*a*b + 2*b**2))/(35.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return -0.02857142857142857*(math.sqrt(2)*math.sqrt(-a + b)*(a + b))
+
+           elif k == 2:
+
+              return (2*math.sqrt(2)*(16*a**2 + 13*a*b + 16*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (47*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/315.
+
+           elif k == 4:
+
+              return (2*math.sqrt(2)*(30*a**2 + 17*a*b + 30*b**2))/(495.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (17*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/693.
+
+      elif j == 2:
+
+           if k == 0:
+
+              return (-a**2 + b**2)/(7.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(16*a**2 + 13*a*b + 16*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return -0.022222222222222223*(math.sqrt(2)*math.sqrt(-a + b)*(a + b))
+
+           elif k == 3:
+
+              return (-2*math.sqrt(2)*(164*a**2 + 321*a*b + 164*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/55.
+
+           elif k == 5:
+
+              return (2*math.sqrt(2)*(596*a**2 + 823*a*b + 596*b**2))/(9009.*math.sqrt(-a + b))
+
+      elif j == 3:
+
+           if k == 0:
+
+              return (2*(50*a**2 + 53*a*b + 50*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (47*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/315.
+
+           elif k == 2:
+
+              return (-2*math.sqrt(2)*(164*a**2 + 321*a*b + 164*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (-59*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/385.
+
+           elif k == 4:
+
+              return (-2*math.sqrt(2)*(1882*a**2 + 1605*a*b + 1882*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (47*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/819.
+
+      elif j == 4:
+
+           if k == 0:
+
+              return (7*math.sqrt(-a + b)*(a + b))/45.
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(30*a**2 + 17*a*b + 30*b**2))/(495.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/55.
+
+           elif k == 3:
+
+              return (-2*math.sqrt(2)*(1882*a**2 + 1605*a*b + 1882*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-467*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/4095.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(502*a**2 + 631*a*b + 502*b**2))/(15015.*math.sqrt(-a + b))
+
+      elif j == 5:
+
+           if k == 0:
+
+              return (-2*(26*a**2 + 69*a*b + 26*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (17*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/693.
+
+           elif k == 2:
+
+              return (2*math.sqrt(2)*(596*a**2 + 823*a*b + 596*b**2))/(9009.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (47*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/819.
+
+           elif k == 4:
+
+              return (-2*math.sqrt(2)*(502*a**2 + 631*a*b + 502*b**2))/(15015.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (-53*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/495.
+
+  elif i == 4:
+
+      if j == 0:
+
+           if k == 0:
+
+              return -0.009523809523809525*(math.sqrt(2)*(5*a**2 - 3*a*b + 5*b**2))/math.sqrt(-a + b)
+
+           elif k == 1:
+
+              return (-13*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 2:
+
+              return (-2*(13*a**2 + 31*a*b + 13*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (7*math.sqrt(-a + b)*(a + b))/45.
+
+           elif k == 4:
+
+              return (2*(563*a**2 + 579*a*b + 563*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (37*(-a**2 + b**2))/(231.*math.sqrt(-a + b))
+
+      elif j == 1:
+
+           if k == 0:
+
+              return (-13*math.sqrt(-a + b)*(a + b))/105.
+
+           elif k == 1:
+
+              return (-2*math.sqrt(2)*(14*a**2 + 11*a*b + 14*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 3:
+
+              return (2*math.sqrt(2)*(30*a**2 + 17*a*b + 30*b**2))/(495.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (547*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/3465.
+
+           elif k == 5:
+
+              return (2*math.sqrt(2)*(190*a**2 + 101*a*b + 190*b**2))/(3003.*math.sqrt(-a + b))
+
+      elif j == 2:
+
+           if k == 0:
+
+              return (-2*(13*a**2 + 31*a*b + 13*b**2))/(315.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 2:
+
+              return (2*math.sqrt(2)*(199*a**2 + 339*a*b + 199*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/55.
+
+           elif k == 4:
+
+              return (-94*math.sqrt(2)*(37*a**2 + 95*a*b + 37*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/39.
+
+      elif j == 3:
+
+           if k == 0:
+
+              return (7*math.sqrt(-a + b)*(a + b))/45.
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(30*a**2 + 17*a*b + 30*b**2))/(495.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/55.
+
+           elif k == 3:
+
+              return (-2*math.sqrt(2)*(1882*a**2 + 1605*a*b + 1882*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-467*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/4095.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(502*a**2 + 631*a*b + 502*b**2))/(15015.*math.sqrt(-a + b))
+
+      elif j == 4:
+
+           if k == 0:
+
+              return (2*(563*a**2 + 579*a*b + 563*b**2))/(3465.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (547*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/3465.
+
+           elif k == 2:
+
+              return (-94*math.sqrt(2)*(37*a**2 + 95*a*b + 37*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (-467*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/4095.
+
+           elif k == 4:
+
+              return (-2*math.sqrt(2)*(1649*a**2 - 967*a*b + 1649*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (-29*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/385.
+
+      elif j == 5:
+
+           if k == 0:
+
+              return (37*(-a**2 + b**2))/(231.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(190*a**2 + 101*a*b + 190*b**2))/(3003.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/39.
+
+           elif k == 3:
+
+              return (-2*math.sqrt(2)*(502*a**2 + 631*a*b + 502*b**2))/(15015.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-29*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/385.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(21770*a**2 - 11563*a*b + 21770*b**2))/(765765.*math.sqrt(-a + b))
+
+  elif i == 5:
+
+      if j == 0:
+
+           if k == 0:
+
+              return -0.047619047619047616*(math.sqrt(-a + b)*(a + b))/math.sqrt(2)
+
+           elif k == 1:
+
+              return (-2*(2*a**2 - a*b + 2*b**2))/(63.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return -0.1111111111111111*(math.sqrt(-a + b)*(a + b))
+
+           elif k == 3:
+
+              return (-2*(26*a**2 + 69*a*b + 26*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (37*(-a**2 + b**2))/(231.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (2*(1478*a**2 + 1503*a*b + 1478*b**2))/(9009.*math.sqrt(-a + b))
+
+      elif j == 1:
+
+           if k == 0:
+
+              return (-2*(2*a**2 - a*b + 2*b**2))/(63.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (-5*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/63.
+
+           elif k == 2:
+
+              return (-2*math.sqrt(2)*(24*a**2 + 29*a*b + 24*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (17*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/693.
+
+           elif k == 4:
+
+              return (2*math.sqrt(2)*(190*a**2 + 101*a*b + 190*b**2))/(3003.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (1453*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/9009.
+
+      elif j == 2:
+
+           if k == 0:
+
+              return -0.1111111111111111*(math.sqrt(-a + b)*(a + b))
+
+           elif k == 1:
+
+              return (-2*math.sqrt(2)*(24*a**2 + 29*a*b + 24*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (13*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/231.
+
+           elif k == 3:
+
+              return (2*math.sqrt(2)*(596*a**2 + 823*a*b + 596*b**2))/(9009.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/39.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(1636*a**2 + 4493*a*b + 1636*b**2))/(45045.*math.sqrt(-a + b))
+
+      elif j == 3:
+
+           if k == 0:
+
+              return (-2*(26*a**2 + 69*a*b + 26*b**2))/(693.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (17*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/693.
+
+           elif k == 2:
+
+              return (2*math.sqrt(2)*(596*a**2 + 823*a*b + 596*b**2))/(9009.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (47*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/819.
+
+           elif k == 4:
+
+              return (-2*math.sqrt(2)*(502*a**2 + 631*a*b + 502*b**2))/(15015.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (-53*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/495.
+
+      elif j == 4:
+
+           if k == 0:
+
+              return (37*(-a**2 + b**2))/(231.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (2*math.sqrt(2)*(190*a**2 + 101*a*b + 190*b**2))/(3003.*math.sqrt(-a + b))
+
+           elif k == 2:
+
+              return (math.sqrt(2)*math.sqrt(-a + b)*(a + b))/39.
+
+           elif k == 3:
+
+              return (-2*math.sqrt(2)*(502*a**2 + 631*a*b + 502*b**2))/(15015.*math.sqrt(-a + b))
+
+           elif k == 4:
+
+              return (-29*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/385.
+
+           elif k == 5:
+
+              return (-2*math.sqrt(2)*(21770*a**2 - 11563*a*b + 21770*b**2))/(765765.*math.sqrt(-a + b))
+
+      elif j == 5:
+
+           if k == 0:
+
+              return (2*(1478*a**2 + 1503*a*b + 1478*b**2))/(9009.*math.sqrt(-a + b))
+
+           elif k == 1:
+
+              return (1453*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/9009.
+
+           elif k == 2:
+
+              return (-2*math.sqrt(2)*(1636*a**2 + 4493*a*b + 1636*b**2))/(45045.*math.sqrt(-a + b))
+
+           elif k == 3:
+
+              return (-53*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/495.
+
+           elif k == 4:
+
+              return (-2*math.sqrt(2)*(21770*a**2 - 11563*a*b + 21770*b**2))/(765765.*math.sqrt(-a + b))
+
+           elif k == 5:
+
+              return (-57*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/1547.
+  if i > 5:
+      assert(0)

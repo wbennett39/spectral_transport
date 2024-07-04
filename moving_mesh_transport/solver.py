@@ -216,6 +216,7 @@ class main_class(parameter_load_class):
                     self.xs = xs
                     self.phi = phi
                     self.e = e
+                    print(self.e,'energy density')
                     self.psi = psi
                     self.exit_dist = exit_dist
                     self.ws = ws
@@ -233,20 +234,20 @@ class main_class(parameter_load_class):
                 #     plt.show()
                 ##################################################################
                     
-                if self.benchmarking == True:
-                    if self.thermal_couple == 0:
-                        if self.c_scaling == False:
-                            benchmark_solution = benchmark(np.abs(xs))[0] #benchmark for RMS
-                        elif self.c_scaling == True:
-                            benchmark_solution = self.scattering_ratio*math.exp(-(1-self.scattering_ratio)*self.tfinal)*benchmark(np.abs(xs*self.scattering_ratio))[0] #benchmark for RMS
+                # if self.benchmarking == True:
+                #     if self.thermal_couple == 0:
+                #         if self.c_scaling == False:
+                #             benchmark_solution = benchmark(np.abs(xs))[0] #benchmark for RMS
+                #         elif self.c_scaling == True:
+                #             benchmark_solution = self.scattering_ratio*math.exp(-(1-self.scattering_ratio)*self.tfinal)*benchmark(np.abs(xs*self.scattering_ratio))[0] #benchmark for RMS
 
-                        RMS = np.sqrt(np.mean((phi - benchmark_solution)**2))
+                #         RMS = np.sqrt(np.mean((phi - benchmark_solution)**2))
                     
-                    elif self.thermal_couple == 1:
-                        if  (self.weights == "gauss_lobatto" and (self.sigma != 300 and self.x0[0] != 400)):
-                            e_xs = benchmark(np.abs(xs))[2][:,0]
-                            phi_bench = benchmark(np.abs(xs))[2][:,1]
-                            e_bench = benchmark(np.abs(xs))[2][:,2]
+                #     elif self.thermal_couple == 1:
+                #         if  (self.weights == "gauss_lobatto" and (self.sigma != 300 and self.x0[0] != 400)):
+                #             e_xs = benchmark(np.abs(xs))[2][:,0]
+                #             phi_bench = benchmark(np.abs(xs))[2][:,1]
+                #             e_bench = benchmark(np.abs(xs))[2][:,2]
                             
                       
                             # ##################################################################
@@ -260,17 +261,17 @@ class main_class(parameter_load_class):
                             # plt.show()
                             ##################################################################
                             
-                        elif self.weights == "gauss_legendre" or self.sigma == 300 or self.x0[0] == 400:
-                            print("loading s2 bench")
-                            phi_bench = benchmark(np.abs(xs))[0]
-                            e_bench = benchmark_mat(np.abs(xs))[0]
-                                # plot_p1_su_olson_mathematica()
+                    #     elif self.weights == "gauss_legendre" or self.sigma == 300 or self.x0[0] == 400:
+                    #         print("loading s2 bench")
+                    #         phi_bench = benchmark(np.abs(xs))[0]
+                    #         e_bench = benchmark_mat(np.abs(xs))[0]
+                    #             # plot_p1_su_olson_mathematica()
                                             
-                        RMS = np.sqrt(np.mean((phi - phi_bench)**2))
-                        RMS_energy = np.sqrt(np.mean((e - e_bench)**2))
-                        self.RMS_list_energy[count] = RMS_energy
+                    #     RMS = np.sqrt(np.mean((phi - phi_bench)**2))
+                    #     RMS_energy = np.sqrt(np.mean((e - e_bench)**2))
+                    #     self.RMS_list_energy[count] = RMS_energy
                     
-                    self.RMS_list[count] = RMS
+                    # self.RMS_list[count] = RMS
 
                 ##################################################################
                 if self.find_wave_loc == True:
@@ -304,15 +305,15 @@ class main_class(parameter_load_class):
                 
                 print(N_space, "spaces", "    ", "%.4f" % (time), "time elapsed")
                 
-                if self.benchmarking == True:
-                    print("RMSE", RMS)
-                    if self.major == 'cells':
-                        if self.thermal_couple == 1:
-                            print("energy RMSE", RMS_energy)
-                            if count > 0:
-                                print("material energy convergence order", "%.2f" % convergence(self.RMS_list_energy[count-1], self.N_spaces[count-1], RMS_energy, N_space))
-                        if count > 0:
-                            print("radiation energy density convergence order", "%.2f" % convergence(self.RMS_list[count-1], self.N_spaces[count-1], RMS, N_space))
+                # if self.benchmarking == True:
+                #     print("RMSE", RMS)
+                #     if self.major == 'cells':
+                #         if self.thermal_couple == 1:
+                #             print("energy RMSE", RMS_energy)
+                #             if count > 0:
+                #                 print("material energy convergence order", "%.2f" % convergence(self.RMS_list_energy[count-1], self.N_spaces[count-1], RMS_energy, N_space))
+                #         if count > 0:
+                #             print("radiation energy density convergence order", "%.2f" % convergence(self.RMS_list[count-1], self.N_spaces[count-1], RMS, N_space))
     
                 
                 print("---  ---  ---  ---  ---  ---  ---")

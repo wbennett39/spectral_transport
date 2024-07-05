@@ -280,7 +280,7 @@ class rhs_class():
                 #print("source.S = ", source.S)
 
                 RHS_transfer -= RU
-                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H * 2 * math.pi
+                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H 
                 RHS_transfer += self.c_a*PV*2
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 V_new[-1,space,:] = RHS_transfer 
@@ -345,7 +345,7 @@ class rhs_class():
                     RHS += np.dot(G, U)
                     # RHS += 0.5 * S * self.c #(commented this out because c is included)
                     RHS += 0.5 * S
-                    RHS += self.c_a * H /4/math.pi
+                    RHS += self.c_a * H /2
                     RHS += PV * self.c
                     # print(VV, 'VV')
                     # print(V_old[angle, space,:], 'vold')

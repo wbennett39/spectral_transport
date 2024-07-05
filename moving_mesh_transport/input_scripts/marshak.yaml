@@ -1,24 +1,24 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'marshak'
-    'tfinal': 100.0
+    'tfinal': 0.1
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
     'sigma_t': 1.0
     'sigma_s': 0.0
     't0': 100000.0                          # time the source is turned off
-    'N_spaces': [3, 10]                 # number of cells
+    'N_spaces': [3,20]                 # number of cells
     'tnodes': 10                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [0, 0]                        # number of basis functions -1
+    'Ms': [0,0]                        # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
-    'rt': 5e-10                         # rel tolerance for ODE integrator
-    'at': 1e-9                        # abs tolerance for ODE integrator
+    'rt': 5e-9                       # rel tolerance for ODE integrator
+    'at': 1e-8                        # abs tolerance for ODE integrator
     'mxstp': 1.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
     'radiative_transfer': {none: False}             # material temperature feedback. 1-True, 0 - False
     'thermal_couple': {none: False}
-    'temperature_dependence': [1,0,0,0] # first slot is Su-Olson problem
+    'temperature_dependence': [0,0,1,0] # first slot is Su-Olson problem
     'e_initial': 0.0000000000000000001
     'weights': 'gauss_legendre'          # usually 'gauss_lobatto'. Set to 'gauss_legendre' for S2 calculations
     'save_solution': False

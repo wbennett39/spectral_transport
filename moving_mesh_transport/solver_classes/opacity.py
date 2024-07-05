@@ -95,7 +95,7 @@ class sigma_integrator():
     def integrate_moments_sphere(self, a, b, j, k, t, T_old):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         opacity = self.sigma_function(argument, t, T_old) 
-        self.cs[k,j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
+        self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
         # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5)
         
 
@@ -162,8 +162,8 @@ class sigma_integrator():
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 assert(0)
-            # res = 5 * 10**(0) * (T_old +1e-9) ** -1.5 + 1e-10
-            res = T_old *0 + 1
+            res = 5 * 10**(3) * (T_old +1e-16) ** -1.5 + 1e-10
+            # res = T_old *0 + 100
             if np.isnan(res).any() or np.isinf(res).any():
                 assert(0)
              

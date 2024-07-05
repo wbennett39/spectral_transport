@@ -246,9 +246,9 @@ class run:
             a = 0.0137225 
             c = 29.98
             # T = np.power((np.abs(self.e * a * c/1e13)),(1/1.6))
-            T = self.e * a * c / 0.1
+            T = np.power(self.e,0.25) 
             plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
-            plt.plot(self.xs, T**4, label = r'$T^4$')
+            plt.plot(self.xs, a*c*T**4, label = r'$T^4$')
             plt.legend()
             plt.show()
 

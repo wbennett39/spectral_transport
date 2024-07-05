@@ -125,9 +125,11 @@ class T_function(object):
             #  if np.max(e) <= 1e-20:
             #     T = np.zeros(e.size) + 1e-12
             #  else:
-                T = (np.abs(e * self.a * self.clight))**(1/1.6) 
+                T = self.meni_eos(e)
+                # T = self.su_olson_source(e, argument, a, b)
+                
                 # T = e / 0.1
-                if np.isnan(T).any():
+                if np.isnan(T).any() or np.isinf(T).any() :
                     print('###                                ###')
                     print('nonreal temperature')
                     print(e, 'e solution')
@@ -146,20 +148,21 @@ class T_function(object):
 
         if self.temp_function[0] == 1:
             self.temperature[space,:] = T
-            return self.a * np.power(T,4) * self.fudge_factor  #* self.sigma_a_vec
+            return  np.power(T,4) * self.fudge_factor  * self.sigma_a_vec
             #return np.sin(argument) 
 
         elif self.temp_function[1] == 1:
         
                 self.temperature[space,:] = T
-                return np.power(T,4)  * self.sigma_a_vec
+                return np.power(T,4)  * self.sigma_a_vec 
         
         # elif self.temp_function[2] == 1:
         #     return f * T ** beta * rho ** (1-mu)- self.a * T**4
 
         elif self.temp_function[2] == 1:
             # print(self.sigma_a_vec)
-            return np.power(T,4) * self.sigma_a_vec
+            self.temperature[space,:] = T
+            return  np.power(T,4) * self.sigma_a_vec * self.fudge_factor
         
             
 
@@ -183,6 +186,25 @@ class T_function(object):
 
         t1 = np.abs(4*e/self.alpha)
         return np.power(t1,0.25)
+    
+    def meni_eos(self, e):
+        
+        self.fudge_factor = np.ones(e.size)
+    
+        for count in range(e.size):
+            if math.isnan(e[count]) == True:
+                            print("nan")
+                            print(e)
+                            assert 0     
+            elif (e[count]) < 0.:
+                self.fudge_factor[count] = -1.
+
+
+        ee = e * self.a * self.clight 
+        T1 = (np.abs(ee))
+        # t1 = np.abs(4*e*self.a/self.alpha)
+        # return np.power(t1,0.25) 
+        return np.power(T1, 0.625)
         
         
     def make_H(self, xL, xR, e_vec, sigma_class, space):

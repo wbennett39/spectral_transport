@@ -58,6 +58,7 @@ class scalar_flux(object):
         self.Msigma = build.Msigma
         self.scalar_flux_term = np.zeros(self.M+1)
         self.geometry = build.geometry
+        
 
     # def make_P(self, u):
     #     if self.thermal_couple == 1:
@@ -86,11 +87,15 @@ class scalar_flux(object):
                             if self.geometry['slab'] == True:
                                 self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
                             elif self.geometry['sphere'] == True:
-                                self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(k, i, j, xL, xR) / (math.pi**1.5)
+                                self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5)
             if self.geometry['slab'] == True:                    
                 self.scalar_flux_term = self.PV / math.sqrt(xR-xL)
             elif self.geometry['sphere'] == True:
                 self.scalar_flux_term = self.PV
+                # a = xL
+                # b = xR
+                # assert((abs(self.cs[0,space]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5))
+                
                             # self.PV[i] += self.ws[l] * u[l,i]
 
         # print(self.PV)
@@ -107,6 +112,7 @@ class scalar_flux(object):
 
     def get_coeffs(self, opacity_class):
         self.cs = opacity_class.cs
+
 
     
 

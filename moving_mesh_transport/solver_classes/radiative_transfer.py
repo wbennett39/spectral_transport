@@ -125,7 +125,7 @@ class T_function(object):
             #  if np.max(e) <= 1e-20:
             #     T = np.zeros(e.size) + 1e-12
             #  else:
-                T = (np.abs(e * self.a * self.clight/1e13))**(1/1.6) 
+                T = (np.abs(e * self.a * self.clight))**(1/1.6) 
                 # T = e / 0.1
                 if np.isnan(T).any():
                     print('###                                ###')
@@ -134,7 +134,7 @@ class T_function(object):
                     print(self.e_vec, 'e vector')
                     print('###                                ###')
                     assert(0)
-                print(T)
+                # print(T)
         return T
              
 
@@ -146,7 +146,7 @@ class T_function(object):
 
         if self.temp_function[0] == 1:
             self.temperature[space,:] = T
-            return self.a * np.power(T,4) * self.fudge_factor  * self.sigma_a_vec
+            return self.a * np.power(T,4) * self.fudge_factor  #* self.sigma_a_vec
             #return np.sin(argument) 
 
         elif self.temp_function[1] == 1:

@@ -255,6 +255,7 @@ class rhs_class():
                 transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :], sigma_class, space)
 
                 H = transfer_class.H
+                
                 a = xL
                 b = xR
                 argument = (b-a)/2*self.xs_quad + (a+b)/2
@@ -268,7 +269,7 @@ class rhs_class():
                 U = V_old[-1,space,:]
 
                 num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :]*0)
-                RU = num_flux.LU
+                RU = num_flux.LU 
 
                 RHS_transfer = U*0
 
@@ -279,10 +280,10 @@ class rhs_class():
                 #print("source.S = ", source.S)
 
                 RHS_transfer -= RU
-                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H * 2 
+                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H * 2 * math.pi
                 RHS_transfer += self.c_a*PV*2
                 RHS_transfer = np.dot(RHS_transfer, Minv)
-                V_new[-1,space,:] = RHS_transfer
+                V_new[-1,space,:] = RHS_transfer 
                 if np.isnan(V_new[-1, space, :]).any():
                     print('rhstransfer is nan')
                     assert(0)

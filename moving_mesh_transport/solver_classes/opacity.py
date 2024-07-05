@@ -95,7 +95,7 @@ class sigma_integrator():
     def integrate_moments_sphere(self, a, b, j, k, t, T_old):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         opacity = self.sigma_function(argument, t, T_old) 
-        self.cs[j,k] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
+        self.cs[k,j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
         # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5)
         
 
@@ -125,6 +125,7 @@ class sigma_integrator():
     
     def sigma_moments(self, edges, t, T_old, V_old):
         self.V_old = V_old
+        self.edges = edges
         for i in range(self.N_space):
             self.current_space = int(i)
             # if (edges[i] != self.edges[i]) or (edges[i+1] != self.edges[i+1]) or self.moving == True:
@@ -133,7 +134,8 @@ class sigma_integrator():
                     self.integrate_moments(edges[i], edges[i+1], j, i, t, T_old[self.current_space])
                 elif self.geometry['sphere'] == True:
                     self.integrate_moments_sphere(edges[i], edges[i+1], j, i, t, T_old[self.current_space])
-        self.edges = edges
+
+        
     
     def xi2(self, x, t, x0, c1, v0tilde):
         return -x - c1 - v0tilde*(t)
@@ -160,7 +162,8 @@ class sigma_integrator():
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 assert(0)
-            res = 5 * 10**(3) * (T_old +1e-8) ** -1.5 
+            # res = 5 * 10**(0) * (T_old +1e-9) ** -1.5 + 1e-10
+            res = T_old *0 + 1
             if np.isnan(res).any() or np.isinf(res).any():
                 assert(0)
              

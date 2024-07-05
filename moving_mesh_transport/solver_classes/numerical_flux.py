@@ -151,7 +151,7 @@ class LU_surf(object):
         #     temp = np.ones(xs.size) * self.e_init 
         elif self.boundary_source == True:
             if self.opacity_func['converging'] == True:
-                temp = self.interpolate_heat_wave(t) * np.ones(xs.size) 
+                temp = self.interpolate_heat_wave(t) * np.ones(xs.size) * 0.5
             else:
                 temp = np.ones(xs.size) * self.boundary_source_strength
             
@@ -187,7 +187,7 @@ class LU_surf(object):
     def interpolate_heat_wave(self, t):
         t_arg = np.argmin(np.abs(self.converging_time_array - t))
         # print(self.converging_time_array[t_arg],t)
-        return 1/ 4 / math.pi * self.converging_temp_array[t_arg] ** 4
+        return 1/ 4 / math.pi * self.converging_temp_array[t_arg] ** 4*0 + 1
 
     
         

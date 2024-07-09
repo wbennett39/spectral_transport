@@ -150,7 +150,9 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     if sigma_func['converging'] == 1:
         f = h5py.File('heat_wavepos.h5', 'r+')
         boundary_temp = f['temperature'][:] / 10 # convert from HeV to keV
-        boundary_time = (f['times'][:] - f['times'][0]) * speed_of_light
+        boundary_temp[0] = boundary_temp[1]
+        
+        boundary_time = (f['times'][:] - f['times'][0]) * speed_of_light * sigma_t
         # print(f['times'][:], 'times')
         f.close()
         # print(boundary_temp**4 * 0.0137225 * 29.98/4/math.pi)
@@ -195,7 +197,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         tpnts = eval_array
         print(tpnts, 'time points')
 
-    sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp)
+    sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-5)
     # print(sol)
     print(sol.y.shape,'sol y shape')
     print(eval_times, 'eval times')

@@ -5,6 +5,10 @@ Created on Tue May 24 13:42:55 2022
 
 @author: bennett
 """
+import sys
+sys.path.append('/Users/bennett/Documents/Github/converging_heat/')
+import converging_heat_wave
+from converging_heat_wave import run_converging
 import matplotlib.pyplot as plt
 from ..solver import main_class
 from pathlib import Path
@@ -245,10 +249,28 @@ class run:
             plt.figure(5)
             a = 0.0137225 
             c = 29.98
-            # T = np.power((np.abs(self.e * a * c/1e13)),(1/1.6))
-            T = np.power(self.e,0.25) 
+            T = np.power((np.abs(self.e * a * c/1e-3*0.1**1.6)),(1/1.6))
+            # T = np.power(self.e,0.25) 
             plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
             plt.plot(self.xs, a*c*T**4, label = r'$T^4$')
+            plt.legend()
+            plt.show()
+            
+            plt.figure(6)
+            a = 0.0137225 
+            c = 29.98
+            # T = np.power((np.abs(self.e * a * c/1e13)),(1/1.6))
+            ee = self.e * a * c / 10**-3*0.1**1.6
+            T1 = (np.abs(ee))
+        # self.alpha = 10**-3
+            # t1 = np.abs(4*e*self.a/self.alpha)
+        # return np.power(t1,0.25) 
+            plt.figure(77)
+            r_meni, T_meni = run_converging(self.tfinal / c)
+            T =  np.power(T1, 0.625)    
+            # plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
+            plt.plot(self.xs, T*10, label = r'$T$')
+            plt.plot(r_meni, T_meni, 'b--', label = 'benchmark T')
             plt.legend()
             plt.show()
 
@@ -349,7 +371,7 @@ class run:
         self.t0_source = solver.t0
         self.eval_array = solver.eval_array
         self.exit_phi = solver.exit_phi
-
+        
         
     def run_all(self):
         # self.plane_IC(True, True)

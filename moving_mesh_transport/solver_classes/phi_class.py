@@ -87,7 +87,7 @@ class scalar_flux(object):
                             if self.geometry['slab'] == True:
                                 self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
                             elif self.geometry['sphere'] == True:
-                                self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5)
+                                self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(k, i, j, xL, xR) / (math.pi**1.5)
             if self.geometry['slab'] == True:                    
                 self.scalar_flux_term = self.PV / math.sqrt(xR-xL)
             elif self.geometry['sphere'] == True:

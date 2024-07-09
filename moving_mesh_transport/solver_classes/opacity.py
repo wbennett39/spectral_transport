@@ -98,6 +98,7 @@ class sigma_integrator():
         self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
         # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5)
         
+        
 
     def both_even_or_odd(self, i, j, k):
         if i % 2 == 0:
@@ -162,7 +163,7 @@ class sigma_integrator():
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 assert(0)
-            res = 5 * 10**(3) * (T_old +1e-16) ** -1.5 + 1e-10
+            res = 5 * 10**(3) * (T_old +1e-14) ** -1.5 * 0.1**1.5 
             # res = T_old *0 + 100
             if np.isnan(res).any() or np.isinf(res).any():
                 assert(0)
@@ -238,9 +239,9 @@ class sigma_integrator():
                         if self.geometry['slab'] == True:
                             self.VV[i] +=   self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
                         elif self.geometry['sphere'] == True:
-                            # self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
+                            self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(k, i, j, xL, xR) / (math.pi**1.5) 
                             # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(xR-xL))<=1e-5)
-                            self.VV[i] +=  self.cs[space, k] * u[j]  / (math.pi**1.5) * (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3
+                            # self.VV[i] +=  self.cs[space, k] * u[j]  / (math.pi**1.5) * (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3
             # self.VV = u * 1
 
 

@@ -2,7 +2,7 @@
 
 import sys
 import matplotlib.pyplot as plt
-#sys.path.append('/Users/bennett/Documents/Github/transport_benchmarks/')
+# sys.path.append('/Users/bennett/Documents/Github/transport_benchmarks/')
 from numba.core.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaPerformanceWarning
 import warnings
 
@@ -10,7 +10,7 @@ warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPerformanceWarning)
                       
-#from benchmarks import integrate_greens as intg
+# from benchmarks import integrate_greens as intg
 from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt

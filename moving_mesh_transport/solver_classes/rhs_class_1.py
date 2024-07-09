@@ -97,7 +97,8 @@ data = [('N_ang', int64),
         ('radiative_transfer', nb.typeof(params_default)),
         ('test', float64),
         ('xs_quad', float64[:]),
-        ('T_old', float64[:,:])
+        ('T_old', float64[:,:,:]),
+        ('time_points', float64[:])
 
 
 
@@ -123,6 +124,7 @@ class rhs_class():
         self.told = 0.0
         self.sigma_s = build.sigma_s
         self.sigma_a = build.sigma_a
+        self.sigma_t = build.sigma_t
         self.c = build.sigma_s 
         self.particle_v = build.particle_v
         self.geometry = build.geometry
@@ -131,7 +133,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 1000
+        self.division = 10000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -144,7 +146,9 @@ class rhs_class():
         self.deg_freedom = shaper(self.N_ang, self.N_space, self.M + 1, self.thermal_couple)
         self.alphams = np.zeros(self.N_ang + 1)
         self.x0 = build.x0
-        self.T_old = np.zeros((self.N_space, self.xs_quad.size))
+        timepoints = 2048
+        self.time_points = np.linspace(0.0, build.tfinal, timepoints)
+        self.T_old = np.zeros((timepoints, self.N_space, self.xs_quad.size))
         
         for angle2 in range(1, self.N_ang + 1):
             self.alphams[angle2] = self.alphams[angle2-1] - self.ws[angle2-1] * self.mus[angle2-1]
@@ -204,8 +208,14 @@ class rhs_class():
         # move mesh to time t 
         mesh.move(t)
         # represent opacity as a polynomial expansion
-        sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
+        # self.T_old[:,0] = 1.0
+        time_loc = np.argmin(np.abs(self.time_points - t))
+        # print(self.T_old[time_loc])
+        # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
+        #     time_loc -= 1
+        sigma_class.sigma_moments(mesh.edges, t, self.T_old[time_loc], V_old[-1, :, :])
         flux.get_coeffs(sigma_class)
+    
 
         # iterate over all cells
         for space in range(self.N_space):  
@@ -224,8 +234,8 @@ class rhs_class():
                 Mass = matrices.Mass
                 Minv = np.linalg.inv(Mass)
                 J = matrices.J
-                VVs = matrices.VV
-            # make P if there is any scattering
+                # VVs = matrices.VV
+            # make P 
             if self.radiative_transfer['none'] == False:
                 flux.make_P(V_old[:-1,space,:], space, xL, xR)
             else:
@@ -255,13 +265,17 @@ class rhs_class():
                 transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :], sigma_class, space)
 
                 H = transfer_class.H
+                # if (H <0).any():
+                #     print(H)
+                #     assert 0 
                 
                 a = xL
                 b = xR
                 argument = (b-a)/2*self.xs_quad + (a+b)/2
                 #T_old saves the temperature at the zeros of the interpolating polynomial
                 # print(H)
-                self.T_old[space] = transfer_class.make_T(argument, a, b) 
+                time_loc = np.argmin(np.abs(self.time_points - t))
+                self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
                 # print(self.T_old[space], 'T old')
     
                 ######### solve thermal couple ############
@@ -280,13 +294,13 @@ class rhs_class():
                 #print("source.S = ", source.S)
 
                 RHS_transfer -= RU
-                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - self.c_a*H 
-                RHS_transfer += self.c_a*PV*2
+                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - H /self.sigma_t
+                RHS_transfer += PV*2 /self.sigma_t 
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 V_new[-1,space,:] = RHS_transfer 
-                if np.isnan(V_new[-1, space, :]).any():
-                    print('rhstransfer is nan')
-                    assert(0)
+                # if np.isnan(V_new[-1, space, :]).any():
+                #     print('rhstransfer is nan')
+                #     assert(0)
                 # print(RHS_transfer, 'rhs transfer')
 
             ########## Loop over angle ############
@@ -335,6 +349,7 @@ class rhs_class():
 
 
                 if self.geometry['sphere'] == True:
+
                     a = xL
                     b = xR
                     RHS = V_old[angle, space, :]*0
@@ -344,9 +359,9 @@ class rhs_class():
                     RHS -= mu_derivative
                     RHS += np.dot(G, U)
                     # RHS += 0.5 * S * self.c #(commented this out because c is included)
-                    RHS += 0.5 * S
-                    RHS += self.c_a * H /2
-                    RHS += PV * self.c
+                    RHS += 0.5 * S /self.sigma_t
+                    RHS +=  H * 0.5 / self.sigma_t
+                    RHS += PV * self.c /self.sigma_t
                     # print(VV, 'VV')
                     # print(V_old[angle, space,:], 'vold')
                     
@@ -356,7 +371,7 @@ class rhs_class():
                     # assert(abs(VV[0] - U[0]*(math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3 )
                     # assert(abs(Mass[0,0] -  (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3)
                     # assert(abs((VV-np.dot(Mass, U))[0])<=1e-3)
-                    RHS -= VV
+                    RHS -= VV / self.sigma_t
                     RHS -= np.dot(MPRIME, U)
                     RHS = np.dot(Minv, RHS)
 

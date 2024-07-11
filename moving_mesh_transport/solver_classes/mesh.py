@@ -783,7 +783,8 @@ class mesh_class(object):
         print(self.edges, 'edges0')
         self.Dedges = self.edges * 0
         self.edges0 = self.edges
-        self.Dedges_const = - (self.edges[1:]-self.x0-self.edges[1])/self.edges[-1]
+        self.Dedges_const = self.Dedges
+        self.Dedges_const[1:] = - (self.edges[1:]-self.x0-self.edges[1])/self.edges[-1]
    
     def converging_move(self, t):
         
@@ -794,7 +795,7 @@ class mesh_class(object):
         
         dr_dt = -0.00022665176784523018/(29.6255 - 0.0333555703802535*t)**0.32049799999999995
         self.edges[1:] = np.linspace(rfront, self.x0, self.N_space)
-        self.Dedges[1:] = self.Dedges_const * dr_dt
+        self.Dedges[1:] = self.Dedges_const[1:] * dr_dt
     
         
 

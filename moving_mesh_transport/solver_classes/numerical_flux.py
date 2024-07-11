@@ -188,7 +188,7 @@ class LU_surf(object):
         t_arg = np.argmin(np.abs(self.converging_time_array - t))
         # print(self.converging_time_array[t_arg],t)
         # print(self.converging_temp_array[t_arg] * 10 )
-        return 1/ 2  * self.converging_temp_array[t_arg] ** 4
+        return 0.5  * self.converging_temp_array[t_arg] ** 4
 
     
         
@@ -218,7 +218,7 @@ class LU_surf(object):
                 elif space == 0 and self.is_boundary_source_on(space, t): # special MMS case
                     self.v0 += self.integrate_quad(t, self.xL_minus, self.edges[space], j, "l") * self.B_LR_func(j, self.h)[1] 
                 
-                elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
+                elif space == 0 and self.geometry['sphere'] == True and self.edges[0] == 0.0: #reflecing BC for sphere
                     self.v0 += self.B_LR_func(j, self.h)[0]*(u_refl[j])
 
 

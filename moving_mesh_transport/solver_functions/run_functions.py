@@ -249,7 +249,7 @@ class run:
             plt.figure(5)
             a = 0.0137225 
             c = 29.98
-            T = np.power((np.abs(self.e * a * c/1e-3*0.1**1.6)),(1/1.6))
+            T = np.power((np.abs(self.e * a /1e-3*0.1**1.6)),(1/1.6))
             # T = np.power(self.e,0.25) 
             plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
             plt.plot(self.xs, a*c*T**4, label = r'$T^4$')
@@ -260,7 +260,7 @@ class run:
             a = 0.0137225 
             c = 29.98
             # T = np.power((np.abs(self.e * a * c/1e13)),(1/1.6))
-            ee = self.e * a * c / 10**-3*0.1**1.6
+            ee = self.e * a  / 10**-3 * (0.1)**1.6
             T1 = (np.abs(ee))
         # self.alpha = 10**-3
             # t1 = np.abs(4*e*self.a/self.alpha)

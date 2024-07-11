@@ -97,7 +97,7 @@ data = [('N_ang', int64),
         ('radiative_transfer', nb.typeof(params_default)),
         ('test', float64),
         ('xs_quad', float64[:]),
-        ('T_old', float64[:,:,:]),
+        ('T_old', float64[:,:]),
         ('time_points', float64[:])
 
 
@@ -114,8 +114,13 @@ class rhs_class():
         self.N_space = build.N_space
         self.M = build.M
         self.mus = build.mus
+        self.geometry = build.geometry
+        # if self.geometry['slab'] == True:
         self.ws = build.ws
         self.xs_quad = build.xs_quad
+        # elif self.geometry['sphere'] == True:
+        #     self.ws = build.t_ws
+        #     self.xs_quad = build.t_quad
         self.source_type = np.array(list(build.source_type), dtype = np.int64) 
 
         self.thermal_couple = build.thermal_couple
@@ -127,7 +132,7 @@ class rhs_class():
         self.sigma_t = build.sigma_t
         self.c = build.sigma_s 
         self.particle_v = build.particle_v
-        self.geometry = build.geometry
+        
         self.radiative_transfer = build.thermal_couple
        
         self.c_a = build.sigma_a / build.sigma_t
@@ -148,7 +153,7 @@ class rhs_class():
         self.x0 = build.x0
         timepoints = 2048
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
-        self.T_old = np.zeros((timepoints, self.N_space, self.xs_quad.size))
+        self.T_old = np.zeros((self.N_space, self.xs_quad.size))
         
         for angle2 in range(1, self.N_ang + 1):
             self.alphams[angle2] = self.alphams[angle2-1] - self.ws[angle2-1] * self.mus[angle2-1]
@@ -213,7 +218,8 @@ class rhs_class():
         # print(self.T_old[time_loc])
         # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
         #     time_loc -= 1
-        sigma_class.sigma_moments(mesh.edges, t, self.T_old[time_loc], V_old[-1, :, :])
+        self.T_old = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
+        sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
         flux.get_coeffs(sigma_class)
     
 
@@ -269,13 +275,11 @@ class rhs_class():
                 #     print(H)
                 #     assert 0 
                 
-                a = xL
-                b = xR
-                argument = (b-a)/2*self.xs_quad + (a+b)/2
+               
                 #T_old saves the temperature at the zeros of the interpolating polynomial
                 # print(H)
                 time_loc = np.argmin(np.abs(self.time_points - t))
-                self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
+                # self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
                 # print(self.T_old[space], 'T old')
     
                 ######### solve thermal couple ############
@@ -284,6 +288,7 @@ class rhs_class():
 
                 num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :]*0)
                 RU = num_flux.LU 
+
 
                 RHS_transfer = U*0
 
@@ -382,7 +387,7 @@ class rhs_class():
         # print(V_new.shape)
 
         if self.radiative_transfer['none'] == False:
-
+            V_new = self.V_new_floor_func(V_new)
             return V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
 
         else:
@@ -390,4 +395,25 @@ class rhs_class():
             return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
         
     
-       
+    def V_new_floor_func(self, V_new):
+        floor = 1e-20
+        for ang in range(self.N_ang + 1):
+            for space in range(self.N_space):
+                for j in range(self.M+1):
+                    if abs(V_new[ang, space, j])<=floor:
+                        V_new[ang, space, j] = 0.0
+        return V_new
+    
+    def make_temp(self, e_vec, mesh, rad_transfer):
+        T_vec = np.zeros((self.N_space, self.xs_quad.size))
+        for space in range(self.N_space):
+            xR = mesh.edges[space+1]
+            xL = mesh.edges[space]
+            rad_transfer.e_vec = e_vec[space]
+            a = xL
+            b = xR
+            argument = (b-a)/2*self.xs_quad + (a+b)/2
+            T_vec[space] = rad_transfer.make_T(argument, a, b)
+        return T_vec
+
+

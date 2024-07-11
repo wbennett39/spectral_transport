@@ -163,10 +163,12 @@ class sigma_integrator():
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 assert(0)
-            res = 5 * 10**(3) * (T_old +1e-14) ** -1.5 * 0.1**1.5 
+            res = 5 * 10**(3) * (T_old + 1e-15) ** -1.5 * (0.1**1.5)  + 1e-10
+            # res = 5* 10**3 + T_old * 0
             # res = T_old *0 + 100
             if np.isnan(res).any() or np.isinf(res).any():
                 assert(0)
+
              
             # for ix, xx in enumerate(res):
             #     if abs(res[ix]) >1e16:

@@ -264,7 +264,11 @@ class mesh_class(object):
                             assert(0)
             elif np.all(self.source_type == 0):
                 # print(self.Dedges)
-                self.edges = self.edges0 + self.Dedges*t
+                if self.move_type[0] ==1:
+                    self.edges = self.edges0 + self.Dedges*t
+                elif self.move_type[1] == 1:
+                    # assert(0)
+                    self.converging_move(t)
 
             # if self.debugging == True:
             #     for itest in range(self.edges.size()):
@@ -764,10 +768,35 @@ class mesh_class(object):
             # print(self.delta_t, 'delta_t')
 
     def menis_init(self):
-        self.edges = np.linspace(0, self.x0, self.N_space + 1)
+        c = 29.98
+        if self.moving == False:
+            dimensional_t = self.tfinal/29.98
+        else:
+            dimensional_t = 0.0
+        menis_t = -29.6255 + dimensional_t
+        rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+
+
+        # rf = min(rfront, self.x0/50)
+        # self.edges = np.linspace(0*min(rfront, self.x0 - self.x0/20), self.x0, self.N_space + 1)
+        self.edges = np.concatenate((np.array([0.0]) ,np.linspace(rfront, self.x0, self.N_space)))
+        print(self.edges, 'edges0')
         self.Dedges = self.edges * 0
         self.edges0 = self.edges
-        self.Dedges_const = self.Dedges
+        self.Dedges_const = - (self.edges[1:]-self.x0-self.edges[1])/self.edges[-1]
+   
+    def converging_move(self, t):
+        
+        c = 29.98
+        dimensional_t = t/29.98 
+        menis_t = -29.6255 + dimensional_t
+        rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+        
+        dr_dt = -0.00022665176784523018/(29.6255 - 0.0333555703802535*t)**0.32049799999999995
+        self.edges[1:] = np.linspace(rfront, self.x0, self.N_space)
+        self.Dedges[1:] = self.Dedges_const * dr_dt
+    
+        
 
 
     def boundary_source_init_func(self, v0):

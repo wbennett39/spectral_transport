@@ -71,7 +71,7 @@ class T_function(object):
         
         self.a = 0.0137225 # GJ/cm$^3$/keV$^4
         self.alpha = 4 * self.a
-        self.clight = 29.98
+        self.clight = 29.98 # cm/ns
         self.a2 = 5.67e-5 # in ergs
 
         self.geometry = build.geometry
@@ -105,13 +105,13 @@ class T_function(object):
     
     def integrate_quad(self, a, b, j, sigma_class):
         argument = (b-a)/2 * self.xs_quad + (a+b)/2
-        self.H[j] = (b-a)/2 * np.sum(self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space, self.temperature[self.space]) * normPn(j, argument, a, b))
+        self.H[j] = (b-a)/2 * np.sum(self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * normPn(j, argument, a, b))
 
 
     def integrate_quad_sphere(self, a, b, j, sigma_class):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
-        self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space, self.temperature[self.space]) * 1 * normTn(j, argument, a, b))
+        self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * 1 * normTn(j, argument, a, b))
         #assert(0)
     
     def get_sigma_a_vec(self, x, sigma_class, temperature):
@@ -143,9 +143,9 @@ class T_function(object):
         return T
              
 
-    def T_func(self, argument, a, b, sigma_class, space, temperature_old):
+    def T_func(self, argument, a, b, sigma_class, space):
         T = self.make_T(argument, a, b)
-        self.get_sigma_a_vec(argument, sigma_class, temperature_old)
+        self.get_sigma_a_vec(argument, sigma_class, T)
         # self.xs_points = argument
         # self.e_points = e
 
@@ -200,7 +200,7 @@ class T_function(object):
             #                 print(e)
             #                 assert 0     
             if (e[count]) < 0.:
-                self.fudge_factor[count] = 1.
+                self.fudge_factor[count] = -1.
 
         # dimensional e in GJ/cm^3
         ee = e * self.a  / 10**-3 *0.1**1.6

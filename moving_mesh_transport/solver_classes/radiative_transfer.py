@@ -200,10 +200,10 @@ class T_function(object):
             #                 print(e)
             #                 assert 0     
             if (e[count]) < 0.:
-                self.fudge_factor[count] = -1.
+                self.fudge_factor[count] = -1.0
 
         # dimensional e in GJ/cm^3
-        ee = e * self.a  / 10**-3 *0.1**1.6
+        ee = e * self.a  / 10**-3 * 0.1**1.6
         T1 = (np.abs(ee))
         # self.alpha = 10**-3
         t1 = np.abs(4*e*self.a/self.alpha)

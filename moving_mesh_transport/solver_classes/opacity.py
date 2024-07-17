@@ -96,6 +96,7 @@ class sigma_integrator():
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         opacity = self.sigma_function(argument, t, T_old) 
         self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
+        
         # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5)
         
         
@@ -132,9 +133,9 @@ class sigma_integrator():
             # if (edges[i] != self.edges[i]) or (edges[i+1] != self.edges[i+1]) or self.moving == True:
             for j in range(self.Msigma + 1):
                 if self.geometry['slab'] == True:
-                    self.integrate_moments(edges[i], edges[i+1], j, i, t, T_old[self.current_space])
+                    self.integrate_moments(edges[i], edges[i+1], j, i, t, T_old[i,:])
                 elif self.geometry['sphere'] == True:
-                    self.integrate_moments_sphere(edges[i], edges[i+1], j, i, t, T_old[self.current_space])
+                    self.integrate_moments_sphere(edges[i], edges[i+1], j, i, t, T_old[i,:])
 
         
     
@@ -163,7 +164,12 @@ class sigma_integrator():
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 assert(0)
-            res = 5 * 10**(3) * (T_old + 1e-15) ** -1.5 * (0.1**1.5)  + 1e-10
+            res = (5 * 10**(3) * (T_old) ** -1.5 * (0.1**1.5)  + 1e-10)
+            for ie, elem in enumerate(res):
+                if elem >= 1e8:
+                    res[ie] = 1e8
+                if elem < 0:
+                    res[ie] = 0.0
             # res = 5* 10**3 + T_old * 0
             # res = T_old *0 + 100
             if np.isnan(res).any() or np.isinf(res).any():
@@ -241,7 +247,7 @@ class sigma_integrator():
                         if self.geometry['slab'] == True:
                             self.VV[i] +=   self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
                         elif self.geometry['sphere'] == True:
-                            self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(k, i, j, xL, xR) / (math.pi**1.5) 
+                            self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
                             # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(xR-xL))<=1e-5)
                             # self.VV[i] +=  self.cs[space, k] * u[j]  / (math.pi**1.5) * (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3
             # self.VV = u * 1

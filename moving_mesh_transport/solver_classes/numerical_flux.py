@@ -186,9 +186,10 @@ class LU_surf(object):
     
     def interpolate_heat_wave(self, t):
         t_arg = np.argmin(np.abs(self.converging_time_array - t))
+        # t_arg = 100
         # print(self.converging_time_array[t_arg],t)
         # print(self.converging_temp_array[t_arg] * 10 )
-        return 0.5  * self.converging_temp_array[t_arg] ** 4
+        return  2*self.converging_temp_array[t_arg] ** 4
 
     
         

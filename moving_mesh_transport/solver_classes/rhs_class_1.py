@@ -138,7 +138,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 10000
+        self.division = 1000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -166,7 +166,7 @@ class rhs_class():
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
             if self.N_space <= 32:
                 if self.geometry['sphere'] == True:
-                    print(mesh.edges[int(self.N_space/2):])
+                    print(mesh.edges)
                 else:
                     print(mesh.edges)
             print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')
@@ -278,7 +278,7 @@ class rhs_class():
                
                 #T_old saves the temperature at the zeros of the interpolating polynomial
                 # print(H)
-                time_loc = np.argmin(np.abs(self.time_points - t))
+                # time_loc = np.argmin(np.abs(self.time_points - t))
                 # self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
                 # print(self.T_old[space], 'T old')
     
@@ -299,13 +299,13 @@ class rhs_class():
                 #print("source.S = ", source.S)
 
                 RHS_transfer -= RU
-                RHS_transfer += np.dot(MPRIME, U) + np.dot(G,U) - H /self.sigma_t
+                RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - H /self.sigma_t
                 RHS_transfer += PV*2 /self.sigma_t 
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 V_new[-1,space,:] = RHS_transfer 
-                # if np.isnan(V_new[-1, space, :]).any():
-                #     print('rhstransfer is nan')
-                #     assert(0)
+                if np.isnan(V_new[-1, space, :]).any():
+                    print('rhstransfer is nan')
+                    assert(0)
                 # print(RHS_transfer, 'rhs transfer')
 
             ########## Loop over angle ############
@@ -387,7 +387,7 @@ class rhs_class():
         # print(V_new.shape)
 
         if self.radiative_transfer['none'] == False:
-            V_new = self.V_new_floor_func(V_new)
+            # V_new = self.V_new_floor_func(V_new)
             return V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
 
         else:

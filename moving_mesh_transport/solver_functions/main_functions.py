@@ -158,6 +158,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         # print(boundary_temp**4 * 0.0137225 * 29.98/4/math.pi)
         # print(boundary_time, 'boundary time array')
         initialize.grab_converging_boundary_data(boundary_temp, boundary_time)
+        
 
 
     initialize.make_IC()
@@ -197,7 +198,11 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         tpnts = eval_array
         print(tpnts, 'time points')
 
-    sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-5)
+    sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-8)
+    print(sol.status, 'solution status')
+    print(sol)
+    if sol.status != 0:
+        print(sol.message)
     # print(sol)
     print(sol.y.shape,'sol y shape')
     print(eval_times, 'eval times')

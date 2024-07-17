@@ -18,6 +18,7 @@ import math
 import numpy as np
 from scipy import integrate
 import scipy.interpolate as interp
+import h5py
 
 # I could take all of the plotting out of the solver, group problems here by 
 # infinite medium, finite etc. to simplify things
@@ -273,6 +274,17 @@ class run:
             plt.plot(r_meni, T_meni, 'b--', label = 'benchmark T')
             plt.legend()
             plt.show()
+            f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')
+            if f.__contains__('scalar_flux'):
+                del f['scalar_flux']
+                del f['energy_density']
+                del f['xs']
+            f.create_dataset('scalar_flux', data = self.phi)
+            f.create_dataset('energy_density', data = self.e)
+            f.create_dataset('xs', data = self.xs)
+
+            f.close()
+
 
             # if solver.sigma_func[0] == 1:
             #     # plt.plot(self.xs, self.psi[-1,:], '-^')

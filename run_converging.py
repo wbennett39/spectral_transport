@@ -43,27 +43,29 @@ import h5py
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-f = h5py.File('converging_heat_wave_results.h5','r+')
-if f.__contains__('scalar_flux'):
-    del f['scalar_flux']
-    del f['energy_density']
-    del f['xs']
+
 
 
 run = run()
 run.load()
 
 loader = load()
-
+run.parameters['all']['Ms'] = [0]
+run.parameters['all']['N_spaces'] = [3]
+run.parameters['all']['tfinal'] = 2.5
 run.boundary_source(0,1)
 
 run.load('marshak')
 
-run.parameters['all']['tfinal'] = 814.0
-run.mesh_parameters['eval_times'] = True
+# run.parameters['all']['tfinal'] = 10.0
+run.mesh_parameters['eval_times'] = False
 
 run.boundary_source(0,1)
-
+f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')
+if f.__contains__('scalar_flux'):
+    del f['scalar_flux']
+    del f['energy_density']
+    del f['xs']
 f.create_dataset('scalar_flux', data = run.phi)
 f.create_dataset('energy_density', data = run.e)
 f.create_dataset('xs', data = run.xs)

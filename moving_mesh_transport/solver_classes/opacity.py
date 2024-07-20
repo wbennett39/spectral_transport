@@ -128,14 +128,14 @@ class sigma_integrator():
     def sigma_moments(self, edges, t, T_old, V_old):
         self.V_old = V_old
         self.edges = edges
-        for i in range(self.N_space):
-            self.current_space = int(i)
+        for k in range(self.N_space):
+            # self.current_space = int(i)
             # if (edges[i] != self.edges[i]) or (edges[i+1] != self.edges[i+1]) or self.moving == True:
             for j in range(self.Msigma + 1):
                 if self.geometry['slab'] == True:
-                    self.integrate_moments(edges[i], edges[i+1], j, i, t, T_old[i,:])
+                    self.integrate_moments(edges[k], edges[k+1], j, k, t, T_old[k,:])
                 elif self.geometry['sphere'] == True:
-                    self.integrate_moments_sphere(edges[i], edges[i+1], j, i, t, T_old[i,:])
+                    self.integrate_moments_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:])
 
         
     
@@ -164,10 +164,11 @@ class sigma_integrator():
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 assert(0)
-            res = (5 * 10**(3) * (T_old) ** -1.5 * (0.1**1.5)  + 1e-10)
+            res = (5 * 10**(3) * (np.abs(T_old) + 1e-6) ** -1.5 * (0.1**1.5)  + 1e-10)
             for ie, elem in enumerate(res):
-                if elem >= 1e8:
-                    res[ie] = 1e8
+                if elem >= 1e16:
+                    res[ie] = 1e16
+                    print('ceiling')
                 if elem < 0:
                     res[ie] = 0.0
             # res = 5* 10**3 + T_old * 0
@@ -238,10 +239,10 @@ class sigma_integrator():
         xL = edges[space]
         xR = edges[space+1]
         dx = math.sqrt(xR-xL)
-        if self.sigma_func['constant'] == True:
-            self.VV = u * self.sigma_t
-        else:
-            for i in range(self.M + 1):
+        # if self.sigma_func['constant'] == True:
+        #     self.VV = u * self.sigma_t
+        # else:
+        for i in range(self.M + 1):
                 for j in range(self.M + 1):
                     for k in range(self.Msigma + 1):
                         if self.geometry['slab'] == True:

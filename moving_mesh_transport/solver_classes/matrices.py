@@ -225,7 +225,6 @@ class G_L:
         rLrR = rL*rR
         pi = math.pi
         rttwo = math.sqrt(2)
-
         for ii in range(self.M+1):
             for jj in range(self.M+1):
                 self.G[ii, jj] = GMatrix(ii, jj, rL, rR, rLp, rRp) / pi 

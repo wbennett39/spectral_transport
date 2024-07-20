@@ -189,7 +189,7 @@ class LU_surf(object):
         # t_arg = 100
         # print(self.converging_time_array[t_arg],t)
         # print(self.converging_temp_array[t_arg] * 10 )
-        return  2*self.converging_temp_array[t_arg] ** 4
+        return  self.converging_temp_array[t_arg] ** 4
 
     
         
@@ -235,7 +235,8 @@ class LU_surf(object):
                     if self.geometry['slab'] == True:
                         self.v3 += self.integrate_quad(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0] 
                     elif self.geometry['sphere'] == True:
-                        self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0]
+                        if j == 0:
+                            self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0]
 
             
     
@@ -259,16 +260,17 @@ class LU_surf(object):
 
 
 
-        if leftspeed >= 0: 
+        if leftspeed > 0: 
             psi_minus = self.v0
             # if space == 0:
             #     assert (psi_minus == 1 / self.h / math.sqrt(math.pi) * u[space, 0]) 
         elif leftspeed < 0: 
             psi_minus = self.v1
-        if rightspeed >= 0: 
+        if rightspeed > 0: 
             psi_plus = self.v2
         elif rightspeed < 0:
             psi_plus = self.v3
+        
         
 
         for i in range(0,self.M+1):

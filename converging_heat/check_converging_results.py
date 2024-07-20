@@ -30,13 +30,13 @@ def check(t):
 
     dimensional_t = tfinal/c 
     menis_t = -29.6255 + dimensional_t
-    rf= 0.01 * (-menis_t) ** 0.679502 - 1e-4
+    rf= 0.01 * (-menis_t) ** 0.679502 
 
     ee = e * a  / 10**-3 * (0.1)**1.6
     T1 = (np.abs(ee))
     T = np.power(T1, 0.625)
     r_meni, T_meni = run_converging(tfinal/ c)
-
+    plt.ion()
     plt.figure(2)
     plt.plot(r_meni, T_meni, 'bx', label = 'T Meni')
     plt.plot(xs, T*10, 'k-', label = 'T')
@@ -53,7 +53,7 @@ def check(t):
     plt.plot(r_meni, T_meni, 'bx', label = 'T Meni')
     plt.plot(xs, T*10, 'k-', label = 'T')
     plt.plot(xs, 10*(np.abs(phi_dim)/a/c)**.25, 'b-', label = 'radiation temp')
-    plt.xlim(rf-5e-6, 0.1)
+    plt.xlim(rf, 0.1)
     plt.plot(np.array([0.1]), boundary_temp[time_arg] * 10, 'rx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+2] * 10, 'gx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+1] * 10, 'yo')

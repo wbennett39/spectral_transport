@@ -193,6 +193,7 @@ class mesh_class(object):
                     self.Dedges = self.Dedges_const*0
                 else:
                     # print(self.edges0, 'edges0')
+
                     self.edges = self.edges0 + self.Dedges_const*t
                     self.Dedges = self.Dedges_const
 
@@ -793,6 +794,7 @@ class mesh_class(object):
 
     
     def menis_init2(self):
+        pad = self.x0/100
         third = int(2*(self.N_space + 1)/3)
         rest = int(self.N_space + 1 - third)
         dx = 5e-6
@@ -830,6 +832,67 @@ class mesh_class(object):
         print(self.edges)
         self.Dedges = self.Dedges_const
         # assert 0
+    
+    def menis_init3(self):
+
+
+
+            
+
+            pad = self.x0/100
+            third = int(2*(self.N_space + 1)/3)
+            rest = int(self.N_space + 1 - third)
+            dx = 5e-6
+            c = 29.98
+            if self.moving == False:
+                dimensional_t = self.tfinal/29.98
+            else:
+                dimensional_t = self.tfinal/29.98
+            menis_t = -29.6255 + dimensional_t
+            rfront = 0.01 * (-menis_t) ** 0.679502 - dx
+            if self.moving == False:
+                self.edges = np.zeros(self.N_space+1)
+                self.edges[1:] = np.linspace(rfront, self.x0, self.N_space)
+                self.edges0 = self.edges
+
+                self.Dedges = self.edges *0 
+
+                self.Dedges_const = self.edges*0
+            else:
+        
+                self.edges = np.concatenate((np.linspace(0.0, rfront, 2)[:-1], np.linspace(self.x0-dx-pad, self.x0-dx, rest)[:-1], np.linspace(self.x0-dx, self.x0, third)))
+                # print(self.edges.size)
+                assert(int(self.edges.size) == self.N_space + 1)
+                # print(self.edges[third])
+                # print(self.edges)
+                # if abs(self.edges[rest]-rfront) > 1e-14:
+                #     assert 0
+                self.edges0 = self.edges
+                v, a = self.converging_move_interpolate(self.edges[rest])
+                self.Dedges_const = self.edges * 0 
+                self.c1s = self.edges * 0
+                # print(self.Dedges_const[rest:])
+                # print(np.linspace(1, 0.0, third))
+                self.Dedges_const[rest:] = np.linspace(1.0, 0.0, third) * v
+                # print(1)
+                self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
+                # print(2)
+                self.c1s[rest:] = np.linspace(1.0, 0.0, third) * a
+                # print(3)
+                self.c1s[:rest] = np.linspace(0, 1, rest) * a
+                # print(4)
+                # self.c1s[1] = 1.0 * a
+                print(self.Dedges_const*self.tfinal + 0.5 * self.c1s * self.tfinal**2 + self.edges0, 'final edges')
+
+                # print(self.Dedges_const - v, 'dedges - v')
+                # print(self.c1s - a, 'c1s - a')
+                menis_t = -29.6255 + self.tfinal / c
+                rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+                # self.edges[rest-1] = rfront -5e-4
+                # self.edges[0:rest-1] = np.linspace(0.0, self.edges[rest-1], rest -1)
+                print(self.edges)
+                self.Dedges = self.Dedges_const
+        # assert 0
 
     def converging_move(self, t):
         c = 29.98
@@ -844,15 +907,16 @@ class mesh_class(object):
         self.Dedges[0] = self.Dedges_const[0] * dr_dt
 
     def converging_move2(self, t):
+        if self.moving == True:
         # self.Dedges_const = self.Dedges_const
-        self.edges = self.Dedges_const*t + 0.5 * self.c1s * t**2 + self.edges0
-        # print(self.Dedges_const)
-        self.Dedges =  self.Dedges_const + self.c1s * t 
-        dimensional_t = t/29.98
-        menis_t = -29.6255 + dimensional_t
-        rfront = 0.01 * (-menis_t) ** 0.679502 
-        third = int(2*(self.N_space + 1)/3)
-        rest = int(self.N_space + 1 - third)
+            self.edges = self.Dedges_const*t + 0.5 * self.c1s * t**2 + self.edges0
+            # print(self.Dedges_const)
+            self.Dedges =  self.Dedges_const + self.c1s * t 
+            dimensional_t = t/29.98
+            menis_t = -29.6255 + dimensional_t
+            rfront = 0.01 * (-menis_t) ** 0.679502 
+            third = int(2*(self.N_space + 1)/3)
+            rest = int(self.N_space + 1 - third)
         # if self.tfinal-t <= 1e-4:
         #     print(self.edges[rest] - rfront)
         # print(self.edges[rest])
@@ -949,7 +1013,14 @@ class mesh_class(object):
                     self.thin_square_init_func_legendre()
                 else:
                     # self.simple_moving_init_func()
-                    self.shell_source()
+                    if self.moving == True:
+                        self.shell_source()
+                    else:
+                        self.edges = np.zeros(self.N_space+1)
+                        self.edges[1:] = np.linspace(self.x0, self.x0 + self.tfinal, self.N_space)
+                        self.Dedges = self.edges * 0
+                        self.Dedges_const = self.Dedges
+                        self.edges0 = self.edges
             elif self.source_type[2] == 1:
                 print('calling thin square init')
                 if self.geometry['slab'] == True:
@@ -964,7 +1035,7 @@ class mesh_class(object):
              
             elif np.all(self.source_type == 0):
                 if self.geometry['sphere'] == True:
-                    self.menis_init2()
+                    self.menis_init3()
                 else:
                     self.boundary_source_init_func(self.vnaught)
                 # boundary_source_init_func_outside(self.vnaught, self.N_space, self.x0, self.tfinal) 
@@ -1013,7 +1084,7 @@ class mesh_class(object):
             self.tactual = 0.0
             # static mesh -- puts the edges at the final positions that the moving mesh would occupy
             # sets derivatives to 0
-            self.moving = True
+            # self.moving = True
             if self.thick == True:
                 self.delta_t = self.tfinal 
             self.move(self.tfinal)

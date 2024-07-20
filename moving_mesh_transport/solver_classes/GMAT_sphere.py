@@ -1,10 +1,10 @@
 from numba import njit
 import math
-@njit
+
 
 #if there are issues with accuracy later on, look at turning the decimal numbers rational
 
-
+@njit
 def GMatrix(i, j, a, b, ap, bp):
     if i == 0:
         if j == 0:
@@ -1021,7 +1021,7 @@ def VV_matrix(i, j, k, a, b):
               return (math.sqrt(1/(-a + b))*(a**2 + a*b + b**2))/3.
 
            elif k == 1:
-
+ 
               return (-a**2 + b**2)/(3.*math.sqrt(2)*math.sqrt(-a + b))
 
            elif k == 2:

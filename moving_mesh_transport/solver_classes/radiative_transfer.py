@@ -137,6 +137,7 @@ class T_function(object):
                     print(a,b, 'edges')
                     print(e, 'e solution')
                     print(self.e_vec, 'e vector')
+                    print(a, b, 'edges')
                     print('###                                ###')
                     assert(0)
                 # print(T)

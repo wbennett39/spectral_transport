@@ -70,15 +70,15 @@ class scalar_flux(object):
     #     return self.P
 
     def make_P(self, u, space, xL, xR):
-        if self.sigma_func['constant'] == True: # if the opacity is constant
-            for i in range(0, self.M+1):
-                self.P[i]  = np.sum(np.multiply(u[:,i],self.ws))
-            if self.geometry['slab'] == True:
-                self.scalar_flux_term = self.P
-            elif self.geometry['sphere'] == True:
-                self.scalar_flux_term = self.P 
+        # if self.sigma_func['constant'] == True: # if the opacity is constant
+        #     for i in range(0, self.M+1):
+        #         self.P[i]  = np.sum(np.multiply(u[:,i],self.ws))
+        #     if self.geometry['slab'] == True:
+        #         self.scalar_flux_term = self.P
+        #     elif self.geometry['sphere'] == True:
+        #         self.scalar_flux_term = self.P 
 
-        else:
+        # else:
             self.PV = self.PV*0
             for i in range(self.M+1):
                 for l in range(self.N_ang):

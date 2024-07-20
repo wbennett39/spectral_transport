@@ -177,6 +177,10 @@ class build(object):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         self.IC[self.N_ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) * normPn(j, argument, a, b))
     
+    def integrate_e_sphere(self, a, b, space, j):
+        argument = (b-a)/2*self.xs_quad + (a+b)/2
+        self.IC[self.N_ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) *2.0* normTn(j, argument, a, b))
+    
     def IC_e_func(self,x):
         return np.ones(x.size) * self.e_init
                 
@@ -200,7 +204,11 @@ class build(object):
         if self.thermal_couple['none'] != 1:
             for space in range(self.N_space):
                 for j in range(self.M + 1):
-                    self.integrate_e(edges_init[space], edges_init[space+1], space, j)
+                    if self.geometry['slab'] == True:
+                        self.integrate_e(edges_init[space], edges_init[space+1], space, j)
+                    elif self.geometry['sphere'] == True:
+                        self.integrate_e_sphere(edges_init[space], edges_init[space+1], space, j)
+
 
         if self.moving == False and self.source_type[0] == 2 and self.uncollided == False and self.N_space%2 == 0:
             i = 0

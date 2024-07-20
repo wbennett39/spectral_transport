@@ -232,6 +232,7 @@ class rhs_class():
             dxL = mesh.Dedges[space]
             # matrices.matrix_test(True)
             matrices.make_all_matrices(xL, xR, dxL, dxR)
+
             L = matrices.L
             G = matrices.G
             MPRIME = matrices.MPRIME
@@ -252,6 +253,7 @@ class rhs_class():
             source.make_source(t, xL, xR, uncollided_sol)
             #print(source.make_source(t, xL, xR, uncollided_sol))
             S = source.S
+            H = transfer_class.H
 
             
             #if ( (S[0]!=0.0) or (S[1]!=0.0) ):
@@ -349,7 +351,7 @@ class rhs_class():
                     # if angle != 0 and angle != self.N_ang-1:
                         
                     # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
-                    dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
+                    dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
                      
 
 
@@ -365,7 +367,7 @@ class rhs_class():
                     RHS += np.dot(G, U)
                     # RHS += 0.5 * S * self.c #(commented this out because c is included)
                     RHS += 0.5 * S /self.sigma_t
-                    RHS +=  H * 0.5 / self.sigma_t
+                    RHS +=  self.c_a * H * 0.5 / self.sigma_t
                     RHS += PV * self.c /self.sigma_t
                     # print(VV, 'VV')
                     # print(V_old[angle, space,:], 'vold')

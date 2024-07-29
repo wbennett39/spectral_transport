@@ -7,7 +7,7 @@ Created on Mon Jan 31 11:25:35 2022
 """
 import numpy as np
 import math
-
+from .cubic_spline import cubic_spline
 from .build_problem import build
 from .matrices import G_L
 from .sources import source_class
@@ -40,6 +40,8 @@ transfer_class_type = deferred_type()
 transfer_class_type.define(T_function.class_type.instance_type)
 sigma_class_type = deferred_type()
 sigma_class_type.define(sigma_integrator.class_type.instance_type)
+cubic_class_type = deferred_type()
+cubic_class_type.define(cubic_spline.class_type.instance_type)
 
 # kv_ty = (types.int64, types.unicode_type)
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
@@ -98,9 +100,10 @@ data = [('N_ang', int64),
         ('test', float64),
         ('xs_quad', float64[:]),
         ('T_old', float64[:,:]),
-        ('time_points', float64[:])
-
-
+        ('T_eval_points', float64[:,:]),
+        ('time_points', float64[:]),
+        ('t_quad', float64[:]),
+        ('t_ws', float64[:])
 
         ]
 ##############################################################################
@@ -118,6 +121,8 @@ class rhs_class():
         # if self.geometry['slab'] == True:
         self.ws = build.ws
         self.xs_quad = build.xs_quad
+        self.t_quad = build.t_quad
+        self.t_ws = build.t_ws
         # elif self.geometry['sphere'] == True:
         #     self.ws = build.t_ws
         #     self.xs_quad = build.t_quad
@@ -218,9 +223,11 @@ class rhs_class():
         # print(self.T_old[time_loc])
         # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
         #     time_loc -= 1
-        self.T_old = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
-        sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
+        self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
+        
+        sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class)
+        # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
     
 
         # iterate over all cells
@@ -270,7 +277,7 @@ class rhs_class():
             if self.radiative_transfer['none'] == False:
 
                 # print(V_old[self.N_ang, space, :], 'v old')
-                transfer_class.make_H(xL, xR, V_old[self.N_ang, space, :], sigma_class, space)
+                transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
 
                 H = transfer_class.H
                 # if (H <0).any():
@@ -285,24 +292,19 @@ class rhs_class():
                 # print(self.T_old[space], 'T old')
     
                 ######### solve thermal couple ############
-
                 U = V_old[-1,space,:]
-
-                num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :]*0)
+                num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :]*0, True)
                 RU = num_flux.LU 
-
-
                 RHS_transfer = U*0
-
                 if self.uncollided == True:
                     RHS_transfer += self.c_a *source.S * 2 
                     #RHS_transfer += source.S * 2
-
                 #print("source.S = ", source.S)
-
                 RHS_transfer -= RU
-                RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - H /self.sigma_t
-                RHS_transfer += PV*2 /self.sigma_t 
+                # if space == self.N_space -1:
+                #     print(RU)
+                RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
+                RHS_transfer += self.c_a * PV*2 /self.sigma_t 
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 V_new[-1,space,:] = RHS_transfer 
                 if np.isnan(V_new[-1, space, :]).any():
@@ -408,14 +410,34 @@ class rhs_class():
     
     def make_temp(self, e_vec, mesh, rad_transfer):
         T_vec = np.zeros((self.N_space, self.xs_quad.size))
+        T_eval_points = np.zeros((self.N_space, self.xs_quad.size))
         for space in range(self.N_space):
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]
-            rad_transfer.e_vec = e_vec[space]
+            rad_transfer.e_vec = e_vec[space,:]
             a = xL
             b = xR
             argument = (b-a)/2*self.xs_quad + (a+b)/2
+            argument2 = (b-a)/2*self.t_quad + (a+b)/2
             T_vec[space] = rad_transfer.make_T(argument, a, b)
-        return T_vec
+            # T_test = rad_transfer.make_T(argument2, a, b)
+            # spline_ob = cubic_spline(argument, T_vec[space])
+            # if np.max(np.abs(spline_ob.eval_spline(argument2)- T_test)/np.abs(T_test+1e-4))>=5e-2:
+            #     print(argument, 'arg')
+            #     print(argument2, 'arg2')
+            #     print(a,b,'a,b')
+            #     # print(spline_ob.eval_spline(argument2), T_test)
+            #     print((spline_ob.eval_spline(argument2)- T_test)/np.abs(T_test+1e-4))
+            #     assert(0)
+            T_eval_points[space] = argument
+            # print(T_vec[space], 'T vec')
+            # print(argument, 'xs')
+            if np.isnan(T_eval_points.any()):
+                assert(0)
+            if (T_vec[space]).any() <0:
+                T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
+        # print(T_vec, 'T')
+        # print('## ## ## ## ## ## ')
+        return T_vec, T_eval_points
 
 

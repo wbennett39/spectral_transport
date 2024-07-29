@@ -115,8 +115,8 @@ def test_ortho_Tn_gauss_quad():
         xs_quad, ws_quad = quadrature(2*M+1, 'chebyshev')
         # xs_quad = quadpy.c1.chebyshev_gauss(250).points
         # ws_quad = quadpy.c1.gauss_chebyshev(250).weights
-        aa = 0
-        bb = 1
+        # aa = 0
+        # bb = 1
         for i in range(M+1):
             for j in range(M+1): 
                 integrand = lambda x: normTn(i, x, aa, bb) * weight_func_Tn(x, aa, bb) * normTn(j, x, aa, bb)
@@ -191,12 +191,12 @@ def test_finite_diff():
     # testfunc = (1-x**2) * np.sin(x)
     pts = 5000
     xs = quadpy.c1.gauss_lobatto(pts).points
-    sol_array = np.sin(xs) * (1-xs**2)
+    sol_array = np.sin(xs) 
     deriv_array = xs*0
     true_derivative = (1 - xs**2)*np.cos(xs) - 2*xs*np.sin(xs)
 
     for ix in range(xs.size):
-        deriv_array[ix] = finite_diff_uneven(xs, ix, sol_array , left = (ix == 0), right = (ix == xs.size-1))
+        deriv_array[ix] = finite_diff_uneven_diamond(xs, ix, sol_array , left = (ix == 0), right = (ix == xs.size-1))
     
 
     # plt.plot(xs, true_derivative)
@@ -238,10 +238,13 @@ def test_Tn_edgevalues():
            
 def test_quadrature_chebyshev():
     nn = 50
-    quad_test = np.polynomial.chebyshev.chebgauss(nn)
+    quad_test = np.sort(np.polynomial.chebyshev.chebgauss(nn))
     my_quad_xs, my_quad_ws = quadrature(nn, 'chebyshev')
     npassert(quad_test[0], my_quad_xs)
     npassert(quad_test[1], my_quad_ws)
+
+
+
 
 def test_quadrature_gss_lobatto():
     nn = 50

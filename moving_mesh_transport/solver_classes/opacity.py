@@ -9,6 +9,7 @@ from .functions import Pn, normPn, normTn
 from numba import types, typed
 import numba as nb
 from .GMAT_sphere import VV_matrix
+from .functions import quadrature
 
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
@@ -92,14 +93,57 @@ class sigma_integrator():
         opacity = self.sigma_function(argument, t, T_old)
         self.cs[k, j] = (b-a)/2 * np.sum(self.ws_quad * opacity * normPn(j, argument, a, b))
      
-    def integrate_moments_sphere(self, a, b, j, k, t, T_old):
-        argument = (b-a)/2*self.xs_quad + (a+b)/2
-        opacity = self.sigma_function(argument, t, T_old) 
-        self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b))
+    def integrate_moments_sphere(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
+        # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
+        
+        argument = 0.5*(b-a)*self.xs_quad + (a+b) * 0.5
+        # argument = (-b-a + 2 * self.xs_quad) / (b-a)
+        # if np.abs(argument - T_eval_points[k]).any() >=1e-16:
+        #     print(argument - T_eval_points[k])
+        #     assert(0)
+        opacity = self.sigma_function(argument, t, T_old)
+        # opacity = self.sigma_function(self.xs_quad, t, T_old)
+        #  
+        self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
+        # self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, self.xs_quad, a, b))
+        if checkfunc == True:
+            if abs(0.5 * (b-a) * np.sum(self.ws_quad *  normTn(j, argument, a, b) * 2.0 * normTn(j, argument, a, b))-1)>1e-6:
+                print(0.5 * abs((b-a) * np.sum(self.ws_quad *  normTn(j, argument, a, b) * 2.0 * normTn(j, argument, a, b))), 'integral')
+                print(b,a,'edges') 
+                print(self.ws_quad,'ws')
+                print( normTn(j, argument, a, b), 'basis')
+                print(argument, 'argument')
+                print(j, 'j')
+                assert(0)
+
+        
         
         # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5)
         
-        
+    def check_sigma_coeffs(self, T_eval_points, edges, T_old):
+        # for space in range(self.N_space):
+        #     T_old[space,:] = np.ones(self.xs_quad.size) * np.mean(T_old[space])
+        # self.sigma_moments(edges, 0.0,T_old, T_eval_points)
+        for space in range(self.N_space):
+            a = edges[space]
+            b = edges[space+1]
+            xs = T_eval_points[space]
+            assert(np.mean(np.abs(xs-0.5*(b-a)*self.xs_quad - 0.5*(b+a)))<=1e-14)
+            # print(xs, 'xs')
+            # print(space,'space]')
+            test_func = xs*0
+            for ix, xx in enumerate(xs):
+                for j in range(0,self.Msigma + 1):
+                    test_func[ix] += self.cs[space, j] * normTn(j, xs[ix:ix+1],a,b)[0]
+            if abs(np.max(np.abs(test_func - self.sigma_function(xs, 0, T_old[space]))/ self.sigma_function(xs, 0, T_old[space])) ) >=1e0 : 
+                    print((test_func - self.sigma_function(xs, 0, T_old[space]))/ self.sigma_function(xs, 0, T_old[space]) , 'difference')
+                    print(test_func,'test')
+                    print(self.sigma_function(xs, 0, T_old[space]), 'sigma')
+                    print(space,'space')
+                    print(self.cs[space], 'coeffs')
+                    print(T_old[space],'T')
+                    # assert(0)
+                    # assert(0)
 
     def both_even_or_odd(self, i, j, k):
         if i % 2 == 0:
@@ -125,17 +169,17 @@ class sigma_integrator():
                         self.integrate_quad(-1, 1, i, j, k)
         # print(self.AAA)
     
-    def sigma_moments(self, edges, t, T_old, V_old):
-        self.V_old = V_old
+    def sigma_moments(self, edges, t, T_old, T_eval_points):
+        # self.V_old = V_old
         self.edges = edges
         for k in range(self.N_space):
             # self.current_space = int(i)
             # if (edges[i] != self.edges[i]) or (edges[i+1] != self.edges[i+1]) or self.moving == True:
-            for j in range(self.Msigma + 1):
+            for j in range(0, self.Msigma + 1):
                 if self.geometry['slab'] == True:
                     self.integrate_moments(edges[k], edges[k+1], j, k, t, T_old[k,:])
                 elif self.geometry['sphere'] == True:
-                    self.integrate_moments_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:])
+                    self.integrate_moments_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:], T_eval_points)
 
         
     
@@ -163,17 +207,23 @@ class sigma_integrator():
         elif self.sigma_func['converging'] == 1:
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
+                print(T_old, 'T')
+                print(x,'x')
                 assert(0)
-            res = (5 * 10**(3) * (np.abs(T_old) + 1e-6) ** -1.5 * (0.1**1.5)  + 1e-10)
+            # if (T_old<0).any():
+            #     T_old = np.mean(T_old) + T_old*0
+            res = 5 * 10**(3) * (np.abs(T_old) + 1e-4) ** -1.5 * (0.1**1.5)
             for ie, elem in enumerate(res):
                 if elem >= 1e16:
                     res[ie] = 1e16
                     print('ceiling')
-                if elem < 0:
-                    res[ie] = 0.0
+                # if elem < 0:
+                #     res[ie] = 0.0
+                    # print('negative')
             # res = 5* 10**3 + T_old * 0
             # res = T_old *0 + 100
             if np.isnan(res).any() or np.isinf(res).any():
+                print(T_old, 'T old')
                 assert(0)
 
              

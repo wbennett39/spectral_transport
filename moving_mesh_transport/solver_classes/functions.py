@@ -494,6 +494,8 @@ def eval_Tn(n,x):
     elif n > 12:
         print('not implemented to this order yet')
         assert(0)
+    else:
+        raise ValueError('j must be a positive integer')
 
 @njit('float64(int64)')
 def kronecker(i):
@@ -506,7 +508,7 @@ def kronecker(i):
 def normTn(n,x,a=0,b=1.0):
     tmp = 0*x
     norm = (1/ math.sqrt(2))**kronecker(n) * math.sqrt(1/(b-a)) * math.sqrt(2) / math.sqrt(math.pi) 
-    for count in prange(x.size):
+    for count in range(x.size):
         xx = x[count]
         # tmp[count] = sc.eval_legendre(n,z)*fact
         z = 2/(b - a) * xx - (b + a)/(b - a)
@@ -660,6 +662,7 @@ def quadrature(n, name, testing = False):
         for i in range(1,n+1):
             xs[i-1] = math.cos((2*i-1)/2/n * pi)
             ws[i-1] = pi/n
+        xs = np.sort(xs)
 
 
     elif name == 'gauss_lobatto':

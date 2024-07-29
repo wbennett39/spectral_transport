@@ -166,7 +166,7 @@ class T_function(object):
         elif self.temp_function[2] == 1:
             # print(self.sigma_a_vec)
             self.temperature[space,:] = T
-            return  np.power(T,4) * np.abs(self.sigma_a_vec) * self.fudge_factor
+            return  np.power(T,4) * self.sigma_a_vec * np.sign(T)
         
             
 
@@ -195,21 +195,26 @@ class T_function(object):
         
         self.fudge_factor = np.ones(e.size)
     
-        for count in range(e.size):
+        # for count in range(e.size):
             # if math.isnan(e[count]) == True:
             #                 print("nan")
             #                 print(e)
-            #                 assert 0     
-            if (e[count]) < 0.:
-                self.fudge_factor[count] = -1.0
+            #                 assert 0
+            #
+            #
+            # if e[0] > 0.:
+            #      e[0] = np.mean(e)     
+            # if (e[count]) < 0.:
+            #     self.fudge_factor[count] = -1.0
+                # e[count] = e[count-1]
 
         # dimensional e in GJ/cm^3
         ee = e * self.a  / 10**-3 * 0.1**1.6
         T1 = (np.abs(ee))
         # self.alpha = 10**-3
-        t1 = np.abs(4*e*self.a/self.alpha)
+        # t1 = np.abs(4*e*self.a/self.alpha)
         # return np.power(t1,0.25) 
-        return np.power(T1, 0.625) 
+        return np.power(T1, 0.625) * np.sign(e)
         
         
     def make_H(self, xL, xR, e_vec, sigma_class, space):

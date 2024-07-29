@@ -18,7 +18,6 @@ class cubic_spline(object):
         self.datax = datax
         self.datay = datay
         self.n = datay.size - 1
-        print(self.n, 'n')
         self.coeff_array = np.zeros((4*self.n, 4*self.n))
         self.rhs = np.zeros(4*self.n)
         
@@ -444,6 +443,6 @@ def GaussElim(A,b,LOUD=0):
     return x
 
 
-test_spline()
+# test_spline()
 
 

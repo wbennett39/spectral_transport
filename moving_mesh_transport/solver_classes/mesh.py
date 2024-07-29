@@ -154,6 +154,10 @@ class mesh_class(object):
             print('speed is ', self.speed)
 
         self.initialize_mesh()
+    
+    def check_tangle(self):
+        if (self.edges[1:] - self.edges[0:-1]).any() <=0:
+            raise ValueError('The mesh is tanlged. ')
 
 
     def move(self, t):
@@ -168,6 +172,7 @@ class mesh_class(object):
         This mode moves all of the edges at a constant speed,
         linearly increasing from 0 to the wavespeed
         """
+        self.check_tangle()
         if self.moving == True:
             # if self.source_type[1] == 1 or self.source_type[2] == 1:
                 # if t > 10.0:
@@ -835,14 +840,10 @@ class mesh_class(object):
     
     def menis_init3(self):
 
-
-
-            
-
-            pad = self.x0/100
+            pad = self.x0/10
             third = int(2*(self.N_space + 1)/3)
             rest = int(self.N_space + 1 - third)
-            dx = 5e-6
+            dx = 5e-5
             c = 29.98
             if self.moving == False:
                 dimensional_t = self.tfinal/29.98

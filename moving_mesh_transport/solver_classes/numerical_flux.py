@@ -170,7 +170,7 @@ class LU_surf(object):
         if space != self.N_space - 1:
             self.hp = math.sqrt(self.edges[space+2] - self.edges[space+1])
         else:
-            self.hm = math.sqrt(dx)
+            self.hp = math.sqrt(dx)
         
         if space != 0:
             self.hm = math.sqrt(self.edges[space]-self.edges[space-1])
@@ -189,7 +189,7 @@ class LU_surf(object):
         # t_arg = 100
         # print(self.converging_time_array[t_arg],t)
         # print(self.converging_temp_array[t_arg] * 10 )
-        return  self.converging_temp_array[t_arg] ** 4
+        return  self.converging_temp_array[t_arg] ** 4 
 
     
         
@@ -235,12 +235,11 @@ class LU_surf(object):
                     if self.geometry['slab'] == True:
                         self.v3 += self.integrate_quad(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0] 
                     elif self.geometry['sphere'] == True:
-                        if j == 0:
-                            self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0]
+                            self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.hp)[0]
 
             
     
-    def make_LU(self, t, mesh_class, u, space, mul, u_refl):
+    def make_LU(self, t, mesh_class, u, space, mul, u_refl, rt = False):
         self.v0 = 0 
         self.v1 = 0
         self.v2 = 0
@@ -278,6 +277,9 @@ class LU_surf(object):
             if self.geometry['slab'] == True:
                 self.LU[i] = (B_right*rightspeed*psi_plus - B_left*leftspeed*psi_minus)
             elif self.geometry['sphere'] == True:
+                # if rt == True:
+                #     if space == self.N_space -1:
+                #         print(psi_plus)
                 self.LU[i] = (xR**2*B_right*rightspeed*psi_plus - xL**2*B_left*leftspeed*psi_minus)
 
                 # if space == 0:

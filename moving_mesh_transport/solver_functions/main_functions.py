@@ -118,10 +118,11 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
 
     # xs_quad = quadpy.c1.gauss_legendre(2*M+1).points
     # ws_quad = quadpy.c1.gauss_legendre(2*M+1).weights
+
     if geometry['slab'] == True:
         xs_quad, ws_quad = quadrature(2*M+1, 'gauss_legendre')
     elif geometry['sphere'] == True:
-        xs_quad, ws_quad = quadrature(2*M+1, 'chebyshev')
+        xs_quad, ws_quad = quadrature(max(2*M+1, 2*Msigma+1), 'chebyshev')
 
     # t_quad = quadpy.c1.gauss_legendre(t_nodes).points
     t_quad, t_ws = quadrature(t_nodes, 'gauss_legendre')
@@ -275,12 +276,16 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
             e = phi*0
     else:
         phi = np.zeros((eval_array.size, xs.size))
+        e = np.zeros((eval_array.size, xs.size))
         psi = np.zeros((eval_array.size, N_ang, xs.size))
         exit_dist = np.zeros((eval_array.size, N_ang, 2))
         exit_phi = np.zeros((eval_array.size, 2))
         xs_ret = np.zeros((eval_array.size, xs.size))
+        fake_mesh  = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
+                      wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
+                      domain_width, fake_sedov_v0, boundary_on, t0, geometry) 
         for it, tt in enumerate(eval_array):
-            mesh.move(tt)
+            fake_mesh.move(tt)
             edges = mesh.edges
             if choose_xs == False:
                 xs = find_nodes(edges, M, geometry)
@@ -292,7 +297,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
             exit_dist[it], exit_phi[it] = output.get_exit_dist(uncollided_sol)
             xs_ret[it] = xs
             if thermal_couple['none'] == False:
-                e = output.make_e()
+                e[it,:] = output.make_e()
                 
             else:
                 e = phi*0

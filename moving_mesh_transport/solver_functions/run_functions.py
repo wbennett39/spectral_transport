@@ -6,9 +6,9 @@ Created on Tue May 24 13:42:55 2022
 @author: bennett
 """
 import sys
-sys.path.append('/Users/bennett/Documents/Github/converging_heat/')
-import converging_heat_wave
-from converging_heat_wave import run_converging
+# sys.path.append('/Users/bennett/Documents/Github/converging_heat/')
+# import converging_heat_wave
+from converging_heat.converging_heat_wave import run_converging
 import matplotlib.pyplot as plt
 from ..solver import main_class
 from pathlib import Path

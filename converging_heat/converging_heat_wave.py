@@ -5,7 +5,7 @@ from scipy.integrate import solve_ivp
 from scipy.optimize import root
 from scipy.interpolate import interp1d
 from matplotlib import pyplot as plt
-from heat_wave import AbstractHeatWave, Units
+from .heat_wave import AbstractHeatWave, Units
 import h5py
 import logging
 logging.basicConfig(level=logging.INFO)

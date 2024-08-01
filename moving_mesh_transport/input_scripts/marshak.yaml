@@ -1,7 +1,7 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'marshak'
-    'tfinal': 813000.786114
+    'tfinal': 813.786114
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
@@ -9,8 +9,8 @@
     'sigma_s': 0.0
     't0': 100000.0                          # time the source is turned off
     'N_spaces': [20]                 # number of cells
-    'tnodes': 8                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [2]                        # number of basis functions -1
+    'tnodes': 4                        # quadrature divisions for uncol. Gauss. source
+    'Ms': [0]                        # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-14                       # rel tolerance for ODE integrator
     'at': 1e-12                        # abs tolerance for ODE integrator

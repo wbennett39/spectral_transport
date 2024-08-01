@@ -53,6 +53,8 @@ class parameter_load_class:
             self.l = float(parameters[source_name]['l'])
         else:
             self.l = 1.0
+        if source_name == 'boundary_source':
+            self.l = float(parameters[source_name]['l'])
 
         self.mxstp = float(parameters['all']['mxstp'])
 

@@ -69,6 +69,7 @@ data = [('N_ang', int64),
         ('vv0', float64),
         ('t0', float64),
         ('geometry', nb.typeof(params_default)),
+        ('l', float64)
         # ('problem_type', int64)
         ]
 #################################################################################################
@@ -93,6 +94,7 @@ class mesh_class(object):
         self.edges = np.zeros(N_space+1)
         self.edges0 = np.zeros(N_space+1)
         self.Dedges = np.zeros(N_space+1)
+        self.l = move_factor
         self.N_space = N_space
         self.speed = edge_v
         self.geometry = geometry
@@ -156,7 +158,7 @@ class mesh_class(object):
         self.initialize_mesh()
     
     def check_tangle(self):
-        if (self.edges[1:] - self.edges[0:-1]).any() <=0:
+        if (self.edges[1:] - self.edges[0:-1]).any() <=1e-14:
             raise ValueError('The mesh is tanlged. ')
 
 
@@ -787,7 +789,7 @@ class mesh_class(object):
         dx = 5e-6
         # rf = min(rfront, self.x0/50)
         # self.edges = np.linspace(0*min(rfront, self.x0 - self.x0/20), self.x0, self.N_space + 1)
-        self.edges = np.concatenate((np.array([rfront - dx]) ,np.linspace(rfront, self.x0, self.N_space)))
+        self.edges = np.concatenate((np.array([rfront - dx]) ,np.linspace(rfront, self.x0 * self.l, self.N_space)))
         print(self.edges, 'edges0')
         self.Dedges = self.edges * 0
         self.edges0 = self.edges
@@ -834,34 +836,38 @@ class mesh_class(object):
         rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
         # self.edges[rest-1] = rfront -5e-4
         # self.edges[0:rest-1] = np.linspace(0.0, self.edges[rest-1], rest -1)
-        print(self.edges)
+        # print(self.edges)
         self.Dedges = self.Dedges_const
         # assert 0
     
     def menis_init3(self):
 
-            pad = self.x0/10
+            
             third = int(2*(self.N_space + 1)/3)
             rest = int(self.N_space + 1 - third)
-            dx = 5e-5
+            # dx = 5e-5
+            min_space = 1e-5
+            dx = min_space * third
+            pad = 100* dx
             c = 29.98
             if self.moving == False:
-                dimensional_t = self.tfinal/29.98
+                dimensional_t = self.tfinal/29.98/self.l
             else:
-                dimensional_t = self.tfinal/29.98
+                dimensional_t = self.tfinal/29.98/self.l
             menis_t = -29.6255 + dimensional_t
             rfront = 0.01 * (-menis_t) ** 0.679502 - dx
             if self.moving == False:
                 self.edges = np.zeros(self.N_space+1)
-                self.edges[1:] = np.linspace(rfront, self.x0, self.N_space)
+                self.edges[1:] = np.linspace(rfront * self.l, self.x0 * self.l, self.N_space)
                 self.edges0 = self.edges
 
                 self.Dedges = self.edges *0 
 
                 self.Dedges_const = self.edges*0
             else:
-        
-                self.edges = np.concatenate((np.linspace(0.0, rfront, 2)[:-1], np.linspace(self.x0-dx-pad, self.x0-dx, rest)[:-1], np.linspace(self.x0-dx, self.x0, third)))
+                outside_wave_edges =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0*self.l-dx))[:-1])
+
+                self.edges = np.concatenate((outside_wave_edges, np.linspace(self.x0*self.l-dx, self.x0*self.l, third)))
                 # print(self.edges.size)
                 assert(int(self.edges.size) == self.N_space + 1)
                 # print(self.edges[third])
@@ -870,41 +876,58 @@ class mesh_class(object):
                 #     assert 0
                 self.edges0 = self.edges
                 v, a = self.converging_move_interpolate(self.edges[rest])
+  
+                
+                menis_t = -29.6255 + self.tfinal / c /self.l
+                rfront = 0.01 * (-menis_t) ** 0.679502 
+
                 self.Dedges_const = self.edges * 0 
                 self.c1s = self.edges * 0
                 # print(self.Dedges_const[rest:])
                 # print(np.linspace(1, 0.0, third))
                 self.Dedges_const[rest:] = np.linspace(1.0, 0.0, third) * v
-                # print(1)
-                self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
-                # print(2)
                 self.c1s[rest:] = np.linspace(1.0, 0.0, third) * a
+                # print(1)
+                # self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
+                final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l))[:-1]
+                self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
+
+                # self.Dedges_const[1:rest] = np.ones(rest-1) * v
+                # print(2)
+                
+
+                if v > 0:
+                    self.Dedges_const = self.Dedges_const * 0
+                    self.c1s = self.c1s * 0
+                
+
                 # print(3)
-                self.c1s[:rest] = np.linspace(0, 1, rest) * a
+                # self.c1s[:rest] = np.linspace(0, 1, rest) * a
+                # self.c1s[1:rest] = np.ones(rest-1) * a
                 # print(4)
                 # self.c1s[1] = 1.0 * a
                 print(self.Dedges_const*self.tfinal + 0.5 * self.c1s * self.tfinal**2 + self.edges0, 'final edges')
 
                 # print(self.Dedges_const - v, 'dedges - v')
                 # print(self.c1s - a, 'c1s - a')
-                menis_t = -29.6255 + self.tfinal / c
-                rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+                
                 # self.edges[rest-1] = rfront -5e-4
                 # self.edges[0:rest-1] = np.linspace(0.0, self.edges[rest-1], rest -1)
-                print(self.edges)
+                # print(self.edges)
                 self.Dedges = self.Dedges_const
         # assert 0
 
     def converging_move(self, t):
         c = 29.98
-        dimensional_t = t/c 
+        dimensional_t = t/c/self.l 
         menis_t = -29.6255 + dimensional_t
         rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+        rfront = rfront * self.l
         dr_dt = -0.00022665176784523018/(29.6255 - 0.0333555703802535*t)**0.32049799999999995
         dx = 5e-4
-        self.edges[1:] = np.linspace(rfront, self.x0, self.N_space)
+        self.edges[1:] = np.linspace(rfront*self.l, self.x0*self.l, self.N_space)
         self.Dedges[1:] = self.Dedges_const[1:] * dr_dt
-        self.edges[0] = rfront - dx
+        self.edges[0] = rfront*self.l - dx
         self.Dedges[0] = self.Dedges_const[0] * dr_dt
 
     def converging_move2(self, t):
@@ -913,9 +936,9 @@ class mesh_class(object):
             self.edges = self.Dedges_const*t + 0.5 * self.c1s * t**2 + self.edges0
             # print(self.Dedges_const)
             self.Dedges =  self.Dedges_const + self.c1s * t 
-            dimensional_t = t/29.98
+            dimensional_t = t/29.98/self.l
             menis_t = -29.6255 + dimensional_t
-            rfront = 0.01 * (-menis_t) ** 0.679502 
+            rfront = self.l * 0.01 * (-menis_t) ** 0.679502 
             third = int(2*(self.N_space + 1)/3)
             rest = int(self.N_space + 1 - third)
         # if self.tfinal-t <= 1e-4:
@@ -936,13 +959,13 @@ class mesh_class(object):
         tf = self.tfinal
         tm = self.tfinal/2
         
-        dimensional_tm = tm/c 
+        dimensional_tm = tm/c/self.l 
         menis_tm = -29.6255 + dimensional_tm
-        rm = 0.01 * (-menis_tm) ** 0.679502 
+        rm = self.l * 0.01 * (-menis_tm) ** 0.679502 
 
-        dimensional_tf = tf/c 
+        dimensional_tf = tf/c/self.l 
         menis_tf = -29.6255 + dimensional_tf
-        rf= 0.01 * (-menis_tf) ** 0.679502 
+        rf= self.l * 0.01 * (-menis_tf) ** 0.679502 
 
         v0 = -((-(rm*tf**2) + rf*tm**2 + tf**2*x0 - tm**2*x0)/(tf*(tf - tm)*tm))
         a = (2*(-(rm*tf) + rf*tm + tf*x0 - tm*x0))/(tf*(tf - tm)*tm)

@@ -306,6 +306,8 @@ class rhs_class():
                 RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                 RHS_transfer += self.c_a * PV*2 /self.sigma_t 
                 RHS_transfer = np.dot(RHS_transfer, Minv)
+                if self.l != 1.0:
+                    RHS_transfer = RHS_transfer / self.l
                 V_new[-1,space,:] = RHS_transfer 
                 if np.isnan(V_new[-1, space, :]).any():
                     print('rhstransfer is nan')
@@ -357,8 +359,7 @@ class rhs_class():
                      
 
 
-                if self.geometry['sphere'] == True:
-
+                if self.geometry['sphere'] == True:  
                     a = xL
                     b = xR
                     RHS = V_old[angle, space, :]*0
@@ -368,9 +369,9 @@ class rhs_class():
                     RHS -= mu_derivative
                     RHS += np.dot(G, U)
                     # RHS += 0.5 * S * self.c #(commented this out because c is included)
-                    RHS += 0.5 * S /self.sigma_t
-                    RHS +=  self.c_a * H * 0.5 / self.sigma_t
-                    RHS += PV * self.c /self.sigma_t
+                    RHS += 0.5 * S /self.sigma_t / self.l
+                    RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l
+                    RHS += PV * self.c /self.sigma_t / self.l
                     # print(VV, 'VV')
                     # print(V_old[angle, space,:], 'vold')
                     
@@ -380,7 +381,7 @@ class rhs_class():
                     # assert(abs(VV[0] - U[0]*(math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3 )
                     # assert(abs(Mass[0,0] -  (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3)
                     # assert(abs((VV-np.dot(Mass, U))[0])<=1e-3)
-                    RHS -= VV / self.sigma_t
+                    RHS -= VV / self.sigma_t / self.l
                     RHS -= np.dot(MPRIME, U)
                     RHS = np.dot(Minv, RHS)
 
@@ -434,8 +435,8 @@ class rhs_class():
             # print(argument, 'xs')
             if np.isnan(T_eval_points.any()):
                 assert(0)
-            if (T_vec[space]).any() <0:
-                T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
+            # if (T_vec[space]).any() <0:
+            T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
         # print(T_vec, 'T')
         # print('## ## ## ## ## ## ')
         return T_vec, T_eval_points

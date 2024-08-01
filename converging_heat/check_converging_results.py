@@ -61,6 +61,18 @@ def check(t):
     plt.legend()
     plt.show()
 
+    plt.figure(4)
+    # plt.plot(r_meni, T_meni, 'bx', label = 'T Meni')
+    plt.plot(xs, ee, 'k-', label = 'energy density')
+    plt.plot(xs, (np.abs(phi_dim)/a/c), 'b-', label = 'radiation energy density')
+    plt.xlim(rf, 0.1)
+    # plt.plot(np.array([0.1]), boundary_temp[time_arg] * 10, 'rx')
+    # plt.plot(np.array([0.1]), boundary_temp[time_arg+2] * 10, 'gx')
+    # plt.plot(np.array([0.1]), boundary_temp[time_arg+1] * 10, 'yo')
+    print(boundary_temp)
+    plt.legend()
+    plt.show()
+
     plt.figure(3)
     plt.plot(xs, phi_dim, label = 'scalar flux')
     plt.plot(xs, a*c*(T)**4, label = r'$T^4$' )

@@ -212,11 +212,12 @@ class sigma_integrator():
                 assert(0)
             # if (T_old<0).any():
             #     T_old = np.mean(T_old) + T_old*0
-            res = 5 * 10**(3) * (np.abs(T_old) + 1e-4) ** -1.5 * (0.1**1.5)
-            for ie, elem in enumerate(res):
-                if elem >= 1e16:
-                    res[ie] = 1e16
-                    print('ceiling')
+            result = np.where(T_old<0, 0.0, T_old)
+            res = 5 * 10**(3) * (result + 1e-6) ** -1.5 * (0.1**1.5)
+            # for ie, elem in enumerate(res):
+                # if elem >= 1e16:
+                #     res[ie] = 1e16
+                #     print('ceiling')
                 # if elem < 0:
                 #     res[ie] = 0.0
                     # print('negative')

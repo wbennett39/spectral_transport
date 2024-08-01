@@ -53,12 +53,13 @@ loader = load()
 run.parameters['all']['Ms'] = [0]
 run.parameters['all']['N_spaces'] = [8]
 run.parameters['all']['tfinal'] = 1.0
+run.mesh_parameters['eval_times'] = False
 run.boundary_source(0,1)
 
 run.load('marshak')
 
 # run.parameters['all']['tfinal'] = 10.0
-run.mesh_parameters['eval_times'] = False
+# run.mesh_parameters['eval_times'] = False
 
 run.boundary_source(0,1)
 f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')

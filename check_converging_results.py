@@ -8,18 +8,22 @@ def check(t):
     if t == 204.20877:
         iterator = 0
     elif t == 523.519754:
+
          iterator = 1
     elif t == 692.759852:
+
          iterator = 2
     elif t == 813.786114:
+
          iterator = 3
     tfinal = t
     a = 0.0137225 
     c = 29.98
-    f = h5py.File('converging_heat_wave_results2.h5', 'r+')
+    f = h5py.File('converging_heat/converging_heat_wave_results2.h5', 'r+')
     e = f['energy_density'][iterator,:]
     xs = f['xs'][iterator,:]
     phi = f['scalar_flux'][iterator,:]
+
     phi_dim = phi * a * c
 
     f.close()
@@ -53,7 +57,7 @@ def check(t):
     plt.plot(np.array([0.1]), boundary_temp[time_arg] * 10, 'rx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+2] * 10, 'gx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+1] * 10, 'yo')
-    print(boundary_temp)
+#     print(boundary_temp)
     plt.legend()
     plt.show()
 
@@ -65,7 +69,7 @@ def check(t):
     plt.plot(np.array([0.1]), boundary_temp[time_arg] * 10, 'rx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+2] * 10, 'gx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+1] * 10, 'yo')
-    print(boundary_temp)
+#     print(boundary_temp)
     plt.legend()
     plt.show()
 
@@ -77,7 +81,7 @@ def check(t):
     # plt.plot(np.array([0.1]), boundary_temp[time_arg] * 10, 'rx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+2] * 10, 'gx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+1] * 10, 'yo')
-    print(boundary_temp)
+#     print(boundary_temp)
     plt.legend()
     plt.show()
 
@@ -91,4 +95,3 @@ check(204.20877)
 check(523.519754)
 check(692.759852)
 check(813.786114)
-

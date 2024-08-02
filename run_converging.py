@@ -70,6 +70,12 @@ if f.__contains__('scalar_flux'):
 f.create_dataset('scalar_flux', data = run.phi)
 f.create_dataset('energy_density', data = run.e)
 f.create_dataset('xs', data = run.xs)
+print('###')
+print(run.phi,'scalar flux')
+print(run.phi.shape())
+print('###')
+print(f['scalar_flux'][:],'loaded scalar flux')
+
 
 f.close()
 

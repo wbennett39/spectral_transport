@@ -63,13 +63,22 @@ run.load('marshak')
 
 run.boundary_source(0,1)
 f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')
-if f.__contains__('scalar_flux'):
+M = run.parameters['all']['Ms'] 
+spaces = run.parameters['all']['N_spaces']
+if f.__contains__(f'M={M}_{spaces}_cells'):
+    del f[f'M={M}_{spaces}_cells']
+
+f.create_group(f'M={M}_{spaces}_cells')
+
+if f[f'M={M}_{spaces}_cells'].__contains__('scalar_flux'):
     del f['scalar_flux']
     del f['energy_density']
     del f['xs']
-f.create_dataset('scalar_flux', data = run.phi)
-f.create_dataset('energy_density', data = run.e)
-f.create_dataset('xs', data = run.xs)
+
+
+f[f'M={M}_{spaces}_cells'].create_dataset('scalar_flux', data = run.phi)
+f[f'M={M}_{spaces}_cells'].create_dataset('energy_density', data = run.e)
+f[f'M={M}_{spaces}_cells'].create_dataset('xs', data = run.xs)
 # print('###')
 # print(run.phi,'scalar flux')
 # print('###')

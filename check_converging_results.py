@@ -4,18 +4,18 @@ import numpy as plt
 import matplotlib.pyplot as plt
 import numpy as np
 
-def check(t):
-    if t == 20.420877:
-        iterator = 0
-    elif t == 52.3519754:
+def check(t, iterator):
+#     if t == 20.420877:
+#         iterator = 0
+#     elif t == 52.3519754:
 
-         iterator = 1
-    elif t == 69.2759852:
+#          iterator = 1
+#     elif t == 69.2759852:
 
-         iterator = 2
-    elif t == 81.3786114:
+#          iterator = 2
+#     elif t == 81.3786114:
 
-         iterator = 3
+#          iterator = 3
     tfinal = t
     a = 0.0137225 
     c = 29.98
@@ -98,7 +98,7 @@ def check(t):
     plt.legend()
     plt.show()
 
-check(20.420877)
-check(52.3519754)
-check(69.2759852)
-check(81.3786114)
+check(204.20877,0)
+check(523.519754,1)
+check(692.759852,2)
+check(813.786114,3)

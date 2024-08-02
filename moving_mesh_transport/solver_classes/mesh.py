@@ -846,7 +846,7 @@ class mesh_class(object):
             third = int(2*(self.N_space + 1)/3)
             rest = int(self.N_space + 1 - third)
             # dx = 5e-5
-            min_space = 5e-3
+            min_space = 5e-4
             dx = min_space * third
             pad = 100* dx
             c = 29.98
@@ -880,6 +880,7 @@ class mesh_class(object):
                 
                 menis_t = -29.6255 + self.tfinal / c /self.l
                 rfront = 0.01 * (-menis_t) ** 0.679502 
+                print(rfront,'final shock front')
 
                 self.Dedges_const = self.edges * 0 
                 self.c1s = self.edges * 0
@@ -959,13 +960,13 @@ class mesh_class(object):
         tf = self.tfinal
         tm = self.tfinal/2
         
-        dimensional_tm = tm/c/self.l 
+        dimensional_tm = tm/c 
         menis_tm = -29.6255 + dimensional_tm
-        rm = self.l * 0.01 * (-menis_tm) ** 0.679502 
+        rm = 0.01 * (-menis_tm) ** 0.679502 
 
-        dimensional_tf = tf/c/self.l 
+        dimensional_tf = tf/c
         menis_tf = -29.6255 + dimensional_tf
-        rf= self.l * 0.01 * (-menis_tf) ** 0.679502 
+        rf=  0.01 * (-menis_tf) ** 0.679502 
 
         v0 = -((-(rm*tf**2) + rf*tm**2 + tf**2*x0 - tm**2*x0)/(tf*(tf - tm)*tm))
         a = (2*(-(rm*tf) + rf*tm + tf*x0 - tm*x0))/(tf*(tf - tm)*tm)

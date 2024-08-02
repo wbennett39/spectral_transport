@@ -281,12 +281,20 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         exit_dist = np.zeros((eval_array.size, N_ang, 2))
         exit_phi = np.zeros((eval_array.size, 2))
         xs_ret = np.zeros((eval_array.size, xs.size))
+        # initialize = build(N_ang, N_space, M, tfinal, x0, t0, mus, ws, xs_quad,
+        #                ws_quad, sigma_t, sigma_s, source_type, uncollided, moving, move_type, t_quad, t_ws,
+        #                thermal_couple, temp_function, e_initial, sigma, particle_v, edge_v, cv0, thick, 
+        #                wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
+        #                 quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
+        #                 finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry)
+        
         fake_mesh  = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
                       wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
                       domain_width, fake_sedov_v0, boundary_on, t0, geometry) 
         for it, tt in enumerate(eval_array):
             fake_mesh.move(tt)
             edges = fake_mesh.edges
+            print(edges, 'edges', tt, 't')
             if choose_xs == False:
                 xs = find_nodes(edges, M, geometry)
             elif choose_xs == True:

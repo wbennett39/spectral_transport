@@ -20,9 +20,16 @@ def check(t):
     a = 0.0137225 
     c = 29.98
     f = h5py.File('converging_heat/converging_heat_wave_results2.h5', 'r+')
-    e = f['energy_density'][iterator,:]
-    xs = f['xs'][iterator,:]
-    phi = f['scalar_flux'][iterator,:]
+    e = f['energy_density'][:]
+    xs = f['xs'][:]
+    phi = f['scalar_flux'][:]
+
+    phi = phi[iterator]
+    xs = xs[iterator] 
+    e = e[iterator]
+    print(xs, 'xs')
+    print(phi, 'phi')
+
 
     phi_dim = phi * a * c
 

@@ -286,7 +286,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
                       domain_width, fake_sedov_v0, boundary_on, t0, geometry) 
         for it, tt in enumerate(eval_array):
             fake_mesh.move(tt)
-            edges = mesh.edges
+            edges = fake_mesh.edges
             if choose_xs == False:
                 xs = find_nodes(edges, M, geometry)
             elif choose_xs == True:

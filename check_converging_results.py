@@ -4,7 +4,7 @@ import numpy as plt
 import matplotlib.pyplot as plt
 import numpy as np
 
-def check(t, iterator):
+def check(t, iterator, spaces = 50, M = 0):
 #     if t == 20.420877:
 #         iterator = 0
 #     elif t == 52.3519754:
@@ -20,6 +20,8 @@ def check(t, iterator):
     a = 0.0137225 
     c = 29.98
     f = h5py.File('converging_heat/converging_heat_wave_results2.h5', 'r+')
+#    [f'M={M}_{spaces}_cells']
+    print(f.keys()) 
     e = f['energy_density'][:]
     xs = f['xs'][:]
     phi = f['scalar_flux'][:]

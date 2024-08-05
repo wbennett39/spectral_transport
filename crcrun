@@ -1,6 +1,0 @@
-#!/bin/bash
-#$ -M wbennet2@nd.edu
-#$ -m abe
-
-module load python/3.6.4
-python3 run_converging.py

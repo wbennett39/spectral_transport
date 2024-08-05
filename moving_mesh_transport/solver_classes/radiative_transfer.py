@@ -146,7 +146,7 @@ class T_function(object):
 
     def T_func(self, argument, a, b, sigma_class, space):
         T = self.make_T(argument, a, b)
-        self.get_sigma_a_vec(argument, sigma_class, T)
+        self.get_sigma_a_vec(argument, sigma_class, np.mean(T) + T*0)
         # self.xs_points = argument
         # self.e_points = e
 

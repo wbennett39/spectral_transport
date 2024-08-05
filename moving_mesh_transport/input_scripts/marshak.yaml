@@ -12,9 +12,9 @@
     'tnodes': 16                        # quadrature divisions for uncol. Gauss. source
     'Ms': [2]                        # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
-    'rt': 5e-14                       # rel tolerance for ODE integrator
-    'at': 1e-12                        # abs tolerance for ODE integrator
-    'mxstp': .001
+    'rt': 5e-12                       # rel tolerance for ODE integrator
+    'at': 1e-10                        # abs tolerance for ODE integrator
+    'mxstp': 10.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
     'radiative_transfer': {none: False}             # material temperature feedback. 1-True, 0 - False
     'thermal_couple': {none: False}
@@ -27,7 +27,7 @@
     'cv_const': 0.03
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'BDF'
+    'integrator': 'LSODA'
     'geometry': {slab: False, sphere: True}
     
 # plane pulse source

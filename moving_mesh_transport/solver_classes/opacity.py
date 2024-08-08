@@ -105,6 +105,10 @@ class sigma_integrator():
         # opacity = self.sigma_function(self.xs_quad, t, T_old)
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
+
+        
+        
+
         # self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, self.xs_quad, a, b))
         if checkfunc == True:
             if abs(0.5 * (b-a) * np.sum(self.ws_quad *  normTn(j, argument, a, b) * 2.0 * normTn(j, argument, a, b))-1)>1e-6:
@@ -115,6 +119,23 @@ class sigma_integrator():
                 print(argument, 'argument')
                 print(j, 'j')
                 assert(0)
+            
+            resconst = math.sqrt(b-a) * opacity * math.sqrt(math.pi)
+            if j == 0:
+                if((np.abs(self.cs[k,0]-  resconst) >1e-3).any()):
+                    print(np.abs(self.cs[k,0]-  resconst) )
+                    assert(0)
+            elif j == 1:
+                if((np.abs(self.cs[k,1]) >1e-4)):
+                    print(np.abs(self.cs[k,1]-  0) )
+                    assert(0)
+            elif j == 2:
+                if((np.abs(self.cs[k,2]) >1e-4)):
+                    print(np.abs(self.cs[k,2]) )
+                    assert(0)
+
+
+                      
 
         
         
@@ -213,7 +234,7 @@ class sigma_integrator():
             # if (T_old<0).any():
             #     T_old = np.mean(T_old) + T_old*0
             result = np.where(T_old<0, 0.0, T_old)
-            res = 5 * 10**(3) * (result + 1e-5) ** -1.5 * (0.1**1.5)
+            res = 5 * 10**(3) * (result + 1e-10) ** -1.5 * (0.1**1.5)
             # for ie, elem in enumerate(res):
                 # if elem >= 1e16:
                 #     res[ie] = 1e16

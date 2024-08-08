@@ -8,9 +8,9 @@
     'sigma_t': 1.0
     'sigma_s': 0.0
     't0': 100000.0                          # time the source is turned off
-    'N_spaces': [20]                 # number of cells
+    'N_spaces': [200]                 # number of cells
     'tnodes': 16                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [2]                        # number of basis functions -1
+    'Ms': [0]                        # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-13                       # rel tolerance for ODE integrator
     'at': 1e-12                        # abs tolerance for ODE integrator

@@ -119,6 +119,14 @@ class T_function(object):
 
     def make_T(self, argument, a, b):
         e = self.make_e(argument, a, b)
+
+        
+        e = self.positivize_e(argument, a,b)
+        # self.find_minimum(a,b)
+        if e.any() <0:
+             
+             raise ValueError('Negative energy density')
+
         if self.temp_function[0] == 1:
             T = self.su_olson_source(e, argument, a, b)
         elif self.temp_function[1] == 1:
@@ -146,9 +154,10 @@ class T_function(object):
 
     def T_func(self, argument, a, b, sigma_class, space):
         T = self.make_T(argument, a, b)
-        self.get_sigma_a_vec(argument, sigma_class, np.mean(T) + T*0)
+        self.get_sigma_a_vec(argument, sigma_class, T)
         # self.xs_points = argument
         # self.e_points = e
+        
 
         if self.temp_function[0] == 1:
             self.temperature[space,:] = T
@@ -174,7 +183,21 @@ class T_function(object):
             assert(0)
 
 
-        
+    def positivize_e(self,argument, a, b):
+         ubar = self.cell_average(a,b)
+         m = self.find_minimum(a,b)
+
+         theta = min(1, abs(ubar/(m-ubar)))
+
+         e = self.make_e(argument, a,b,)
+
+         enew = theta * (e-ubar) + ubar
+
+         return enew
+         
+
+
+
     def su_olson_source(self, e, x, a, b):
         
         self.fudge_factor = np.ones(e.size)
@@ -238,3 +261,70 @@ class T_function(object):
                 for j in range(self.M+1):
                     self.integrate_quad_sphere(xL, xR, j, sigma_class)
         
+
+    def cell_average(self, a, b):
+        dx = 4/3 * math.pi * (b**3-a**3)
+        
+        argument = (b-a)/2*self.xs_quad + (a+b)/2
+        e = self.make_e(argument,a,b)
+        ubar = 0.5 * (b-a) * np.sum(e * self.ws_quad)
+
+        return ubar * dx
+    
+     
+     
+
+    def find_minimum(self, a, b):
+        dx = (b-a)/10
+
+        iterations = 3
+        pool_size = 3
+        npts = 11
+
+
+        initial_guess = np.linspace(a,b,npts)
+        ee = self.make_e(initial_guess, a, b)
+        emins_initial = np.sort(ee)[0:pool_size]
+        xvals = np.zeros(pool_size)
+        emins = np.zeros(pool_size)
+        for n in range(pool_size):
+            xvals[n] = initial_guess[np.argmin(np.abs(ee-emins_initial[n]))]
+
+
+
+        for it in range(iterations):
+            for ix in range(pool_size):
+                xs = np.linspace(xvals[ix]-dx, xvals[ix]+dx, npts)
+
+                ee = self.make_e(xs, a, b)
+                emin = np.sort(ee)[0]
+
+                xval = xs[np.argmin(np.abs(ee-emin))]
+
+                emins[ix] = emin
+                xvals[ix] = xval
+
+            
+            dx = dx/ 10
+        if (emins[0] > emins_initial).any():
+             print(emins, 'min vals')
+             print(emins_initial, 'initial min values')
+            #  assert 0
+        return emins[0]
+    
+
+
+
+
+
+        
+                             
+
+
+              
+             
+             
+        
+
+
+         

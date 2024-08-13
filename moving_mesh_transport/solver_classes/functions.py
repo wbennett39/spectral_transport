@@ -698,7 +698,7 @@ def quadrature(n, name, testing = False):
         #     np.testing.assert_allclose(testxs, xs)
         #     np.testing.assert_allclose(testws, ws)
     return xs, ws    
-
+# @njit
 def bisection(f, a, b, tol=1e-14):
     assert np.sign(f(a)) != np.sign(f(b))
     while b-a > tol:
@@ -710,6 +710,8 @@ def bisection(f, a, b, tol=1e-14):
             a = m
             
     return m
+
+
 
 def eval_legendre_deriv(n, x):
     return (
@@ -776,3 +778,7 @@ def rttwo_mistake_undoer(i,j):
         assert(0)
         
 
+
+
+# @njit 
+# def positivity_enforcer():

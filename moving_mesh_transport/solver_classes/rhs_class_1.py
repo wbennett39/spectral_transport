@@ -436,7 +436,7 @@ class rhs_class():
             if np.isnan(T_eval_points.any()):
                 assert(0)
             # if (T_vec[space]).any() <0:
-            T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
+            # T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
         # print(T_vec, 'T')
         # print('## ## ## ## ## ## ')
         return T_vec, T_eval_points

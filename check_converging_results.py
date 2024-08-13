@@ -4,7 +4,7 @@ import numpy as plt
 import matplotlib.pyplot as plt
 import numpy as np
 
-def check(t, iterator, spaces = 200, M = 0):
+def check(t, iterator, spaces = 20, M = 2):
 #     if t == 20.420877:
 #         iterator = 0
 #     elif t == 52.3519754:
@@ -110,7 +110,7 @@ def check(t, iterator, spaces = 200, M = 0):
 # check(5.23519754,1)
 # check(6.92759852,2)
 # check(8.13786114,3)
-check(1.0,0)
-check(10.0,1)
-check(50.0,2)
-check(150.0,3)
+check(.10,0)
+check(1.00,1)
+check(5.0,2)
+check(15.0,3)

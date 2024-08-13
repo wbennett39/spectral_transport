@@ -119,12 +119,12 @@ class T_function(object):
 
     def make_T(self, argument, a, b):
         e = self.make_e(argument, a, b)
+            
 
         
         e = self.positivize_e(argument, a,b)
         # self.find_minimum(a,b)
         if e.any() <0:
-             
              raise ValueError('Negative energy density')
 
         if self.temp_function[0] == 1:
@@ -186,10 +186,12 @@ class T_function(object):
     def positivize_e(self,argument, a, b):
          ubar = self.cell_average(a,b)
          m = self.find_minimum(a,b)
+         if abs(m - ubar) <=1e-14:
+              theta = 1.0
+         else:    
+            theta = min(1, abs(-ubar/(m-ubar)))
 
-         theta = min(1, abs(ubar/(m-ubar)))
-
-         e = self.make_e(argument, a,b,)
+         e = self.make_e(argument, a,b)
 
          enew = theta * (e-ubar) + ubar
 
@@ -263,13 +265,19 @@ class T_function(object):
         
 
     def cell_average(self, a, b):
-        dx = 4/3 * math.pi * (b**3-a**3)
+        # dx = 4/3 * math.pi * (b**3-a**3)
+        dx = b-a
+        if dx <=1e-16:
+             assert 0
         
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         e = self.make_e(argument,a,b)
         ubar = 0.5 * (b-a) * np.sum(e * self.ws_quad)
 
-        return ubar * dx
+        # if np.abs(ubar/dx - self.e_vec[0] * normTn(0,argument,a,b)).any() >=1e-8:
+        #      assert 0
+
+        return ubar / dx
     
      
      
@@ -280,7 +288,8 @@ class T_function(object):
         iterations = 3
         pool_size = 3
         npts = 11
-
+        converged = False
+        tol = 1e-7
 
         initial_guess = np.linspace(a,b,npts)
         ee = self.make_e(initial_guess, a, b)
@@ -292,7 +301,8 @@ class T_function(object):
 
 
 
-        for it in range(iterations):
+        while converged == False:
+            emins_old = emins
             for ix in range(pool_size):
                 xs = np.linspace(xvals[ix]-dx, xvals[ix]+dx, npts)
 
@@ -304,13 +314,14 @@ class T_function(object):
                 emins[ix] = emin
                 xvals[ix] = xval
 
-            
             dx = dx/ 10
-        if (emins[0] > emins_initial).any():
+            if np.abs(emins_old - emins).all() <=tol:
+                 converged = True
+        if (np.sort(emins)[0] > emins_initial).any():
              print(emins, 'min vals')
              print(emins_initial, 'initial min values')
             #  assert 0
-        return emins[0]
+        return np.sort(emins)[0]
     
 
 

@@ -54,7 +54,7 @@ run.parameters['all']['Ms'] = [0]
 run.parameters['all']['N_spaces'] = [8]
 run.parameters['all']['tfinal'] = 1.0
 run.mesh_parameters['eval_times'] = False
-run.boundary_source(0,1)
+run.boundary_source(0,0)
 
 run.load('marshak')
 

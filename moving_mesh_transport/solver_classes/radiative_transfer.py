@@ -289,7 +289,7 @@ class T_function(object):
         pool_size = 3
         npts = 11
         converged = False
-        tol = 1e-7
+        tol = 1e-6
 
         initial_guess = np.linspace(a,b,npts)
         ee = self.make_e(initial_guess, a, b)
@@ -317,6 +317,7 @@ class T_function(object):
             dx = dx/ 10
             if np.abs(emins_old - emins).all() <=tol:
                  converged = True
+
         if (np.sort(emins)[0] > emins_initial).any():
              print(emins, 'min vals')
              print(emins_initial, 'initial min values')

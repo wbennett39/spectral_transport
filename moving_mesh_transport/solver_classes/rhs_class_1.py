@@ -104,7 +104,8 @@ data = [('N_ang', int64),
         ('time_points', float64[:]),
         ('t_quad', float64[:]),
         ('t_ws', float64[:]),
-        ('lumping', int64)
+        ('lumping', int64),
+        ('tfinal', float64)
 
         ]
 ##############################################################################
@@ -118,6 +119,7 @@ class rhs_class():
         self.N_space = build.N_space
         self.M = build.M
         self.mus = build.mus
+        self.tfinal = build.tfinal
         self.geometry = build.geometry
         # if self.geometry['slab'] == True:
         self.ws = build.ws

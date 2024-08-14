@@ -249,27 +249,34 @@ class rhs_class():
             L = matrices.L
             G = matrices.G
             MPRIME = matrices.MPRIME
-             # special matrices for spherical geometries
-            if self.geometry['sphere'] == True:
-                Mass = matrices.Mass
-                if (self.lumping == True) and (self.M >0):
-                    Mass, Minv = self.mass_lumper(Mass)
-                else:
-                    Minv = np.linalg.inv(Mass)
-                J = matrices.J
-                # VVs = matrices.VV
-            # make P 
             if self.radiative_transfer['none'] == False:
                 flux.make_P(V_old[:-1,space,:], space, xL, xR)
             else:
                 flux.make_P(V_old[:,space,:], space, xL, xR)
-            # I need to make different functions to call the scattering and absorbing scalar flux
+     
             PV = flux.scalar_flux_term
+            S = source.S
+            H = transfer_class.H
+            if self.geometry['sphere'] == True:
+                Mass = matrices.Mass
+                J = matrices.J
+                if (self.lumping == True) and (self.M >0):
+                    Mass, Minv = self.mass_lumper(Mass, True)
+                    # L = self.mass_lumper(L)
+                    # G = self.mass_lumper(G)
+                    # J = self.mass_lumper(J)
+                    # MPRIME = self.mass_lumper(MPRIME)
+                    
+                else:
+                    Minv = np.linalg.inv(Mass)
+                
+                # VVs = matrices.VV
+            # make P 
+            
             # integrate the source
             source.make_source(t, xL, xR, uncollided_sol)
             #print(source.make_source(t, xL, xR, uncollided_sol))
-            S = source.S
-            H = transfer_class.H
+
 
             
             #if ( (S[0]!=0.0) or (S[1]!=0.0) ):
@@ -289,6 +296,8 @@ class rhs_class():
                 transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
 
                 H = transfer_class.H
+                # if self.lumping == True:
+                #     H = self.mass_lumper(H)
                 # if (H <0).any():
                 #     print(H)
                 #     assert 0 
@@ -408,15 +417,18 @@ class rhs_class():
 
             return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
         
-    def mass_lumper(self, Mass):
+    def mass_lumper(self, Mass, invert = False):
             mass_lumped = np.zeros((self.M+1, self.M+1))
             mass_lumped_inv = np.zeros((self.M+1, self.M+1))
             for i in range(self.M+1):
                 for j in range(self.M+1):
                     mass_lumped[i,i] += Mass[i, j]
-            for i in range(self.M+1):
-                mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
-            return mass_lumped, mass_lumped_inv
+            if invert == True:
+                for i in range(self.M+1):
+                    mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
+                return mass_lumped, mass_lumped_inv
+            else:
+                return mass_lumped
 
 
 

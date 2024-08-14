@@ -428,7 +428,7 @@ class rhs_class():
                     mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
                 return mass_lumped, mass_lumped_inv
             else:
-                return mass_lumped
+                return mass_lumped, mass_lumped_inv
 
 
 

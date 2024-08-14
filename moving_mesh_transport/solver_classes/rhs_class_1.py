@@ -248,7 +248,7 @@ class rhs_class():
              # special matrices for spherical geometries
             if self.geometry['sphere'] == True:
                 Mass = matrices.Mass
-                if self.lumping == True and self.M >0:
+                if (self.lumping == True) and (self.M >0):
                     Mass, Minv = self.mass_lumper(Mass)
                 else:
                     Minv = np.linalg.inv(Mass)

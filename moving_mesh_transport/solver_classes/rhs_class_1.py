@@ -145,7 +145,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 1000
+        self.division = 10000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -171,6 +171,8 @@ class rhs_class():
         self.delta_tavg += delta_t / self.division
         if self.counter == self.division:
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
+            print((t/self.tfinal) * 100, ' percent complete')
+            print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             if self.N_space <= 32:
                 if self.geometry['sphere'] == True:
                     print(mesh.edges)

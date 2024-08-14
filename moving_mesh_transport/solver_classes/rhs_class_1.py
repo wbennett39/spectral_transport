@@ -173,7 +173,7 @@ class rhs_class():
         self.delta_tavg += delta_t / self.division
         if self.counter == self.division:
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
-            print((t/self.tfinal) * 100, ' percent complete')
+            print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             if self.N_space <= 32:
                 if self.geometry['sphere'] == True:

@@ -129,7 +129,7 @@ class main_class(parameter_load_class):
                 self.thick, self.mxstp, self.wave_loc_array, self.find_edges_tol, self.source_strength, self.move_factor, 
                 self.integrator, self.l, self.save_wave_loc, self.pad, self.leader_pad, self.xs_quad, self.eval_times, self.eval_array,
                 self.boundary_on, self.boundary_source_strength, self.boundary_source, self.sigma_func, self.Msigma, self.finite_domain,
-                self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry)
+                self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry, self.lumping)
                 print(edges, 'final edges')
                 # print(edges, "edges")
                 print(wave_tpnts, wave_xpnts, "wave points")

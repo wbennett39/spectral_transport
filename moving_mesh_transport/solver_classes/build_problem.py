@@ -86,7 +86,8 @@ data = [('N_ang', int64),
         ('epsilon', float64), 
         ('geometry', nb.typeof(params_default)),
         ('boundary_temp', float64[:]),
-        ('boundary_time', float64[:])
+        ('boundary_time', float64[:]),
+        ('lumping', int64)
         ]
 ###############################################################################
 
@@ -96,10 +97,11 @@ class build(object):
     source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
      quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
-     fake_sedov_v0, test_dimensional_rhs, epsilon, geometry):
+     fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping):
         self.N_ang = N_ang
         self.N_space = N_space
         self.M = M
+        self.lumping = lumping
         self.tfinal = tfinal
         self.sigma_t = sigma_t
         self.sigma_s = sigma_s

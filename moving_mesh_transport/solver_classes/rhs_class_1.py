@@ -103,7 +103,8 @@ data = [('N_ang', int64),
         ('T_eval_points', float64[:,:]),
         ('time_points', float64[:]),
         ('t_quad', float64[:]),
-        ('t_ws', float64[:])
+        ('t_ws', float64[:]),
+        ('lumping', int64)
 
         ]
 ##############################################################################
@@ -137,6 +138,7 @@ class rhs_class():
         self.sigma_t = build.sigma_t
         self.c = build.sigma_s 
         self.particle_v = build.particle_v
+        self.lumping = build.lumping
         
         self.radiative_transfer = build.thermal_couple
        
@@ -246,7 +248,10 @@ class rhs_class():
              # special matrices for spherical geometries
             if self.geometry['sphere'] == True:
                 Mass = matrices.Mass
-                Minv = np.linalg.inv(Mass)
+                if self.lumping == True and self.M >0:
+                    Mass, Minv = self.mass_lumper(Mass)
+                else:
+                    Minv = np.linalg.inv(Mass)
                 J = matrices.J
                 # VVs = matrices.VV
             # make P 
@@ -399,7 +404,23 @@ class rhs_class():
 
             return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
         
-    
+    def mass_lumper(self, Mass):
+            mass_lumped = np.zeros((self.M+1, self.M+1))
+            mass_lumped_inv = np.zeros((self.M+1, self.M+1))
+            for i in range(self.M+1):
+                for j in range(self.M+1):
+                    mass_lumped[i,i] += Mass[i, j]
+            for i in range(self.M+1):
+                mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
+            return mass_lumped, mass_lumped_inv
+
+
+
+
+
+
+
+
     def V_new_floor_func(self, V_new):
         floor = 1e-20
         for ang in range(self.N_ang + 1):

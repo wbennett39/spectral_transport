@@ -79,7 +79,8 @@ def check(t, iterator, spaces = 20, M = 1):
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+2] * 10, 'gx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+1] * 10, 'yo')
 #     print(boundary_temp)
-    plt.legend()
+#     if iterator == 3: 
+#           plt.legend()
     plt.show()
 
     plt.figure(4)
@@ -106,10 +107,10 @@ def check(t, iterator, spaces = 20, M = 1):
 # check(813.786114,3)
 
 
-check(2.0420877,0)
-check(5.23519754,1)
-check(6.92759852,2)
-check(8.13786114,3)
+check(204.20877,0)
+check(523.519754,1)
+check(692.759852,2)
+check(813.786114,3)
 # check(.10,0)
 # check(1.00,1)
 # check(5.0,2)

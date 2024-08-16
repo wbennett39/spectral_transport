@@ -866,9 +866,11 @@ class mesh_class(object):
 
                 self.Dedges_const = self.edges*0
             else:
+                inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx
+
                 outside_wave_edges =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0*self.l-dx))[:-1])
 
-                self.edges = np.concatenate((outside_wave_edges, np.linspace(self.x0*self.l-dx, self.x0*self.l, third)))
+                self.edges = np.concatenate((outside_wave_edges, inside_wave_edges))
                 # print(self.edges.size)
                 assert(int(self.edges.size) == self.N_space + 1)
                 # print(self.edges[third])

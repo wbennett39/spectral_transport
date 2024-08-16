@@ -147,7 +147,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 10000
+        self.division = 5000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -209,6 +209,7 @@ class rhs_class():
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
         # print out timesteps
         self.time_step_counter(t, mesh) 
+
         # allocate arrays
 
         # My (Stephen's) attempt at adding radiative transfer to this code
@@ -230,6 +231,10 @@ class rhs_class():
         # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
         #     time_loc -= 1
         self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
+        # for ix in range(self.N_space):
+        #     for j in range(self.xs_quad.size):
+        #         if self.T_old[ix, j] <0.0:
+        #             assert(0)
         
         sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class)
@@ -261,7 +266,7 @@ class rhs_class():
                 Mass = matrices.Mass
                 J = matrices.J
                 if (self.lumping == True) and (self.M >0):
-                    Mass, Minv = self.mass_lumper(Mass, True)
+                    Mass, Minv = self.mass_lumper(Mass, True) 
                     # L = self.mass_lumper(L)
                     # G = self.mass_lumper(G)
                     # J = self.mass_lumper(J)
@@ -456,7 +461,7 @@ class rhs_class():
             a = xL
             b = xR
             argument = (b-a)/2*self.xs_quad + (a+b)/2
-            argument2 = (b-a)/2*self.t_quad + (a+b)/2
+            # argument2 = (b-a)/2*self.t_quad + (a+b)/2
             T_vec[space] = rad_transfer.make_T(argument, a, b)
             # T_test = rad_transfer.make_T(argument2, a, b)
             # spline_ob = cubic_spline(argument, T_vec[space])
@@ -472,9 +477,17 @@ class rhs_class():
             # print(argument, 'xs')
             if np.isnan(T_eval_points.any()):
                 assert(0)
+            # elif T_vec.any() <0:
+            #     # raise ValueError('negative temperature')
+            #     assert(0)
             # if (T_vec[space]).any() <0:
             # T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
-        # print(T_vec, 'T')
+
+        # for space in range(self.N_space):
+        #     for j in range(self.xs_quad.size):
+        #         if T_vec[space, j] <0:
+        #             print(T_vec[space, j])
+        #             assert(0)
         # print('## ## ## ## ## ## ')
         return T_vec, T_eval_points
 

@@ -119,9 +119,6 @@ class T_function(object):
 
     def make_T(self, argument, a, b):
         e = self.make_e(argument, a, b)
-            
-
-        
         e = self.positivize_e(argument, a,b)
         # self.find_minimum(a,b)
         if e.any() <0:
@@ -136,6 +133,12 @@ class T_function(object):
             #     T = np.zeros(e.size) + 1e-12
             #  else:
                 T = self.meni_eos(e)
+  
+                for it, TT in enumerate(T):
+                    if TT<0.0:
+                    #  raise ValueError('negative temperature')
+                        print(TT)
+                        assert(0)
                 # T = self.su_olson_source(e, argument, a, b)
                 
                 # T = e / 0.1
@@ -175,7 +178,7 @@ class T_function(object):
         elif self.temp_function[2] == 1:
             # print(self.sigma_a_vec)
             self.temperature[space,:] = T
-            return  np.power(T,4) * self.sigma_a_vec * np.sign(T)
+            return  np.power(T,4) * self.sigma_a_vec
         
             
 
@@ -184,7 +187,11 @@ class T_function(object):
 
 
     def positivize_e(self,argument, a, b):
+         floor = 1e-4
+
          ubar = self.cell_average(a,b)
+     
+
          m = self.find_minimum(a,b)
          if abs(m - ubar) <=1e-14:
               theta = 1.0
@@ -192,9 +199,36 @@ class T_function(object):
             theta = min(1, abs(-ubar/(m-ubar)))
 
          e = self.make_e(argument, a,b)
+         if ubar <0.0:
+              enew = e * 0
+         else:
+            enew = theta * (e-ubar) + ubar 
+         if (enew<0).any():
+                m = self.find_minimum(a,b, tol = 1e8)
+                theta = min(1, abs(-ubar/(m-ubar)))
+                enew = theta * (e-ubar) + ubar
+                if (enew<0).any():
+                    #  print(theta, 'theta')
+                    #  print(ubar, 'ubar')
+                    #  print(e,'e')
+                    #  print(m,'m')
+                    #  print(enew, 'enew')
 
-         enew = theta * (e-ubar) + ubar
+                    #  print(self.xs_quad, 'xs')
+                     e2 = self.make_e(np.linspace(a,b,1000), a,b)
+                    #  print(np.mean(e2), 'mean e2')
+                    #  if ((m - e2) <0).all():
+                    #     assert(0)
+                    #  else:
+                    #     #   print(np.min(np.abs((m-e2))), 'm-e2')
+                    #     #   print(np.min(e2),'min e2')
+                    #     #   print(np.min(enew), 'min enew')
 
+                    #     #   assert(0)
+                     for ix, ee in enumerate(enew):
+                            if ee < 0:
+                               if abs(ee) < floor:
+                                    enew[ix] = 0.0
          return enew
          
 
@@ -276,53 +310,83 @@ class T_function(object):
 
         # if np.abs(ubar/dx - self.e_vec[0] * normTn(0,argument,a,b)).any() >=1e-8:
         #      assert 0
-
+        if ubar <0:
+             print('negative ubar')
+             assert(0)
         return ubar / dx
     
      
      
 
-    def find_minimum(self, a, b):
+    def find_minimum(self, a, b, tol = 2**12):
         dx = (b-a)/10
-
-        iterations = 3
         pool_size = 3
-        npts = 11
+        npts = 301
         converged = False
-        tol = 1e-6
+        tol = 1e-15
 
         initial_guess = np.linspace(a,b,npts)
         ee = self.make_e(initial_guess, a, b)
         emins_initial = np.sort(ee)[0:pool_size]
         xvals = np.zeros(pool_size)
         emins = np.zeros(pool_size)
+        emins = emins_initial
         for n in range(pool_size):
             xvals[n] = initial_guess[np.argmin(np.abs(ee-emins_initial[n]))]
 
 
+        it = 0
+        # while converged == False:
+        #     emins_old = emins
+        for ix in range(pool_size):
+                # xs = np.linspace(xvals[ix]-dx, xvals[ix]+dx, npts)
 
-        while converged == False:
-            emins_old = emins
-            for ix in range(pool_size):
-                xs = np.linspace(xvals[ix]-dx, xvals[ix]+dx, npts)
+                # ee = self.make_e(xs, a, b)
+                # emin = np.sort(ee)[0]
 
-                ee = self.make_e(xs, a, b)
-                emin = np.sort(ee)[0]
+                # xval = xs[np.argmin(np.abs(ee-emin))]
+                xvals[ix] = self.gradient_descent(xvals[ix] -dx, xvals[ix]+dx, xvals[ix], a,b, tol)
+                emins[ix] = self.make_e(np.array([xvals[ix]]), a, b)[0]
+                
 
-                xval = xs[np.argmin(np.abs(ee-emin))]
+   
 
-                emins[ix] = emin
-                xvals[ix] = xval
+            
 
-            dx = dx/ 10
-            if np.abs(emins_old - emins).all() <=tol:
-                 converged = True
+            
 
         if (np.sort(emins)[0] > emins_initial).any():
              print(emins, 'min vals')
              print(emins_initial, 'initial min values')
             #  assert 0
+
+
         return np.sort(emins)[0]
+    
+    def gradient_descent(self,x1,x2,x0, a,b, tolf):
+        step = (x2-x1)/10
+        tol = step/tolf
+        loc = x0
+        loc_old = loc
+        direction = 1.0
+        converged = False
+        while step > tol and converged == False:
+            loc += step * direction
+            f1 = self.make_e(np.array([loc]), a, b)[0]
+            f2 = self.make_e(np.array([loc_old]), a, b)[0]
+            if f1 > f2 or loc <=a or loc >= b:
+                step = step/2.0
+                direction = direction * -1
+
+            elif abs(f1-f2)<=1e-15:
+                converged = True
+            # elif loc <= a or loc >=b:
+            #      converged = True 
+
+                
+            loc_old = loc
+        # print('found min')
+        return loc
     
 
 

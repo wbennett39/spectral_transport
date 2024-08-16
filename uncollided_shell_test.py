@@ -22,11 +22,11 @@ def shell_IC_uncollided_solution(xs, t):
 
 
 tlist = [0.1, 0.5, 1,2,3,4,5,6,7,8,9,10,12,12,13,14]
-for tf in tlist:
-# tf = 1.0
-    xs = np.linspace(0.000001,tf+x0)
-    uncol = shell_IC_uncollided_solution(xs, tf)
-    plt.plot(xs, uncol, '--', label = f't={tf}')
-plt.legend()
-plt.xlim(0,7)
-plt.show()
+# for tf in tlist:
+# # tf = 1.0
+#     xs = np.linspace(0.000001,tf+x0)
+#     uncol = shell_IC_uncollided_solution(xs, tf)
+#     plt.plot(xs, uncol, '--', label = f't={tf}')
+# plt.legend()
+# plt.xlim(0,7)
+# plt.show()

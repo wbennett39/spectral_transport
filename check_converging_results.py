@@ -76,6 +76,9 @@ def check(t, iterator, spaces = 40, M = 1):
     plt.plot(xs, 10*(np.abs(phi_dim)/a/c)**.25, 'b-', label = 'radiation temp')
     plt.xlim(rf, 0.1)
     plt.plot(np.array([0.1]), boundary_temp[time_arg] * 10, 'rx')
+    plt.xlabel('x [cm]')
+
+    plt.ylabel('T [HeV]')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+2] * 10, 'gx')
     # plt.plot(np.array([0.1]), boundary_temp[time_arg+1] * 10, 'yo')
 #     print(boundary_temp)

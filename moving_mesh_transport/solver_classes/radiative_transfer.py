@@ -187,7 +187,7 @@ class T_function(object):
 
 
     def positivize_e(self,argument, a, b):
-         floor = 1e-4
+         floor = 1e-8
 
          ubar = self.cell_average(a,b)
      
@@ -199,13 +199,17 @@ class T_function(object):
             theta = min(1, abs(-ubar/(m-ubar)))
 
          e = self.make_e(argument, a,b)
-         if ubar <0.0:
+         if ubar <0.0 and abs(ubar) < floor:
+              ubar = 0.0
+         elif ubar <0.0 and abs(ubar) > floor:
               enew = e * 0
+              print(ubar, 'ubar')
+              raise ValueError('negative ubar')
          else:
             enew = theta * (e-ubar) + ubar 
          if (enew<0).any():
                 m = self.find_minimum(a,b, tol = 1e8)
-                theta = min(1, abs(-ubar/(m-ubar)))
+                theta = min(1, abs(0.0-ubar/(m-ubar)))
                 enew = theta * (e-ubar) + ubar
                 if (enew<0).any():
                     #  print(theta, 'theta')
@@ -215,7 +219,7 @@ class T_function(object):
                     #  print(enew, 'enew')
 
                     #  print(self.xs_quad, 'xs')
-                     e2 = self.make_e(np.linspace(a,b,1000), a,b)
+                    #  e2 = self.make_e(np.linspace(a,b,1000), a,b)
                     #  print(np.mean(e2), 'mean e2')
                     #  if ((m - e2) <0).all():
                     #     assert(0)
@@ -310,9 +314,9 @@ class T_function(object):
 
         # if np.abs(ubar/dx - self.e_vec[0] * normTn(0,argument,a,b)).any() >=1e-8:
         #      assert 0
-        if ubar <0:
-             print('negative ubar')
-             assert(0)
+        # if ubar <0:
+        #      print('negative ubar')
+        #      assert(0)
         return ubar / dx
     
      

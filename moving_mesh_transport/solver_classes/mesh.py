@@ -69,7 +69,8 @@ data = [('N_ang', int64),
         ('vv0', float64),
         ('t0', float64),
         ('geometry', nb.typeof(params_default)),
-        ('l', float64)
+        ('l', float64),
+        ('c2s', float64[:])
         # ('problem_type', int64)
         ]
 #################################################################################################
@@ -871,6 +872,7 @@ class mesh_class(object):
                 outside_wave_edges =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0*self.l-dx))[:-1])
 
                 self.edges = np.concatenate((outside_wave_edges, inside_wave_edges))
+                print(self.edges, 'edges 0 ')
                 # print(self.edges.size)
                 assert(int(self.edges.size) == self.N_space + 1)
                 # print(self.edges[third])
@@ -878,7 +880,8 @@ class mesh_class(object):
                 # if abs(self.edges[rest]-rfront) > 1e-14:
                 #     assert 0
                 self.edges0 = self.edges
-                v, a = self.converging_move_interpolate(self.edges[rest])
+                # v, a = self.converging_move_interpolate(self.edges[rest])
+                v, a, j = self.converging_move_interpolate2(self.edges[rest])
   
                 
                 menis_t = -29.6255 + self.tfinal / c /self.l
@@ -887,10 +890,12 @@ class mesh_class(object):
 
                 self.Dedges_const = self.edges * 0 
                 self.c1s = self.edges * 0
+                self.c2s = self.edges * 0
                 # print(self.Dedges_const[rest:])
                 # print(np.linspace(1, 0.0, third))
                 self.Dedges_const[rest:] = np.linspace(1.0, 0.0, third) * v
                 self.c1s[rest:] = np.linspace(1.0, 0.0, third) * a
+                self.c2s[rest:] = np.linspace(1.0, 0.0, third) * j
                 # print(1)
                 # self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
                 final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l))[:-1]
@@ -903,6 +908,7 @@ class mesh_class(object):
                 if v > 0:
                     self.Dedges_const = self.Dedges_const * 0
                     self.c1s = self.c1s * 0
+                    self.c2s = self.c2s * 0
                 
 
                 # print(3)
@@ -980,6 +986,38 @@ class mesh_class(object):
         #     a = 0
 
         return v0, a
+    def converging_move_interpolate2(self, x0):
+        c = 29.98 
+        t3 = self.tfinal
+        t1 = self.tfinal/3
+        t2 = 2 * self.tfinal/3
+
+        
+        dimensional_t1 = t1/c 
+        menis_t1 = -29.6255 + dimensional_t1
+        r1 = 0.01 * (-menis_t1) ** 0.679502 
+
+        dimensional_t2 = t2/c
+        menis_t2 = -29.6255 + dimensional_t2
+        r2=  0.01 * (-menis_t2) ** 0.679502 
+
+        dimensional_t3 = t3/c
+        menis_t3 = -29.6255 + dimensional_t3
+        r3=  0.01 * (-menis_t3) ** 0.679502 
+
+        v0 = -((-(r3*t1**3*t2**2) + r3*t1**2*t2**3 + r2*t1**3*t3**2 - r1*t2**3*t3**2 - r2*t1**2*t3**3 + r1*t2**2*t3**3 + t1**3*t2**2*x0 - t1**2*t2**3*x0 - t1**3*t3**2*x0 + t2**3*t3**2*x0 + t1**2*t3**3*x0 - t2**2*t3**3*x0)/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3))
+        a = (2*(-(r3*t1**3*t2) + r3*t1*t2**3 + r2*t1**3*t3 - r1*t2**3*t3 - r2*t1*t3**3 + r1*t2*t3**3 + t1**3*t2*x0 - t1*t2**3*x0 - t1**3*t3*x0 + t2**3*t3*x0 + t1*t3**3*x0 - t2*t3**3*x0))/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3)
+        j = (-3*(-(r3*t1**2*t2) + r3*t1*t2**2 + r2*t1**2*t3 - r1*t2**2*t3 - r2*t1*t3**2 + r1*t2*t3**2 + t1**2*t2*x0 - t1*t2**2*x0 - t1**2*t3*x0 + t2**2*t3*x0 + t1*t3**2*x0 - t2*t3**2*x0))/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3)
+       
+        print(v0, 'v0')
+
+        print(a, 'a')
+        print(j,'j')
+        # if v0 >0:
+        #     v0 = 0
+        #     a = 0
+
+        return v0, a,j 
     
 
     def boundary_source_init_func(self, v0):

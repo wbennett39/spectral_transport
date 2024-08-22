@@ -199,17 +199,27 @@ class T_function(object):
             theta = min(1, abs(-ubar/(m-ubar)))
 
          e = self.make_e(argument, a,b)
+
          if ubar <0.0 and abs(ubar) < floor:
               ubar = 0.0
-         elif ubar <0.0 and abs(ubar) > floor:
+              theta = min(1, abs(-ubar/(m-ubar+1e-10)))
+            #   enew = theta * (e-ubar) + ubar 
+              enew = 0 * e + floor
+
+         elif ubar <0.0 and abs(ubar) >= floor:
               enew = e * 0
               print(ubar, 'ubar')
+              print(e, 'e')
               raise ValueError('negative ubar')
-         else:
+         
+         elif ubar >= 0.0:
             enew = theta * (e-ubar) + ubar 
+        
+         
          if (enew<0).any():
                 m = self.find_minimum(a,b, tol = 1e8)
-                theta = min(1, abs(0.0-ubar/(m-ubar)))
+
+                theta = min(1, abs(-ubar/(m-ubar+1e-10)))
                 enew = theta * (e-ubar) + ubar
                 if (enew<0).any():
                     #  print(theta, 'theta')
@@ -233,6 +243,9 @@ class T_function(object):
                             if ee < 0:
                                if abs(ee) < floor:
                                     enew[ix] = 0.0
+
+        #  if enew == []:
+        #       assert 0
          return enew
          
 

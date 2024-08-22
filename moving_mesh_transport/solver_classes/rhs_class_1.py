@@ -175,7 +175,8 @@ class rhs_class():
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
             print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
-            if self.N_space <= 32:
+            print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
+            if self.N_space <= 100000:
                 if self.geometry['sphere'] == True:
                     print(mesh.edges)
                 else:

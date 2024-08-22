@@ -50,11 +50,14 @@ run = run()
 run.load()
 
 loader = load()
-run.parameters['all']['Ms'] = [0]
-run.parameters['all']['N_spaces'] = [8]
-run.parameters['all']['tfinal'] = 0.0001
+run.parameters['all']['Ms'] = [2]
+run.parameters['all']['N_spaces'] = [50]
+run.parameters['all']['tfinal'] = 0.0000001
+run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False
-run.boundary_source(0,0)
+run.mesh_parameters['Msigma'] = 0
+
+run.boundary_source(0,1)
 
 run.load('marshak')
 

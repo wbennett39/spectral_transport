@@ -159,7 +159,7 @@ class mesh_class(object):
         self.initialize_mesh()
     
     def check_tangle(self):
-        if (self.edges[1:] - self.edges[0:-1]).any() <=1e-14:
+        if ((self.edges[1:] - self.edges[0:-1]) <=1e-14).any():
             raise ValueError('The mesh is tanlged. ')
 
 
@@ -847,7 +847,7 @@ class mesh_class(object):
             third = int(2*(self.N_space + 1)/3)
             rest = int(self.N_space + 1 - third)
             # dx = 5e-5
-            min_space = 5e-4
+            min_space = 5e-5
             dx = min_space * third
             pad = 100* dx
             c = 29.98
@@ -867,9 +867,12 @@ class mesh_class(object):
 
                 self.Dedges_const = self.edges*0
             else:
+                min_space2 = self.x0/100000
+                dx2 = min_space2 * third
                 inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx
 
-                outside_wave_edges =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0*self.l-dx))[:-1])
+                # outside_wave_edges =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0*self.l-dx))[:-1])
+                outside_wave_edges = np.concatenate((np.array([0.0]), np.linspace(self.x0-dx2-dx, self.x0-dx, rest)[:-1]))
 
                 self.edges = np.concatenate((outside_wave_edges, inside_wave_edges))
                 print(self.edges, 'edges 0 ')
@@ -894,12 +897,15 @@ class mesh_class(object):
                 # print(self.Dedges_const[rest:])
                 # print(np.linspace(1, 0.0, third))
                 self.Dedges_const[rest:] = np.linspace(1.0, 0.0, third) * v
+                self.Dedges_const[1:rest] = np.ones(rest-1) * v
                 self.c1s[rest:] = np.linspace(1.0, 0.0, third) * a
+                self.c1s[1:rest] = np.ones(rest-1) * a
                 self.c2s[rest:] = np.linspace(1.0, 0.0, third) * j
+                self.c2s[1:rest] = np.ones(rest-1) * j
                 # print(1)
                 # self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
-                final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l))[:-1]
-                self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
+                # final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l))[:-1]
+                # self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
 
                 # self.Dedges_const[1:rest] = np.ones(rest-1) * v
                 # print(2)
@@ -916,7 +922,7 @@ class mesh_class(object):
                 # self.c1s[1:rest] = np.ones(rest-1) * a
                 # print(4)
                 # self.c1s[1] = 1.0 * a
-                print(self.Dedges_const*self.tfinal + 0.5 * self.c1s * self.tfinal**2 + self.edges0, 'final edges')
+                print(self.Dedges_const*self.tfinal + 0.5 * self.c1s * self.tfinal**2 + self.edges0 + self.c2s * self.tfinal**3/3, 'final edges')
 
                 # print(self.Dedges_const - v, 'dedges - v')
                 # print(self.c1s - a, 'c1s - a')
@@ -943,9 +949,9 @@ class mesh_class(object):
     def converging_move2(self, t):
         if self.moving == True:
         # self.Dedges_const = self.Dedges_const
-            self.edges = self.Dedges_const*t + 0.5 * self.c1s * t**2 + self.edges0
+            self.edges = self.Dedges_const*t + 0.5 * self.c1s * t**2 + self.edges0 + self.c2s * t**3 /3
             # print(self.Dedges_const)
-            self.Dedges =  self.Dedges_const + self.c1s * t 
+            self.Dedges =  self.Dedges_const + self.c1s * t  + self.c2s * t**2
             dimensional_t = t/29.98/self.l
             menis_t = -29.6255 + dimensional_t
             rfront = self.l * 0.01 * (-menis_t) ** 0.679502 
@@ -955,10 +961,10 @@ class mesh_class(object):
         #     print(self.edges[rest] - rfront)
         # print(self.edges[rest])
         # print(rfront, 'rf')
-        # if abs(self.edges[rest]-rfront) > 5e-8:
-        #     print(self.edges[rest]-rfront, 'rf')
-        #     print(self.edges[rest-1]-rfront, 'rf-1')
-        #     print(self.edges[rest+1]-rfront, 'rf+1')
+        if abs(self.edges[rest]-rfront) > 5e-3:
+            print(self.edges[rest]-rfront, 'rf')
+            print(self.edges[rest-1]-rfront, 'rf-1')
+            print(self.edges[rest+1]-rfront, 'rf+1')
 
         # print(self.edges, 'edges')
         # print(self.Dedges, 'dedges')

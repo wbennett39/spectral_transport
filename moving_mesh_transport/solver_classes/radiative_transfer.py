@@ -210,7 +210,8 @@ class T_function(object):
               enew = e * 0
               print(ubar, 'ubar')
               print(e, 'e')
-              raise ValueError('negative ubar')
+              if self.M !=0:
+                raise ValueError('negative ubar')
          
          elif ubar >= 0.0:
             enew = theta * (e-ubar) + ubar 

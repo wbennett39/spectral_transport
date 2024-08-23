@@ -345,7 +345,7 @@ class T_function(object):
 
     def find_minimum(self, a, b, tol1 = 2**10):
         dx = (b-a)/10
-        pool_size = 3
+        pool_size = 1
         npts = 301
         converged = False
         tol = 1e-15
@@ -395,14 +395,12 @@ class T_function(object):
         loc_old = loc
         direction = 1.0
         converged = False
-        abstol = 10**-13
-        it = 0
+        abstol = 10**-15
         # print(it, 'it')
         # print(step, 'step', tol, 'tol', converged)
         # print(tolf,'tol')
         while step > tol and converged == False:
             # print(it)
-            it += 1
             loc += step * direction
             f1 = self.make_e(np.array([loc]), a, b)[0]
             f2 = self.make_e(np.array([loc_old]), a, b)[0]

@@ -219,7 +219,7 @@ class T_function(object):
         
          
          if (enew<0).any():
-                m = self.find_minimum(a,b, tol = 1e14)
+                m = self.find_minimum(a,b, tol1 = 1e14)
 
                 theta = min(1, abs(-ubar/(m-ubar+1e-15)))
                 enew = theta * (e-ubar) + ubar
@@ -343,7 +343,7 @@ class T_function(object):
      
      
 
-    def find_minimum(self, a, b, tol = 2**12):
+    def find_minimum(self, a, b, tol1 = 2**12):
         dx = (b-a)/10
         pool_size = 3
         npts = 301
@@ -370,7 +370,7 @@ class T_function(object):
                 # emin = np.sort(ee)[0]
 
                 # xval = xs[np.argmin(np.abs(ee-emin))]
-                xvals[ix] = self.gradient_descent(xvals[ix] -dx, xvals[ix]+dx, xvals[ix], a,b, tol)
+                xvals[ix] = self.gradient_descent(xvals[ix] -dx, xvals[ix]+dx, xvals[ix], a,b, tol1)
                 emins[ix] = self.make_e(np.array([xvals[ix]]), a, b)[0]
                 
 
@@ -395,16 +395,23 @@ class T_function(object):
         loc_old = loc
         direction = 1.0
         converged = False
+        it = 0
+        # print(it, 'it')
+        # print(step, 'step', tol, 'tol', converged)
+        # print(tolf,'tol')
         while step > tol and converged == False:
+            # print(it)
+            it += 1
             loc += step * direction
             f1 = self.make_e(np.array([loc]), a, b)[0]
             f2 = self.make_e(np.array([loc_old]), a, b)[0]
-            if f1 > f2 or loc <=a or loc >= b:
+            if abs(f1-f2)<=1e-12:
+                converged = True
+            elif f1 > f2 or loc <=a or loc >= b:
                 step = step/2.0
                 direction = direction * -1
 
-            elif abs(f1-f2)<=1e-15:
-                converged = True
+            
             # elif loc <= a or loc >=b:
             #      converged = True 
 

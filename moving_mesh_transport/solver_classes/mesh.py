@@ -867,7 +867,7 @@ class mesh_class(object):
 
                 self.Dedges_const = self.edges*0
             else:
-                min_space2 = self.x0/100000
+                min_space2 = 5 * min_space
                 dx2 = min_space2 * third
                 inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx
 

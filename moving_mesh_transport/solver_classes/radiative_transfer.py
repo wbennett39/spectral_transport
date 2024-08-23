@@ -220,7 +220,7 @@ class T_function(object):
          if (enew<0).any():
                 m = self.find_minimum(a,b, tol = 1e8)
 
-                theta = min(1, abs(-ubar/(m-ubar+1e-10)))
+                theta = min(1, abs(-ubar/(m-ubar+1e-15)))
                 enew = theta * (e-ubar) + ubar
                 if (enew<0).any():
                     #  print(theta, 'theta')
@@ -244,6 +244,9 @@ class T_function(object):
                             if ee < 0:
                                if abs(ee) < floor:
                                     enew[ix] = 0.0
+                               else:
+                                    assert 0
+
 
         #  if enew == []:
         #       assert 0

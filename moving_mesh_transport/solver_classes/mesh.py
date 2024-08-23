@@ -867,7 +867,7 @@ class mesh_class(object):
 
                 self.Dedges_const = self.edges*0
             else:
-                min_space2 = 5 * min_space
+                min_space2 = 10 * min_space
                 dx2 = min_space2 * third
                 inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx
 
@@ -961,10 +961,13 @@ class mesh_class(object):
         #     print(self.edges[rest] - rfront)
         # print(self.edges[rest])
         # print(rfront, 'rf')
-        if abs(self.edges[rest]-rfront) > 5e-3:
-            print(self.edges[rest]-rfront, 'rf')
-            print(self.edges[rest-1]-rfront, 'rf-1')
-            print(self.edges[rest+1]-rfront, 'rf+1')
+        # if abs(self.edges[rest]-rfront) > 5e-3:
+        #     print(self.edges[rest]-rfront, 'rf')
+        #     print(self.edges[rest-1]-rfront, 'rf-1')
+        #     print(self.edges[rest+1]-rfront, 'rf+1')
+            if self.edges[1] > rfront:
+                assert 0
+
 
         # print(self.edges, 'edges')
         # print(self.Dedges, 'dedges')

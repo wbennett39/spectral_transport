@@ -203,7 +203,7 @@ class T_function(object):
 
          if ubar <0.0 and abs(ubar) < floor:
               ubar = 0.0
-              theta = min(1, abs(-ubar/(m-ubar+1e-10)))
+              theta = min(1, abs(-ubar/(m-ubar+1e-16)))
             #   enew = theta * (e-ubar) + ubar 
               enew = 0 * e + floor
 

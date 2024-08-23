@@ -187,7 +187,7 @@ class T_function(object):
 
 
     def positivize_e(self,argument, a, b):
-         floor = 1e-8
+         floor = 10**-8
 
          ubar = self.cell_average(a,b)
      
@@ -199,6 +199,7 @@ class T_function(object):
             theta = min(1, abs(-ubar/(m-ubar)))
 
          e = self.make_e(argument, a,b)
+         
 
          if ubar <0.0 and abs(ubar) < floor:
               ubar = 0.0
@@ -218,16 +219,12 @@ class T_function(object):
         
          
          if (enew<0).any():
-                m = self.find_minimum(a,b, tol = 1e8)
+                m = self.find_minimum(a,b, tol = 1e14)
 
                 theta = min(1, abs(-ubar/(m-ubar+1e-15)))
                 enew = theta * (e-ubar) + ubar
                 if (enew<0).any():
-                    #  print(theta, 'theta')
-                    #  print(ubar, 'ubar')
-                    #  print(e,'e')
-                    #  print(m,'m')
-                    #  print(enew, 'enew')
+                     
 
                     #  print(self.xs_quad, 'xs')
                     #  e2 = self.make_e(np.linspace(a,b,1000), a,b)
@@ -240,11 +237,18 @@ class T_function(object):
                     #     #   print(np.min(enew), 'min enew')
 
                     #     #   assert(0)
+                     basee = np.mean(e)
+                     tol = 10**5
                      for ix, ee in enumerate(enew):
                             if ee < 0:
-                               if abs(ee) < floor:
+                               if abs(ee) < basee/tol:
                                     enew[ix] = 0.0
                                else:
+                                    print(theta, 'theta')
+                                    print(ubar, 'ubar')
+                                    print(e,'e')
+                                    print(m,'m')
+                                    print(enew, 'enew')
                                     assert 0
 
 

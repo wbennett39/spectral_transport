@@ -176,6 +176,10 @@ class rhs_class():
             print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
+            dimensional_t = t/29.98
+            menis_t = -29.6255 + dimensional_t
+            rfront = 0.01 * (-menis_t) ** 0.679502 
+            print(rfront, 'marshak wavefront location')
             if self.N_space <= 100000:
                 if self.geometry['sphere'] == True:
                     print(mesh.edges)

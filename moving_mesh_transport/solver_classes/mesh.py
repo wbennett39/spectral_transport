@@ -847,7 +847,7 @@ class mesh_class(object):
             third = int(2*(self.N_space + 1)/3)
             rest = int(self.N_space + 1 - third)
             # dx = 5e-5
-            min_space = 5e-6
+            min_space = 5e-5
             dx = min_space * third
             pad = 100* dx
             c = 29.98
@@ -856,7 +856,7 @@ class mesh_class(object):
             else:
                 dimensional_t = self.tfinal/29.98/self.l
             menis_t = -29.6255 + dimensional_t
-            rfront = 0.01 * (-menis_t) ** 0.679502 - dx
+            rfront = 0.01 * (-menis_t) ** 0.679502 
             if self.moving == False:
                 self.edges = np.zeros(self.N_space+1)
                 # self.edges[1:] = np.linspace(rfront * self.l, self.x0 * self.l, self.N_space)

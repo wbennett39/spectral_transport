@@ -187,8 +187,8 @@ class T_function(object):
 
 
     def positivize_e(self,argument, a, b):
-         floor = 1e-5
-
+         
+         tol = 1000
          ubar = self.cell_average(a,b)
      
 
@@ -199,7 +199,7 @@ class T_function(object):
             theta = min(1, abs(-ubar/(m-ubar)))
 
          e = self.make_e(argument, a,b)
-         
+         floor = np.max(e)/tol         
 
          if ubar <0.0 and abs(ubar) < floor:
               ubar = 0.0
@@ -211,7 +211,9 @@ class T_function(object):
               enew = e * 0
               print(ubar, 'ubar')
               print(e, 'e')
+              print(a,b, 'cell edges')
               if self.M !=0:
+                
                 raise ValueError('negative ubar')
          
          elif ubar >= 0.0:
@@ -373,12 +375,6 @@ class T_function(object):
                 xvals[ix] = self.gradient_descent(xvals[ix] -dx, xvals[ix]+dx, xvals[ix], a,b, tol1)
                 emins[ix] = self.make_e(np.array([xvals[ix]]), a, b)[0]
                 
-
-   
-
-            
-
-            
 
         if (np.sort(emins)[0] > emins_initial).any():
              print(emins, 'min vals')

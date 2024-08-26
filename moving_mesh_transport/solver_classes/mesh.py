@@ -844,8 +844,8 @@ class mesh_class(object):
     def menis_init3(self):
 
             
-            third = int(2*(self.N_space + 1)/3)
-            rest = int(self.N_space + 1 - third)
+            third = int(1*(self.N_space + 1)/3)
+            rest = int(self.N_space + 1 - 2*third)
             # dx = 5e-5
             min_space = 5e-9
             dx = min_space * third
@@ -870,13 +870,18 @@ class mesh_class(object):
                 min_space2 = 5 * min_space
                 # dx2 = min_space2 * third
                 # dx2 = self.x0/500
-                dx2 = 0.01
+                dx2 = 1e-7
                 inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx
 
-                # outside_wave_edges =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0*self.l-dx))[:-1])
-                outside_wave_edges = np.concatenate((np.array([0.0]), np.linspace(self.x0-dx2-dx, self.x0-dx, rest)[:-1]))
+                outside_wave_edges2 =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0-dx2-dx))[:-1])
+                outside_wave_edges = (np.linspace(self.x0-dx2-dx, self.x0-dx, third + 1)[:-1])
+                print('#')
+                print(inside_wave_edges)
+                print(outside_wave_edges)
+                print(outside_wave_edges2)
+                print('#')
 
-                self.edges = np.concatenate((outside_wave_edges, inside_wave_edges))
+                self.edges = np.concatenate((outside_wave_edges2, outside_wave_edges, inside_wave_edges))
                 print(self.edges, 'edges 0 ')
                 # print(self.edges.size)
                 assert(int(self.edges.size) == self.N_space + 1)
@@ -898,16 +903,25 @@ class mesh_class(object):
                 self.c2s = self.edges * 0
                 # print(self.Dedges_const[rest:])
                 # print(np.linspace(1, 0.0, third))
-                self.Dedges_const[rest:] = np.linspace(1.0, 0.0, third) * v
-                self.Dedges_const[1:rest] = np.ones(rest-1) * v
-                self.c1s[rest:] = np.linspace(1.0, 0.0, third) * a
-                self.c1s[1:rest] = np.ones(rest-1) * a
-                self.c2s[rest:] = np.linspace(1.0, 0.0, third) * j
-                self.c2s[1:rest] = np.ones(rest-1) * j
+
+
+
+                self.Dedges_const[-third:] = np.linspace(1.0, 0.0, third) * v
+
+                self.Dedges_const[-2*third:-third] = np.ones(third) * v
+
+                self.c1s[-2*third:-third] = np.linspace(1.0, 0.0, third) * a
+
+                self.c1s[-2*third:-third] = np.ones(third) * a
+
+                self.c2s[-third:] = np.linspace(1.0, 0.0, third) * j
+
+                self.c2s[-2*third:-third] = np.ones(third) * j
+
                 # print(1)
                 # self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
-                # final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l))[:-1]
-                # self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
+                final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l))[:-1]
+                self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
 
                 # self.Dedges_const[1:rest] = np.ones(rest-1) * v
                 # print(2)

@@ -199,9 +199,11 @@ class T_function(object):
             theta = min(1, abs(-ubar/(m-ubar)))
 
          e = self.make_e(argument, a,b)
-         floor = np.max(e)/tol         
+        #  floor = np.max(e)/tol
+         floor = 1e-3         
 
          if ubar <0.0 and abs(ubar) < floor:
+            #   print(ubar, 'ubar')
               ubar = 0.0
               theta = min(1, abs(-ubar/(m-ubar+1e-16)))
             #   enew = theta * (e-ubar) + ubar 

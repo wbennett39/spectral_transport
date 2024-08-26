@@ -8,7 +8,7 @@
     'sigma_t': 1.0
     'sigma_s': 0.0
     't0': 100000.0                          # time the source is turned off
-    'N_spaces': [40]                 # number of cells
+    'N_spaces': [6]                 # number of cells
     'tnodes': 12                        # quadrature divisions for uncol. Gauss. source
     'Ms': [2]                        # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
@@ -19,7 +19,7 @@
     'radiative_transfer': {none: False}             # material temperature feedback. 1-True, 0 - False
     'thermal_couple': {none: False}
     'temperature_dependence': [0,0,1,0] # first slot is Su-Olson problem
-    'e_initial': 0.0000001
+    'e_initial': 0.000000
     'weights': 'gauss_legendre'          # usually 'gauss_lobatto'. Set to 'gauss_legendre' for S2 calculations
     'save_solution': False
     'particle_v': 'one' #does this do anything?

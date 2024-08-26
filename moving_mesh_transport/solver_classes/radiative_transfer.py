@@ -343,10 +343,10 @@ class T_function(object):
      
      
 
-    def find_minimum(self, a, b, tol1 = 2**10):
+    def find_minimum(self, a, b, tol1 = 2**6):
         dx = (b-a)/10
         pool_size = 1
-        npts = 301
+        npts = 101
         converged = False
         tol = 1e-15
 

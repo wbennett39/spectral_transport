@@ -187,7 +187,7 @@ class T_function(object):
 
 
     def positivize_e(self,argument, a, b):
-         floor = 10**-8
+         floor = 1e-5
 
          ubar = self.cell_average(a,b)
      
@@ -241,7 +241,7 @@ class T_function(object):
                      tol = 10**5
                      for ix, ee in enumerate(enew):
                             if ee < 0:
-                               if abs(ee) < basee/tol:
+                               if abs(ee) < floor:
                                     enew[ix] = 0.0
                                else:
                                     print(theta, 'theta')

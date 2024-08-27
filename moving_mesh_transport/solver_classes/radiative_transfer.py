@@ -121,8 +121,8 @@ class T_function(object):
         e = self.make_e(argument, a, b)
         e = self.positivize_e(argument, a,b)
         # self.find_minimum(a,b)
-        if e.any() <0:
-             raise ValueError('Negative energy density')
+        # if e.any() <0:
+        #      raise ValueError('Negative energy density')
 
         if self.temp_function[0] == 1:
             T = self.su_olson_source(e, argument, a, b)
@@ -134,11 +134,11 @@ class T_function(object):
             #  else:
                 T = self.meni_eos(e)
   
-                for it, TT in enumerate(T):
-                    if TT<0.0:
-                    #  raise ValueError('negative temperature')
-                        print(TT)
-                        assert(0)
+                # for it, TT in enumerate(T):
+                #     if TT<0.0:
+                #     #  raise ValueError('negative temperature')
+                #         print(TT)
+                #         assert(0)
                 # T = self.su_olson_source(e, argument, a, b)
                 
                 # T = e / 0.1
@@ -202,21 +202,21 @@ class T_function(object):
         #  floor = np.max(e)/tol
          floor = 1e-3         
 
-         if ubar <0.0 and abs(ubar) < floor:
-            #   print(ubar, 'ubar')
-              ubar = 0.0
-              theta = min(1, abs(-ubar/(m-ubar+1e-16)))
-            #   enew = theta * (e-ubar) + ubar 
-              enew = 0 * e + floor
+        #  if ubar <0.0 and abs(ubar) < floor:
+        #     #   print(ubar, 'ubar')
+        #       ubar = 0.0
+        #       theta = min(1, abs(-ubar/(m-ubar+1e-16)))
+        #     #   enew = theta * (e-ubar) + ubar 
+        #       enew = 0 * e + floor
 
-         elif ubar <0.0 and abs(ubar) >= floor:
+         if ubar <0.0 and abs(ubar) >= floor:
               enew = e * 0
               print(ubar, 'ubar')
               print(e, 'e')
               print(a,b, 'cell edges')
-              if self.M !=0:
+            #   if self.M !=0:
                 
-                raise ValueError('negative ubar')
+            #     raise ValueError('negative ubar')
          
          elif ubar >= 0.0:
             enew = theta * (e-ubar) + ubar 
@@ -227,33 +227,33 @@ class T_function(object):
 
                 theta = min(1, abs(-ubar/(m-ubar+1e-15)))
                 enew = theta * (e-ubar) + ubar
-                if (enew<0).any():
+                # if (enew<0).any():
                      
 
-                    #  print(self.xs_quad, 'xs')
-                    #  e2 = self.make_e(np.linspace(a,b,1000), a,b)
-                    #  print(np.mean(e2), 'mean e2')
-                    #  if ((m - e2) <0).all():
-                    #     assert(0)
-                    #  else:
-                    #     #   print(np.min(np.abs((m-e2))), 'm-e2')
-                    #     #   print(np.min(e2),'min e2')
-                    #     #   print(np.min(enew), 'min enew')
+                #     #  print(self.xs_quad, 'xs')
+                #     #  e2 = self.make_e(np.linspace(a,b,1000), a,b)
+                #     #  print(np.mean(e2), 'mean e2')
+                #     #  if ((m - e2) <0).all():
+                #     #     assert(0)
+                #     #  else:
+                #     #     #   print(np.min(np.abs((m-e2))), 'm-e2')
+                #     #     #   print(np.min(e2),'min e2')
+                #     #     #   print(np.min(enew), 'min enew')
 
-                    #     #   assert(0)
-                     basee = np.mean(e)
-                     tol = 10**5
-                     for ix, ee in enumerate(enew):
-                            if ee < 0:
-                               if abs(ee) < floor:
-                                    enew[ix] = 0.0
-                               else:
-                                    print(theta, 'theta')
-                                    print(ubar, 'ubar')
-                                    print(e,'e')
-                                    print(m,'m')
-                                    print(enew, 'enew')
-                                    assert 0
+                #     #     #   assert(0)
+                #      basee = np.mean(e)
+                #      tol = 10**5
+                #      for ix, ee in enumerate(enew):
+                #             if ee < 0:
+                #                if abs(ee) < floor:
+                #                     enew[ix] = 0.0
+                #                else:
+                #                     print(theta, 'theta')
+                #                     print(ubar, 'ubar')
+                #                     print(e,'e')
+                #                     print(m,'m')
+                #                     print(enew, 'enew')
+                #                     assert 0
 
 
         #  if enew == []:

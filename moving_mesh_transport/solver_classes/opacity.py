@@ -231,8 +231,8 @@ class sigma_integrator():
                 assert(0)
             # if (T_old<0).any():
             #     T_old = np.mean(T_old) + T_old*0
-            # result = np.where(T_old<0, 0.0, T_old)
-            res = 5 * 10**(3) * (T_old + 5e-5) ** -1.5 * (0.1**1.5)
+            result = np.where(T_old<0, 0.0, T_old)
+            res = 5 * 10**(3) * (result + 5e-5) ** -1.5 * (0.1**1.5)
             # for ie, elem in enumerate(res):
                 # if elem >= 1e16:
                 #     res[ie] = 1e16

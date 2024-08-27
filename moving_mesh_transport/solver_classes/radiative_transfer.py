@@ -209,17 +209,17 @@ class T_function(object):
         #     #   enew = theta * (e-ubar) + ubar 
         #       enew = 0 * e + floor
 
-         if ubar <0.0 and abs(ubar) >= floor:
-              enew = e * 0
-              print(ubar, 'ubar')
-              print(e, 'e')
-              print(a,b, 'cell edges')
-            #   if self.M !=0:
+        #  if ubar <0.0 and abs(ubar) >= floor:
+        #       enew = e * 0
+        #       print(ubar, 'ubar')
+        #       print(e, 'e')
+        #       print(a,b, 'cell edges')
+        #     #   if self.M !=0:
                 
-            #     raise ValueError('negative ubar')
+        #     #     raise ValueError('negative ubar')
          
-         elif ubar >= 0.0:
-            enew = theta * (e-ubar) + ubar 
+        #  elif ubar >= 0.0:
+         enew = theta * (e-ubar) + ubar 
         
          
          if (enew<0).any():

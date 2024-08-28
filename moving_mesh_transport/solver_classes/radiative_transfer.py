@@ -190,7 +190,7 @@ class T_function(object):
          e = self.make_e(argument, a,b)
          enew = e
          floor = 1e-5 
-         if (e<floor).any():
+         if (np.abs(e)<floor).any() and (e<0).any() :
             tol = 1000
             ubar = self.cell_average(a,b)
         

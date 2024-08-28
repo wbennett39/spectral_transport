@@ -187,73 +187,76 @@ class T_function(object):
 
 
     def positivize_e(self,argument, a, b):
-         
-         tol = 1000
-         ubar = self.cell_average(a,b)
-     
-
-         m = self.find_minimum(a,b)
-         if abs(m - ubar) <=1e-14:
-              theta = 1.0
-         else:    
-            theta = min(1, abs(-ubar/(m-ubar)))
-
          e = self.make_e(argument, a,b)
-        #  floor = np.max(e)/tol
-         floor = 1e-3         
-
-        #  if ubar <0.0 and abs(ubar) < floor:
-        #     #   print(ubar, 'ubar')
-        #       ubar = 0.0
-        #       theta = min(1, abs(-ubar/(m-ubar+1e-16)))
-        #     #   enew = theta * (e-ubar) + ubar 
-        #       enew = 0 * e + floor
-
-        #  if ubar <0.0 and abs(ubar) >= floor:
-        #       enew = e * 0
-        #       print(ubar, 'ubar')
-        #       print(e, 'e')
-        #       print(a,b, 'cell edges')
-        #     #   if self.M !=0:
-                
-        #     #     raise ValueError('negative ubar')
-         
-        #  elif ubar >= 0.0:
-         enew = theta * (e-ubar) + ubar 
+         enew = e
+         floor = 1e-5 
+         if (e<floor).any():
+            tol = 1000
+            ubar = self.cell_average(a,b)
         
-         
-         if (enew<0).any():
-                m = self.find_minimum(a,b, tol1 = 1e14)
 
-                theta = min(1, abs(-ubar/(m-ubar+1e-15)))
-                enew = theta * (e-ubar) + ubar
-                # if (enew<0).any():
-                     
+            m = self.find_minimum(a,b)
+            if abs(m - ubar) <=1e-14:
+                theta = 1.0
+            else:    
+                theta = min(1, abs(-ubar/(m-ubar)))
 
-                #     #  print(self.xs_quad, 'xs')
-                #     #  e2 = self.make_e(np.linspace(a,b,1000), a,b)
-                #     #  print(np.mean(e2), 'mean e2')
-                #     #  if ((m - e2) <0).all():
-                #     #     assert(0)
-                #     #  else:
-                #     #     #   print(np.min(np.abs((m-e2))), 'm-e2')
-                #     #     #   print(np.min(e2),'min e2')
-                #     #     #   print(np.min(enew), 'min enew')
+            
+            #  floor = np.max(e)/tol
+                    
 
-                #     #     #   assert(0)
-                #      basee = np.mean(e)
-                #      tol = 10**5
-                #      for ix, ee in enumerate(enew):
-                #             if ee < 0:
-                #                if abs(ee) < floor:
-                #                     enew[ix] = 0.0
-                #                else:
-                #                     print(theta, 'theta')
-                #                     print(ubar, 'ubar')
-                #                     print(e,'e')
-                #                     print(m,'m')
-                #                     print(enew, 'enew')
-                #                     assert 0
+            #  if ubar <0.0 and abs(ubar) < floor:
+            #     #   print(ubar, 'ubar')
+            #       ubar = 0.0
+            #       theta = min(1, abs(-ubar/(m-ubar+1e-16)))
+            #     #   enew = theta * (e-ubar) + ubar 
+            #       enew = 0 * e + floor
+
+            #  if ubar <0.0 and abs(ubar) >= floor:
+            #       enew = e * 0
+            #       print(ubar, 'ubar')
+            #       print(e, 'e')
+            #       print(a,b, 'cell edges')
+            #     #   if self.M !=0:
+                    
+            #     #     raise ValueError('negative ubar')
+            
+            #  elif ubar >= 0.0:
+            enew = theta * (e-ubar) + ubar 
+            
+            
+            if (enew<0).any():
+                    m = self.find_minimum(a,b, tol1 = 1e14)
+
+                    theta = min(1, abs(-ubar/(m-ubar+1e-15)))
+                    enew = theta * (e-ubar) + ubar
+                    # if (enew<0).any():
+                        
+
+                    #     #  print(self.xs_quad, 'xs')
+                    #     #  e2 = self.make_e(np.linspace(a,b,1000), a,b)
+                    #     #  print(np.mean(e2), 'mean e2')
+                    #     #  if ((m - e2) <0).all():
+                    #     #     assert(0)
+                    #     #  else:
+                    #     #     #   print(np.min(np.abs((m-e2))), 'm-e2')
+                    #     #     #   print(np.min(e2),'min e2')
+                    #     #     #   print(np.min(enew), 'min enew')
+
+                    #     #     #   assert(0)
+                    #      basee = np.mean(e)
+                    #      tol = 10**5
+                    #      for ix, ee in enumerate(enew):
+                    #             if ee < 0:
+                    #                if abs(ee) < floor:
+                    #                     enew[ix] = 0.0
+                    #                else:
+                    #                     print(theta, 'theta')
+                    #                     print(ubar, 'ubar')
+                    #                     print(e,'e')
+                    #                     print(m,'m')
+                    #                     print(enew, 'enew')
+                    #                     assert 0
 
 
         #  if enew == []:

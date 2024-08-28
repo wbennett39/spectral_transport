@@ -272,6 +272,7 @@ class rhs_class():
                 J = matrices.J
                 if (self.lumping == True) and (self.M >0):
                     Mass, Minv = self.mass_lumper(Mass, True) 
+                    # print(Minv)
                     # L = self.mass_lumper(L)
                     # G = self.mass_lumper(G)
                     # J = self.mass_lumper(J)

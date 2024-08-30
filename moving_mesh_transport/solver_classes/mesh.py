@@ -847,7 +847,7 @@ class mesh_class(object):
             third = int(1*(self.N_space + 1)/3)
             rest = int(self.N_space + 1 - 2*third)
             # dx = 5e-5
-            min_space = 5e-5 
+            min_space = 5e-3
             dx = min_space * third
             pad = 100* dx
             c = 29.98

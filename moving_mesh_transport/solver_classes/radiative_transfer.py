@@ -190,9 +190,10 @@ class T_function(object):
          e = self.make_e(argument, a,b)
          enew = e
          floor = 1e-5 
-         if (e<0).any() :
+         ubar = self.cell_average(a,b)
+         if (e<0).any() and ubar >0.0 :
             tol = 1000
-            ubar = self.cell_average(a,b)
+            
         
 
             m = self.find_minimum(a,b)

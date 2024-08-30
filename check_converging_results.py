@@ -4,7 +4,7 @@ import numpy as plt
 import matplotlib.pyplot as plt
 import numpy as np
 
-def check(t, iterator, spaces = 25, M = 1):
+def check(t, iterator, spaces = 8, M = 1):
 #     if t == 20.420877:
 #         iterator = 0
 #     elif t == 52.3519754:

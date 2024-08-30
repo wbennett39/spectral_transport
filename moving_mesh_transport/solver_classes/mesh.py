@@ -882,6 +882,7 @@ class mesh_class(object):
                 print('#')
 
                 self.edges = np.concatenate((outside_wave_edges2, outside_wave_edges, inside_wave_edges))
+
                 print(self.edges, 'edges 0 ')
                 # print(self.edges.size)
                 assert(int(self.edges.size) == self.N_space + 1)
@@ -910,7 +911,7 @@ class mesh_class(object):
 
                 self.Dedges_const[-2*third:-third] = np.ones(third) * v
 
-                self.c1s[-2*third:-third] = np.linspace(1.0, 0.0, third) * a
+                self.c1s[-third:] = np.linspace(1.0, 0.0, third) * a
 
                 self.c1s[-2*third:-third] = np.ones(third) * a
 
@@ -925,7 +926,9 @@ class mesh_class(object):
 
                 # self.Dedges_const[1:rest] = np.ones(rest-1) * v
                 # print(2)
-                
+                print(self.Dedges_const, 'v0')
+                print(self.c1s, 'c1')
+                print(self.c2s,'c2')
 
                 if v > 0:
                     self.Dedges_const = self.Dedges_const * 0

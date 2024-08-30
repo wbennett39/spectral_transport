@@ -59,7 +59,8 @@ data = [("M", int64),
         ('converging_temp_array', float64[:]),
         ('converging_time_array', float64[:]),
         ('a', float64),
-        ('cspeed', float64)
+        ('cspeed', float64),
+        ('targold', float64)
         ]
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
@@ -99,6 +100,7 @@ class LU_surf(object):
         self.uncollided = build.uncollided
         self.a = 0.0137225
         self.cspeed = 29.98
+        self.targold = 0
 
         
         # if build.test_dimensional_rhs == True:
@@ -189,6 +191,11 @@ class LU_surf(object):
         # t_arg = 100
         # print(self.converging_time_array[t_arg],t)
         # print(self.converging_temp_array[t_arg] * 10 )
+        # if t_arg != self.targold:
+        #     print('### ### ### ### ### ### ###')
+        #     print('boundary temp step')
+        #     print('### ### ### ### ### ### ###')
+        self.targold = t_arg
         return  self.converging_temp_array[t_arg] ** 4 
 
     

@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M wbennet2@nd.edu
 #$ -m abe
-#$ -N M=1_100_cells_S_4_static
+#$ -N M=1_60_cells_S_4_static
 
 module load python/3.6.4
 python3 run_converging.py

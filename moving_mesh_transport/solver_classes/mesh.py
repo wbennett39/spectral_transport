@@ -870,7 +870,7 @@ class mesh_class(object):
                 min_space2 = 5 * min_space
                 # dx2 = min_space2 * third
                 # dx2 = self.x0/500
-                dx2 = 1e-4
+                dx2 = 5e-3
                 inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx
 
                 outside_wave_edges2 =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0-dx2-dx))[:-1])
@@ -892,7 +892,7 @@ class mesh_class(object):
                 #     assert 0
                 self.edges0 = self.edges
                 # v, a = self.converging_move_interpolate(self.edges[rest])
-                v, a, j = self.converging_move_interpolate2(self.edges[rest])
+                v, a, j = self.converging_move_interpolate2(self.edges[-third])
   
                 
                 menis_t = -29.6255 + self.tfinal / c /self.l

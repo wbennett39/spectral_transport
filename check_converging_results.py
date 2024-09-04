@@ -119,7 +119,7 @@ def check(t, iterator, spaces = 8, M = 1):
 # check(5.0,2)
 # check(15.0,3)
 
-check(2.0420877,0)
-check(5.23519754,1)
-check(6.92759852,2)
-check(8.13786114,3)
+check(20.420877,0)
+check(52.3519754,1)
+check(69.2759852,2)
+check(81.3786114,3)

@@ -355,7 +355,7 @@ class T_function(object):
     def find_minimum(self, a, b, tol1 = 2**6):
         dx = (b-a)/10
         pool_size = 1
-        npts = 101
+        npts = 51
         converged = False
         tol = 1e-15
 

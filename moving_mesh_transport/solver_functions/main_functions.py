@@ -198,7 +198,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     if eval_times == True:
         tpnts = eval_array
         print(tpnts, 'time points')
-
+    mesh_dry_run(mesh, tfinal)
     sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-13)
     print(sol.status, 'solution status')
     print(sol)
@@ -353,3 +353,9 @@ def x0_function(x0, source_type, count):
 
 
  
+def mesh_dry_run(mesh, tfinal):
+    tlist = np.linspace(0.0, tfinal, 500)
+    for it, tt in enumerate(tlist):
+        mesh.move(tt)
+    print('mesh dry run complete')
+    mesh.move(0.0)

@@ -844,7 +844,7 @@ class mesh_class(object):
     def menis_init3(self):
 
             
-            third = int(1*(self.N_space + 1)/3)
+            third = int(2*(self.N_space + 1)/5)
             rest = int(self.N_space + 1 - 2*third)
             # dx = 5e-5
             min_space = 5e-10

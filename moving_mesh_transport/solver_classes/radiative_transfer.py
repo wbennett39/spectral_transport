@@ -335,6 +335,7 @@ class T_function(object):
         # dx = 4/3 * math.pi * (b**3-a**3)
         dx = b-a
         if dx <=1e-16:
+             print(a,b,'edges')
              assert 0
         
         argument = (b-a)/2*self.xs_quad + (a+b)/2

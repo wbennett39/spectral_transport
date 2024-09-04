@@ -847,7 +847,7 @@ class mesh_class(object):
             third = int(2*(self.N_space + 1)/5)
             rest = int(self.N_space + 1 - 2*third)
             # dx = 5e-5
-            min_space = 5e-10
+            min_space = 5e-9
             dx = min_space * third
             pad = 100* dx
             c = 29.98
@@ -921,7 +921,7 @@ class mesh_class(object):
 
                 # print(1)
                 # self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
-                final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l))[:-1]
+                final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l - dx -dx2))[:-1]
                 self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
 
                 # self.Dedges_const[1:rest] = np.ones(rest-1) * v

@@ -119,7 +119,7 @@ class T_function(object):
 
     def make_T(self, argument, a, b):
         e = self.make_e(argument, a, b)
-        e = self.positivize_e(argument, a,b)
+        # e = self.positivize_e(argument, a,b)
         # self.find_minimum(a,b)
         # if e.any() <0:
         #      raise ValueError('Negative energy density')

@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M wbennet2@nd.edu
 #$ -m abe
-#$ -N M=2_25_cells_S4_m_t200_loosetol
+#$ -N M=2_15_cells_S4_m_t200_loosetol
 
 module load python/3.6.4
 python3 run_converging.py

@@ -147,7 +147,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 5000
+        self.division = 1000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -231,7 +231,7 @@ class rhs_class():
         mesh.move(t)
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0
-        time_loc = np.argmin(np.abs(self.time_points - t))
+        # time_loc = np.argmin(np.abs(self.time_points - t))
         # print(self.T_old[time_loc])
         # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
         #     time_loc -= 1
@@ -481,8 +481,8 @@ class rhs_class():
             T_eval_points[space] = argument
             # print(T_vec[space], 'T vec')
             # print(argument, 'xs')
-            if np.isnan(T_eval_points.any()):
-                assert(0)
+            # if np.isnan(T_eval_points.any()):
+            #     assert(0)
             # elif T_vec.any() <0:
             #     # raise ValueError('negative temperature')
             #     assert(0)

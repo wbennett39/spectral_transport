@@ -840,14 +840,25 @@ class mesh_class(object):
         # print(self.edges)
         self.Dedges = self.Dedges_const
         # assert 0
-    
+    def menis_init4(self):
+        dx2 = self.x0/200
+        if self.moving == False:
+                dimensional_t = self.tfinal/29.98/self.l
+        else:
+                dimensional_t = self.tfinal/29.98/self.l
+
+        menis_t = -29.6255 + dimensional_t
+        rfront = 0.01 * (-menis_t) ** 0.679502
+        third = int((self.N_space + 1)/3)
+
+
     def menis_init3(self):
 
             
-            third = int(2*(self.N_space + 1)/5)
+            third = int(4*(self.N_space + 1)/9)
             rest = int(self.N_space + 1 - 2*third)
             # dx = 5e-5
-            min_space = 5e-4
+            min_space = 1e-6
             dx = min_space * third
             pad = 100* dx
             c = 29.98

@@ -51,7 +51,7 @@ run.load()
 
 loader = load()
 run.parameters['all']['Ms'] = [0]
-run.parameters['all']['N_spaces'] = [10]
+run.parameters['all']['N_spaces'] = [6]
 run.parameters['all']['tfinal'] = 0.0000001
 run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False

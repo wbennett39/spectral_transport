@@ -1,7 +1,7 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'marshak'
-    'tfinal': 204.20877
+    'tfinal': 813.786114
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0

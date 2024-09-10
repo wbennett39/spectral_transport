@@ -223,7 +223,7 @@ class sigma_integrator():
         if self.sigma_func['constant'] == 1:
             return x * 0 + 1.0
         
-        elif self.sigma_func['converging'] == 1:
+        elif self.sigma_func['converging'] == 1 or self.sigma_func['test1'] == 1 or self.sigma_func['test2'] == 1 or self.sigma_func['test3'] == 1 or self.sigma_func['test4'] == 1:
             # self.get_temp(x, a, b, RT)
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 print(T_old, 'T')

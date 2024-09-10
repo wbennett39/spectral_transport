@@ -781,13 +781,16 @@ def rttwo_mistake_undoer(i,j):
 @njit
 def converging_r(t_dim, sigma_func):
     rfront = 0.01 * (-t_dim) ** 0.679502
-    
     if sigma_func['test1'] == True:
-        rfront = 1e-4 * (-t_dim) ** 679501
+        rfront = 1e-4 * (-t_dim) ** 0.679501
     elif sigma_func['test2'] == True:
         rfront = 0.005 * (-t_dim) ** 0.51765
     elif sigma_func['test3'] == True:
+        rfront = 1e-4 * (-t_dim) ** 1.1157536
+    elif sigma_func['test4'] == True:
         rfront = (- t_dim) ** 0.462367
+    # else:
+    #     raise ValueError('no function selected')
     return rfront 
 
 @njit
@@ -826,19 +829,19 @@ def ts_converging(t, sigma_func):
     
     if sigma_func['test1'] == 1:
         R = 1e-3
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         res = 1.34503465 * (-t) ** 0.0920519 * W_converging(xi, sigma_func) ** (5/8)
     elif sigma_func['test2'] == 1:
         R = 0.05
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         res = 0.809892 * (-t) ** 0.100238 * W_converging(xi, sigma_func) ** .5
     elif sigma_func['test3'] == 1:
         R = 1e-3
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         res = 1.1982 * (-t) ** 0.0276393 * W_converging(xi, sigma_func) ** .5
     elif sigma_func['test4'] == 1:
         R = 10
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         res = .552154 * (-t) ** .242705 * W_converging(xi, sigma_func) ** .25
     return res
 
@@ -859,22 +862,22 @@ def T_bath(t, sigma_func):
     rf = converging_r(t, sigma_func)
     if sigma_func['test1'] == True:
         R = 1e-3
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         LAMBDA = xi * V_converging(xi, sigma_func) * W_converging(xi, sigma_func) ** -1.5
         res = (1 + 0.103502* LAMBDA * (-t) ** -.541423)**0.25 * ts_converging(t, sigma_func)
     elif sigma_func['test2'] == 1:
         R = 0.05  
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         LAMBDA = xi ** 1.2 * V_converging(xi, sigma_func) * W_converging(xi, sigma_func)**-1
         res = (1 + 0.385372 * LAMBDA * (-t) ** 0.579294) ** .25 * ts_converging(t, sigma_func)
     elif sigma_func['test3'] == 1:
         R = 1e-3
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         LAMBDA = xi**.6625 * V_converging(xi, sigma_func) * W_converging(xi, sigma_func) ** -1
         res = (1+0.075821* LAMBDA * (-t) ** -.316092)**.25 * ts_converging(t, sigma_func)
     elif sigma_func['test4'] == 1:
         R = 10
-        xi = xi_converging(rf, R, sigma_func)
+        xi = xi_converging(rf, R)
         LAMBDA = xi * V_converging(xi, sigma_func)
         res = (1 + 0.083391*LAMBDA*(-t)**-.537633)**.25 * ts_converging(t, sigma_func)
     

@@ -18,6 +18,7 @@ from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
 from .functions import finite_diff_uneven_diamond 
+from .functions import converging_time_function, converging_r
 import numba as nb
 from numba import prange
 from numba.experimental import jitclass
@@ -177,8 +178,11 @@ class rhs_class():
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
             dimensional_t = t/29.98
-            menis_t = -29.6255 + dimensional_t
-            rfront = 0.01 * (-menis_t) ** 0.679502 
+            # menis_t = -29.6255 + dimensional_t
+            menis_t = converging_time_function(t, self.sigma_func)
+            # rfront = 0.01 * (-menis_t) ** 0.679502 
+            rfront = converging_r(menis_t, self.sigma_func)
+            print(np.min(np.abs(mesh.edges-rfront)), 'min abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
             if self.N_space <= 100000:
                 if self.geometry['sphere'] == True:

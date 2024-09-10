@@ -60,7 +60,7 @@ run.mesh_parameters['Msigma'] = 0
 run.boundary_source(0,0)
 
 run.load('marshak')
-run.parameters['boundary_source']['x0'] = 10.0
+run.parameters['boundary_source']['x0'] = np.array([10.0])
 
 menis_times = np.array([-94.706889, -27.126998, -1])
 dimensional_times =  145.4733877 + menis_times 
@@ -68,7 +68,8 @@ dimensional_times =  145.4733877 + menis_times
 run.mesh_parameters['eval_array'] = dimensional_times * 29.98
 print(run.mesh_parameters['eval_array'], 'evaluation times')
 run.parameters['all']['tfinal'] = (dimensional_times * 29.98)[-1]
-run.mesh_parameters['sigma_func']['test4'] = True
+run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': False, 'test2': False, 'test3': False, 'test4': True}
+
 
 # run.parameters['all']['tfinal'] = 10.0
 # run.mesh_parameters['eval_times'] = False

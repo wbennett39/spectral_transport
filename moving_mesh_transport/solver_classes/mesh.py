@@ -860,7 +860,7 @@ class mesh_class(object):
             third = int(4*(self.N_space + 1)/9)
             rest = int(self.N_space + 1 - 2*third)
             # dx = 5e-5
-            min_space = 1e-6
+            min_space = self.x0 / 1e4
             dx = min_space * third
             pad = 100* dx
             c = 29.98
@@ -907,7 +907,7 @@ class mesh_class(object):
                 #     assert 0
                 self.edges0 = self.edges
                 # v, a = self.converging_move_interpolate(self.edges[rest])
-                v, a, j = self.converging_move_interpolate2(self.edges[-third])
+                v, a, j = self.converging_move_interpolate2(self.edges0[-third])
   
                 
                 # menis_t = -29.6255 + self.tfinal / c /self.l
@@ -1058,6 +1058,7 @@ class mesh_class(object):
         menis_t3 = converging_time_function(t3, self.sigma_func)
         # r3=  0.01 * (-menis_t3) ** 0.679502 
         r3 = converging_r(menis_t3, self.sigma_func)
+        print(r1, r2, r3, 'rs')
 
         v0 = -((-(r3*t1**3*t2**2) + r3*t1**2*t2**3 + r2*t1**3*t3**2 - r1*t2**3*t3**2 - r2*t1**2*t3**3 + r1*t2**2*t3**3 + t1**3*t2**2*x0 - t1**2*t2**3*x0 - t1**3*t3**2*x0 + t2**3*t3**2*x0 + t1**2*t3**3*x0 - t2**2*t3**3*x0)/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3))
         a = (2*(-(r3*t1**3*t2) + r3*t1*t2**3 + r2*t1**3*t3 - r1*t2**3*t3 - r2*t1*t3**3 + r1*t2*t3**3 + t1**3*t2*x0 - t1*t2**3*x0 - t1**3*t3*x0 + t2**3*t3*x0 + t1*t3**3*x0 - t2*t3**3*x0))/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3)

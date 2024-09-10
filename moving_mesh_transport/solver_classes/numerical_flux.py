@@ -11,11 +11,12 @@ from numba import float64, int64, deferred_type
 from numba.experimental import jitclass
 from numba import types, typed
 import numba as nb
-from .functions import T_bath
+from .functions import T_bath, converging_time_function
 
 from .mesh import mesh_class
 from .functions import normPn, normTn
 from .build_problem import build
+
 ###############################################################################
 mesh_class_type = deferred_type()
 mesh_class_type.define(mesh_class.class_type.instance_type)
@@ -153,8 +154,13 @@ class LU_surf(object):
         # elif (self.thermal_couple == 1) and (self.moving == 1):
         #     temp = np.ones(xs.size) * self.e_init 
         elif self.boundary_source == True:
-            if self.opacity_func['converging'] == True:
+            if self.opacity_func['converging'] == 1:
                 temp = self.interpolate_heat_wave(t) * np.ones(xs.size) * 0.5
+            elif self.opacity_func['test1'] == 1 or self.opacity_func['test2'] == 1 or self.opacity_func['test3'] == 1 or self.opacity_func['test4'] == 1:
+                menis_t = converging_time_function(t, self.opacity_func)
+                T_bath_HeV = T_bath(menis_t, self.opacity_func)
+                temp = (T_bath_HeV / 10) ** 4 * 0.5 * np.ones(xs.size) 
+                
             else:
                 temp = np.ones(xs.size) * self.boundary_source_strength
             

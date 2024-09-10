@@ -991,11 +991,11 @@ class mesh_class(object):
             self.edges = self.Dedges_const*t + 0.5 * self.c1s * t**2 + self.edges0 + self.c2s * t**3 /3
             # print(self.Dedges_const)
             self.Dedges =  self.Dedges_const + self.c1s * t  + self.c2s * t**2
-            dimensional_t = t/29.98/self.l
-            menis_t = -29.6255 + dimensional_t
-            rfront = self.l * 0.01 * (-menis_t) ** 0.679502 
-            third = int(2*(self.N_space + 1)/3)
-            rest = int(self.N_space + 1 - third)
+            # dimensional_t = t/29.98/self.l
+            # menis_t = -29.6255 + dimensional_t
+            # rfront = self.l * 0.01 * (-menis_t) ** 0.679502 
+            # third = int(2*(self.N_space + 1)/3)
+            # rest = int(self.N_space + 1 - third)
         # if self.tfinal-t <= 1e-4:
         #     print(self.edges[rest] - rfront)
         # print(self.edges[rest])
@@ -1004,8 +1004,8 @@ class mesh_class(object):
         #     print(self.edges[rest]-rfront, 'rf')
         #     print(self.edges[rest-1]-rfront, 'rf-1')
         #     print(self.edges[rest+1]-rfront, 'rf+1')
-            if self.edges[1] > rfront:
-                assert 0
+            # if self.edges[1] > rfront:
+            #     assert 0
 
 
         # print(self.edges, 'edges')

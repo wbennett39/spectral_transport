@@ -11,6 +11,7 @@ from numba import float64, int64, deferred_type
 from numba.experimental import jitclass
 from numba import types, typed
 import numba as nb
+from .functions import T_bath
 
 from .mesh import mesh_class
 from .functions import normPn, normTn

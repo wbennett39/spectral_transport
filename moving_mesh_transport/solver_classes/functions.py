@@ -781,6 +781,7 @@ def rttwo_mistake_undoer(i,j):
 @njit
 def converging_r(t_dim, sigma_func):
     rfront = 0.01 * (-t_dim) ** 0.679502
+    
     if sigma_func['test1'] == True:
         rfront = 1e-4 * (-t_dim) ** 679501
     elif sigma_func['test2'] == True:
@@ -883,9 +884,21 @@ def T_bath(t, sigma_func):
 
         
     
-
-
+@njit
+def converging_time_function(t, sigma_func):
+    t_dim = t/29.98
+    t_init = -29.6255
+    if sigma_func['test2'] == True:
+        t_init = -85.4678 
+    elif sigma_func['test1'] == True:
+        t_init = -29.625647 
+    elif sigma_func['test3'] == True:
+        t_init = -7.875848
+    elif sigma_func['test4'] == True:
+        t_init = -145.47339
     
+    return t_dim + t_init
+
     
 
 # @njit 

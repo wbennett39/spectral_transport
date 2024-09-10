@@ -189,7 +189,7 @@ class build(object):
     def make_IC(self):
         edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
         self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
-        self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.geometry)
+        self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.geometry, self.sigma_func)
         edges_init = edges.edges
 
         # The current method for handling delta functions

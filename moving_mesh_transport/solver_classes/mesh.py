@@ -9,6 +9,7 @@ from .mesh_functions import set_func, _interp1d
 #from mesh_functions import set_func, _interp1d
 # import quadpy
 import numpy.polynomial as nply
+from .functions import converging_time_function, converging_r
 from scipy.special import roots_legendre
 from .mesh_functions import boundary_source_init_func_outside
 #from mesh_functions import boundary_source_init_func_outside
@@ -70,7 +71,8 @@ data = [('N_ang', int64),
         ('t0', float64),
         ('geometry', nb.typeof(params_default)),
         ('l', float64),
-        ('c2s', float64[:])
+        ('c2s', float64[:]),
+        ('sigma_func', nb.typeof(params_default))
         # ('problem_type', int64)
         ]
 #################################################################################################
@@ -81,11 +83,11 @@ data = [('N_ang', int64),
 class mesh_class(object):
     def __init__(self, N_space, x0, tfinal, moving, move_type, source_type, edge_v,
      thick, move_factor, wave_loc_array, pad, leader_pad, thick_quad, thick_quad_edge, 
-     finite_domain, domain_width, fake_sedov_v, boundary_on, t0, geometry):
+     finite_domain, domain_width, fake_sedov_v, boundary_on, t0, geometry, sigma_func):
         
         self.debugging = True
         self.test_dimensional_rhs = False
-
+        self.sigma_func = sigma_func
         self.pad = pad
         self.tfinal = tfinal
         self.N_space = N_space
@@ -866,8 +868,10 @@ class mesh_class(object):
                 dimensional_t = self.tfinal/29.98/self.l
             else:
                 dimensional_t = self.tfinal/29.98/self.l
-            menis_t = -29.6255 + dimensional_t
-            rfront = 0.01 * (-menis_t) ** 0.679502 
+            # menis_t = -29.6255 + dimensional_t
+            menis_t = converging_time_function(self.tfinal, self.sigma_func)
+            # rfront = 0.01 * (-menis_t) ** 0.679502 
+            rfront = converging_r(menis_t, self.sigma_func)
             if self.moving == False:
                 self.edges = np.zeros(self.N_space+1)
                 # self.edges[1:] = np.linspace(rfront * self.l, self.x0 * self.l, self.N_space)
@@ -906,8 +910,9 @@ class mesh_class(object):
                 v, a, j = self.converging_move_interpolate2(self.edges[-third])
   
                 
-                menis_t = -29.6255 + self.tfinal / c /self.l
-                rfront = 0.01 * (-menis_t) ** 0.679502 
+                # menis_t = -29.6255 + self.tfinal / c /self.l
+
+                # rfront = 0.01 * (-menis_t) ** 0.679502 
                 print(rfront,'final shock front')
 
                 self.Dedges_const = self.edges * 0 
@@ -966,8 +971,12 @@ class mesh_class(object):
     def converging_move(self, t):
         c = 29.98
         dimensional_t = t/c/self.l 
-        menis_t = -29.6255 + dimensional_t
-        rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+
+        # menis_t = -29.6255 + dimensional
+        # m_t
+        menis_t = converging_time_function(t, self.sigma_func)
+        # rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+        rfront = converging_r(menis_t, self.sigma_func)
         rfront = rfront * self.l
         dr_dt = -0.00022665176784523018/(29.6255 - 0.0333555703802535*t)**0.32049799999999995
         dx = 5e-4
@@ -1033,16 +1042,22 @@ class mesh_class(object):
 
         
         dimensional_t1 = t1/c 
-        menis_t1 = -29.6255 + dimensional_t1
-        r1 = 0.01 * (-menis_t1) ** 0.679502 
+        # menis_t1 = -29.6255 + dimensional_t1
+        menis_t1 = converging_time_function(t1, self.sigma_func)
+        # r1 = 0.01 * (-menis_t1) ** 0.679502 
+        r1 = converging_r(menis_t1, self.sigma_func)
 
         dimensional_t2 = t2/c
-        menis_t2 = -29.6255 + dimensional_t2
-        r2=  0.01 * (-menis_t2) ** 0.679502 
+        # menis_t2 = -29.6255 + dimensional_t2
+        menis_t2 = converging_time_function(t2, self.sigma_func)
+        # r2=  0.01 * (-menis_t2) ** 0.679502 
+        r2 = converging_r(menis_t2, self.sigma_func)
 
         dimensional_t3 = t3/c
-        menis_t3 = -29.6255 + dimensional_t3
-        r3=  0.01 * (-menis_t3) ** 0.679502 
+        # menis_t3 = -29.6255 + dimensional_t3
+        menis_t3 = converging_time_function(t3, self.sigma_func)
+        # r3=  0.01 * (-menis_t3) ** 0.679502 
+        r3 = converging_r(menis_t3, self.sigma_func)
 
         v0 = -((-(r3*t1**3*t2**2) + r3*t1**2*t2**3 + r2*t1**3*t3**2 - r1*t2**3*t3**2 - r2*t1**2*t3**3 + r1*t2**2*t3**3 + t1**3*t2**2*x0 - t1**2*t2**3*x0 - t1**3*t3**2*x0 + t2**3*t3**2*x0 + t1**2*t3**3*x0 - t2**2*t3**3*x0)/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3))
         a = (2*(-(r3*t1**3*t2) + r3*t1*t2**3 + r2*t1**3*t3 - r1*t2**3*t3 - r2*t1*t3**3 + r1*t2*t3**3 + t1**3*t2*x0 - t1*t2**3*x0 - t1**3*t3*x0 + t2**3*t3*x0 + t1*t3**3*x0 - t2*t3**3*x0))/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3)

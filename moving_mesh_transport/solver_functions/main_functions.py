@@ -172,7 +172,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
 
     mesh = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
                       wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
-                      domain_width, fake_sedov_v0, boundary_on, t0, geometry) 
+                      domain_width, fake_sedov_v0, boundary_on, t0, geometry, sigma_func) 
 
 
     matrices = G_L(initialize, give[0], give[1], give[2], give[3], give[4], give[5], give[6], give[7], give[8], give[9], give[10], give[11], give[12])
@@ -290,7 +290,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         
         fake_mesh  = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
                       wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
-                      domain_width, fake_sedov_v0, boundary_on, t0, geometry) 
+                      domain_width, fake_sedov_v0, boundary_on, t0, geometry, sigma_func) 
         for it, tt in enumerate(eval_array):
             fake_mesh.move(tt)
             edges = fake_mesh.edges

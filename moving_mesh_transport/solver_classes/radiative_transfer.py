@@ -55,7 +55,8 @@ data = [('temp_function', int64[:]),
         ('temperature', float64[:,:]),
         ('space', int64),
         ('sigma_a_vec', float64[:]),
-        ('a2', float64)
+        ('a2', float64),
+        ('sigma_func',nb.typeof(params_default))
 
 
 
@@ -75,7 +76,7 @@ class T_function(object):
         self.a2 = 5.67e-5 # in ergs
 
         self.geometry = build.geometry
-        
+        self.sigma_func = build.sigma_func
         if self.geometry['slab'] == True:
             self.xs_quad = build.xs_quad
             self.ws_quad = build.ws_quad
@@ -132,7 +133,7 @@ class T_function(object):
             #  if np.max(e) <= 1e-20:
             #     T = np.zeros(e.size) + 1e-12
             #  else:
-                T = self.meni_eos(e)
+                T = self.meni_eos(e, argument)
   
                 # for it, TT in enumerate(T):
                 #     if TT<0.0:
@@ -283,7 +284,7 @@ class T_function(object):
         t1 = np.abs(4*e/self.alpha)
         return np.power(self.a*t1,0.25)
     
-    def meni_eos(self, e):
+    def meni_eos(self, e, x):
         
         self.fudge_factor = np.ones(e.size)
     
@@ -301,12 +302,34 @@ class T_function(object):
                 # e[count] = e[count-1]
 
         # dimensional e in GJ/cm^3
-        ee = e * self.a  / 10**-3 * 0.1**1.6
-        T1 = (np.abs(ee))
-        # self.alpha = 10**-3
-        # t1 = np.abs(4*e*self.a/self.alpha)
-        # return np.power(t1,0.25) 
-        return np.power(T1, 0.625) * np.sign(e)
+        if self.sigma_func['test1'] == True:
+             rho = 19.3
+             ee = e * self.a  / 10**-3 * 0.1**1.6 / 3.4 / rho **.86
+             T1 = (np.abs(ee))
+             return np.power(T1, 0.625) * np.sign(e)
+        elif self.sigma_func['test2'] == True:
+             rho = x**.5
+             ee = e * self.a  / 10**-3 * 0.1**2 / 3.0/ rho **.4
+             T1 = (np.abs(ee))
+             return np.power(T1, 0.5) * np.sign(e)
+        elif self.sigma_func['test3'] == True:
+             rho = x **-.45
+             ee = e * self.a  / 10**-3 * 0.1**2 / rho **.75
+             T1 = (np.abs(ee))
+             return np.power(T1, 0.5) * np.sign(e)
+             
+        elif self.sigma_func['test4'] == True:
+             ee = e * self.a  / 10**-2 * 0.1**4 * 4 / 5 / 1.372017
+             T1 = (np.abs(ee))
+             return np.power(T1, 0.25) * np.sign(e)
+                  
+        else:
+            ee = e * self.a  / 10**-3 * 0.1**1.6
+            T1 = (np.abs(ee))
+            # self.alpha = 10**-3
+            # t1 = np.abs(4*e*self.a/self.alpha)
+            # return np.power(t1,0.25) 
+            return np.power(T1, 0.625) * np.sign(e)
         
         
     def make_H(self, xL, xR, e_vec, sigma_class, space):

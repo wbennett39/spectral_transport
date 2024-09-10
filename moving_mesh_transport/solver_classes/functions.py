@@ -778,7 +778,115 @@ def rttwo_mistake_undoer(i,j):
         assert(0)
         
 
+@njit
+def converging_r(t_dim, sigma_func):
+    rfront = 0.01 * (-t_dim) ** 0.679502
+    if sigma_func['test1'] == True:
+        rfront = 1e-4 * (-t_dim) ** 679501
+    elif sigma_func['test2'] == True:
+        rfront = 0.005 * (-t_dim) ** 0.51765
+    elif sigma_func['test3'] == True:
+        rfront = (- t_dim) ** 0.462367
+    return rfront 
 
+@njit
+def xi_converging(rf, r):
+    return r / rf
+
+@njit
+def W_converging(xi, sigma_func):
+    if sigma_func['test1'] == True:
+        if 1 <= xi <= 2:
+            res =  (xi-1)**0.4057 * (1.521 - 0.3762 * xi + 0.06558 * xi **2)
+        elif xi > 2:
+            res =  (xi-1)**0.2955 * (1.082 - 0.02718 * xi + 0.001055 * xi **2)
+    elif sigma_func['test2'] == True:
+        if 1 <= xi <= 2:
+            res =  (xi-1)**0.3977 * (1.244 - .1757 * xi + 0.03186 * xi **2)
+        elif xi > 2:
+            res =  (xi-1)**0.3401 * (1.021 - 0.0007123 * xi + 0.0001726 * xi **2)
+    elif sigma_func['test3'] == True:
+        if 1 <= xi <= 2:
+            res =  (xi-1)**0.3575 * (1.979 - .6195 * xi + 0.1106 * xi **2)
+        elif xi > 2:
+            res =  (xi-1)**0.2101 * (1.27 - 0.04707 * xi + 0.001797 * xi **2)
+    elif sigma_func['test4'] == True:
+        if 1 <= xi <= 2:
+            res =  (xi-1)**1.141 * (0.2251 - .127 * xi + 0.001626 * xi **2)
+        elif xi > 2:
+            res =  (xi-1)**1.102 * (0.1846 - 0.1505 * xi + 0.00004394 * xi **2)
+    return res
+        
+
+@njit
+def ts_converging(t, sigma_func):
+    # surface temperature. Units in HeV
+    rf = converging_r(t, sigma_func)
+    
+    if sigma_func['test1'] == 1:
+        R = 1e-3
+        xi = xi_converging(rf, R, sigma_func)
+        res = 1.34503465 * (-t) ** 0.0920519 * W_converging(xi, sigma_func) ** (5/8)
+    elif sigma_func['test2'] == 1:
+        R = 0.05
+        xi = xi_converging(rf, R, sigma_func)
+        res = 0.809892 * (-t) ** 0.100238 * W_converging(xi, sigma_func) ** .5
+    elif sigma_func['test3'] == 1:
+        R = 1e-3
+        xi = xi_converging(rf, R, sigma_func)
+        res = 1.1982 * (-t) ** 0.0276393 * W_converging(xi, sigma_func) ** .5
+    elif sigma_func['test4'] == 1:
+        R = 10
+        xi = xi_converging(rf, R, sigma_func)
+        res = .552154 * (-t) ** .242705 * W_converging(xi, sigma_func) ** .25
+    return res
+
+@njit
+def V_converging(xi, sigma_func):
+    if sigma_func['test1'] == True:
+        res = 0.4345 * xi ** -2.752 + .2451 * xi ** -1.454
+    elif sigma_func['test2'] == 1:
+        res = 0.262 * xi ** -2.34 + .2558 * xi ** -1.88
+    elif sigma_func['test3'] == 1:
+        res = 0.8879 * xi ** - .233 + .2278 * xi ** -1.037
+    elif sigma_func['test4'] == 1:
+        res = 0.06247 * xi ** -3.836 + 0.3999 * xi **-2.157
+    return res 
+
+@njit
+def T_bath(t, sigma_func):
+    rf = converging_r(t, sigma_func)
+    if sigma_func['test1'] == True:
+        R = 1e-3
+        xi = xi_converging(rf, R, sigma_func)
+        LAMBDA = xi * V_converging(xi, sigma_func) * W_converging(xi, sigma_func) ** -1.5
+        res = (1 + 0.103502* LAMBDA * (-t) ** -.541423)**0.25 * ts_converging(t, sigma_func)
+    elif sigma_func['test2'] == 1:
+        R = 0.05  
+        xi = xi_converging(rf, R, sigma_func)
+        LAMBDA = xi ** 1.2 * V_converging(xi, sigma_func) * W_converging(xi, sigma_func)**-1
+        res = (1 + 0.385372 * LAMBDA * (-t) ** 0.579294) ** .25 * ts_converging(t, sigma_func)
+    elif sigma_func['test3'] == 1:
+        R = 1e-3
+        xi = xi_converging(rf, R, sigma_func)
+        LAMBDA = xi**.6625 * V_converging(xi, sigma_func) * W_converging(xi, sigma_func) ** -1
+        res = (1+0.075821* LAMBDA * (-t) ** -.316092)**.25 * ts_converging(t, sigma_func)
+    elif sigma_func['test4'] == 1:
+        R = 10
+        xi = xi_converging(rf, R, sigma_func)
+        LAMBDA = xi * V_converging(xi, sigma_func)
+        res = (1 + 0.083391*LAMBDA*(-t)**-.537633)**.25 * ts_converging(t, sigma_func)
+    
+    return res
+
+
+
+        
+    
+
+
+    
+    
 
 # @njit 
 # def positivity_enforcer():

@@ -353,11 +353,11 @@ class rhs_class():
                 mul = self.mus[angle]
                 # calculate numerical flux
                 refl_index = 0
-                if space == 0:
-                    if angle >= self.N_ang/2:
-                        assert(self.mus[angle] > 0)
-                        refl_index = self.N_ang-angle-1
-                        assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
+                # if space == 0:
+                    # if angle >= self.N_ang/2:
+                    #     assert(self.mus[angle] > 0)
+                    #     refl_index = self.N_ang-angle-1
+                    #     assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                     # print(self.mus[])
                     
                 num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])

@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M wbennet2@nd.edu
 #$ -m abe
-#$ -N M=2_20_cells_S2_t3
+#$ -N t3M=2_30_cells_S2
 
 module load python/3.6.4
 python3 converging_test3.py

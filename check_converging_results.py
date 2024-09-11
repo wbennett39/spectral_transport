@@ -4,7 +4,7 @@ import numpy as plt
 import matplotlib.pyplot as plt
 import numpy as np
 
-def check(t, iterator, spaces = 40, M = 2):
+def check(t, iterator, spaces = 20, M = 2, test = 'converging'):
 #     if t == 20.420877:
 #         iterator = 0
 #     elif t == 52.3519754:
@@ -19,7 +19,14 @@ def check(t, iterator, spaces = 40, M = 2):
     tfinal = t
     a = 0.0137225 
     c = 29.98
-    ff = h5py.File('converging_heat/converging_heat_wave_results2.h5', 'r+')
+    if test == 'converging':
+          ff = h5py.File('converging_heat/converging_heat_wave_results2.h5', 'r+')
+    elif test == 'test1':
+         ff = h5py.File('converging_heat/converging_heat_wave_results_test1.h5', 'r+')
+    elif test == 'test2':
+         ff = h5py.File('converging_heat/converging_heat_wave_results_test2.h5', 'r+')
+         
+         
     f = ff[f'M=[{M}]_[{spaces}]_cells']
     print(f.keys()) 
     e = f['energy_density'][:]
@@ -104,16 +111,16 @@ def check(t, iterator, spaces = 40, M = 2):
     plt.legend()
     plt.show()
 
-# check(204.20877,0)
-# check(523.519754,1)
-# check(692.759852,2)
-# check(813.786114,3)
+check(204.20877,0)
+check(523.519754,1)
+check(692.759852,2)
+check(813.786114,3)
 
 
-check(2.0420877,0)
-check(5.23519754,1)
-check(6.92759852,2)
-check(8.13786114,3)
+# check(2.0420877,0)
+# check(5.23519754,1)
+# check(6.92759852,2)
+# check(8.13786114,3)
 
 # check(2.0420877,0, spaces = 20)
 # check(5.23519754,1, spaces = 20)

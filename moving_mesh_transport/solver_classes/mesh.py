@@ -860,7 +860,8 @@ class mesh_class(object):
             third = int(4*(self.N_space + 1)/9)
             rest = int(self.N_space + 1 - 2*third)
             # dx = 5e-5
-            min_space = self.x0 / 1e5
+            # min_space = self.x0 / 1e
+            min_space = self.x0/500
             dx = min_space * third
             pad = 100* dx
             c = 29.98
@@ -885,8 +886,10 @@ class mesh_class(object):
                 min_space2 = 5 * min_space
                 # dx2 = min_space2 * third
                 # dx2 = self.x0/500
-                dx2 = self.x0/200
-                inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx
+                dx2 = self.x0/20
+                # inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx 
+                inside_wave_edges = np.linspace(self.x0-dx, self.x0, third)
+                # inside_wave_edges = np.
 
                 outside_wave_edges2 =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0-dx2-dx))[:-1])
                 outside_wave_edges = (np.linspace(self.x0-dx2-dx, self.x0-dx, third + 1)[:-1])

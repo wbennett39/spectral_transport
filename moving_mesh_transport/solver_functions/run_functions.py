@@ -241,39 +241,44 @@ class run:
             # f = lambda x: np.exp(-x**2 /(2 * 0.5**2))
             # fsol = lambda x, mu: np.exp(x * 1/mu) 
             # plt.figure(3)
-
-            plt.plot(self.xs, self.e, '-^', label = 'energy density')
-            plt.legend()
+            if self.eval_times == True:
+                for it in range(self.xs[:,0].size):
+                    plt.plot(self.xs[it], self.e[it], '-^')
+            
+            # plt.legend()
+                plt.title('energy density')
+                plt.show()
 
 
             # if parameters.sigma_func['converging'] == True:
-            plt.figure(5)
-            a = 0.0137225 
-            c = 29.98
-            T = np.power((np.abs(self.e * a /1e-3*0.1**1.6)),(1/1.6))
-            # T = np.power(self.e,0.25) 
-            plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
-            plt.plot(self.xs, a*c*T**4, label = r'$T^4$')
-            plt.legend()
-            plt.show()
-            
-            plt.figure(6)
-            a = 0.0137225 
-            c = 29.98
-            # T = np.power((np.abs(self.e * a * c/1e13)),(1/1.6))
-            ee = self.e * a  / 10**-3 * (0.1)**1.6
-            T1 = (np.abs(ee))
-        # self.alpha = 10**-3
-            # t1 = np.abs(4*e*self.a/self.alpha)
-        # return np.power(t1,0.25) 
-            plt.figure(77)
-            r_meni, T_meni = run_converging(self.tfinal / c)
-            T =  np.power(T1, 0.625)    
+            # plt.figure(5)
+            # a = 0.0137225 
+            # c = 29.98
+            # T = np.power((np.abs(self.e * a /1e-3*0.1**1.6)),(1/1.6))
+            # # T = np.power(self.e,0.25) 
             # plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
-            plt.plot(self.xs, T*10, label = r'$T$')
-            plt.plot(r_meni, T_meni, 'b--', label = 'benchmark T')
-            plt.legend()
-            plt.show()
+            # plt.plot(self.xs, a*c*T**4, label = r'$T^4$')
+            # plt.legend()
+            # plt.show()
+            
+            # plt.figure(6)
+            # a = 0.0137225 
+            # c = 29.98
+        #     # T = np.power((np.abs(self.e * a * c/1e13)),(1/1.6))
+        #     ee = self.e * a  / 10**-3 * (0.1)**1.6
+        #     T1 = (np.abs(ee))
+        # # self.alpha = 10**-3
+        #     # t1 = np.abs(4*e*self.a/self.alpha)
+        # # return np.power(t1,0.25) 
+        #     plt.figure(77)
+        #     # r_meni, T_meni = run_converging(self.tfinal / c)
+        #     T =  np.power(T1, 0.625)    
+        #     # plt.plot(self.xs, self.phi*a*c, '-', label = r'$\phi$')
+        #     # plt.plot(self.xs, T*10, label = r'$T$')
+        #     plt.plot(self.xs, self.e)
+        #     # plt.plot(r_meni, T_meni, 'b--', label = 'benchmark T')
+        #     plt.legend()
+        #     plt.show()
             f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')
             if f.__contains__('scalar_flux'):
                 del f['scalar_flux']
@@ -383,6 +388,8 @@ class run:
         self.t0_source = solver.t0
         self.eval_array = solver.eval_array
         self.exit_phi = solver.exit_phi
+        self.eval_times = solver.eval_times
+        self.edges = solver.edges
         
         
     def run_all(self):

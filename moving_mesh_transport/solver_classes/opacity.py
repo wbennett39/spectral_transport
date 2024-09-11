@@ -234,7 +234,7 @@ class sigma_integrator():
             result = np.where(T_old<0, 0.0, T_old)
             if self.sigma_func['test1'] == 1:
                 rho = 19.3
-                res = 7200 *  (result + 5e-4) ** -1.5 * (0.1**1.5) * rho **1.2
+                res = 7200 *  (result + 5e-3) ** -1.5 * (0.1**1.5) * rho **1.2
             elif self.sigma_func['test2'] == 1:
                 rho = x**.5
                 res = 1.5e4 * (result + 5e-3) ** -3.0 * (0.1**3) * rho ** 1.4

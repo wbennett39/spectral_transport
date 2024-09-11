@@ -910,7 +910,9 @@ class mesh_class(object):
                 #     assert 0
                 self.edges0 = self.edges
                 # v, a = self.converging_move_interpolate(self.edges[rest])
-                v, a, j = self.converging_move_interpolate2(self.edges0[-third])
+                # v, a, j = self.converging_move_interpolate2(self.edges0[-third])
+                v, a, j = self.converging_move_interpolate2(self.edges0[int(-third -third/2)])
+
   
                 
                 # menis_t = -29.6255 + self.tfinal / c /self.l

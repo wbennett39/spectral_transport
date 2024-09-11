@@ -238,7 +238,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         extra_deg_freedom = 0
        
         sol_last = sol.y[:,-1].reshape((N_ang,N_space,M+1))
-        if eval_times ==True:
+        if eval_times ==True and sol.status != -1:
             sol_array = sol.y.reshape((eval_array.size, N_ang,N_space,M+1)) 
     elif thermal_couple['none'] != 1:
         extra_deg_freedom = 1
@@ -262,7 +262,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     elif choose_xs == True:
         xs = specified_xs
     # print(xs, 'xs')
-    if eval_times == False:
+    if eval_times == False or sol.status == -1:
         output = make_output(tfinal, N_ang, ws, xs, sol_last, M, edges, uncollided, geometry)
         phi = output.make_phi(uncollided_sol)
         psi = output.psi_out # this is the collided psi

@@ -222,6 +222,7 @@ class main_class(parameter_load_class):
                     self.ws = ws
                     self.angles = angles
                     self.exit_phi = exit_phi
+                    self.edges = edges
                     # for it, t in enumerate(self.eval_array):
                     #     self.exit_phi[it, 0] = np.sum(np.multiply(self.ws, self.exit_dist[it, :, 0])) 
                     #     self.exit_phi[it, 1] = np.sum(np.multiply(self.ws, self.exit_dist[it, :, 1])) 

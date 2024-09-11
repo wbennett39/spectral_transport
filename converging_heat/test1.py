@@ -23,6 +23,7 @@ tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
+edges = tr['edges'][:]
 phi_dim = phi * a * c
 # analytical solution
 R = 0.001
@@ -81,6 +82,9 @@ plt.plot(r_anal/1e-4, Trt_fit(r_anal, t1), c="r", ls="--", lw=2)
 plt.plot(xs[0,:]/1e-4, 10*(np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
 plt.plot(xs[1,:]/1e-4, 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:]/1e-4, 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
+plt.plot(edges, edges*0, 'k|', markersize = 40)
+
+
 
 
 

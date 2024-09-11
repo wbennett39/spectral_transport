@@ -72,7 +72,7 @@ run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewer
 # run.parameters['all']['tfinal'] = 10.0
 # run.mesh_parameters['eval_times'] = False
 
-run.boundary_source(0,0)
+run.boundary_source(0,1)
 f = h5py.File('converging_heat/converging_heat_wave_results_test1.h5','r+')
 M = run.parameters['all']['Ms'] 
 spaces = run.parameters['all']['N_spaces']
@@ -85,11 +85,14 @@ if f[f'M={M}_{spaces}_cells'].__contains__('scalar_flux'):
     del f['scalar_flux']
     del f['energy_density']
     del f['xs']
+if f[f'M={M}_{spaces}_cells'].__contains__('edges'):
+    del f['edges']
 
 
 f[f'M={M}_{spaces}_cells'].create_dataset('scalar_flux', data = run.phi)
 f[f'M={M}_{spaces}_cells'].create_dataset('energy_density', data = run.e)
 f[f'M={M}_{spaces}_cells'].create_dataset('xs', data = run.xs)
+f[f'M={M}_{spaces}_cells'].create_dataset('edges', data = run.edges)
 # print('###')
 # print(run.phi,'scalar flux')
 # print('###')

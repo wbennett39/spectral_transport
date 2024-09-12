@@ -183,9 +183,9 @@ class rhs_class():
             # rfront = 0.01 * (-menis_t) ** 0.679502 
             rfront = converging_r(menis_t, self.sigma_func)
             third = int(4*(self.N_space + 1)/9)
-            tracker_edge = int(-third) 
-            print(tracker_edge)
-            print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
+            # tracker_edge = int(-third) 
+            # print(tracker_edge)
+            # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
             if self.N_space <= 100000:
                 if self.geometry['sphere'] == True:
@@ -221,6 +221,7 @@ class rhs_class():
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
         # print out timesteps
         self.time_step_counter(t, mesh) 
+        print(t,'t')
 
         # allocate arrays
 
@@ -423,7 +424,6 @@ class rhs_class():
                     RHS = np.dot(Minv, RHS)
 
                
-                    
                     V_new[angle,space,:] = RHS  
 
         # print(V_new.shape)

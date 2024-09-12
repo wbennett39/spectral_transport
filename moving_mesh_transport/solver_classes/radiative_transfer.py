@@ -313,7 +313,8 @@ class T_function(object):
              T1 = (np.abs(ee))
              return np.power(T1, 0.5) * np.sign(e)
         elif self.sigma_func['test3'] == True:
-             rho = (x+1e-8) **-.45
+             rho = (x+1e-8) **(-.45)
+
              ee = e * self.a  / 10**-3 * 0.1**2 / (rho **.75)
              T1 = (np.abs(ee))
              return np.power(T1, 0.5) * np.sign(e)

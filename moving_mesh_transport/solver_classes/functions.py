@@ -852,7 +852,7 @@ def V_converging(xi, sigma_func):
     elif sigma_func['test2'] == 1:
         res = 0.262 * xi ** -2.34 + .2558 * xi ** -1.88
     elif sigma_func['test3'] == 1:
-        res = 0.8879 * xi ** - .233 + .2278 * xi ** -1.037
+        res = 0.8879 * (xi+1e-14) ** -.233 + .2278 * (xi+1e-10) ** -1.037
     elif sigma_func['test4'] == 1:
         res = 0.06247 * xi ** -3.836 + 0.3999 * xi **-2.157
     return res 
@@ -873,8 +873,9 @@ def T_bath(t, sigma_func):
     elif sigma_func['test3'] == 1:
         R = 1e-3
         xi = xi_converging(rf, R)
-        LAMBDA = xi**.6625 * V_converging(xi, sigma_func) * W_converging(xi, sigma_func) ** -1
-        res = (1+0.075821* LAMBDA * (-t) ** -.316092)**.25 * ts_converging(t, sigma_func)
+        LAMBDA = xi**.6625 * V_converging(xi, sigma_func) * (W_converging(xi, sigma_func)+1e-13) ** -1
+        res = (1+0.075821* LAMBDA * (-t+1e-13) ** -.316092)**.25 * ts_converging(t, sigma_func)
+
     elif sigma_func['test4'] == 1:
         R = 10
         xi = xi_converging(rf, R)

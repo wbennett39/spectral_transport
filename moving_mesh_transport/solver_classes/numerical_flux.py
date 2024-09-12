@@ -161,6 +161,7 @@ class LU_surf(object):
                 T_bath_HeV = T_bath(menis_t, self.opacity_func)
                 temp = (T_bath_HeV / 10) ** 4 * 0.5 * np.ones(xs.size) 
                 
+                
             else:
                 temp = np.ones(xs.size) * self.boundary_source_strength
             

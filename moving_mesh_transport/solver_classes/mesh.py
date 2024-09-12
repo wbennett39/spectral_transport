@@ -953,7 +953,7 @@ class mesh_class(object):
                 min_space2 = 5 * min_space
                 # dx2 = min_space2 * third
                 # dx2 = self.x0/500
-                dx2 = self.x0/20
+                dx2 = self.x0/50
                 # inside_wave_edges = self.x0 - (np.abs((np.logspace(0,1,third)-10)/-9) )*dx 
                 inside_wave_edges = np.linspace(self.x0-dx, self.x0, third)
                 # inside_wave_edges = np.

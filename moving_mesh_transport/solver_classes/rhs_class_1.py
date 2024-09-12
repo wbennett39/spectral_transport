@@ -224,6 +224,7 @@ class rhs_class():
 
         # allocate arrays
 
+
         # My (Stephen's) attempt at adding radiative transfer to this code
 
         # Not sure if this is correct

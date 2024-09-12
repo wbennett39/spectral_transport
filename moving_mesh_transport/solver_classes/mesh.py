@@ -865,6 +865,7 @@ class mesh_class(object):
                 self.Dedges = self.edges *0 
 
                 self.Dedges_const = self.edges*0
+                print(self.edges, 'edges')
              else:
                 menis_t = converging_time_function(self.tfinal, self.sigma_func)
                 # rfront = 0.01 * (-menis_t) ** 0.679502 
@@ -875,7 +876,7 @@ class mesh_class(object):
                 rest = int(self.N_space + 1 - 2*third)
                 assert(2*third+ rest == self.N_space+1)
                 center_edge = int(third/2) + 1 + third
-                dx2 = self.x0/100
+                dx2 = self.x0/10
                 min_spacing = 1e-6
                 dx1 = min_spacing * third
                 cluster = np.linspace(self.x0 - dx1 - dx2, self.x0 - dx1, third)
@@ -1232,7 +1233,7 @@ class mesh_class(object):
              
             elif np.all(self.source_type == 0):
                 if self.geometry['sphere'] == True:
-                    self.menis_init4()
+                    self.menis_init3()
                     print(self.Dedges_const, 'dedges const')
                 else:
                     self.boundary_source_init_func(self.vnaught)

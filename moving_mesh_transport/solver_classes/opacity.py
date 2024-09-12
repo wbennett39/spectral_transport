@@ -239,7 +239,7 @@ class sigma_integrator():
                 rho = x**.5
                 res = 1.5e4 * (result + 5e-3) ** -3.0 * (0.1**3) * rho ** 1.4
             elif self.sigma_func['test3'] == 1:
-                rho = x ** -.45
+                rho = (x+1e-10) ** -.45
                 res = 10**3 * (result + 5e-3) ** -3.5 * (0.1**3.5) * rho **1.4
             elif self.sigma_func['test4'] == 1:
                 rho = x

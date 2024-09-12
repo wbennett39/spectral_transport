@@ -182,7 +182,10 @@ class rhs_class():
             menis_t = converging_time_function(t, self.sigma_func)
             # rfront = 0.01 * (-menis_t) ** 0.679502 
             rfront = converging_r(menis_t, self.sigma_func)
-            print(np.min(np.abs(mesh.edges-rfront)), 'min abs diff of wavefront and tracker edge')
+            third = int(4*(self.N_space + 1)/9)
+            tracker_edge = int(-third) 
+            print(tracker_edge)
+            print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
             if self.N_space <= 100000:
                 if self.geometry['sphere'] == True:

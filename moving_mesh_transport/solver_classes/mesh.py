@@ -113,7 +113,7 @@ class mesh_class(object):
             self.move_func = 0 # simple linear
         elif self.move_type[1] == True:
             self.move_func = 1 # thick square source move
-            print('thick square source edge estimation mesh')
+            # print('thick square source edge estimation mesh')
         elif self.move_type[2] == True:
             self.move_func = 2 # sqrt t static
         elif self.move_type[3] == True:
@@ -162,6 +162,7 @@ class mesh_class(object):
     
     def check_tangle(self):
         if ((self.edges[1:] - self.edges[0:-1]) <=1e-14).any():
+            print(self.edges)
             raise ValueError('The mesh is tanlged. ')
 
 
@@ -529,6 +530,7 @@ class mesh_class(object):
                 self.edges += 0.01
 
     def shell_source(self):
+        print('shell source function')
         dx = 1e-5
         N_inside = int(self.N_space/2 + 1)
         edges_inside = np.linspace(0, self.x0, N_inside+1)
@@ -842,16 +844,80 @@ class mesh_class(object):
         # print(self.edges)
         self.Dedges = self.Dedges_const
         # assert 0
-    def menis_init4(self):
-        dx2 = self.x0/200
-        if self.moving == False:
-                dimensional_t = self.tfinal/29.98/self.l
-        else:
-                dimensional_t = self.tfinal/29.98/self.l
+    # def menis_init4(self):
+    #     dx2 = self.x0/200
+    #     if self.moving == False:
+    #             dimensional_t = self.tfinal/29.98/self.l
+    #     else:
+    #             dimensional_t = self.tfinal/29.98/self.l
 
-        menis_t = -29.6255 + dimensional_t
-        rfront = 0.01 * (-menis_t) ** 0.679502
-        third = int((self.N_space + 1)/3)
+    #     menis_t = -29.6255 + dimensional_t
+    #     rfront = 0.01 * (-menis_t) ** 0.679502
+    #     third = int((self.N_space + 1)/3)
+
+    def menis_init4(self):
+             if self.moving == False:
+                self.edges = np.zeros(self.N_space+1)
+                # self.edges[1:] = np.linspace(rfront * self.l, self.x0 * self.l, self.N_space)
+                self.edges = np.linspace(0.0, self.x0, self.N_space+1)
+                self.edges0 = self.edges
+
+                self.Dedges = self.edges *0 
+
+                self.Dedges_const = self.edges*0
+             else:
+                menis_t = converging_time_function(self.tfinal, self.sigma_func)
+                # rfront = 0.01 * (-menis_t) ** 0.679502 
+                rfront = converging_r(menis_t, self.sigma_func)
+                third = int(1*(self.N_space + 1)/3)
+                if third%2 == 0:
+                    third += 1
+                rest = int(self.N_space + 1 - 2*third)
+                assert(2*third+ rest == self.N_space+1)
+                center_edge = int(third/2) + 1 + third
+                dx2 = self.x0/100
+                min_spacing = 1e-6
+                dx1 = min_spacing * third
+                cluster = np.linspace(self.x0 - dx1 - dx2, self.x0 - dx1, third)
+                right_edges = np.linspace(self.x0-dx1+dx2/third, self.x0, third)
+
+                # outside_wave_edges2 =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0-dx2-dx1-self.x0/100))[:-1])
+                outside_wave_edges2 = np.linspace(0.0, self.x0-dx2-dx1, rest+1)[:-1]
+                self.edges = np.concatenate((outside_wave_edges2, cluster, right_edges))
+                self.edges0 = self.edges
+                print(self.edges, 'edges0')
+                v, a, j = self.converging_move_interpolate2(self.edges0[-center_edge])
+                print(self.edges0[-center_edge], 'tracking edge')
+                if v >0:
+                    v = 0
+                    a = 0
+                    j = 0
+
+                self.Dedges_const = self.edges * 0 
+                self.c1s = self.edges * 0
+                self.c2s = self.edges * 0
+
+                self.Dedges_const[-2*third:-third] = np.ones(third) * v
+                self.c1s[-2*third:-third] = np.ones(third) * a
+                self.c2s[-2*third:-third] = np.ones(third) * j
+
+
+                self.Dedges_const[-third:] = np.linspace(1, 0, third) * v
+                self.c1s[-third:] = np.linspace(1, 0, third) * a
+                self.c2s[-third:] = np.linspace(1, 0, third) * j
+                print(self.Dedges_const, 'v0')
+
+                # self.Dedges_const[]
+                # self.c1s
+                # self.c2s
+                print(self.edges0[-center_edge] + self.Dedges_const[-center_edge] * self.tfinal + 0.5 * self.c1s[-center_edge] * self.tfinal ** 2 + self.c2s[-center_edge] * self.tfinal**3/3, 'final center edge')
+                final_outside_edge = self.edges0[-2*third] + self.Dedges_const[-2*third] * self.tfinal + 0.5 * self.c1s[-2*third] * self.tfinal ** 2 + self.c2s[-2*third] * self.tfinal**3/3
+                print(final_outside_edge, 'last edge of cluster at tfinal')
+                print(self.edges0 + self.Dedges_const * self.tfinal + 0.5 * self.c1s * self.tfinal ** 2 + self.c2s * self.tfinal**3/3, 'final edges')
+                # assert(0)
+                final_rest_edges  =  np.linspace(0.0, final_outside_edge, rest+1)[:-1]
+                self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
+
 
 
     def menis_init3(self):
@@ -911,7 +977,7 @@ class mesh_class(object):
                 self.edges0 = self.edges
                 # v, a = self.converging_move_interpolate(self.edges[rest])
                 # v, a, j = self.converging_move_interpolate2(self.edges0[-third])
-                v, a, j = self.converging_move_interpolate2(self.edges0[int(-third -third/2)])
+                v, a, j = self.converging_move_interpolate2(self.edges0[-third])
 
   
                 
@@ -973,22 +1039,22 @@ class mesh_class(object):
                 self.Dedges = self.Dedges_const
         # assert 0
 
-    def converging_move(self, t):
-        c = 29.98
-        dimensional_t = t/c/self.l 
+    # def converging_move(self, t):
+    #     c = 29.98
+    #     dimensional_t = t/c/self.l 
 
-        # menis_t = -29.6255 + dimensional
-        # m_t
-        menis_t = converging_time_function(t, self.sigma_func)
-        # rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
-        rfront = converging_r(menis_t, self.sigma_func)
-        rfront = rfront * self.l
-        dr_dt = -0.00022665176784523018/(29.6255 - 0.0333555703802535*t)**0.32049799999999995
-        dx = 5e-4
-        self.edges[1:] = np.linspace(rfront*self.l, self.x0*self.l, self.N_space)
-        self.Dedges[1:] = self.Dedges_const[1:] * dr_dt
-        self.edges[0] = rfront*self.l - dx
-        self.Dedges[0] = self.Dedges_const[0] * dr_dt
+    #     # menis_t = -29.6255 + dimensional
+    #     # m_t
+    #     menis_t = converging_time_function(t, self.sigma_func)
+    #     # rfront = 0.01 * (-menis_t) ** 0.679502 - 1e-8
+    #     rfront = converging_r(menis_t, self.sigma_func)
+    #     rfront = rfront * self.l
+    #     dr_dt = -0.00022665176784523018/(29.6255 - 0.0333555703802535*t)**0.32049799999999995
+    #     dx = 5e-4
+    #     self.edges[1:] = np.linspace(rfront*self.l, self.x0*self.l, self.N_space)
+    #     self.Dedges[1:] = self.Dedges_const[1:] * dr_dt
+    #     self.edges[0] = rfront*self.l - dx
+    #     self.Dedges[0] = self.Dedges_const[0] * dr_dt
 
     def converging_move2(self, t):
         if self.moving == True:
@@ -996,6 +1062,11 @@ class mesh_class(object):
             self.edges = self.Dedges_const*t + 0.5 * self.c1s * t**2 + self.edges0 + self.c2s * t**3 /3
             # print(self.Dedges_const)
             self.Dedges =  self.Dedges_const + self.c1s * t  + self.c2s * t**2
+            # print('### ### ## ### ### ###')
+            # print(self.Dedges_const)
+            # print(self.c1s)
+            # print(self.c2s)
+            # print(self.edges, t)
             # dimensional_t = t/29.98/self.l
             # menis_t = -29.6255 + dimensional_t
             # rfront = self.l * 0.01 * (-menis_t) ** 0.679502 
@@ -1161,7 +1232,8 @@ class mesh_class(object):
              
             elif np.all(self.source_type == 0):
                 if self.geometry['sphere'] == True:
-                    self.menis_init3()
+                    self.menis_init4()
+                    print(self.Dedges_const, 'dedges const')
                 else:
                     self.boundary_source_init_func(self.vnaught)
                 # boundary_source_init_func_outside(self.vnaught, self.N_space, self.x0, self.tfinal) 
@@ -1201,7 +1273,8 @@ class mesh_class(object):
                             self.thin_square_init_func()
 
         # self.edges0 = self.edges
-        self.Dedges_const = self.Dedges
+        # self.Dedges_const = self.Dedges
+        print(self.Dedges_const, 'dedges const')
 
 
 

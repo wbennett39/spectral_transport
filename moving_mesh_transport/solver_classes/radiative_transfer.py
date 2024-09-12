@@ -304,17 +304,17 @@ class T_function(object):
         # dimensional e in GJ/cm^3
         if self.sigma_func['test1'] == True:
              rho = 19.3
-             ee = e * self.a  / 10**-3 * 0.1**1.6 / 3.4 / rho **.86
+             ee = e * self.a  / 10**-3 * 0.1**1.6 / 3.4 / (rho **.86)
              T1 = (np.abs(ee))
              return np.power(T1, 0.625) * np.sign(e)
         elif self.sigma_func['test2'] == True:
              rho = x**.5
-             ee = e * self.a  / 10**-3 * 0.1**2 / 3.0/ rho **.4
+             ee = e * self.a  / 10**-3 * 0.1**2 / 3.0/ (rho **.4)
              T1 = (np.abs(ee))
              return np.power(T1, 0.5) * np.sign(e)
         elif self.sigma_func['test3'] == True:
              rho = x **-.45
-             ee = e * self.a  / 10**-3 * 0.1**2 / rho **.75
+             ee = e * self.a  / 10**-3 * 0.1**2 / (rho **.75)
              T1 = (np.abs(ee))
              return np.power(T1, 0.5) * np.sign(e)
              

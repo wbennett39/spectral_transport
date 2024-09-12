@@ -8,7 +8,7 @@ matplotlib.rcParams.update({
 })
 
 #####
-spaces = 20
+spaces = 25
 M = 2
 #####
 #####
@@ -25,6 +25,7 @@ xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 edges = tr['edges'][:]
 phi_dim = phi * a * c
+sn_transport.close()
 # analytical solution
 R = 0.001
 delta = 0.6795011543956738
@@ -52,9 +53,13 @@ plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(0., R, 1000)
-t1 = -2.2122309472889687e-08
-t2 = -9.448424353186857e-09
-t3 = -1e-9
+#t1 = -2.2122309472889687e-08
+#t2 = -9.448424353186857e-09
+#t3 = -1e-9
+t3 = -2.2122309472889687e-08
+t2 =-2.3e-08
+t1 = -2.5e-8
+
 
 rho0 = 19.3
 omega = 0.
@@ -82,7 +87,7 @@ plt.plot(r_anal/1e-4, Trt_fit(r_anal, t1), c="r", ls="--", lw=2)
 plt.plot(xs[0,:]/1e-4, 10*(np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
 plt.plot(xs[1,:]/1e-4, 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:]/1e-4, 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
-plt.plot(edges, edges*0, 'k|', markersize = 40)
+plt.plot(edges/1e-4, edges*0, 'k|', markersize = 40)
 
 
 

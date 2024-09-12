@@ -221,7 +221,7 @@ class rhs_class():
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
         # print out timesteps
         self.time_step_counter(t, mesh) 
-        print(t,'t')
+
 
         # allocate arrays
 

@@ -919,6 +919,39 @@ class mesh_class(object):
                 final_rest_edges  =  np.linspace(0.0, final_outside_edge, rest+1)[:-1]
                 self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
 
+    def menis_init5(self):
+
+        menis_t = converging_time_function(self.tfinal, self.sigma_func)
+            # rfront = 0.01 * (-menis_t) ** 0.679502 
+        pad = self.x0/200    
+        rfront = converging_r(menis_t, self.sigma_func) - pad
+        print(rfront, 'rfront')
+        half = int((self.N_space+1)/2)
+        rest = self.N_space +1 -half
+        dx = self.x0/100000
+        inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )*dx     
+        outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (self.x0-dx))[:-1]
+        self.edges = np.concatenate((outside_edges, inside_edges))
+        self.edges0 = self.edges
+        v, a, j = self.converging_move_interpolate2(self.edges0[rest])
+
+        self.Dedges_const = self.edges * 0 
+        self.c1s = self.edges * 0
+        self.c2s = self.edges * 0
+
+        inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront)    
+        outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (rfront))[:-1]
+        print(inside_edges, 'indside finial ')
+        print(outside_edges, 'outside final')
+        final_edges = np.concatenate((outside_edges, inside_edges))
+        print(final_edges, 'final edges')
+
+        self.Dedges_const[:rest] = (outside_edges - self.edges0[:rest])/self.tfinal
+        self.Dedges_const[rest:] = (inside_edges  -self.edges0[rest:])/self.tfinal
+        print('mesh built')
+        
+
+        
 
 
     def menis_init3(self):
@@ -1236,7 +1269,11 @@ class mesh_class(object):
              
             elif np.all(self.source_type == 0):
                 if self.geometry['sphere'] == True:
-                    self.menis_init3()
+                    if self.moving == False:
+                        self.menis_init3()
+                    else:
+                        self.menis_init5()
+
                     print(self.Dedges_const, 'dedges const')
                 else:
                     self.boundary_source_init_func(self.vnaught)

@@ -74,6 +74,7 @@ class sigma_integrator():
         self.VP = np.zeros(self.M+1)
         self.AAA = np.zeros((self.M+1, self.M + 1, self.Msigma + 1))
         self.moving = False
+        self.x0 = build.x0
         # if self.sigma_func['fake_sedov'] == True:
         #     self.moving = True
         # self.sigma_v = 0.005

@@ -939,15 +939,37 @@ class mesh_class(object):
         self.c1s = self.edges * 0
         self.c2s = self.edges * 0
 
-        inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront)    
-        outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (rfront))[:-1]
+        
+        menis_t = converging_time_function(self.tfinal/2, self.sigma_func)
+        rfront1 = converging_r(menis_t, self.sigma_func) - pad
+        inside_edges_mid = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront1)    
+        outside_edges_mid =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (rfront1))[:-1]
+
+
+        menis_t = converging_time_function(self.tfinal, self.sigma_func)
+        rfront2 = converging_r(menis_t, self.sigma_func) - pad
+
+        inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront2)    
+        outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (rfront2))[:-1]
+
         print(inside_edges, 'indside finial ')
         print(outside_edges, 'outside final')
         final_edges = np.concatenate((outside_edges, inside_edges))
         print(final_edges, 'final edges')
 
-        self.Dedges_const[:rest] = (outside_edges - self.edges0[:rest])/self.tfinal
-        self.Dedges_const[rest:] = (inside_edges  -self.edges0[rest:])/self.tfinal
+        # self.Dedges_const[:rest] = (outside_edges - self.edges0[:rest])/self.tfinal
+        # self.Dedges_const[rest:] = (inside_edges  -self.edges0[rest:])/self.tfinal
+
+        r1 = np.concatenate((outside_edges_mid, inside_edges_mid))
+        r2 = np.concatenate((inside_edges, outside_edges))
+        t1 = self.tfinal/2
+        t2 = self.tfinal
+        x0 = self.edges0
+        self.Dedges_const = -((-(r2*t1**2) + r1*t2**2 + t1**2*x0 - t2**2*x0)/(t1*(t1 - t2)*t2))
+        self.c1s = (2*(-(r2*t1) + r1*t2 + t1*x0 - t2*x0))/(t1*(t1 - t2)*t2)
+
+
+
         print('mesh built')
         
 

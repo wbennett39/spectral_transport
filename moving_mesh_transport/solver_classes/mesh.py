@@ -926,7 +926,7 @@ class mesh_class(object):
         pad = self.x0/200    
         rfront = converging_r(menis_t, self.sigma_func) - pad
         print(rfront, 'rfront')
-        half = int((self.N_space+1)/2)
+        half = int(2*(self.N_space+1)/3)
         rest = self.N_space +1 -half
         dx = self.x0/100000
         inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )*dx     

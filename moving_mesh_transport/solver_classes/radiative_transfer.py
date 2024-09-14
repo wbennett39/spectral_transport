@@ -120,7 +120,7 @@ class T_function(object):
 
     def make_T(self, argument, a, b):
         e = self.make_e(argument, a, b)
-        # e = self.positivize_e(argument, a,b)
+        # e = self.positivize_e(e, argument, a,b)
         # self.find_minimum(a,b)
         # if e.any() <0:
         #      raise ValueError('Negative energy density')
@@ -187,8 +187,8 @@ class T_function(object):
             assert(0)
 
 
-    def positivize_e(self,argument, a, b):
-         e = self.make_e(argument, a,b)
+    def positivize_e(self, e, argument, a, b):
+        #  e = self.make_e(argument, a,b)
          enew = e
          floor = 1e-5 
          ubar = self.cell_average(a,b)
@@ -227,11 +227,11 @@ class T_function(object):
             enew = theta * (e-ubar) + ubar 
             
             
-            if (enew<0).any():
-                    m = self.find_minimum(a,b, tol1 = 1e14)
+            # if (enew<0).any():
+            #         m = self.find_minimum(a,b, tol1 = 1e10)
 
-                    theta = min(1, abs(-ubar/(m-ubar+1e-15)))
-                    enew = theta * (e-ubar) + ubar
+            #         theta = min(1, abs(-ubar/(m-ubar+1e-15)))
+            #         enew = theta * (e-ubar) + ubar
                     # if (enew<0).any():
                         
 

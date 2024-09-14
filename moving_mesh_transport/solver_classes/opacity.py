@@ -231,6 +231,7 @@ class sigma_integrator():
                 assert(0)
             # if (T_old<0).any():
             #     T_old = np.mean(T_old) + T_old*0
+            resmax = 134183.7512857635 / self.x0
             result = np.where(T_old<0, 0.0, T_old)
             if self.sigma_func['test1'] == 1:
                 rho = 19.3
@@ -238,12 +239,19 @@ class sigma_integrator():
             elif self.sigma_func['test2'] == 1:
                 rho = x**.5
                 res = 1.5e4 * (result + 5e-3) ** -3.0 * (0.1**3) * rho ** 1.4
+                if res.any() > resmax:
+                    res = np.zeros(result.size) + resmax
+
             elif self.sigma_func['test3'] == 1:
                 rho = (x+1e-8) ** -.45
                 res = 10**3 * (result + 5e-3) ** -3.5 * (0.1**3.5) * rho **1.4
+                if res.any() > resmax:
+                    res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 rho = x
                 res = (result + 5e-3) ** -3.5 * rho ** 2* (0.1**3.5)
+                if res.any() > resmax:
+                    res = np.zeros(result.size) + resmax
             else:
                 res = 5 * 10**(3) * (result + 5e-3) ** -1.5 * (0.1**1.5)
 

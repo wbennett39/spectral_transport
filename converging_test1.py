@@ -64,6 +64,8 @@ run.parameters['boundary_source']['x0'] = np.array([1e-3])
 
 menis_times = np.array([-22.122309, -9.4484244, -1])
 
+# menis_times = np.array([-24, -22.122309, -9.4484244])
+
 # menis_times =  np.array([-25, -23, -22.122309])
 # menis_times = np.array([-29.0, -28.5, -28.0])
 dimensional_times =  29.625647 + menis_times 
@@ -75,7 +77,7 @@ run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewer
 # run.parameters['all']['tfinal'] = 10.0
 # run.mesh_parameters['eval_times'] = False
 
-run.boundary_source(0,1)
+run.boundary_source(0,0)
 f = h5py.File('converging_heat/converging_heat_wave_results_test1.h5','r+')
 M = run.parameters['all']['Ms'] 
 spaces = run.parameters['all']['N_spaces']

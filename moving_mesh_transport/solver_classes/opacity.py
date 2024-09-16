@@ -8,7 +8,7 @@ from numba import int64, float64, deferred_type, prange
 from .functions import Pn, normPn, normTn
 from numba import types, typed
 import numba as nb
-from .GMAT_sphere import VV_matrix
+from .GMAT_sphere import VV_matrix, VVmatLUMPED
 from .functions import quadrature
 
 build_type = deferred_type()
@@ -47,7 +47,8 @@ data = [('N_ang', int64),
         ('V_old', float64[:,:]),
         ('current_space', int64),
         ('opacity_vec', float64[:,:]),
-        ('a', float64)
+        ('a', float64),
+        ('lumping', int64)
 
         ]
 
@@ -80,6 +81,7 @@ class sigma_integrator():
         # self.sigma_v = 0.005
         self.sigma_v = build.fake_sedov_v0
         self.geometry = build.geometry
+        self.lumping = build.lumping
         
         # initialize integrals of Basis Legendre polynomials
         self.create_integral_matrices()
@@ -233,34 +235,36 @@ class sigma_integrator():
             # if (T_old<0).any():
             #     T_old = np.mean(T_old) + T_old*0
             # resmax = 134183.7512857635 / self.x0
-            resmax = 5000
+            resmax = 5e10
             result = np.where(T_old<0, 0.0, T_old)
+
             if self.sigma_func['test1'] == 1:
                 rho = 19.3
-                res = 7200 *  (result + 0*5e-3) ** (-1.5) * (0.1**1.5) * rho **1.2
+                res = 7200 *  (result + 5e-3) ** (-1.5) * (0.1**1.5) * rho **1.2
+
             elif self.sigma_func['test2'] == 1:
                 rho = x**.5
-                res = 1.5e4 * (result + 0*5e-3) ** -3.0 * (0.1**3) * rho ** 1.4
-                # if res.any() > resmax:
-                #     res = np.zeros(result.size) + resmax
+                res = 1.5e4 * (result + 5e-3) ** -3.0 * (0.1**3) * rho ** 1.4
+                if res.any() > resmax:
+                    res = np.zeros(result.size) + resmax
 
             elif self.sigma_func['test3'] == 1:
-                rho = (x+1e-8) ** -.45
-                res = 10**3 * (result + 0*5e-3) ** -3.5 * (0.1**3.5) * rho **1.4
-                # if res.any() > resmax:
-                #     res = np.zeros(result.size) + resmax
+                rho = (x+1e-12) ** -.45
+                res = 10**3 * (result + 5e-3) ** -3.5 * (0.1**3.5) * (rho) **1.4
+                if res.any() > resmax:
+                    res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 rho = x
-                res = (result + 0*5e-3) ** -3.5 * rho ** 2* (0.1**3.5)
-                # if res.any() > resmax:
-                #     res = np.zeros(result.size) + resmax
+                res = (result + 5e-3) ** -3.5 * rho ** 2* (0.1**3.5)
+                if res.any() > resmax:
+                    res = np.zeros(result.size) + resmax
             else:
-                res = 5 * 10**(3) * (result + 0*5e-3) ** -1.5 * (0.1**1.5)
+                res = 5 * 10**(3) * (result + 5e-3) ** -1.5 * (0.1**1.5)
             
-            if (res>resmax).any():
-                for ix, xx in enumerate(res):
-                    if res[ix] > resmax:
-                        res[ix] = resmax
+            # if (res>resmax).any():
+            #     for ix, xx in enumerate(res):
+            #         if res[ix] > resmax:
+            #             res[ix] = resmax
 
             # for ie, elem in enumerate(res):
                 # if elem >= 1e16:
@@ -272,6 +276,7 @@ class sigma_integrator():
             # res = 5* 10**3 + T_old * 0
             # res = T_old *0 + 100
             if np.isnan(res).any() or np.isinf(res).any():
+                print(res, 'res')
                 print(T_old, 'T old')
                 assert(0)
 
@@ -347,7 +352,11 @@ class sigma_integrator():
                         if self.geometry['slab'] == True:
                             self.VV[i] +=   self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
                         elif self.geometry['sphere'] == True:
-                            self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
+                            if self.lumping == False:
+                                self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
+                            else:
+                                self.VV[i] +=   self.cs[space, k] * u[j] * VVmatLUMPED(i, j, k, xL, xR) / (math.pi**1.5) 
+
                             # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(xR-xL))<=1e-5)
                             # self.VV[i] +=  self.cs[space, k] * u[j]  / (math.pi**1.5) * (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3
             # self.VV = u * 1

@@ -10,7 +10,7 @@ import math
 
 from .build_problem import build
 from .opacity import sigma_integrator
-from .GMAT_sphere import VV_matrix
+from .GMAT_sphere import VV_matrix, VVmatLUMPED
 
 from numba import float64, int64, deferred_type
 from numba.experimental import jitclass
@@ -42,6 +42,7 @@ data = [("P", float64[:]),
         ('sigma_func', nb.typeof(params_default)),
         ('scalar_flux_term', float64[:]),
         ('geometry', nb.typeof(params_default)),
+        ('lumping', int64)
         ]
 ###############################################################################
 @jitclass(data)
@@ -58,6 +59,7 @@ class scalar_flux(object):
         self.Msigma = build.Msigma
         self.scalar_flux_term = np.zeros(self.M+1)
         self.geometry = build.geometry
+        self.lumping = build.lumping
         
 
     # def make_P(self, u):
@@ -87,7 +89,11 @@ class scalar_flux(object):
                             if self.geometry['slab'] == True:
                                 self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
                             elif self.geometry['sphere'] == True:
-                                self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                if self.lumping == False:
+                                    self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                else:
+                                    self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VVmatLUMPED(i, j,k, xL, xR) / (math.pi**1.5)
+
             if self.geometry['slab'] == True:                    
                 self.scalar_flux_term = self.PV / math.sqrt(xR-xL)
             elif self.geometry['sphere'] == True:

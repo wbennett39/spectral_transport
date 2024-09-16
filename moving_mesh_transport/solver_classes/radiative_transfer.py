@@ -56,7 +56,8 @@ data = [('temp_function', int64[:]),
         ('space', int64),
         ('sigma_a_vec', float64[:]),
         ('a2', float64),
-        ('sigma_func',nb.typeof(params_default))
+        ('sigma_func',nb.typeof(params_default)),
+        ('lumping', float64)
 
 
 
@@ -74,6 +75,7 @@ class T_function(object):
         self.alpha = 4 * self.a
         self.clight = 29.98 # cm/ns
         self.a2 = 5.67e-5 # in ergs
+        self.lumping = build.lumping
 
         self.geometry = build.geometry
         self.sigma_func = build.sigma_func
@@ -113,6 +115,14 @@ class T_function(object):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
         self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * 1 * normTn(j, argument, a, b))
+    
+    def integrate_trap_sphere(self, a, b, j, sigma_class):
+        
+        # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
+        left = (a**2 * self.T_func(np.array([a]), a, b, sigma_class, self.space) * 1 * normTn(j, np.array([a]), a, b))[0]
+        right = (b**2 * self.T_func(np.array([b]), a, b, sigma_class, self.space) * 1 * normTn(j, np.array([b]), a, b))[0]
+
+        self.H[j] =  0.5 * (b-a) * (left + right)
         #assert(0)
     
     def get_sigma_a_vec(self, x, sigma_class, temperature):
@@ -352,8 +362,12 @@ class T_function(object):
             elif self.geometry['sphere'] == True:
 
                 for j in range(self.M+1):
-                    self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                    if self.lumping == False:
+                        self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                    else:
+                         self.integrate_trap_sphere(xL, xR, j, sigma_class)
         
+
 
     def cell_average(self, a, b):
         # dx = 4/3 * math.pi * (b**3-a**3)

@@ -177,6 +177,7 @@ class rhs_class():
             print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
+            print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
             dimensional_t = t/29.98
             # menis_t = -29.6255 + dimensional_t
             menis_t = converging_time_function(t, self.sigma_func)

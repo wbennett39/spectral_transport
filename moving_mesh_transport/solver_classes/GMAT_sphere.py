@@ -1385,3 +1385,458 @@ def LLUMPED(i, j, a, b):
         elif j == 3:
 
             return 18*(a + b)
+        
+
+
+@njit 
+def VVmatLUMPED(i, j, k, a, b):
+    if i>3 or j>3:
+        raise ValueError('Not implemented to order this high')
+    if i == 0:
+
+        if j == 0:
+
+           if k == 0:
+
+              return (math.sqrt(1/(-a + b))*(a**2 + b**2))/2.
+
+           elif k == 1:
+
+              return (a + b)/(math.sqrt(2)*math.sqrt(1/(-a + b)))
+
+           elif k == 2:
+
+              return (math.sqrt(1/(-a + b))*(a**2 + b**2))/math.sqrt(2)
+
+           elif k == 3:
+
+              return (a + b)/(math.sqrt(2)*math.sqrt(1/(-a + b)))
+
+        elif j == 1:
+
+           if k == 0:
+
+              return (a + b)/(math.sqrt(2)*math.sqrt(1/(-a + b)))
+
+           elif k == 1:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+        elif j == 2:
+
+           if k == 0:
+
+              return (math.sqrt(1/(-a + b))*(a**2 + b**2))/math.sqrt(2)
+
+           elif k == 1:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 2:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 3:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+        elif j == 3:
+
+           if k == 0:
+
+              return (a + b)/(math.sqrt(2)*math.sqrt(1/(-a + b)))
+
+           elif k == 1:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+    elif i == 1:
+
+        if j == 0:
+
+           if k == 0:
+
+              return (a + b)/(math.sqrt(2)*math.sqrt(1/(-a + b)))
+
+           elif k == 1:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+        elif j == 1:
+
+           if k == 0:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 1:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 2:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 3:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+        elif j == 2:
+
+           if k == 0:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 1:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+        elif j == 3:
+
+           if k == 0:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 1:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 2:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 3:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+    elif i == 2:
+
+        if j == 0:
+
+           if k == 0:
+
+              return (math.sqrt(1/(-a + b))*(a**2 + b**2))/math.sqrt(2)
+
+           elif k == 1:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 2:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 3:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+        elif j == 1:
+
+           if k == 0:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 1:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+        elif j == 2:
+
+           if k == 0:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 1:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 2:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 3:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+        elif j == 3:
+
+           if k == 0:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 1:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+    elif i == 3:
+
+        if j == 0:
+
+           if k == 0:
+
+              return (a + b)/(math.sqrt(2)*math.sqrt(1/(-a + b)))
+
+           elif k == 1:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+        elif j == 1:
+
+           if k == 0:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 1:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 2:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 3:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+        elif j == 2:
+
+           if k == 0:
+
+              return (a + b)/math.sqrt(1/(-a + b))
+
+           elif k == 1:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 2:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 3:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+        elif j == 3:
+
+           if k == 0:
+
+              return math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 1:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+
+           elif k == 2:
+
+              return math.sqrt(2)*math.sqrt(1/(-a + b))*(a**2 + b**2)
+
+           elif k == 3:
+
+              return (math.sqrt(2)*(a + b))/math.sqrt(1/(-a + b))
+           
+
+@njit
+def MPRIMELUMPED(i, j, a, b, ap, bp):
+    if i >3 or j >3:
+        raise ValueError('not implemented to this order yet')
+    if i == 0:
+
+        if j == 0:
+
+            return a*ap + b*bp
+
+        elif j == 1:
+
+            return math.sqrt(2)*(-(a*ap) + b*bp)
+
+        elif j == 2:
+
+            return math.sqrt(2)*(a*ap + b*bp)
+
+        elif j == 3:
+
+            return math.sqrt(2)*(-(a*ap) + b*bp)
+
+    elif i == 1:
+
+        if j == 0:
+
+            return math.sqrt(2)*(-(a*ap) + b*bp)
+
+        elif j == 1:
+
+            return 2*(a*ap + b*bp)
+
+        elif j == 2:
+
+            return -2*a*ap + 2*b*bp
+
+        elif j == 3:
+
+            return 2*(a*ap + b*bp)
+
+    elif i == 2:
+
+        if j == 0:
+
+            return math.sqrt(2)*(a*ap + b*bp)
+
+        elif j == 1:
+
+            return -2*a*ap + 2*b*bp
+
+        elif j == 2:
+
+            return 2*(a*ap + b*bp)
+
+        elif j == 3:
+
+            return -2*a*ap + 2*b*bp
+
+    elif i == 3:
+
+        if j == 0:
+
+            return math.sqrt(2)*(-(a*ap) + b*bp)
+
+        elif j == 1:
+
+            return 2*(a*ap + b*bp)
+
+        elif j == 2:
+
+            return -2*a*ap + 2*b*bp
+
+        elif j == 3:
+
+            return 2*(a*ap + b*bp)
+        
+
+def GMATRIXLUMPED(i, j, a, b, ap, bp):
+    if i == 0:
+
+        if j == 0:
+
+            return -0.25*((a**2 + b**2)*(ap - bp))/(a - b)
+
+        elif j == 1:
+
+            return ((a + b)*(ap - bp))/(2.*math.sqrt(2))
+
+        elif j == 2:
+
+            return -0.5*((a**2 + b**2)*(ap - bp))/(math.sqrt(2)*(a - b))
+
+        elif j == 3:
+
+            return ((a + b)*(ap - bp))/(2.*math.sqrt(2))
+
+    elif i == 1:
+
+        if j == 0:
+
+            return (-(b**2*(ap - 5*bp)) + a**2*(5*ap - bp))/(2.*math.sqrt(2)*(a - b))
+
+        elif j == 1:
+
+            return (-(b**2*(ap - 5*bp)) + a**2*(-5*ap + bp))/(2.*(a - b))
+
+        elif j == 2:
+
+            return (-(b**2*(ap - 5*bp)) + a**2*(5*ap - bp))/(2.*(a - b))
+
+        elif j == 3:
+
+            return (-(b**2*(ap - 5*bp)) + a**2*(-5*ap + bp))/(2.*(a - b))
+
+    elif i == 2:
+
+        if j == 0:
+
+            return (-(b**2*(ap - 17*bp)) + a**2*(-17*ap + bp))/(2.*math.sqrt(2)*(a - b))
+
+        elif j == 1:
+
+            return (-(b**2*(ap - 17*bp)) + a**2*(17*ap - bp))/(2.*(a - b))
+
+        elif j == 2:
+
+            return (-(b**2*(ap - 17*bp)) + a**2*(-17*ap + bp))/(2.*(a - b))
+
+        elif j == 3:
+
+            return (-(b**2*(ap - 17*bp)) + a**2*(17*ap - bp))/(2.*(a - b))
+
+    elif i == 3:
+
+        if j == 0:
+
+            return (-(b**2*(ap - 37*bp)) + a**2*(37*ap - bp))/(2.*math.sqrt(2)*(a - b))
+
+        elif j == 1:
+
+            return (-(b**2*(ap - 37*bp)) + a**2*(-37*ap + bp))/(2.*(a - b))
+
+        elif j == 2:
+
+            return (-(b**2*(ap - 37*bp)) + a**2*(37*ap - bp))/(2.*(a - b))
+
+        elif j == 3:
+
+            return (-(b**2*(ap - 37*bp)) + a**2*(-37*ap + bp))/(2.*(a - b))
+
+

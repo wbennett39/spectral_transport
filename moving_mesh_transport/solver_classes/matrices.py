@@ -11,7 +11,7 @@ from .build_problem import build
 import math
 from .functions import sqrt_two_mass_func as rtf
 from .functions import rttwo_mistake_undoer as rund
-from .GMAT_sphere import GMatrix, MPRIME, LLUMPED
+from .GMAT_sphere import GMatrix, MPRIME, LLUMPED, MPRIMELUMPED, GMATRIXLUMPED
 
 from numba import int64, float64, deferred_type
 from numba.experimental import jitclass
@@ -198,23 +198,45 @@ class G_L:
         #     self.J[0,1] = (rR-rL) /3 /rttwo/pi
         #     self.J[1,1] =  (rR+rL) / pi / 3
         # elif self.M > 1:
-        for ii in range(self.M+1):
-            for jj in range(self.M+1):
-                self.J[ii, jj] = (self.J_coeff[ii, jj, 0] * rL + self.J_coeff[ii, jj, 1] * rR)  / pi
-        
-        self.J[1:,0] = self.J[1:,0] / rttwo
-        self.J[0,1:] = self.J[0,1:] / rttwo
+        a = rL
+        b = rR
+        pi = math.pi
 
-        self.J = np.multiply(self.J, 1/self.J_denom[0:self.M+1, 0:self.M+1])
-        if self.testing == True:
-            assert(abs(self.J[0,0] - 0.5 * (rR+rL) /  pi)<=1e-10)
+        if self.lumping == True:
+            onerttwo = math.sqrt(2)
             
-            if self.M >0:
-                assert(abs(self.J[1,0] - (rR-rL) /3 /rttwo/pi)<=1e-10)
-                assert(abs(self.J[0,1] - (rR-rL) /3 /rttwo/pi)<=1e-10)
-                assert(abs(self.J[1,1] -  (rR+rL) / pi / 3)<=1e-10)
-            if self.M > 1:
-                assert(abs(self.J[2,2] - 7 * (rL+rR) /15 /pi)<=1e-10)
+            for ii in range(self.M+1):
+                for jj in range(self.M+1):
+                    fac = 1
+                    neg = 1
+                    if int(ii + jj) == 0: 
+                        self.J[ii, jj] = 0.5 * (a+b) / pi
+                    else:
+                        if ii==0 or jj == 0:
+                            fac = onerttwo
+                        if (ii + jj)%2 != 0:
+                            neg = -1
+                        self.J[ii, jj] = fac * (neg * a+b) /pi
+        
+
+        elif self.lumping == False:
+            for ii in range(self.M+1):
+                for jj in range(self.M+1):
+                    self.J[ii, jj] = (self.J_coeff[ii, jj, 0] * rL + self.J_coeff[ii, jj, 1] * rR)  / pi
+            
+            self.J[1:,0] = self.J[1:,0] / rttwo
+            self.J[0,1:] = self.J[0,1:] / rttwo
+
+            self.J = np.multiply(self.J, 1/self.J_denom[0:self.M+1, 0:self.M+1])
+            if self.testing == True:
+                assert(abs(self.J[0,0] - 0.5 * (rR+rL) /  pi)<=1e-10)
+                
+                if self.M >0:
+                    assert(abs(self.J[1,0] - (rR-rL) /3 /rttwo/pi)<=1e-10)
+                    assert(abs(self.J[0,1] - (rR-rL) /3 /rttwo/pi)<=1e-10)
+                    assert(abs(self.J[1,1] -  (rR+rL) / pi / 3)<=1e-10)
+                if self.M > 1:
+                    assert(abs(self.J[2,2] - 7 * (rL+rR) /15 /pi)<=1e-10)
 
     
     
@@ -233,7 +255,11 @@ class G_L:
         rttwo = math.sqrt(2)
         for ii in range(self.M+1):
             for jj in range(self.M+1):
-                self.G[ii, jj] = GMatrix(ii, jj, rL, rR, rLp, rRp) / pi 
+                if self.lumping == False:
+                    self.G[ii, jj] = GMatrix(ii, jj, rL, rR, rLp, rRp) / pi 
+                else:
+
+                    self.G[ii, jj] = GMATRIXLUMPED(ii, jj, rL, rR, rLp, rRp) / pi 
         
         # self.G[1:,0] = self.G[1:,0] / rttwo
         # self.G[0,1:] = self.G[0,1:] / rttwo
@@ -306,7 +332,12 @@ class G_L:
         pi = math.pi
         for ii in range(self.M+1):
             for jj in range(self.M+1):
-                self.MPRIME[ii, jj] = MPRIME(ii, jj, a, b, ap, bp) / pi
+                if self.lumping == False:
+                    self.MPRIME[ii, jj] = MPRIME(ii, jj, a, b, ap, bp) / pi
+                else:
+                    self.MPRIME[ii, jj] = MPRIMELUMPED(ii, jj, a, b, ap, bp) / pi
+
+
 
         # self.L[0,0]  = 2*math.log(rR/rL)/pi/(rR-rL)
     

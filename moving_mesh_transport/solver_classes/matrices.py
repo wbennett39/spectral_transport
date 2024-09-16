@@ -258,7 +258,7 @@ class G_L:
                 if self.lumping == False:
                     self.G[ii, jj] = GMatrix(ii, jj, rL, rR, rLp, rRp) / pi 
                 else:
-
+                    # self.G[ii, jj] = GMatrix(ii, jj, rL, rR, rLp, rRp) / pi
                     self.G[ii, jj] = GMATRIXLUMPED(ii, jj, rL, rR, rLp, rRp) / pi 
         
         # self.G[1:,0] = self.G[1:,0] / rttwo

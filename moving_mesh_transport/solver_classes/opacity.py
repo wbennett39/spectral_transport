@@ -225,36 +225,36 @@ class sigma_integrator():
 
             if self.sigma_func['test1'] == 1:
                 floor = 5e-3
-                result = np.where(T_old<floor, floor, T_old)
+                result = np.where(T_old<0.0, 0.0, T_old)
                 rho = 19.3
-                res = 7200 *  (result) ** (-1.5) * (0.1**1.5) * rho **1.2
+                res = 7200 *  (result+5e-3) ** (-1.5) * (0.1**1.5) * rho **1.2
 
             elif self.sigma_func['test2'] == 1:
-                floor = 1e-1
-                result = np.where(T_old<floor, floor, T_old)
+                floor = 5e-2
+                result = np.where(T_old<0.0, 0.0, T_old)
                 rho = x**.5
-                res = 1.5e4 * (result) ** -3.0 * (0.1**3) * rho ** 1.4
+                res = 1.5e4 * (result+floor) ** -3.0 * (0.1**3) * rho ** 1.4
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
 
             elif self.sigma_func['test3'] == 1:
-                floor = 1e-1
-                result = np.where(T_old<floor, floor, T_old)
+                floor = 5e-2
+                result = np.where(T_old<0, 0.0, T_old)
                 rho = (x+1e-12) ** -.45
-                res = 10**3 * (result ) ** -3.5 * (0.1**3.5) * (rho) **1.4
+                res = 10**3 * (result+floor ) ** -3.5 * (0.1**3.5) * (rho) **1.4
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
-                floor = 1e-1
-                result = np.where(T_old<floor, floor, T_old)
+                floor = 5e-2
+                result = np.where(T_old<0.0, 0.0, T_old)
                 rho = x
-                res = (result) ** -3.5 * rho ** 2* (0.1**3.5)
+                res = (result+floor) ** -3.5 * rho ** 2* (0.1**3.5)
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
             else:
                 floor = 5e-3
-                result = np.where(T_old<floor, floor, T_old)
-                res = 5 * 10**(3) * (result) ** -1.5 * (0.1**1.5)
+                result = np.where(T_old<0.0, 0.0, T_old)
+                res = 5 * 10**(3) * (result + floor) ** -1.5 * (0.1**1.5)
             
             # if (res>resmax).any():
             #     for ix, xx in enumerate(res):

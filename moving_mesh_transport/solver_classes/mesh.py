@@ -923,7 +923,7 @@ class mesh_class(object):
 
         menis_t = converging_time_function(self.tfinal, self.sigma_func)
             # rfront = 0.01 * (-menis_t) ** 0.679502 
-        pad = self.x0/15/self.N_space    
+        pad = self.x0/15/(self.N_space  /4)  
         rfront = converging_r(menis_t, self.sigma_func) - pad
         print(rfront, 'rfront')
         half = int((self.N_space+1)/2)

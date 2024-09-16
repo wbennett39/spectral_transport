@@ -1765,7 +1765,7 @@ def MPRIMELUMPED(i, j, a, b, ap, bp):
 
             return 2*(a*ap + b*bp)
         
-
+@njit
 def GMATRIXLUMPED(i, j, a, b, ap, bp):
     if i == 0:
 

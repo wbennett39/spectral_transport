@@ -109,31 +109,16 @@ class sigma_integrator():
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
 
+    # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
+    #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
+    #     self.cs[k, j] = 0.5 * (b-a) 
+
+        
+        
+
         
         # self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, self.xs_quad, a, b))
-        if checkfunc == True:
-            if abs(0.5 * (b-a) * np.sum(self.ws_quad *  normTn(j, argument, a, b) * 2.0 * normTn(j, argument, a, b))-1)>1e-6:
-                print(0.5 * abs((b-a) * np.sum(self.ws_quad *  normTn(j, argument, a, b) * 2.0 * normTn(j, argument, a, b))), 'integral')
-                print(b,a,'edges') 
-                print(self.ws_quad,'ws')
-                print( normTn(j, argument, a, b), 'basis')
-                print(argument, 'argument')
-                print(j, 'j')
-                assert(0)
-            
-            resconst = math.sqrt(b-a) * opacity * math.sqrt(math.pi)
-            if j == 0:
-                if((np.abs(self.cs[k,0]-  resconst) >1e-3).any()):
-                    print(np.abs(self.cs[k,0]-  resconst) )
-                    assert(0)
-            elif j == 1:
-                if((np.abs(self.cs[k,1]) >1e-4)):
-                    print(np.abs(self.cs[k,1]-  0) )
-                    assert(0)
-            elif j == 2:
-                if((np.abs(self.cs[k,2]) >1e-4)):
-                    print(np.abs(self.cs[k,2]) )
-                    assert(0)
+        
 
 
                       

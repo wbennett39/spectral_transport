@@ -230,19 +230,19 @@ class sigma_integrator():
             elif self.sigma_func['test2'] == 1:
                 rho = x**.5
                 res = 1.5e4 * (result + 5e-3) ** -3.0 * (0.1**3) * rho ** 1.4
-                if res.any() > resmax:
-                    res = np.zeros(result.size) + resmax
+                # if res.any() > resmax:
+                #     res = np.zeros(result.size) + resmax
 
             elif self.sigma_func['test3'] == 1:
                 rho = (x+1e-12) ** -.45
                 res = 10**3 * (result + 5e-3) ** -3.5 * (0.1**3.5) * (rho) **1.4
-                if res.any() > resmax:
-                    res = np.zeros(result.size) + resmax
+                # if res.any() > resmax:
+                #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 rho = x
                 res = (result + 5e-3) ** -3.5 * rho ** 2* (0.1**3.5)
-                if res.any() > resmax:
-                    res = np.zeros(result.size) + resmax
+                # if res.any() > resmax:
+                #     res = np.zeros(result.size) + resmax
             else:
                 res = 5 * 10**(3) * (result + 5e-3) ** -1.5 * (0.1**1.5)
             

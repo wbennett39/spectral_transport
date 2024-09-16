@@ -11,7 +11,7 @@ from .build_problem import build
 import math
 from .functions import sqrt_two_mass_func as rtf
 from .functions import rttwo_mistake_undoer as rund
-from .GMAT_sphere import GMatrix, MPRIME
+from .GMAT_sphere import GMatrix, MPRIME, LLUMPED
 
 from numba import int64, float64, deferred_type
 from numba.experimental import jitclass
@@ -50,7 +50,8 @@ data = [("M", int64),
         ('J', float64[:,:]),
         ('VV', float64[:,:,:]),
         ('geometry', nb.typeof(params_default)),
-        ('testing', int64)
+        ('testing', int64),
+        ('lumping', int64)
 
         ]
 @jitclass(data)
@@ -65,6 +66,7 @@ class G_L:
         self.J = np.zeros((self.M+1, self.M+1))
         self.VV = np.zeros((self.N+1, self.M+1, self.M+1))
         self.MPRIME = np.zeros((self.M+1, self.M+1))
+        self.lumping = build.lumping
 
         self.Mass_denom = Mass_denom[:]
         self.J_denom = J_denom[:]
@@ -98,7 +100,11 @@ class G_L:
         if self.geometry['slab'] == True:
             self.make_L_slab(xL, xR)
         elif self.geometry['sphere'] == True:
+
             self.make_L_sphere(xL, xR)
+  
+
+
     
     def make_G(self, xL, xR, dxL, dxR):
         if self.geometry['slab'] == True:
@@ -265,30 +271,35 @@ class G_L:
         #     self.L[0,1] = 0
         #     self.L[1,0] = -2 * rtwo * (rL2 + rLrR + rR2) / 3/ pi /(rL-rR)
         #     self.L[1,1] = 2*(rL + rR)/3/pi
+        if self.lumping == True:
+            for ii in range(1, self.M+1):
+                for jj in range(self.M+1):
+                     self.L[ii, jj] = LLUMPED(ii, jj, rL, rR)/ pi
 
-        for ii in range(1, self.M+1):
-            for jj in range(self.M+1):
-                if (ii + jj + 2) % 2 != 0:
-                    self.L[ii, jj] = (self.L_coeff_odd[ii, jj, 0] * rL2 + self.L_coeff_odd[ii, jj, 1] * rLrR + self.L_coeff_odd[ii, jj, 2] * rR2) / (rL-rR) / pi
-                else:
-                    self.L[ii, jj] = (self.L_coeff_even[ii, jj, 0] * rL + self.L_coeff_even[ii, jj, 1] * rR)  / pi
+        elif self.lumping == False:
+            for ii in range(1, self.M+1):
+                for jj in range(self.M+1):
+                    if (ii + jj + 2) % 2 != 0:
+                        self.L[ii, jj] = (self.L_coeff_odd[ii, jj, 0] * rL2 + self.L_coeff_odd[ii, jj, 1] * rLrR + self.L_coeff_odd[ii, jj, 2] * rR2) / (rL-rR) / pi
+                    else:
+                        self.L[ii, jj] = (self.L_coeff_even[ii, jj, 0] * rL + self.L_coeff_even[ii, jj, 1] * rR)  / pi
 
-        self.L[1:,0] = self.L[1:,0] * rtwo
+            self.L[1:,0] = self.L[1:,0] * rtwo
 
-        self.L[1:,:] = np.multiply(self.L[1:,:], 1/self.L_denom[1:self.M+1, 0:self.M+1])
+            self.L[1:,:] = np.multiply(self.L[1:,:], 1/self.L_denom[1:self.M+1, 0:self.M+1])
         #testing L
-        if self.testing == True:
-            assert(self.L[0,0] == 0)
-            if self.M >0:
-                assert(self.L[0,1] == 0)
-                assert(abs(self.L[1,0] + 2 * rtwo * (rL2 + rLrR + rR2) / 3/ pi /(rL-rR))<=1e-10)
-                assert(abs(self.L[1,1] - 2*(rL + rR)/3/pi)<=1e-10)
-            if self.M > 1:
-                L2ac = -16 * (2* rL2 + rLrR + 2 * rR2) /15/pi/(rL-rR)
-                assert(abs(self.L[2,1] - L2ac ) <= 1e-10)
-            if self.M > 2:
-                L33ac = 18 * (rR+rL) / 35/ pi
-                assert(abs(self.L[3,3] - L33ac ) <= 1e-10)
+            if self.testing == True:
+                assert(self.L[0,0] == 0)
+                if self.M >0:
+                    assert(self.L[0,1] == 0)
+                    assert(abs(self.L[1,0] + 2 * rtwo * (rL2 + rLrR + rR2) / 3/ pi /(rL-rR))<=1e-10)
+                    assert(abs(self.L[1,1] - 2*(rL + rR)/3/pi)<=1e-10)
+                if self.M > 1:
+                    L2ac = -16 * (2* rL2 + rLrR + 2 * rR2) /15/pi/(rL-rR)
+                    assert(abs(self.L[2,1] - L2ac ) <= 1e-10)
+                if self.M > 2:
+                    L33ac = 18 * (rR+rL) / 35/ pi
+                    assert(abs(self.L[3,3] - L33ac ) <= 1e-10)
 
     
     def make_MPRIME(self, a, b, ap, bp):

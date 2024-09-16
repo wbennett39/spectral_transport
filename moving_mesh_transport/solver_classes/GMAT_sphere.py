@@ -1307,3 +1307,81 @@ def VV_matrix(i, j, k, a, b):
 
               return (-59*math.sqrt(2)*math.sqrt(-a + b)*(a + b))/385.
     
+
+
+
+@njit
+def LLUMPED(i, j, a, b):
+    if i > 3 or j > 3:
+        raise ValueError('not implemented to this order')
+    if i == 0:
+
+        if j == 0:
+
+            return 0
+
+        elif j == 1:
+
+            return 0
+
+        elif j == 2:
+
+            return 0
+
+        elif j == 3:
+
+            return 0
+
+    elif i == 1:
+
+        if j == 0:
+
+            return -((math.sqrt(2)*(a**2 + b**2))/(a - b))
+
+        elif j == 1:
+
+            return 2*(a + b)
+
+        elif j == 2:
+
+            return (-2*(a**2 + b**2))/(a - b)
+
+        elif j == 3:
+
+            return 2*(a + b)
+
+    elif i == 2:
+
+        if j == 0:
+
+            return 4*math.sqrt(2)*(a + b)
+
+        elif j == 1:
+
+            return (-8*(a**2 + b**2))/(a - b)
+
+        elif j == 2:
+
+            return 8*(a + b)
+
+        elif j == 3:
+
+            return (-8*(a**2 + b**2))/(a - b)
+
+    elif i == 3:
+
+        if j == 0:
+
+            return (-9*math.sqrt(2)*(a**2 + b**2))/(a - b)
+
+        elif j == 1:
+
+            return 18*(a + b)
+
+        elif j == 2:
+
+            return (-18*(a**2 + b**2))/(a - b)
+
+        elif j == 3:
+
+            return 18*(a + b)

@@ -170,7 +170,7 @@ class rhs_class():
 
     
     def time_step_counter(self, t, mesh):
-        delta_t = t - self.t_old
+        delta_t = t - self.told
         self.delta_tavg += delta_t / self.division
         if self.counter == self.division:
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)

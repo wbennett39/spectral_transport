@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 850
+spaces = 160
 M = 1
 #####
 #####
@@ -26,11 +26,26 @@ diff = np.loadtxt("test4_diff.txt")
 sn_transport = h5py.File('converging_heat_wave_results_test4.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
+
+
+
+
+
+
 xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 #edges = tr['edges'][:]
 phi_dim = phi * a * c
 sn_transport.close()
+mat_T = phi_dim * 0
+ee1 = e[0,:] * a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017 * 5
+mat_T[0,:] = np.abs(ee1)**.25
+
+ee2 = e[1,:] * a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017 * 5
+mat_T[1,:] = np.abs(ee2)**.25
+
+ee2 = e[2,:] * a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017 * 5
+mat_T[2,:] = np.abs(ee1)**.25
 
 # analytical solution
 R = 10.
@@ -89,6 +104,10 @@ plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
 plt.plot(xs[0,:], (np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
 plt.plot(xs[1,:], (np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
+
+plt.plot(xs[0,:], mat_T[0,:], 'k--', label = 'radiation temp')
+plt.plot(xs[1,:], mat_T[1,:], 'k--')
+plt.plot(xs[2,:], mat_T[2,:], 'k--')
 #plt.plot(edges, edges*0, 'k|', markersize = 40)
 
 plt.ylabel("$T \\ [\\mathrm{{KeV}}]$", fontsize=24)

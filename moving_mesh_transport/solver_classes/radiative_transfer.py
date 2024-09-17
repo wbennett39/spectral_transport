@@ -323,24 +323,25 @@ class T_function(object):
              T1 = (np.abs(ee))
              return np.power(T1, 0.5) * np.sign(e)
         elif self.sigma_func['test3'] == True:
-             rho = (x+1e-8) **(-.45)
+             rho = (x+1e-6) **(-.45)
 
              ee = e * self.a * 0.1**2 / 10**-3  / (rho **.75)
              T1 = (np.abs(ee))
              return np.power(T1, 0.5) * np.sign(e)
              
         elif self.sigma_func['test4'] == True:
-             ee = e * self.a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017
+             
+             ee = e * self.a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017 * 5
              T1 = (np.abs(ee))
              return np.power(T1, 0.25) * np.sign(e)
                   
         else:
-            ee = e * self.a  / 10**-3 * 0.1**1.6
+            ee = e * self.a  / 10**-3 /0.3
             T1 = (np.abs(ee))
             # self.alpha = 10**-3
             # t1 = np.abs(4*e*self.a/self.alpha)
             # return np.power(t1,0.25) 
-            return np.power(T1, 0.625) * np.sign(e)
+            return np.power(T1, 1.0) * np.sign(e)
         
         
     def make_H(self, xL, xR, e_vec, sigma_class, space):

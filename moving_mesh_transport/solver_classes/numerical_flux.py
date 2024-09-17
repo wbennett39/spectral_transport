@@ -155,12 +155,14 @@ class LU_surf(object):
         #     temp = np.ones(xs.size) * self.e_init 
         elif self.boundary_source == True:
             if self.opacity_func['converging'] == 1:
-                temp = self.interpolate_heat_wave(t) * np.ones(xs.size) * 0.5
+                # temp = self.interpolate_heat_wave(t) * np.ones(xs.size) * 0.5
+                temp = np.ones(xs.size) * self.boundary_source_strength * 0.5
+                
             elif self.opacity_func['test1'] == 1 or self.opacity_func['test2'] == 1 or self.opacity_func['test3'] == 1 or self.opacity_func['test4'] == 1:
                 menis_t = converging_time_function(t, self.opacity_func)
                 T_bath_HeV = T_bath(menis_t, self.opacity_func)
                 temp = (T_bath_HeV / 10) ** 4 * 0.5 * np.ones(xs.size) 
-                
+
                 
             else:
                 temp = np.ones(xs.size) * self.boundary_source_strength

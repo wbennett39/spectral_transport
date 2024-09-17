@@ -780,7 +780,8 @@ def rttwo_mistake_undoer(i,j):
 
 @njit
 def converging_r(t_dim, sigma_func):
-    rfront = 0.01 * (-t_dim) ** 0.679502
+    # rfront = 0.01 * (-t_dim) ** 0.679502
+    rfront = 9.0
     if sigma_func['test1'] == True:
         rfront = 1e-4 * (-t_dim) ** 0.679501
     elif sigma_func['test2'] == True:

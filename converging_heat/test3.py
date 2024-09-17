@@ -1,13 +1,13 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
+import h5py
 matplotlib.style.use('classic')
 matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 
-diff = np.loadtxt("test3_diff.txt")
-mc = np.loadtxt("test3_mc.txt")
+
 #####
 spaces = 160
 M = 1
@@ -16,6 +16,18 @@ M = 1
 a = 0.0137225
 c = 29.98
 #####
+
+
+sn_transport = h5py.File('converging_heat_wave_results_test3.h5', 'r+')
+tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
+e = tr['energy_density'][:]
+xs = tr['xs'][:]
+phi = tr['scalar_flux'][:]
+phi_dim = phi * a * c
+sn_transport.close()
+diff = np.loadtxt("test3_diff.txt")
+mc = np.loadtxt("test3_mc.txt")
+
 # analytical solution
 R = 0.001
 delta=1.1157535873060416
@@ -43,9 +55,12 @@ plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-t1 = -6.591897629554719e-09
-t2 = -3.926450981261105e-09
-t3 = -1e-9
+t1 = -7.5e-09
+t2 = -7.4e-09
+t3 = -7e-09
+#t1 = -6.591897629554719e-09
+#t2 = -3.926450981261105e-09
+#t3 = -1e-9
 
 rho0 = 1.
 omega = 0.45

@@ -8,7 +8,7 @@ matplotlib.rcParams.update({
 })
 
 #####
-spaces = 100
+spaces = 60
 M = 1
 #####
 #####
@@ -25,6 +25,16 @@ xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 edges = tr['edges'][:]
 phi_dim = phi * a * c
+mat_T = phi_dim * 0
+rho = 19.3
+ee1 = e[0,:] * a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
+mat_T[0,:] = np.abs(ee1)**.625
+
+ee2 = e[1,:]* a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
+mat_T[1,:] = np.abs(ee2)**.625
+
+ee2 = e[2,:] * a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
+mat_T[2,:] = np.abs(ee1)**.625
 sn_transport.close()
 # analytical solution
 R = 0.001
@@ -61,12 +71,21 @@ r_anal = np.linspace(0., R, 1000)
 #t2 =-2.2122309472889687e-08
 #t3 =-9.448424353186857e-09
 
-t3 = -2.2122309472889687e-08
-t2 =-2.3e-08
-t1 = -2.5e-8
+#t3 = -2.2122309472889687e-08
+#t2 =-2.3e-08
+#t1 = -2.5e-8
+
 #t1 = -2.9e-8
 #t2 = - 2.85e-8
 #t3 = -2.8e-8
+#menis_times = np.array([-29.625, -29.6, -29.5])
+#t1 =-2.9625e-08
+#t2 =-2.96e-08
+#t3 =-2.5e-08
+
+t1 = -2.5e-08
+t2 = -2.3e-08
+t3 = -2.2122309472889687e-08
 
 
 rho0 = 19.3
@@ -96,6 +115,11 @@ plt.plot(xs[0,:]/1e-4, 10*(np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radia
 plt.plot(xs[1,:]/1e-4, 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:]/1e-4, 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
 plt.plot(edges/1e-4, edges*0, 'k|', markersize = 40)
+
+
+plt.plot(xs[0,:]/1e-4, 10*mat_T[0,:], 'k--', label = 'radiation temp')
+plt.plot(xs[1,:]/1e-4, 10*mat_T[1,:], 'k--')
+plt.plot(xs[2,:]/1e-4, 10*mat_T[2,:], 'k--')
 
 
 

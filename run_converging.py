@@ -38,7 +38,7 @@ from moving_mesh_transport.solver_classes.functions import test_s2_sol
 from moving_mesh_transport.loading_and_saving.load_solution import load_sol as load
 
 import h5py 
-
+import numpy as np
 
 from moving_mesh_transport.solver_functions.run_functions import run
 
@@ -56,15 +56,21 @@ run.parameters['all']['tfinal'] = 0.0000001
 run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False
 run.mesh_parameters['Msigma'] = 0
-
+run.parameters['boundary_source']['x0'] = np.array([10])
 run.boundary_source(0,0)
 
 run.load('marshak')
 
+dimensional_times = np.array([10.0, 50.0, 100.0])
+
+run.mesh_parameters['eval_array'] = dimensional_times * 29.98
+run.parameters['all']['tfinal'] = (dimensional_times * 29.98)[-1]
+
 # run.parameters['all']['tfinal'] = 10.0
 # run.mesh_parameters['eval_times'] = False
+run.parameters['boundary_source']['x0'] = np.array([10])
+run.boundary_source(0,0)
 
-run.boundary_source(0,1)
 f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')
 M = run.parameters['all']['Ms'] 
 spaces = run.parameters['all']['N_spaces']

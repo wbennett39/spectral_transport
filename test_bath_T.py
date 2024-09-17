@@ -46,10 +46,27 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 
-run = run()
-run.load()
 
-loader = load()
 
+import numpy as np
+
+ts = np.linspace(0.01, 2800, 100)
+bath = ts* 0
+tmeni = ts * 0
+sigma = {'test1': 0, 'test2': 0, 'test3': 0, 'test4': 1}
+print(sigma['test4'])
+for it, tt in enumerate(ts):
+    t = converging_time_function(tt, sigma)
+    bath[it] = T_bath(t, sigma)
+    tmeni[it] = t
+plt.ion()
+plt.figure(1)
+plt.plot(tmeni, 10*bath, '--')
+plt.xlabel('t [ns]')
+plt.ylabel('T KeV')
+plt.show()
+
+
+from converging_heat.test4 import *
 
 

@@ -817,9 +817,13 @@ def W_converging(xi, sigma_func):
             res =  (xi-1)**0.2101 * (1.27 - 0.04707 * xi + 0.001797 * xi **2)
     elif sigma_func['test4'] == True:
         if 1 <= xi <= 2:
-            res =  (xi-1)**1.141 * (0.2251 - .127 * xi + 0.001626 * xi **2)
+            res =  (xi-1)**1.141 * (0.2251+ .127 * xi + 0.001626 * xi **2)
         elif xi > 2:
-            res =  (xi-1)**1.102 * (0.1846 - 0.1505 * xi + 0.00004394 * xi **2)
+            res =  (xi-1)**1.102 * (0.1846 + 0.1505 * xi + 0.00004394 * xi **2)
+        else:
+            assert(0)
+    else:
+        assert 0
     return res
         
 
@@ -843,7 +847,7 @@ def ts_converging(t, sigma_func):
     elif sigma_func['test4'] == 1:
         R = 10
         xi = xi_converging(rf, R)
-        res = .552154 * (-t) ** .242705 * W_converging(xi, sigma_func) ** .25 * 10
+        res = .552154 * (-t) ** .242705 * W_converging(xi, sigma_func) ** .25 #KeVc
     return res
 
 @njit
@@ -881,8 +885,9 @@ def T_bath(t, sigma_func):
         R = 10
         xi = xi_converging(rf, R)
         LAMBDA = xi * V_converging(xi, sigma_func)
-        res = (1 + 0.083391*LAMBDA*(-t)**-.537633)**.25 * ts_converging(t, sigma_func)
-    
+        res = (1 + 0.083391*LAMBDA*(-t)**-.537633)**.25 * ts_converging(t, sigma_func) 
+    else:
+        assert(0)
     return res
 
 

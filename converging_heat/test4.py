@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 50
+spaces = 80
 M = 1
 #####
 #####
@@ -26,12 +26,12 @@ diff = np.loadtxt("test4_diff.txt")
 sn_transport = h5py.File('converging_heat_wave_results_test4.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
-
-
-
-
-
-
+#
+#
+#
+#
+#
+#
 xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 #edges = tr['edges'][:]
@@ -93,9 +93,9 @@ plt.figure("T")
 #plt.plot(mc[:,0], mc[:,3]*0.1, color="k", lw=2.5, )
 #plt.plot(mc[:,0], mc[:,5]*0.1, color="k", lw=2.5, )
 
-plt.plot(diff[:,0], diff[:,1]*0.1, c="lime", ls="-", lw=2, label="Diffusion Simulation")
-plt.plot(diff[:,0], diff[:,3]*0.1, c="lime", ls="-", lw=2, )
-plt.plot(diff[:,0], diff[:,5]*0.1, c="lime", ls="-", lw=2, )
+#plt.plot(diff[:,0], diff[:,1]*0.1, c="lime", ls="-", lw=2, label="Diffusion Simulation")
+#plt.plot(diff[:,0], diff[:,3]*0.1, c="lime", ls="-", lw=2, )
+#plt.plot(diff[:,0], diff[:,5]*0.1, c="lime", ls="-", lw=2, )
 
 plt.plot(r_anal, Trt_fit(r_anal, t3)*0.1, c="r", ls="--", lw=2, label="Diffusion Analytic")
 plt.plot(r_anal, Trt_fit(r_anal, t2)*0.1, c="r", ls="--", lw=2)
@@ -128,9 +128,9 @@ plt.figure("u")
 #plt.plot(mc[:,0], mc[:,4], color="k", lw=2.5, )
 #plt.plot(mc[:,0], mc[:,6], color="k", lw=2.5, )
 
-plt.plot(diff[:,0], diff[:,2], c="lime", ls="-", lw=2, label="Diffusion Simulation")
-plt.plot(diff[:,0], diff[:,4], c="lime", ls="-", lw=2, )
-plt.plot(diff[:,0], diff[:,6], c="lime", ls="-", lw=2, )
+#plt.plot(diff[:,0], diff[:,2], c="lime", ls="-", lw=2, label="Diffusion Simulation")
+#plt.plot(diff[:,0], diff[:,4], c="lime", ls="-", lw=2, )
+#plt.plot(diff[:,0], diff[:,6], c="lime", ls="-", lw=2, )
 
 plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
 plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)

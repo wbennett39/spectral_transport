@@ -8,7 +8,7 @@ matplotlib.rcParams.update({
 })
 
 #####
-spaces = 50
+spaces = 80
 M = 1
 #####
 #####
@@ -130,7 +130,7 @@ plt.plot(xs[2,:]/1e-4, 10*mat_T[2,:], 'k--')
 plt.ylabel("$T \\ [\\mathrm{{HeV}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{\\mu m}}]$", fontsize=24)
 plt.title("$\\mathrm{{Test \\ 1}}$", fontsize=22)
-plt.legend(loc="upper left", fontsize=16).set_draggable(True)
+#plt.legend(loc="upper left", fontsize=16).set_draggable(True)
 plt.ylim(ymax=2.5)
 ticks = np.linspace(0,R/1e-4,11)
 lticks = [f"{t:g}" for t in ticks]

@@ -62,8 +62,8 @@ run.boundary_source(0,0)
 run.load('marshak')
 run.parameters['boundary_source']['x0'] = np.array([1e-3])
 
-# menis_times = np.array([-6.5918976, -3.92645, -1])
-menis_times = np.array([-7.5, -7, -6.5918976])
+menis_times = np.array([-6.5918976, -3.92645, -1])
+# menis_times = np.array([-7.5, -7, -6.5918976])
 dimensional_times =  7.875084 + menis_times 
 
 run.mesh_parameters['eval_array'] = dimensional_times * 29.98

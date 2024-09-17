@@ -929,7 +929,7 @@ class mesh_class(object):
         half = int((self.N_space+1)/2)
         rest = self.N_space +1 -half
         
-        min_space = self.x0/5000
+        min_space = self.x0/800
         dx = min_space * half
         inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )*dx     
         outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (self.x0-dx))[:-1]

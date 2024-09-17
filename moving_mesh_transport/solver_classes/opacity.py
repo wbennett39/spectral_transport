@@ -239,7 +239,7 @@ class sigma_integrator():
 
             elif self.sigma_func['test2'] == 1:
                 floor = 5e-2
-                resmax = 5e8
+                resmax = 1e8
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = x**.5
                 res = 1.5e4 * (result) ** -3.0 * (0.1**3) * rho ** 1.4

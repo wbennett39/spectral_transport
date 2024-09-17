@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M wbennet2@nd.edu
 #$ -m abe
-#$ -N new_t1_M1_k100_S2
+#$ -N new_t1_M1_k120_S2
 
 module load python/3.6.4
 python3 converging_test1.py

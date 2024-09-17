@@ -8,7 +8,14 @@ matplotlib.rcParams.update({
 
 diff = np.loadtxt("test3_diff.txt")
 mc = np.loadtxt("test3_mc.txt")
-
+#####
+spaces = 120
+M = 1
+#####
+#####
+a = 0.0137225
+c = 29.98
+#####
 # analytical solution
 R = 0.001
 delta=1.1157535873060416

@@ -842,7 +842,7 @@ def ts_converging(t, sigma_func):
     elif sigma_func['test4'] == 1:
         R = 10
         xi = xi_converging(rf, R)
-        res = .552154 * (-t) ** .242705 * W_converging(xi, sigma_func) ** .25
+        res = .552154 * (-t) ** .242705 * W_converging(xi, sigma_func) ** .25 * 10
     return res
 
 @njit

@@ -1,11 +1,19 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import h5py
 import matplotlib
 matplotlib.style.use('classic')
 matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
-
+#####
+spaces = 850
+M = 1
+#####
+#####
+a = 0.0137225
+c = 29.98
+#####
 sigma_sb = 5.670374419e-5
 clight = 2.99792458e10
 arad = 4. * sigma_sb / clight 
@@ -14,7 +22,15 @@ hev_kelvin = 100. * ev_kelvin
 kev_kelvin = 1000. * ev_kelvin
 
 diff = np.loadtxt("test4_diff.txt")
-mc = np.loadtxt("test4_mc.txt")
+#mc = np.loadtxt("test4_mc.txt")
+sn_transport = h5py.File('converging_heat_wave_results_test4.h5', 'r+')
+tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
+e = tr['energy_density'][:]
+xs = tr['xs'][:]
+phi = tr['scalar_flux'][:]
+#edges = tr['edges'][:]
+phi_dim = phi * a * c
+sn_transport.close()
 
 # analytical solution
 R = 10.
@@ -43,9 +59,12 @@ plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-t1 = -9.470688883217099e-08
-t2 = -2.7126998146008884e-08
-t3 = -1e-9
+#t1 = -9.470688883217099e-08
+#t2 = -2.7126998146008884e-08
+#t3 = -1e-9
+t1 = -14.0e-8
+t2 =-10.0e-8
+t3 =  -9.4706889e-8
 
 rho0 = 1.
 omega = -1.
@@ -55,9 +74,9 @@ urt = np.vectorize(lambda r,t: 1e-13*f*(Trt_fit(r,t)*hev_kelvin)**beta*(rho0*r**
 
 
 plt.figure("T")
-plt.plot(mc[:,0], mc[:,1]*0.1, color="k", lw=2.5,  label="Transport IMC")
-plt.plot(mc[:,0], mc[:,3]*0.1, color="k", lw=2.5, )
-plt.plot(mc[:,0], mc[:,5]*0.1, color="k", lw=2.5, )
+#plt.plot(mc[:,0], mc[:,1]*0.1, color="k", lw=2.5,  label="Transport IMC")
+#plt.plot(mc[:,0], mc[:,3]*0.1, color="k", lw=2.5, )
+#plt.plot(mc[:,0], mc[:,5]*0.1, color="k", lw=2.5, )
 
 plt.plot(diff[:,0], diff[:,1]*0.1, c="lime", ls="-", lw=2, label="Diffusion Simulation")
 plt.plot(diff[:,0], diff[:,3]*0.1, c="lime", ls="-", lw=2, )
@@ -66,6 +85,11 @@ plt.plot(diff[:,0], diff[:,5]*0.1, c="lime", ls="-", lw=2, )
 plt.plot(r_anal, Trt_fit(r_anal, t3)*0.1, c="r", ls="--", lw=2, label="Diffusion Analytic")
 plt.plot(r_anal, Trt_fit(r_anal, t2)*0.1, c="r", ls="--", lw=2)
 plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
+
+plt.plot(xs[0,:], (np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
+plt.plot(xs[1,:], (np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
+plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
+#plt.plot(edges, edges*0, 'k|', markersize = 40)
 
 plt.ylabel("$T \\ [\\mathrm{{KeV}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
@@ -81,9 +105,9 @@ plt.savefig(f"Test4_T.pdf", bbox_inches='tight')
 
 
 plt.figure("u")
-plt.plot(mc[:,0], mc[:,2], color="k", lw=2.5,  label="Transport IMC")
-plt.plot(mc[:,0], mc[:,4], color="k", lw=2.5, )
-plt.plot(mc[:,0], mc[:,6], color="k", lw=2.5, )
+#plt.plot(mc[:,0], mc[:,2], color="k", lw=2.5,  label="Transport IMC")
+#plt.plot(mc[:,0], mc[:,4], color="k", lw=2.5, )
+#plt.plot(mc[:,0], mc[:,6], color="k", lw=2.5, )
 
 plt.plot(diff[:,0], diff[:,2], c="lime", ls="-", lw=2, label="Diffusion Simulation")
 plt.plot(diff[:,0], diff[:,4], c="lime", ls="-", lw=2, )

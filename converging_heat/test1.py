@@ -8,7 +8,7 @@ matplotlib.rcParams.update({
 })
 
 #####
-spaces = 60
+spaces = 50
 M = 1
 #####
 #####
@@ -27,14 +27,16 @@ edges = tr['edges'][:]
 phi_dim = phi * a * c
 mat_T = phi_dim * 0
 rho = 19.3
+
 ee1 = e[0,:] * a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
+
 mat_T[0,:] = np.abs(ee1)**.625
 
 ee2 = e[1,:]* a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
 mat_T[1,:] = np.abs(ee2)**.625
 
-ee2 = e[2,:] * a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
-mat_T[2,:] = np.abs(ee1)**.625
+ee3 = e[2,:] * a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
+mat_T[2,:] = np.abs(ee3)**.625
 sn_transport.close()
 # analytical solution
 R = 0.001

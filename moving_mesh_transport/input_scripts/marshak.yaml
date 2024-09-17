@@ -8,12 +8,12 @@
     'sigma_t': 1.0
     'sigma_s': 0.0
     't0': 100000.0                          # time the source is turned off
-    'N_spaces': [50]                 # number of cells
+    'N_spaces': [80]                 # number of cells
     'tnodes': 5                        # quadrature divisions for uncol. Gauss. source
     'Ms': [1]                        # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-6                       # rel tolerance for ODE integrator
-    'at': 1e-5                       # abs tolerance for ODE integrator
+    'at': 5e-6                       # abs tolerance for ODE integrator
     'mxstp': 10.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
     'radiative_transfer': {none: False}             # material temperature feedback. 1-True, 0 - False

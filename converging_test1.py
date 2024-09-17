@@ -62,11 +62,11 @@ run.boundary_source(0,0)
 run.load('marshak')
 run.parameters['boundary_source']['x0'] = np.array([1e-3])
 
-# menis_times = np.array([-22.122309, -9.4484244, -1])
+menis_times = np.array([-22.122309, -9.4484244, -1])
 
 # menis_times = np.array([-24, -22.122309, -9.4484244])
 
-menis_times =  np.array([-25, -23, -22.122309])
+# menis_times =  np.array([-25, -23, -22.122309])
 # menis_times = np.array([-29.625, -29.6, -29.5])
 # menis_times = np.array([-29.0, -28.5, -28.0])
 dimensional_times =  29.625647 + menis_times 

@@ -9,7 +9,7 @@ matplotlib.rcParams.update({
 diff = np.loadtxt("test3_diff.txt")
 mc = np.loadtxt("test3_mc.txt")
 #####
-spaces = 120
+spaces = 160
 M = 1
 #####
 #####
@@ -66,6 +66,11 @@ plt.plot(diff[:,0]/1e-4, diff[:,5], c="lime", ls="-", lw=2, )
 plt.plot(r_anal/1e-4, Trt_fit(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
 plt.plot(r_anal/1e-4, Trt_fit(r_anal, t2), c="r", ls="--", lw=2)
 plt.plot(r_anal/1e-4, Trt_fit(r_anal, t1), c="r", ls="--", lw=2)
+
+
+plt.plot(xs[0,:]/1e-4, 10*(np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
+plt.plot(xs[1,:]/1e-4, 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
+plt.plot(xs[2,:]/1e-4, 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
 
 plt.ylabel("$T \\ [\\mathrm{{HeV}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{\\mu m}}]$", fontsize=24)

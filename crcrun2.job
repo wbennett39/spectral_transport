@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M wbennet2@nd.edu
 #$ -m abe
-#$ -N SHORTt2M=1_350_cells_S2_mov
+#$ -N SHORTt2M=1_120_cells_S2_mov
 
 module load python/3.6.4
 python3 converging_test2.py

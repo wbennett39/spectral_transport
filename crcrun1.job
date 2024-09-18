@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M wbennet2@nd.edu
 #$ -m abe
-#$ -N earlynew_t1_M1_k80_S16_maxsigma=5e6
+#$ -N new_t1_M1_k200_S8_maxsigma=5e6
 
 module load python/3.6.4
 python3 converging_test1.py

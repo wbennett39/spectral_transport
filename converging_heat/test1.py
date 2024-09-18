@@ -8,7 +8,7 @@ matplotlib.rcParams.update({
 })
 
 #####
-spaces = 70
+spaces = 100
 M = 1
 #####
 #####

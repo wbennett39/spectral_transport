@@ -225,7 +225,7 @@ class sigma_integrator():
 
             if self.sigma_func['test1'] == 1:
                 # resmax = 1e8
-                resmax = 5e6
+                resmax = 1e5
                 floor = 5e-3
                 result = np.where(T_old<0.0, 0.0, T_old)
                 # result = np.abs(T_old)

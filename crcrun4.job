@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -M wbennet2@nd.edu
 #$ -m abe
-#$ -N t4M=1_60_cells_S8_t=-94
+#$ -N t4M=1_60_cells_S8_t=-94_resmax=5e5
 
 module load python/3.6.4
 python3 converging_test4.py

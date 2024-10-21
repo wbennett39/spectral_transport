@@ -89,11 +89,13 @@ if f[f'M={M}_{spaces}_cells'].__contains__('scalar_flux'):
     del f['scalar_flux']
     del f['energy_density']
     del f['xs']
-
+if f[f'M={M}_{spaces}_cells'].__contains__('edges'):
+    del f['edges']
 
 f[f'M={M}_{spaces}_cells'].create_dataset('scalar_flux', data = run.phi)
 f[f'M={M}_{spaces}_cells'].create_dataset('energy_density', data = run.e)
 f[f'M={M}_{spaces}_cells'].create_dataset('xs', data = run.xs)
+f[f'M={M}_{spaces}_cells'].create_dataset('edges', data = run.edges)
 # print('###')
 # print(run.phi,'scalar flux')
 # print('###')

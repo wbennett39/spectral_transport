@@ -17,7 +17,7 @@ from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
-from .functions import finite_diff_uneven_diamond 
+from .functions import finite_diff_uneven_diamond, alpha_difference
 from .functions import converging_time_function, converging_r
 import numba as nb
 from numba import prange
@@ -106,7 +106,9 @@ data = [('N_ang', int64),
         ('t_quad', float64[:]),
         ('t_ws', float64[:]),
         ('lumping', int64),
-        ('tfinal', float64)
+        ('tfinal', float64),
+        ('alphas', float64[:]),
+        ('ws', float64[:])
 
         ]
 ##############################################################################
@@ -120,6 +122,7 @@ class rhs_class():
         self.N_space = build.N_space
         self.M = build.M
         self.mus = build.mus
+        self.ws = build.ws
         self.tfinal = build.tfinal
         self.geometry = build.geometry
         # if self.geometry['slab'] == True:
@@ -164,11 +167,21 @@ class rhs_class():
         timepoints = 2048
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
+        self.alphas = np.zeros(self.N_ang+1)
+        self.make_alphas()
         
-        for angle2 in range(1, self.N_ang + 1):
-            self.alphams[angle2] = self.alphams[angle2-1] - self.ws[angle2-1] * self.mus[angle2-1]
+  
 
     
+    def make_alphas(self):
+        self.alphas[0] = 0
+        n = 1
+        for ia in range(1,self.N_ang+1):
+            self.alphas[ia] = self.alphas[ia-1] - self.mus[ia-1] * self.ws[ia-1]
+        print(self.alphas)
+
+
+
     def time_step_counter(self, t, mesh):
         delta_t = t - self.told
         self.delta_tavg += delta_t / self.division
@@ -295,7 +308,7 @@ class rhs_class():
             # make P 
             
             # integrate the source
-            source.make_source(t, xL, xR, uncollided_sol)
+            # source.make_source(t, xL, xR, uncollided_sol)
             #print(source.make_source(t, xL, xR, uncollided_sol))
 
 
@@ -352,6 +365,9 @@ class rhs_class():
                     print('rhstransfer is nan')
                     assert(0)
                 # print(RHS_transfer, 'rhs transfer')
+            ########## Starting direction #########
+            psionehalf = V_old[0, space, :] 
+
 
             ########## Loop over angle ############
             for angle in range(self.N_ang):
@@ -389,13 +405,13 @@ class rhs_class():
                     #     # print(Minv,  3 * math.pi/ (a*b + b**2 + a**2))
                     #     assert(np.abs(Minv[0,0] - 3 * math.pi/ (a*b + b**2 + a**2)) <=1e-8)
                 dterm = U*0
-                for j in prange(self.M+1):
+                for j in range(self.M+1):
                     # vec = (1-self.mus**2) * V_old[:, space, j]
                     # if angle != 0 and angle != self.N_ang-1:
                         
                     # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
-                    dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
-                     
+                    # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
+                     dterm[j] = alpha_difference(self.alphas[angle+1], self.alphas[angle], self.ws[angle],  psionehalf[j], V_old[angle, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False )
 
 
                 if self.geometry['sphere'] == True:  
@@ -426,6 +442,8 @@ class rhs_class():
 
                
                     V_new[angle,space,:] = RHS  
+                    psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
+                    psionehalf = psionehalf_new
 
         # print(V_new.shape)
 

@@ -167,7 +167,9 @@ class rhs_class():
         timepoints = 2048
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
-        self.alphas = np.zeros(self.N_ang+1)
+        self.alphas = np.zeros(self.N_ang)
+        print(self.mus, 'mus')
+        print(self.ws, 'ws')
         self.make_alphas()
         
   
@@ -175,9 +177,8 @@ class rhs_class():
     
     def make_alphas(self):
         self.alphas[0] = 0
-        n = 1
-        for ia in range(1,self.N_ang+1):
-            self.alphas[ia] = self.alphas[ia-1] - self.mus[ia-1] * self.ws[ia-1]
+        for ia in range(1,self.N_ang):
+            self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia]
         print(self.alphas)
 
 
@@ -375,14 +376,18 @@ class rhs_class():
                 mul = self.mus[angle]
                 # calculate numerical flux
                 refl_index = 0
-                # if space == 0:
-                    # if angle >= self.N_ang/2:
-                    #     assert(self.mus[angle] > 0)
-                    #     refl_index = self.N_ang-angle-1
-                    #     assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
+                if space == 0:
+                    if angle >= (self.N_ang)/2:
+                        assert(self.mus[angle] > 0)
+                        refl_index = self.N_ang-angle
+                        assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                     # print(self.mus[])
                     
                 num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
+
+                # new r=0 BC
+                # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)
+
                 
                     # print(self.mus[self.N_ang-angle-1], -self.mus[angle])
                     
@@ -405,13 +410,15 @@ class rhs_class():
                     #     # print(Minv,  3 * math.pi/ (a*b + b**2 + a**2))
                     #     assert(np.abs(Minv[0,0] - 3 * math.pi/ (a*b + b**2 + a**2)) <=1e-8)
                 dterm = U*0
-                for j in range(self.M+1):
-                    # vec = (1-self.mus**2) * V_old[:, space, j]
-                    # if angle != 0 and angle != self.N_ang-1:
-                        
-                    # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
-                    # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
-                     dterm[j] = alpha_difference(self.alphas[angle+1], self.alphas[angle], self.ws[angle],  psionehalf[j], V_old[angle, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False )
+                if angle > 0:
+                    for j in range(self.M+1):
+                        # vec = (1-self.mus**2) * V_old[:, space, j]
+                        # if angle != 0 and angle != self.N_ang-1:
+                            
+                        # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
+                        # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
+                        dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], V_old[angle, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False )
+
 
 
                 if self.geometry['sphere'] == True:  

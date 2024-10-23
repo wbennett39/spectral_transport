@@ -62,9 +62,9 @@ run.boundary_source(0,0)
 run.load('marshak')
 run.parameters['boundary_source']['x0'] = np.array([1e-3])
 
-# menis_times = np.array([-6.5918976, -3.92645, -1])
+menis_times = np.array([-6.5918976, -3.92645, -1])
 # menis_times = np.array([-7.5, -7, -6.5918976])
-menis_times = np.array([-7.5, -7.4, -7])
+# menis_times = np.array([-7.5, -7.4, -7])
 dimensional_times =  7.875084 + menis_times 
 
 run.mesh_parameters['eval_array'] = dimensional_times * 29.98
@@ -76,7 +76,7 @@ run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewer
 # run.parameters['all']['tfinal'] = 10.0
 # run.mesh_parameters['eval_times'] = False
 
-run.boundary_source(0,1)
+run.boundary_source(0,0)
 f = h5py.File('converging_heat/converging_heat_wave_results_test3.h5','r+')
 M = run.parameters['all']['Ms'] 
 spaces = run.parameters['all']['N_spaces']

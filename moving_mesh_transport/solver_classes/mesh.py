@@ -1002,15 +1002,19 @@ class mesh_class(object):
             if self.moving == False:
                 self.edges = np.zeros(self.N_space+1)
                 # self.edges[1:] = np.linspace(rfront * self.l, self.x0 * self.l, self.N_space)
-                inside = np.linspace(rfront, self.x0, 2*third)
-                outside = np.linspace(0.0, rfront, rest+1)[0:-1]
-                # self.edges = np.linspace(0.0, self.x0, self.N_space+1)
-                self.edges = np.concatenate((outside, inside))
+                # inside = np.linspace(rfront, self.x0, 2*third)
+                # outside = np.linspace(0.0, rfront, rest+1)[0:-1]
+                # # self.edges = np.linspace(0.0, self.x0, self.N_space+1)
+                # self.edges = np.concatenate((outside, inside))
+                self.edges = np.linspace(0, self.x0, self.N_space + 1)
                 self.edges0 = self.edges
 
                 self.Dedges = self.edges *0 
+                self.Dedges_const = self.edges * 0 
+                self.c1s = self.edges * 0
+                self.c2s = self.edges * 0
 
-                self.Dedges_const = self.edges*0
+                # self.Dedges_const = self.edges*0
             else:
                 min_space2 = 5 * min_space
                 # dx2 = min_space2 * third

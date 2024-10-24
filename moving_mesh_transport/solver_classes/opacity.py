@@ -225,12 +225,12 @@ class sigma_integrator():
 
             if self.sigma_func['test1'] == 1:
                 # resmax = 1e8
-                resmax = 5e6
+                resmax = 4e6
                 floor = 5e-3
                 result = np.where(T_old<0.0, 0.0, T_old)
                 # result = np.abs(T_old)
                 rho = 19.3
-                res = 7200 *  (result+1e-10) ** (-1.5) * (0.1**1.5) * rho **1.2
+                res = 7200 *  (result+1e-6) ** (-1.5) * (0.1**1.5) * rho **1.2
                 if (res > resmax).any():
                     for ix, xx in enumerate(res):
                         if res[ix] > resmax:
@@ -240,7 +240,7 @@ class sigma_integrator():
 
             elif self.sigma_func['test2'] == 1:
                 floor = 5e-2
-                resmax = 5e6 * (1e-3/0.05)
+                resmax = 1e5 
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = np.mean(x)**.5
                 res = 1.5e4 * (result+1e-10) ** -3.0 * (0.1**3) * rho ** 1.4
@@ -253,7 +253,7 @@ class sigma_integrator():
 
             elif self.sigma_func['test3'] == 1:
                 floor = 5e-2
-                resmax = 5e6 * (1)
+                resmax = 1e4 * (1)
                 result = np.where(T_old<0, 0.0, T_old)
                 rho = (np.mean(x)+1e-10) ** (-.45)
                 res = 10**3 * (result +1e-10) ** -3.5 * (0.1**3.5) * (rho) **1.4
@@ -265,12 +265,12 @@ class sigma_integrator():
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
-                resmax = 5e6 * (1e-3/10)
+                resmax = 1e5 
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = np.mean(x)
                 if (x<0).any():
                     assert(0)
-                res = (result+1e-10) ** -3.5 * rho ** 2 * (0.1**3.5)
+                res = (result+1e-8) ** -3.5 * rho ** 2 
                 if (res > resmax).any():
                     for ix, xx in enumerate(res):
                         if res[ix] > resmax:

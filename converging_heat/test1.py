@@ -8,7 +8,7 @@ matplotlib.rcParams.update({
 })
 
 #####
-spaces = 10
+spaces = 18
 M = 1
 #####
 #####
@@ -24,6 +24,7 @@ e = tr['energy_density'][:]
 xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 edges = tr['edges'][:]
+print(edges, 'edges')
 phi_dim = phi * a * c
 mat_T = phi_dim * 0
 rho = 19.3

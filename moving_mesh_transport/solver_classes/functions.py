@@ -831,7 +831,7 @@ def W_converging(xi, sigma_func):
             res =  (xi-1)**0.2101 * (1.27 - 0.04707 * xi + 0.001797 * xi **2)
     elif sigma_func['test4'] == True:
         if 1 <= xi <= 2:
-            res =  (xi-1)**1.141 * (0.2251+ .127 * xi + 0.001626 * xi **2)
+            res =  (xi-1)**1.141 * (0.2251 + 0.127 * xi + 0.001626 * xi **2)
         elif xi > 2:
             res =  (xi-1)**1.102 * (0.1846 + 0.1505 * xi + 0.00004394 * xi **2)
         else:
@@ -857,7 +857,7 @@ def ts_converging(t, sigma_func):
     elif sigma_func['test3'] == 1:
         R = 1e-3
         xi = xi_converging(rf, R)
-        res = 1.1982 * (-t) ** 0.0276393 * W_converging(xi, sigma_func) ** .5
+        res = 1.1982 * (-t) ** 0.027639 * W_converging(xi, sigma_func) ** .5
     elif sigma_func['test4'] == 1:
         R = 10
         xi = xi_converging(rf, R)
@@ -869,9 +869,9 @@ def V_converging(xi, sigma_func):
     if sigma_func['test1'] == True:
         res = 0.4345 * xi ** -2.752 + .2451 * xi ** -1.454
     elif sigma_func['test2'] == 1:
-        res = 0.262 * xi ** -2.34 + .2558 * xi ** -1.88
+        res = 0.262 * xi ** -3.24 + .2558 * xi ** -1.88
     elif sigma_func['test3'] == 1:
-        res = 0.8879 * (xi+1e-14) ** -.233 + .2278 * (xi+1e-10) ** -1.037
+        res = 0.8879 * (xi+1e-14) ** -2.233 + .2278 * (xi+1e-10) ** -1.037
     elif sigma_func['test4'] == 1:
         res = 0.06247 * xi ** -3.836 + 0.3999 * xi **-2.157
     return res 
@@ -888,7 +888,7 @@ def T_bath(t, sigma_func):
         R = 0.05  
         xi = xi_converging(rf, R)
         LAMBDA = xi ** 1.2 * V_converging(xi, sigma_func) * W_converging(xi, sigma_func)**-1
-        res = (1 + 0.385372 * LAMBDA * (-t) ** 0.579294) ** .25 * ts_converging(t, sigma_func)
+        res = (1 + 0.385372 * LAMBDA * (-t) ** -0.579294) ** .25 * ts_converging(t, sigma_func)
     elif sigma_func['test3'] == 1:
         R = 1e-3
         xi = xi_converging(rf, R)

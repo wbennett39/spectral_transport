@@ -44,8 +44,8 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 
-
-
+N_spaces_list = [50, 60, 70, 80, 90, 100, 120, 150, 350, 400, 500, 1000]
+# N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 run = run()
 run.load()
 
@@ -60,48 +60,53 @@ run.mesh_parameters['Msigma'] = 0
 run.boundary_source(0,0)
 
 run.load('marshak')
-run.parameters['boundary_source']['x0'] = np.array([10.0])
+for it, N_space in enumerate(N_spaces_list):
+    run.parameters['boundary_source']['x0'] = np.array([10.0])
+    run.parameters['all']['N_spaces'] = [N_space]
+    run.parameters['all']['rt'] = 5e-13
+    run.parameters['all']['at'] = 5e-11
 
-menis_times = np.array([-94.706889, -27.126998, -1])
-# menis_times = np.array([-140, -100, -94.706889])
-# menis_times = np.array([-145, -143, -140])
+    menis_times = np.array([-94.706889, -27.126998, -1])
+    # menis_times = np.array([-140, -100, -94.706889])
+    # menis_times = np.array([-145, -143, -140])
+    # menis_times = np.array([-140, -130, -125])
 
-dimensional_times =  145.4733877 + menis_times 
+    dimensional_times =  145.4733877 + menis_times 
 
-run.mesh_parameters['eval_array'] = dimensional_times * 29.98
-print(run.mesh_parameters['eval_array'], 'evaluation times')
-run.parameters['all']['tfinal'] = (dimensional_times * 29.98)[-1]
-run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': False, 'test2': False, 'test3': False, 'test4': True}
+    run.mesh_parameters['eval_array'] = dimensional_times * 29.98
+    print(run.mesh_parameters['eval_array'], 'evaluation times')
+    run.parameters['all']['tfinal'] = (dimensional_times * 29.98)[-1]
+    run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': False, 'test2': False, 'test3': False, 'test4': True}
 
 
-# run.parameters['all']['tfinal'] = 10.0
-# run.mesh_parameters['eval_times'] = False
+    # run.parameters['all']['tfinal'] = 10.0
+    # run.mesh_parameters['eval_times'] = False
 
-run.boundary_source(0,0)
-f = h5py.File('converging_heat/converging_heat_wave_results_test4.h5','r+')
-M = run.parameters['all']['Ms'] 
-spaces = run.parameters['all']['N_spaces']
-if f.__contains__(f'M={M}_{spaces}_cells'):
-    del f[f'M={M}_{spaces}_cells']
+    run.boundary_source(0,0)
+    f = h5py.File('converging_heat/converging_heat_wave_results_test4.h5','r+')
+    M = run.parameters['all']['Ms'] 
+    spaces = run.parameters['all']['N_spaces']
+    if f.__contains__(f'M={M}_{spaces}_cells'):
+        del f[f'M={M}_{spaces}_cells']
 
-f.create_group(f'M={M}_{spaces}_cells')
+    f.create_group(f'M={M}_{spaces}_cells')
 
-if f[f'M={M}_{spaces}_cells'].__contains__('scalar_flux'):
-    del f['scalar_flux']
-    del f['energy_density']
-    del f['xs']
+    if f[f'M={M}_{spaces}_cells'].__contains__('scalar_flux'):
+        del f['scalar_flux']
+        del f['energy_density']
+        del f['xs']
 
-if f[f'M={M}_{spaces}_cells'].__contains__('edges'):
-    del f['edges']
-f[f'M={M}_{spaces}_cells'].create_dataset('scalar_flux', data = run.phi)
-f[f'M={M}_{spaces}_cells'].create_dataset('energy_density', data = run.e)
-f[f'M={M}_{spaces}_cells'].create_dataset('xs', data = run.xs)
-f[f'M={M}_{spaces}_cells'].create_dataset('edges', data = run.edges)
-# print('###')
-# print(run.phi,'scalar flux')
-# print('###')
-# print(f['scalar_flux'][:],'loaded scalar flux')
-f.close()
+    if f[f'M={M}_{spaces}_cells'].__contains__('edges'):
+        del f['edges']
+    f[f'M={M}_{spaces}_cells'].create_dataset('scalar_flux', data = run.phi)
+    f[f'M={M}_{spaces}_cells'].create_dataset('energy_density', data = run.e)
+    f[f'M={M}_{spaces}_cells'].create_dataset('xs', data = run.xs)
+    f[f'M={M}_{spaces}_cells'].create_dataset('edges', data = run.edges)
+    # print('###')
+    # print(run.phi,'scalar flux')
+    # print('###')
+    # print(f['scalar_flux'][:],'loaded scalar flux')
+    f.close()
 
 
 

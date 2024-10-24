@@ -108,7 +108,9 @@ data = [('N_ang', int64),
         ('lumping', int64),
         ('tfinal', float64),
         ('alphas', float64[:]),
-        ('ws', float64[:])
+        ('ws', float64[:]),
+        ('old_percent_complete', float64),
+        ('stymie_count', int64)
 
         ]
 ##############################################################################
@@ -151,7 +153,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 6000
+        self.division = 3000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -171,6 +173,10 @@ class rhs_class():
         print(self.mus, 'mus')
         print(self.ws, 'ws')
         self.make_alphas()
+        self.old_percent_complete = 0.0
+        self.stymie_count = 0
+
+        
         
   
 
@@ -189,6 +195,13 @@ class rhs_class():
         if self.counter == self.division:
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
             print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
+            if np.round((t/self.tfinal) * 100, 3)-self.old_percent_complete <= 0.001:
+                self.stymie_count += 1
+            # if self.stymie_count >= 15:
+            #     raise ValueError('Solver stuck')
+            self.old_percent_complete = np.round((t/self.tfinal) * 100, 3)
+             
+            
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
@@ -202,9 +215,9 @@ class rhs_class():
             # print(tracker_edge)
             # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
-            # if self.N_space <= 100000:
-                # if self.geometry['sphere'] == True:
-                    # print(mesh.edges)
+            if self.N_space <= 100:
+                if self.geometry['sphere'] == True:
+                    print(mesh.edges/self.x0)
                 # else:
                 #     print(mesh.edges)
             print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')

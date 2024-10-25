@@ -42,7 +42,7 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [12, 15, 20, 25, 30, 35]
+N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
 # N_spaces_list = [300]
 MM = 1
 

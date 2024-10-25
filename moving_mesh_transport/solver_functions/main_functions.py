@@ -115,15 +115,16 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     speed_of_light = 29.98 # cm/ns
     mus, ws = quadrature(N_ang, weights, testing = True)
 
-    mus_new = np.zeros(N_ang+1)
-    ws_new = np.zeros(N_ang+1)
+    mus_new = np.zeros(N_ang+2)
+    ws_new = np.zeros(N_ang+2)
     mus_new[0] = -1
-    mus_new[1:] = mus
-    ws_new[1:] = ws
+    mus_new[-1] = 1
+    mus_new[1:-1] = mus
+    ws_new[1:-1] = ws
     mus = mus_new
     ws = ws_new
     
-    N_ang += 1
+    N_ang += 2
     #     print("mus =", mus)
 
     # xs_quad = quadpy.c1.gauss_legendre(2*M+1).points

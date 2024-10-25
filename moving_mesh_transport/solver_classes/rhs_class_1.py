@@ -169,7 +169,7 @@ class rhs_class():
         timepoints = 2048
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
-        self.alphas = np.zeros(self.N_ang)
+        self.alphas = np.zeros(self.N_ang-1)
         print(self.mus, 'mus')
         print(self.ws, 'ws')
         self.make_alphas()
@@ -183,7 +183,7 @@ class rhs_class():
     
     def make_alphas(self):
         self.alphas[0] = 0
-        for ia in range(1,self.N_ang):
+        for ia in range(1,self.N_ang-1):
             self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia]
         print(self.alphas)
 
@@ -392,7 +392,7 @@ class rhs_class():
                 if space == 0:
                     if angle >= (self.N_ang)/2:
                         assert(self.mus[angle] > 0)
-                        refl_index = self.N_ang-angle
+                        refl_index = self.N_ang-angle-1
                         assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                     # print(self.mus[])
                     
@@ -423,7 +423,7 @@ class rhs_class():
                     #     # print(Minv,  3 * math.pi/ (a*b + b**2 + a**2))
                     #     assert(np.abs(Minv[0,0] - 3 * math.pi/ (a*b + b**2 + a**2)) <=1e-8)
                 dterm = U*0
-                if angle > 0:
+                if angle > 0 and angle != self.N_ang-1:
                     for j in range(self.M+1):
                         # vec = (1-self.mus**2) * V_old[:, space, j]
                         # if angle != 0 and angle != self.N_ang-1:

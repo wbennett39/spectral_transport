@@ -92,7 +92,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.parameters['all']['tfinal'] = 10.0
     # run.mesh_parameters['eval_times'] = False
 
-    run.boundary_source(0,1)
+    run.boundary_source(0,0)
     f = h5py.File('converging_heat/converging_heat_wave_results_test1.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']

@@ -42,7 +42,8 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [12, 15, 20, 25, 30, 35]
+# N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
+N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 # N_spaces_list = [300]
 MM = 1
 
@@ -92,7 +93,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.parameters['all']['tfinal'] = 10.0
     # run.mesh_parameters['eval_times'] = False
 
-    run.boundary_source(0,1)
+    run.boundary_source(0,0)
     f = h5py.File('converging_heat/converging_heat_wave_results_test1.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']

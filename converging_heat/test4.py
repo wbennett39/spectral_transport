@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 85
+spaces = 80
 M = 1
 #####
 #####
@@ -23,7 +23,7 @@ kev_kelvin = 1000. * ev_kelvin
 
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
-sn_transport = h5py.File('converging_heat_wave_results_test4.h5', 'r+')
+sn_transport = h5py.File('converging_heat_wave_results_test4_1025.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 #
@@ -64,13 +64,13 @@ Lambda = xsiR*Vxsi(xsiR)
 Ts = Trt_fit(R,times)
 Tbath = Ts * (1.+0.083391*(times/-1e-9)**(-0.537633)*Lambda)**0.25
 
-plt.plot(times/1e-9, Ts, "r", label="surface")
-plt.plot(times/1e-9, Tbath, "--b", label="bath")
-plt.xlabel("$t$ [ns]")
-plt.ylabel("$T(t)$ [HeV]")
-plt.grid()
-plt.legend(loc="best")
-plt.show()
+# plt.plot(times/1e-9, Ts, "r", label="surface")
+# plt.plot(times/1e-9, Tbath, "--b", label="bath")
+# plt.xlabel("$t$ [ns]")
+# plt.ylabel("$T(t)$ [HeV]")
+# plt.grid()
+# plt.legend(loc="best")
+# plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
@@ -82,8 +82,8 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t1 = -14.5e-8
 # t2 = -14.3e-8
 t1 = -14.0e-8
-t2 = -13.0e-8
-t3 = -12.5e-8
+t2 = -13.5e-8
+t3 = -13.0e-8
 
 
 # t1 = -14.0e-8
@@ -132,7 +132,7 @@ plt.tight_layout()
 plt.savefig(f"Test4_T.pdf", bbox_inches='tight')
 
 
-plt.figure("u")
+# plt.figure("u")
 #plt.plot(mc[:,0], mc[:,2], color="k", lw=2.5,  label="Transport IMC")
 #plt.plot(mc[:,0], mc[:,4], color="k", lw=2.5, )
 #plt.plot(mc[:,0], mc[:,6], color="k", lw=2.5, )

@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 90
+spaces = 85
 M = 1
 #####
 #####
@@ -83,7 +83,7 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t2 = -14.3e-8
 t1 = -14.0e-8
 t2 = -13.0e-8
-t3 = -12.0e-8
+t3 = -12.5e-8
 
 
 # t1 = -14.0e-8
@@ -141,20 +141,20 @@ plt.figure("u")
 #plt.plot(diff[:,0], diff[:,4], c="lime", ls="-", lw=2, )
 #plt.plot(diff[:,0], diff[:,6], c="lime", ls="-", lw=2, )
 
-plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
-plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)
-plt.plot(r_anal, urt(r_anal, t1), c="r", ls="--", lw=2)
+# plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
+# plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)
+# plt.plot(r_anal, urt(r_anal, t1), c="r", ls="--", lw=2)
 
-plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
-plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
-plt.legend(loc="upper left", fontsize=16).set_draggable(True)
-plt.ylim(ymax=35)
-ticks = np.linspace(0,R,11)
-lticks = [f"{t:g}" for t in ticks]
-plt.xticks(ticks, lticks)
-plt.grid()
-plt.tight_layout()
-plt.savefig(f"Test4_u.pdf", bbox_inches='tight')
+# plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
+# plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
+# plt.legend(loc="upper left", fontsize=16).set_draggable(True)
+# plt.ylim(ymax=35)
+# ticks = np.linspace(0,R,11)
+# lticks = [f"{t:g}" for t in ticks]
+# plt.xticks(ticks, lticks)
+# plt.grid()
+# plt.tight_layout()
+# plt.savefig(f"Test4_u.pdf", bbox_inches='tight')
 
 plt.show()
 

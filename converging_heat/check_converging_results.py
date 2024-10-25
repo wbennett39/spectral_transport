@@ -16,7 +16,7 @@ def check(t):
     tfinal = t
     a = 0.0137225 
     c = 29.98
-    f = h5py.File('converging_heat_wave_results2.h5', 'r+')
+    f = h5py.File('converging_heat_wave_results_test1crc.h5', 'r+')
     e = f['energy_density'][iterator,:]
     xs = f['xs'][iterator,:]
     phi = f['scalar_flux'][iterator,:]

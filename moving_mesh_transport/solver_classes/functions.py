@@ -330,6 +330,10 @@ def uncollided_s2_gaussian(x,t,sigma,t0):
 def uncollided_s2_gaussian_thick(x,t,sigma,t0):
     return (6*t**5 + t**6 + 12*t**3*(10 + 15*x**2 - 3*sigma**2) + 3*t**4*(10 + 15*x**2 - 3*sigma**2) +  18*t*(40 + 15*x**2*(4 + x**2) - 6*(2 + 3*x**2)*sigma**2 + 6*sigma**4) +  9*t**2*(40 + 15*x**2*(4 + x**2) - 6*(2 + 3*x**2)*sigma**2 + 6*sigma**4) - 9*(-80 - 3*x**2*(40 + 10*x**2 + x**4) + 24*sigma**2 + 9*x**2*(4 + x**2)*sigma**2 - 6*(2 + 3*x**2)*sigma**4 + 18*sigma**6) + math.exp(t0)*(-t**6 + 6*t**5*(-1 + t0) + 6*t0**5 - t0**6 + 12*t0**3*(10 + 15*x**2 - 3*sigma**2) - 3*t0**4*(10 + 15*x**2 - 3*sigma**2) - 3*t**4*(10 + 5*(-2 + t0)*t0 + 15*x**2 - 3*sigma**2) + 4*t**3*(-30 + 5*t0*(6 + (-3 + t0)*t0) + 45*(-1 + t0)*x**2 - 9*(-1 + t0)*sigma**2) + 18*t0*(40 + 15*x**2*(4 + x**2) - 6*(2 + 3*x**2)*sigma**2 + 6*sigma**4) - 9*t0**2*(40 + 15*x**2*(4 + x**2) - 6*(2 + 3*x**2)*sigma**2 + 6*sigma**4) + 9*(-80 - 3*x**2*(40 + 10*x**2 + x**4) + 24*sigma**2 + 9*x**2*(4 + x**2)*sigma**2 - 6*(2 + 3*x**2)*sigma**4 + 18*sigma**6) - 3*t**2*(5*(24 + t0*(-24 + t0*(12 + (-4 + t0)*t0))) + 45*x**4 - 18*(2 + (-2 + t0)*t0)*sigma**2 + 18*sigma**4 + 18*x**2*(10 + 5*(-2 + t0)*t0 - 3*sigma**2)) + 6*t*(-120 + t0*(120 + t0*(-60 + t0*(20 + (-5 + t0)*t0))) + 45*(-1 + t0)*x**4 - 6*(-6 + t0*(6 + (-3 + t0)*t0))*sigma**2 + 18*(-1 + t0)*sigma**4 + 6*x**2*(-30 + 5*t0*(6 + (-3 + t0)*t0) - 9*(-1 + t0)*sigma**2))))/(162.*math.exp(t)*sigma**6)
 
+
+
+
+
 @njit        
 def problem_identifier(source_type):
     if source_type[0] == 1:
@@ -605,6 +609,16 @@ def finite_diff_uneven_diamond(x, ix, psi, left = False, right = False, origin =
             deltamu = mup - mum
             res = (-(1-mum**2) * psim ) / deltamu
         return res
+
+
+@njit 
+def alpha_difference(alphasp1, alphasm1, w, psionehalf, V_old, left, right, origin):
+
+    res = 2/w * (2 * alphasp1 * V_old - (alphasp1 + alphasm1) * psionehalf)
+    return res 
+
+
+
 @njit
 def finite_diff_uneven_diamond_2(x, ix, psi, alphams, ws, left = False, right = False):
     # if left == False and right == False:
@@ -817,7 +831,7 @@ def W_converging(xi, sigma_func):
             res =  (xi-1)**0.2101 * (1.27 - 0.04707 * xi + 0.001797 * xi **2)
     elif sigma_func['test4'] == True:
         if 1 <= xi <= 2:
-            res =  (xi-1)**1.141 * (0.2251+ .127 * xi + 0.001626 * xi **2)
+            res =  (xi-1)**1.141 * (0.2251 + 0.127 * xi + 0.001626 * xi **2)
         elif xi > 2:
             res =  (xi-1)**1.102 * (0.1846 + 0.1505 * xi + 0.00004394 * xi **2)
         else:
@@ -843,7 +857,7 @@ def ts_converging(t, sigma_func):
     elif sigma_func['test3'] == 1:
         R = 1e-3
         xi = xi_converging(rf, R)
-        res = 1.1982 * (-t) ** 0.0276393 * W_converging(xi, sigma_func) ** .5
+        res = 1.1982 * (-t) ** 0.027639 * W_converging(xi, sigma_func) ** .5
     elif sigma_func['test4'] == 1:
         R = 10
         xi = xi_converging(rf, R)
@@ -855,9 +869,9 @@ def V_converging(xi, sigma_func):
     if sigma_func['test1'] == True:
         res = 0.4345 * xi ** -2.752 + .2451 * xi ** -1.454
     elif sigma_func['test2'] == 1:
-        res = 0.262 * xi ** -2.34 + .2558 * xi ** -1.88
+        res = 0.262 * xi ** -3.24 + .2558 * xi ** -1.88
     elif sigma_func['test3'] == 1:
-        res = 0.8879 * (xi+1e-14) ** -.233 + .2278 * (xi+1e-10) ** -1.037
+        res = 0.8879 * (xi+1e-14) ** -2.233 + .2278 * (xi+1e-10) ** -1.037
     elif sigma_func['test4'] == 1:
         res = 0.06247 * xi ** -3.836 + 0.3999 * xi **-2.157
     return res 
@@ -874,7 +888,7 @@ def T_bath(t, sigma_func):
         R = 0.05  
         xi = xi_converging(rf, R)
         LAMBDA = xi ** 1.2 * V_converging(xi, sigma_func) * W_converging(xi, sigma_func)**-1
-        res = (1 + 0.385372 * LAMBDA * (-t) ** 0.579294) ** .25 * ts_converging(t, sigma_func)
+        res = (1 + 0.385372 * LAMBDA * (-t) ** -0.579294) ** .25 * ts_converging(t, sigma_func)
     elif sigma_func['test3'] == 1:
         R = 1e-3
         xi = xi_converging(rf, R)

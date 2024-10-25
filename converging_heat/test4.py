@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 80
+spaces = 100
 M = 1
 #####
 #####
@@ -38,13 +38,13 @@ phi = tr['scalar_flux'][:]
 phi_dim = phi * a * c
 sn_transport.close()
 mat_T = phi_dim * 0
-ee1 = e[0,:] * a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017 * 5
+ee1 = e[0,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[0,:] = np.abs(ee1)**.25
 
-ee2 = e[1,:] * a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017 * 5
+ee2 = e[1,:] * a  / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[1,:] = np.abs(ee2)**.25
 
-ee2 = e[2,:] * a * 0.1**4  / 10**-2  * 4 / 5 / 1.372017 * 5
+ee2 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[2,:] = np.abs(ee1)**.25
 
 # analytical solution
@@ -74,12 +74,21 @@ plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-#t1 = -9.470688883217099e-08
-#t2 = -2.7126998146008884e-08
-#t3 = -1e-9
+# t1 = -9.470688883217099e-08
+# t2 = -2.7126998146008884e-08
+# t3 = -1e-9
+
+
+# t1 = -14.5e-8
+# t2 = -14.3e-8
 t1 = -14.0e-8
-t2 =-10.0e-8
-t3 =  -9.4706889e-8
+t2 = -13.0e-8
+t3 = -12.0e-8
+
+
+# t1 = -14.0e-8
+# t2 =-10.0e-8
+# t3 =  -9.4706889e-8
 
 rho0 = 1.
 omega = -1.

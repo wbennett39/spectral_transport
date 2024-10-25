@@ -17,7 +17,7 @@ from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
-from .functions import finite_diff_uneven_diamond 
+from .functions import finite_diff_uneven_diamond, alpha_difference
 from .functions import converging_time_function, converging_r
 import numba as nb
 from numba import prange
@@ -106,7 +106,11 @@ data = [('N_ang', int64),
         ('t_quad', float64[:]),
         ('t_ws', float64[:]),
         ('lumping', int64),
-        ('tfinal', float64)
+        ('tfinal', float64),
+        ('alphas', float64[:]),
+        ('ws', float64[:]),
+        ('old_percent_complete', float64),
+        ('stymie_count', int64)
 
         ]
 ##############################################################################
@@ -120,6 +124,7 @@ class rhs_class():
         self.N_space = build.N_space
         self.M = build.M
         self.mus = build.mus
+        self.ws = build.ws
         self.tfinal = build.tfinal
         self.geometry = build.geometry
         # if self.geometry['slab'] == True:
@@ -148,7 +153,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 6000
+        self.division = 3000
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -164,17 +169,39 @@ class rhs_class():
         timepoints = 2048
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
+        self.alphas = np.zeros(self.N_ang)
+        print(self.mus, 'mus')
+        print(self.ws, 'ws')
+        self.make_alphas()
+        self.old_percent_complete = 0.0
+        self.stymie_count = 0
+
         
-        for angle2 in range(1, self.N_ang + 1):
-            self.alphams[angle2] = self.alphams[angle2-1] - self.ws[angle2-1] * self.mus[angle2-1]
+        
+  
 
     
+    def make_alphas(self):
+        self.alphas[0] = 0
+        for ia in range(1,self.N_ang):
+            self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia]
+        print(self.alphas)
+
+
+
     def time_step_counter(self, t, mesh):
         delta_t = t - self.told
         self.delta_tavg += delta_t / self.division
         if self.counter == self.division:
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
             print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
+            if np.round((t/self.tfinal) * 100, 3)-self.old_percent_complete <= 0.001:
+                self.stymie_count += 1
+            # if self.stymie_count >= 15:
+            #     raise ValueError('Solver stuck')
+            self.old_percent_complete = np.round((t/self.tfinal) * 100, 3)
+             
+            
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
@@ -188,9 +215,9 @@ class rhs_class():
             # print(tracker_edge)
             # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
-            # if self.N_space <= 100000:
-                # if self.geometry['sphere'] == True:
-                    # print(mesh.edges)
+            if self.N_space <= 100:
+                if self.geometry['sphere'] == True:
+                    print(mesh.edges/self.x0)
                 # else:
                 #     print(mesh.edges)
             print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')
@@ -295,7 +322,7 @@ class rhs_class():
             # make P 
             
             # integrate the source
-            source.make_source(t, xL, xR, uncollided_sol)
+            # source.make_source(t, xL, xR, uncollided_sol)
             #print(source.make_source(t, xL, xR, uncollided_sol))
 
 
@@ -352,6 +379,9 @@ class rhs_class():
                     print('rhstransfer is nan')
                     assert(0)
                 # print(RHS_transfer, 'rhs transfer')
+            ########## Starting direction #########
+            psionehalf = V_old[0, space, :] 
+
 
             ########## Loop over angle ############
             for angle in range(self.N_ang):
@@ -359,14 +389,18 @@ class rhs_class():
                 mul = self.mus[angle]
                 # calculate numerical flux
                 refl_index = 0
-                # if space == 0:
-                    # if angle >= self.N_ang/2:
-                    #     assert(self.mus[angle] > 0)
-                    #     refl_index = self.N_ang-angle-1
-                    #     assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
+                if space == 0:
+                    if angle >= (self.N_ang)/2:
+                        assert(self.mus[angle] > 0)
+                        refl_index = self.N_ang-angle
+                        assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                     # print(self.mus[])
                     
                 num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
+
+                # new r=0 BC
+                # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)
+
                 
                     # print(self.mus[self.N_ang-angle-1], -self.mus[angle])
                     
@@ -389,13 +423,15 @@ class rhs_class():
                     #     # print(Minv,  3 * math.pi/ (a*b + b**2 + a**2))
                     #     assert(np.abs(Minv[0,0] - 3 * math.pi/ (a*b + b**2 + a**2)) <=1e-8)
                 dterm = U*0
-                for j in prange(self.M+1):
-                    # vec = (1-self.mus**2) * V_old[:, space, j]
-                    # if angle != 0 and angle != self.N_ang-1:
-                        
-                    # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
-                    dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
-                     
+                if angle > 0:
+                    for j in range(self.M+1):
+                        # vec = (1-self.mus**2) * V_old[:, space, j]
+                        # if angle != 0 and angle != self.N_ang-1:
+                            
+                        # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
+                        # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
+                        dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], V_old[angle, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False )
+
 
 
                 if self.geometry['sphere'] == True:  
@@ -426,6 +462,8 @@ class rhs_class():
 
                
                     V_new[angle,space,:] = RHS  
+                    psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
+                    psionehalf = psionehalf_new
 
         # print(V_new.shape)
 

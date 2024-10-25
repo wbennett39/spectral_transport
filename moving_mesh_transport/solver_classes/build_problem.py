@@ -99,6 +99,7 @@ class build(object):
      quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
      fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping):
         self.N_ang = N_ang
+        print(self.N_ang, 'angles')
         self.N_space = N_space
         self.M = M
         self.lumping = lumping

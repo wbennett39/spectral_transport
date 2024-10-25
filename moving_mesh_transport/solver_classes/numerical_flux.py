@@ -161,13 +161,16 @@ class LU_surf(object):
             elif self.opacity_func['test1'] == 1 or self.opacity_func['test2'] == 1 or self.opacity_func['test3'] == 1 or self.opacity_func['test4'] == 1:
                 menis_t = converging_time_function(t, self.opacity_func)
                 T_bath_HeV = T_bath(menis_t, self.opacity_func)
+    
                 if self.opacity_func['test4'] == 1:
                     temp = temp = (T_bath_HeV ) ** 4 * 0.5 * np.ones(xs.size)
+                    # print(T_bath_HeV, menis_t)
                     # print('t= ', t)
                     # print(temp[0])
                 else:
 
                     temp = (T_bath_HeV / 10) ** 4 * 0.5 * np.ones(xs.size) 
+                    
 
                 
             else:

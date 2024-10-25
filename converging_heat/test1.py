@@ -8,7 +8,7 @@ matplotlib.rcParams.update({
 })
 
 #####
-spaces = 100
+spaces = 18
 M = 1
 #####
 #####
@@ -24,6 +24,7 @@ e = tr['energy_density'][:]
 xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 edges = tr['edges'][:]
+print(edges, 'edges')
 phi_dim = phi * a * c
 mat_T = phi_dim * 0
 rho = 19.3
@@ -55,13 +56,13 @@ Lambda = xsiR**1*Vxsi(xsiR)*Wxsi(xsiR)**-1.5
 Ts = Trt_fit(R,times)
 Tbath = Ts * (1.+0.103502*(times/-1e-9)**(-0.541423)*Lambda)**0.25
 
-plt.plot(times/1e-9, Ts, "r", label="surface")
-plt.plot(times/1e-9, Tbath, "--b", label="bath")
-plt.xlabel("$t$ [ns]")
-plt.ylabel("$T(t)$ [HeV]")
-plt.grid()
-plt.legend(loc="best")
-plt.show()
+# plt.plot(times/1e-9, Ts, "r", label="surface")
+# plt.plot(times/1e-9, Tbath, "--b", label="bath")
+# plt.xlabel("$t$ [ns]")
+# plt.ylabel("$T(t)$ [HeV]")
+# plt.grid()
+# plt.legend(loc="best")
+# plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(0., R, 1000)
@@ -144,28 +145,28 @@ plt.tight_layout()
 plt.savefig(f"Test1_T.pdf", bbox_inches='tight')
 
 
-plt.figure("u")
-plt.plot(mc[:,0]/1e-4, mc[:,2], color="k", lw=2.5,  label="Transport IMC")
-plt.plot(mc[:,0]/1e-4, mc[:,4], color="k", lw=2.5, )
-plt.plot(mc[:,0]/1e-4, mc[:,6], color="k", lw=2.5, )
+# plt.figure("u")
+# plt.plot(mc[:,0]/1e-4, mc[:,2], color="k", lw=2.5,  label="Transport IMC")
+# plt.plot(mc[:,0]/1e-4, mc[:,4], color="k", lw=2.5, )
+# plt.plot(mc[:,0]/1e-4, mc[:,6], color="k", lw=2.5, )
 
-plt.plot(diff[:,0]/1e-4, diff[:,2], c="lime", ls="-", lw=2, label="Diffusion Simulation")
-plt.plot(diff[:,0]/1e-4, diff[:,4], c="lime", ls="-", lw=2, )
-plt.plot(diff[:,0]/1e-4, diff[:,6], c="lime", ls="-", lw=2, )
+# plt.plot(diff[:,0]/1e-4, diff[:,2], c="lime", ls="-", lw=2, label="Diffusion Simulation")
+# plt.plot(diff[:,0]/1e-4, diff[:,4], c="lime", ls="-", lw=2, )
+# plt.plot(diff[:,0]/1e-4, diff[:,6], c="lime", ls="-", lw=2, )
 
-plt.plot(r_anal/1e-4, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
-plt.plot(r_anal/1e-4, urt(r_anal, t2), c="r", ls="--", lw=2)
-plt.plot(r_anal/1e-4, urt(r_anal, t1), c="r", ls="--", lw=2)
+# plt.plot(r_anal/1e-4, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
+# plt.plot(r_anal/1e-4, urt(r_anal, t2), c="r", ls="--", lw=2)
+# plt.plot(r_anal/1e-4, urt(r_anal, t1), c="r", ls="--", lw=2)
 
-plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
-plt.xlabel("$r \\ [\\mathrm{{\\mu m}}]$", fontsize=24)
-plt.legend(loc="upper left", fontsize=16).set_draggable(True)
-plt.ylim(ymax=140)
-ticks = np.linspace(0,R/1e-4,11)
-lticks = [f"{t:g}" for t in ticks]
-plt.xticks(ticks, lticks)
-plt.grid()
-plt.tight_layout()
-plt.savefig(f"Test1_u.pdf", bbox_inches='tight')
+# plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
+# plt.xlabel("$r \\ [\\mathrm{{\\mu m}}]$", fontsize=24)
+# plt.legend(loc="upper left", fontsize=16).set_draggable(True)
+# plt.ylim(ymax=140)
+# ticks = np.linspace(0,R/1e-4,11)
+# lticks = [f"{t:g}" for t in ticks]
+# plt.xticks(ticks, lticks)
+# plt.grid()
+# plt.tight_layout()
+# plt.savefig(f"Test1_u.pdf", bbox_inches='tight')
 
 plt.show()

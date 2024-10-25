@@ -918,30 +918,121 @@ class mesh_class(object):
                 # assert(0)
                 final_rest_edges  =  np.linspace(0.0, final_outside_edge, rest+1)[:-1]
                 self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
+    def two_point_interpolation(self, x1, x2, t1, t2, x0):
+        a = (2*(t1*x0 - t2*x0 + t2*x1 - t1*x2))/(t1*(t1 - t2)*t2)
+        v = -((t1**2*x0 - t2**2*x0 + t2**2*x1 - t1**2*x2)/(t1*(t1 - t2)*t2))
+        return v, a
+    def menis_init7(self):
+        menis_tf = converging_time_function(self.tfinal, self.sigma_func)
+        rfrontf= converging_r(menis_tf, self.sigma_func)
+        half = int((self.N_space+1)/2)
+        rest = self.N_space +1 -half
+        min_space = self.x0/240
+        dx = min_space * half
+        tracking_edges = np.linspace(0.0, self.x0-dx,half)
+        outside_edges = np.linspace(self.x0-dx, self.x0, rest+1)[1:]
+        self.edges0 = np.concatenate((tracking_edges, outside_edges))
+        self.edges = self.edges0
+        final_tracking = np.linspace(0, rfrontf , half)
+        final_outside = np.linspace(rfrontf, self.x0, rest+1)[1:]
+        final_edges = np.concatenate((final_tracking, final_outside))
+        self.Dedges_const = self.edges * 0 
+        self.c1s = self.edges * 0
+        self.c2s = self.edges * 0
+        self.Dedges_const = (final_edges - self.edges0)/self.tfinal
+        print(self.edges0, 'initial')
+        print(final_edges, 'final')
+
+
+
+
+
+
+
+
+
+
+
+    def menis_init6(self):
+        menis_tf = converging_time_function(self.tfinal, self.sigma_func)
+        rfrontf= converging_r(menis_tf, self.sigma_func)
+
+        
+
+        half = int((self.N_space+1)/2)
+        rest = self.N_space +1 -half
+        min_space = self.x0/240
+        bumper = max(self.x0/self.N_space/2, self.x0/100)
+        assert bumper < rfrontf
+        L = 2*(rfrontf-2*bumper)
+        dx = min_space * rest
+        tracking_edges = np.linspace( self.x0 - L-dx, self.x0-dx,half-1)
+        outside_edges = np.linspace(self.x0-dx, self.x0, rest+1)[1:]
+        self.edges0 = np.concatenate((np.array([0.0, bumper]), tracking_edges, outside_edges))
+        self.edges = self.edges0
+        print(self.edges0, 'initial edges')
+        final_tracking = np.linspace(rfrontf-L/2, rfrontf + L/2, half-1)
+        final_outside = np.linspace(rfrontf+L/2, self.x0, rest+1)[1:]
+        final_edges = np.concatenate( (np.array([0, bumper]), final_tracking, final_outside))
+
+        menis_tm = converging_time_function(self.tfinal/2, self.sigma_func)
+        rfrontm= converging_r(menis_tm, self.sigma_func)
+
+        tracking_edges_middle = np.linspace( rfrontm- L/2, rfrontm + L/2,half-1)
+        outside_edges_middle = np.linspace(rfrontm + L/2, self.x0, rest+1)[1:]
+        middle_edges = np.concatenate( (np.array([0, bumper]), tracking_edges_middle, outside_edges_middle))
+
+
+        # v, a, j = self.converging_move_interpolate2(self.edges0[rest]
+        
+
+        self.Dedges_const = self.edges * 0 
+        self.c1s = self.edges * 0
+        self.c2s = self.edges * 0
+        self.Dedges_const = (final_edges - self.edges0)/self.tfinal
+        # self.Dedges_const, self.c1s = self.two_point_interpolation(middle_edges, final_edges, self.tfinal/2, self.tfinal, self.edges0)
+
+        if (self.Dedges_const> 1e-12).any():
+            self.Dedges_const = self.Dedges_const * 0
+            self.c1s = self.c1s * 0
+            print(self.edges0 - final_edges)
+            assert(0)
+
+        print(final_edges, 'final edges')
+        print(self.Dedges_const, 'v')
+        print(self.c1s, 'a')
+
+
+        
+
+
+
+
+
 
     def menis_init5(self):
 
         menis_t = converging_time_function(self.tfinal, self.sigma_func)
             # rfront = 0.01 * (-menis_t) ** 0.679502 
-        pad = self.x0/100
+        pad = self.x0/self.N_space/150
         rfront = converging_r(menis_t, self.sigma_func) - pad
         print(rfront, 'rfront')
-        half = int((self.N_space+1)/3)
+        half = int((self.N_space+1)/2)
         rest = self.N_space +1 -half
         
-        min_space = self.x0/800
+        min_space = self.x0/150
         dx = min_space * half
         inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )*dx     
         outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (self.x0-dx))[:-1]
         self.edges = np.concatenate((outside_edges, inside_edges))
         self.edges0 = self.edges
-        v, a, j = self.converging_move_interpolate2(self.edges0[rest])
+        print(self.edges0, 'initial edges')
+        # v, a, j = self.converging_move_interpolate2(self.edges0[rest])
 
         self.Dedges_const = self.edges * 0 
         self.c1s = self.edges * 0
         self.c2s = self.edges * 0
 
-        
         menis_t = converging_time_function(self.tfinal/2, self.sigma_func)
         rfront1 = converging_r(menis_t, self.sigma_func) - pad
         inside_edges_mid = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront1)    
@@ -950,6 +1041,11 @@ class mesh_class(object):
 
         menis_t = converging_time_function(self.tfinal, self.sigma_func)
         rfront2 = converging_r(menis_t, self.sigma_func) - pad
+        rfront_stopper = rest * min_space
+        rfront22 = max(rfront_stopper, rfront2)
+        print(rfront2, rfront22, '#####')
+        rfront2 = rfront22
+
 
         inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront2)    
         outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (rfront2))[:-1]
@@ -958,9 +1054,15 @@ class mesh_class(object):
         print(outside_edges, 'outside final')
         final_edges = np.concatenate((outside_edges, inside_edges))
         print(final_edges, 'final edges')
-
+        
         self.Dedges_const[:rest] = (outside_edges - self.edges0[:rest])/self.tfinal
         self.Dedges_const[rest:] = (inside_edges  -self.edges0[rest:])/self.tfinal
+
+        if (final_edges> self.x0).any() or (final_edges<0).any() or (self.Dedges_const >0).any():
+            self.Dedges_const = self.Dedges_const * 0
+
+        
+
 
         # r1 = np.concatenate((outside_edges_mid, inside_edges_mid))
         # r2 = np.concatenate(( outside_edges, inside_edges))
@@ -1002,15 +1104,19 @@ class mesh_class(object):
             if self.moving == False:
                 self.edges = np.zeros(self.N_space+1)
                 # self.edges[1:] = np.linspace(rfront * self.l, self.x0 * self.l, self.N_space)
-                inside = np.linspace(rfront, self.x0, 2*third)
-                outside = np.linspace(0.0, rfront, rest+1)[0:-1]
-                # self.edges = np.linspace(0.0, self.x0, self.N_space+1)
-                self.edges = np.concatenate((outside, inside))
+                # inside = np.linspace(rfront, self.x0, 2*third)
+                # outside = np.linspace(0.0, rfront, rest+1)[0:-1]
+                # # self.edges = np.linspace(0.0, self.x0, self.N_space+1)
+                # self.edges = np.concatenate((outside, inside))
+                self.edges = np.linspace(0, self.x0, self.N_space + 1)
                 self.edges0 = self.edges
 
                 self.Dedges = self.edges *0 
+                self.Dedges_const = self.edges * 0 
+                self.c1s = self.edges * 0
+                self.c2s = self.edges * 0
 
-                self.Dedges_const = self.edges*0
+                # self.Dedges_const = self.edges*0
             else:
                 min_space2 = 5 * min_space
                 # dx2 = min_space2 * third
@@ -1298,7 +1404,7 @@ class mesh_class(object):
                     if self.moving == False:
                         self.menis_init3()
                     else:
-                        self.menis_init5()
+                        self.menis_init7()
 
                     print(self.Dedges_const, 'dedges const')
                 else:

@@ -265,7 +265,7 @@ class sigma_integrator():
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
-                resmax = 3.5e3
+                resmax = 3.5e2
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = np.mean(x + 0.1)
                 if (x<0).any():

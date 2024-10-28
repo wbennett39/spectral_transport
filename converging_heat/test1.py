@@ -9,7 +9,7 @@ matplotlib.rcParams.update({
 
 
 def plot_answers(spaces):
-    plt.ion()
+    # plt.ion()
     #####
     # spaces = 35
     M = 1
@@ -185,4 +185,4 @@ def plot_answers(spaces):
 
 # plot_answers(40)
 # plot_answers(45)
-plot_answers(50)
+plot_answers(100)

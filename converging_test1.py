@@ -43,7 +43,7 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 # N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
-N_spaces_list = [60, 80, 120, 150]
+N_spaces_list = [75, 120, 150]
 # N_spaces_list =. [300]
 MM = 1
 

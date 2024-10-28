@@ -9,7 +9,7 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 200
+spaces = 20
 M = 1
 #####
 #####
@@ -18,7 +18,7 @@ c = 29.98
 #####
 
 
-sn_transport = h5py.File('converging_heat_wave_results_test3.h5', 'r+')
+sn_transport = h5py.File('converging_heat_wave_results_test3_1025.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 xs = tr['xs'][:]
@@ -46,22 +46,22 @@ Lambda = xsiR**0.6625*Vxsi(xsiR)*Wxsi(xsiR)**-1
 Ts = Trt_fit(R,times)
 Tbath = Ts * (1.+0.075821*(times/-1e-9)**(-0.316092)*Lambda)**0.25
 
-plt.plot(times/1e-9, Ts, "r", label="surface")
-plt.plot(times/1e-9, Tbath, "--b", label="bath")
-plt.xlabel("$t$ [ns]")
-plt.ylabel("$T(t)$ [HeV]")
-plt.grid()
-plt.legend(loc="best")
-plt.show()
+# plt.plot(times/1e-9, Ts, "r", label="surface")
+# plt.plot(times/1e-9, Tbath, "--b", label="bath")
+# plt.xlabel("$t$ [ns]")
+# plt.ylabel("$T(t)$ [HeV]")
+# plt.grid()
+# plt.legend(loc="best")
+# plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-t1 = -7.5e-09
-t2 = -7.4e-09
-t3 = -7e-09
-#t1 = -6.591897629554719e-09
-#t2 = -3.926450981261105e-09
-#t3 = -1e-9
+# t1 = -7.5e-09
+# t2 = -7.4e-09
+# t3 = -7e-09
+t1 = -6.591897629554719e-09
+t2 = -3.926450981261105e-09
+t3 = -1e-9
 
 rho0 = 1.
 omega = 0.45

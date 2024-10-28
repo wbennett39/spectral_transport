@@ -35,6 +35,7 @@ from ..solver_classes.opacity import sigma_integrator
 from timeit import default_timer as timer
 from .wavespeed_estimator import wavespeed_estimator
 from .wave_loc_estimator import find_wave
+import chaospy
 
 
 
@@ -139,8 +140,11 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     t_quad, t_ws = quadrature(t_nodes, 'gauss_legendre')
 
     # t_ws = quadpy.c1.gauss_legendre(t_nodes).weights
-    quad_thick_source, blank = quadrature(int(N_space/2+1), 'gauss_lobatto')
-    quad_thick_edge, blank = quadrature(int(N_space/4+1), 'gauss_lobatto')
+    half = int((N_space + 1)/2)
+    rest = N_space +1 - half
+    quad_thick_source= chaospy.quadrature.clenshaw_curtis(half - 1)[0][0]
+    # quad_thick_edge, blank = quadrature(int(N_space/4+1), 'gauss_lobatto')
+    quad_thick_edge = chaospy.quadrature.clenshaw_curtis(rest)[0][0][:-1]
     # quad_thick_source = quadpy.c1.gauss_lobatto(int(N_space/2+1)).points
     # quad_thick_edge = quadpy.c1.gauss_lobatto(int(N_space/4+1)).points
     # quad_thick_source = ([quad_thick_source_inside, quad_thick_source_outside])

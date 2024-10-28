@@ -15,7 +15,7 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 20
+spaces = 50
 M = 1
 #####
 #####
@@ -29,9 +29,14 @@ xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 edges = tr['edges'][:]
 phi_dim = phi * a * c
+rho = phi * 0
 sn_transport.close()
 diff = np.loadtxt("test2_diff.txt")
 mc = np.loadtxt("test2_mc.txt")
+ee1 = e[0,:] * a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
+rho[0,:] = np.sqrt(xs[0, :])
+
+# mat_T[0,:] = np.abs(ee1)**.625
 
 # analytical solution
 R = 0.05
@@ -91,6 +96,11 @@ plt.plot(xs[1,:], 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:], 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
 print(xs)
 plt.plot(edges, edges*0, 'k|', markersize = 40)
+rad_T = phi*0
+rad_T[0, :] = 10*(np.abs(phi_dim[0,:])/a/c)**.25
+rad_T[1, :] = 10*(np.abs(phi_dim[1,:])/a/c)**.25
+rad_T[2, :] = 10*(np.abs(phi_dim[2,:])/a/c)**.25
+
 
 plt.ylabel("$T \\ [\\mathrm{{HeV}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
@@ -105,6 +115,11 @@ plt.xticks(ticks, lticks)
 plt.grid()
 plt.tight_layout()
 plt.savefig(f"Test2_T.pdf", bbox_inches='tight')
+ff = h5py.File('SN.h5', 'r+')
+ff['test2']['xs'] = xs
+ff['test2']['T4'] = 10* rad_T
+ff['test3']['u'] = e * 10**16 #convert GJ to kelvin
+ff.close()
 
 
 # plt.figure("u")

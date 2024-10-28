@@ -147,6 +147,13 @@ def plot_answers(spaces):
     plt.tight_layout()
     plt.savefig(f"Test1_T.pdf", bbox_inches='tight')
 
+    ff = h5py.File('SN.h5', 'r+')
+    ff['test1']['xs'] = xs
+    ff['test1']['T4'] = 10* mat_T
+    ff['test1']['u'] = e * 10**16 #convert GJ to kelvin
+    ff.close()
+
+
 
     # plt.figure("u")
     # plt.plot(mc[:,0]/1e-4, mc[:,2], color="k", lw=2.5,  label="Transport IMC")

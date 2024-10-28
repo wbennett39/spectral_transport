@@ -1,31 +1,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
-import h5py
 matplotlib.style.use('classic')
 matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 
-
-#####
-spaces = 40
-M = 1
-#####
-#####
-a = 0.0137225
-c = 29.98
-#####
-
-
-sn_transport = h5py.File('converging_heat_wave_results_test3_1025.h5', 'r+')
-tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
-e = tr['energy_density'][:]
-xs = tr['xs'][:]
-phi = tr['scalar_flux'][:]
-edges = tr['edges'][:]
-phi_dim = phi * a * c
-sn_transport.close()
 diff = np.loadtxt("test3_diff.txt")
 mc = np.loadtxt("test3_mc.txt")
 
@@ -46,19 +26,16 @@ Lambda = xsiR**0.6625*Vxsi(xsiR)*Wxsi(xsiR)**-1
 Ts = Trt_fit(R,times)
 Tbath = Ts * (1.+0.075821*(times/-1e-9)**(-0.316092)*Lambda)**0.25
 
-# plt.plot(times/1e-9, Ts, "r", label="surface")
-# plt.plot(times/1e-9, Tbath, "--b", label="bath")
-# plt.xlabel("$t$ [ns]")
-# plt.ylabel("$T(t)$ [HeV]")
-# plt.grid()
-# plt.legend(loc="best")
-# plt.show()
+plt.plot(times/1e-9, Ts, "r", label="surface")
+plt.plot(times/1e-9, Tbath, "--b", label="bath")
+plt.xlabel("$t$ [ns]")
+plt.ylabel("$T(t)$ [HeV]")
+plt.grid()
+plt.legend(loc="best")
+plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-# t1 = -7.5e-09
-# t2 = -7.4e-09
-# t3 = -7e-09
 t1 = -6.591897629554719e-09
 t2 = -3.926450981261105e-09
 t3 = -1e-9
@@ -83,16 +60,6 @@ plt.plot(r_anal/1e-4, Trt_fit(r_anal, t3), c="r", ls="--", lw=2, label="Diffusio
 plt.plot(r_anal/1e-4, Trt_fit(r_anal, t2), c="r", ls="--", lw=2)
 plt.plot(r_anal/1e-4, Trt_fit(r_anal, t1), c="r", ls="--", lw=2)
 
-
-plt.plot(xs[0,:]/1e-4, 10*(np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
-plt.plot(xs[1,:]/1e-4, 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
-plt.plot(xs[2,:]/1e-4, 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
-rad_T = phi*0
-rad_T[0, :] = 10*(np.abs(phi_dim[0,:])/a/c)**.25
-rad_T[1, :] = 10*(np.abs(phi_dim[1,:])/a/c)**.25
-rad_T[2, :] = 10*(np.abs(phi_dim[2,:])/a/c)**.25
-
-plt.plot(edges/1e-4, edges*0, 'k|', markersize = 40)
 plt.ylabel("$T \\ [\\mathrm{{HeV}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{\\mu m}}]$", fontsize=24)
 plt.title("$\\mathrm{{Test \\ 3}}$", fontsize=22)
@@ -131,10 +98,5 @@ plt.tight_layout()
 plt.savefig(f"Test3_u.pdf", bbox_inches='tight')
 
 plt.show()
-ff = h5py.File('SN.h5', 'r+')
-ff['test3']['xs'] = xs
-ff['test3']['T4'] = 10* rad_T
-ff['test3']['u'] = e * 10**16 #convert GJ to kelvin
-ff.close()
 
 quit()

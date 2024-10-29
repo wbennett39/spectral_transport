@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 150
+spaces = 200
 M = 1
 #####
 #####
@@ -131,6 +131,9 @@ plt.grid()
 plt.tight_layout()
 plt.savefig(f"Test4_T.pdf", bbox_inches='tight')
 ff = h5py.File('SN.h5', 'r+')
+del ff['test4']['xs']
+del ff['test4']['T4']
+del ff['test4']['u']
 ff['test4']['xs'] = xs
 ff['test4']['T4'] = mat_T
 ff['test4']['u'] = e * 10**16 #convert GJ to kelvin

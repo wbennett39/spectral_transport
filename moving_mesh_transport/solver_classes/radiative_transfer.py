@@ -318,12 +318,12 @@ class T_function(object):
              T1 = (np.abs(ee))
              return np.power(T1, 0.625) * np.sign(e)
         elif self.sigma_func['test2'] == True:
-             rho = (x+1e-8)**.5
+             rho = np.mean(x)**.5
              ee = e * self.a * 0.1**2 / 10**-3  / 3.0/ (rho **.4)
              T1 = (np.abs(ee))
              return np.power(T1, 0.5) * np.sign(e)
         elif self.sigma_func['test3'] == True:
-             rho = (x+1e-6) **(-.45)
+             rho = (np.mean(x)+1e-6) **(-.45)
 
              ee = e * self.a * 0.1**2 / 10**-3  / (rho **.75)
              T1 = (np.abs(ee))

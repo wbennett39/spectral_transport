@@ -21,7 +21,7 @@ def plot_answers(spaces):
 
     diff = np.loadtxt("test1_diff.txt")
     mc = np.loadtxt("test1_mc.txt")
-    sn_transport = h5py.File('converging_heat_wave_results_test1_1025.h5', 'r+')
+    sn_transport = h5py.File('converging_heat_wave_results_test1_1028.h5', 'r+')
     tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
     e = tr['energy_density'][:]
     xs = tr['xs'][:]
@@ -148,6 +148,9 @@ def plot_answers(spaces):
     plt.savefig(f"Test1_T.pdf", bbox_inches='tight')
 
     ff = h5py.File('SN.h5', 'r+')
+    del ff['test1']['xs']
+    del ff['test1']['T4']
+    del ff['test1']['u']
     ff['test1']['xs'] = xs
     ff['test1']['T4'] = 10* mat_T
     ff['test1']['u'] = e * 10**16 #convert GJ to kelvin
@@ -190,6 +193,6 @@ def plot_answers(spaces):
 
 # plot_answers(35)
 
-# plot_answers(40)
-# plot_answers(45)
+# plot_answers(150)
 plot_answers(100)
+# plot_answers(120)

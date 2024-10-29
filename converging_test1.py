@@ -42,7 +42,7 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [25, 35, 45, 65, 75, 85, 90, 100, 150, 200, 250, 300, 350, 400]
+N_spaces_list = [45, 75, 100, 150, 200, 250, 300, 350, 400]
 # N_spaces_list = [215]
 # N_spaces_list =. [300]
 MM = 1
@@ -58,6 +58,7 @@ run.parameters['all']['tfinal'] = 0.000000000001
 run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False
 run.mesh_parameters['Msigma'] = 0
+run.parameters['boundary_source']['N_angles'] = [2]
 
 run.boundary_source(0,0)
 plt.close()
@@ -71,16 +72,16 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['boundary_source']['x0'] = np.array([1e-3])
     run.parameters['all']['Ms'] = [MM]
     run.mesh_parameters['Msigma'] = MM
-    run.parameters['all']['rt'] = 1e-6
-    run.parameters['all']['at'] = 5e-5
+    run.parameters['all']['rt'] = 5e-4
+    run.parameters['all']['at'] = 5e-6
 
 
-    menis_times = np.array([-22.122309, -9.4484244, -1])
+    # menis_times = np.array([-22.122309, -9.4484244, -1])
     # menis_times = np.array([-22.122309, -9.4484244, -1])
 
     # menis_times = np.array([-24, -22.122309, -9.4484244])
 
-    # menis_times =  np.array([-25, -23, -22.122309])
+    menis_times =  np.array([-25, -23, -22.122309])
     # menis_times = np.array([-29.625, -29.6, -29.5])
     # menis_times = np.array([-29.0, -28.5, -28.0])
     dimensional_times =  29.625647 + menis_times 

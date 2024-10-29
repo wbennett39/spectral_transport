@@ -43,8 +43,7 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-
-N_spaces_list = [65, 75, 85, 95, 100, 125, 150, 175, 200, 250,275, 300, 350, 375, 400, 450, 500]
+N_spaces_list = [75, 100, 150, 200, 250, 300, 350, 400]
 # N_spaces_list = [215]
 
 run = run()
@@ -64,8 +63,8 @@ run.load('marshak')
 for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['N_spaces'] = [N_space]
     run.parameters['boundary_source']['x0'] = np.array([0.05])
-    run.parameters['all']['rt'] = 1e-6
-    run.parameters['all']['at'] = 1e-5
+    run.parameters['all']['rt'] = 5e-6
+    run.parameters['all']['at'] = 5e-5
 
 
     menis_times = np.array([-58.251607, -19.068532, -1])

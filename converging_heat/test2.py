@@ -15,7 +15,7 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 45
+spaces = 50
 M = 1
 #####
 #####

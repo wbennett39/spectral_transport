@@ -42,7 +42,7 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [45, 75, 100, 150, 200, 250, 300, 350, 400]
+N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
 # N_spaces_list = [215]
 # N_spaces_list =. [300]
 MM = 1
@@ -77,11 +77,11 @@ for it, N_space in enumerate(N_spaces_list):
 
 
     # menis_times = np.array([-22.122309, -9.4484244, -1])
-    # menis_times = np.array([-22.122309, -9.4484244, -1])
+    menis_times = np.array([-22.122309, -9.4484244, -1])
 
     # menis_times = np.array([-24, -22.122309, -9.4484244])
 
-    menis_times =  np.array([-25, -23, -22.122309])
+    # menis_times =  np.array([-25, -23, -22.122309])
     # menis_times = np.array([-29.625, -29.6, -29.5])
     # menis_times = np.array([-29.0, -28.5, -28.0])
     dimensional_times =  29.625647 + menis_times 

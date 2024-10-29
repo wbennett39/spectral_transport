@@ -45,7 +45,7 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 # N_spaces_list = [75, 85, 95, 100, 125, 150, 175, 200, 250,275, 300, 350, 375, 400, 450, 500]
-N_spaces_list = [10, 20 ,30, 40, 50, 60, 70 ,80, 100,125, 150, 175,200, 225, 250, 275, 300, 325, 350, 375, 400]
+N_spaces_list = [30, 50, 80, 100, 120, 150]
 
 run = run()
 run.load()

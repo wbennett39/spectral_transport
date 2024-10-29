@@ -942,6 +942,50 @@ class mesh_class(object):
         self.Dedges_const = (final_edges - self.edges0)/self.tfinal
         print(self.edges0, 'initial')
         print(final_edges, 'final')
+    
+    def menis_init_final(self):
+        menis_tf = converging_time_function(self.tfinal, self.sigma_func)
+        rfrontf= converging_r(menis_tf, self.sigma_func)
+        print(menis_tf, 'menis t')
+        print(rfrontf, 'rf')
+        half = int((self.N_space+1)/2)
+        rest = self.N_space +1 -half
+        self.thick_quad_edge = np.linspace(0,1, rest+1)[:-1]
+        self.thick_quad = np.linspace(0,1, half)
+
+        min_space = self.x0/500
+        pad = min_space 
+        dx = min_space * half
+        edges_inside = self.x0 - np.flip(self.thick_quad) * dx
+        edges_outside = self.thick_quad_edge * (self.x0 - dx)
+        initial_edges = np.concatenate((edges_outside, edges_inside))
+        self.edges0 = initial_edges
+        self.edges = initial_edges
+        assert self.edges.size == self.N_space + 1
+        edges_inside = (2 * np.flip(self.thick_quad)-1 - self.x0/rfrontf)* rfrontf * np.flip(self.thick_quad) + self.x0
+        edges_outside = self.thick_quad_edge * ( rfrontf)
+        final_edges = np.concatenate((edges_outside, edges_inside))
+        self.Dedges_const = self.edges * 0 
+        self.c1s = self.edges * 0
+        self.c2s = self.edges * 0
+        self.Dedges_const = (final_edges - self.edges0)/self.tfinal
+        print(self.edges0, 'initial')
+        print(final_edges, 'final')        
+
+        menis_tm = converging_time_function(2*self.tfinal/3, self.sigma_func)
+        rfrontm= converging_r(menis_tm, self.sigma_func)
+        print(rfrontm, 'rf middle')
+
+        edges_inside = (2 * np.flip(self.thick_quad)-1 - self.x0/rfrontm)* rfrontm * np.flip(self.thick_quad) + self.x0
+        edges_outside = self.thick_quad_edge * (rfrontm)
+        middle_edges = np.concatenate((edges_outside, edges_inside))
+        print(middle_edges, 'middle edges')
+        if (middle_edges != np.sort(middle_edges)).any():
+            print('edges out of order')
+            middle_edges = np.sort(middle_edges)
+
+        # self.Dedges_const, self.c1s = self.two_point_interpolation(middle_edges, final_edges, 2*self.tfinal/3, self.tfinal, self.edges0)
+
 
 
 
@@ -1404,7 +1448,7 @@ class mesh_class(object):
                     if self.moving == False:
                         self.menis_init3()
                     else:
-                        self.menis_init7()
+                        self.menis_init_final()
 
                     print(self.Dedges_const, 'dedges const')
                 else:
@@ -1466,7 +1510,7 @@ class mesh_class(object):
             # self.edges[0] = -self.x0 + -self.tfinal * self.speed
 
 
-            print(self.edges[-1], "final edges -- last edge")
+            print(self.edges[-1], "final edges -- last edge") 
 
 
 

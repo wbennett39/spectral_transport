@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 80
+spaces = 150
 M = 1
 #####
 #####
@@ -81,14 +81,14 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 
 # t1 = -14.5e-8
 # t2 = -14.3e-8
-t1 = -14.0e-8
-t2 = -13.5e-8
-t3 = -13.0e-8
-
-
 # t1 = -14.0e-8
-# t2 =-10.0e-8
-# t3 =  -9.4706889e-8
+# t2 = -13.5e-8
+# t3 = -13.0e-8
+
+
+t1 = -14.0e-8
+t2 =-10.0e-8
+t3 =  -9.4706889e-8
 
 rho0 = 1.
 omega = -1.
@@ -130,6 +130,11 @@ plt.xticks(ticks, lticks)
 plt.grid()
 plt.tight_layout()
 plt.savefig(f"Test4_T.pdf", bbox_inches='tight')
+ff = h5py.File('SN.h5', 'r+')
+ff['test4']['xs'] = xs
+ff['test4']['T4'] = mat_T
+ff['test4']['u'] = e * 10**16 #convert GJ to kelvin
+ff.close()
 
 
 # plt.figure("u")

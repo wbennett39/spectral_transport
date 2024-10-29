@@ -184,7 +184,7 @@ class rhs_class():
     def make_alphas(self):
         self.alphas[0] = 0
         for ia in range(1,self.N_ang-1):
-            self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia]
+            self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia] * 2
         print(self.alphas)
 
 
@@ -382,7 +382,6 @@ class rhs_class():
             ########## Starting direction #########
             psionehalf = V_old[0, space, :] 
 
-
             ########## Loop over angle ############
             for angle in range(self.N_ang):
                 
@@ -461,9 +460,12 @@ class rhs_class():
                     RHS = np.dot(Minv, RHS)
 
                
-                    V_new[angle,space,:] = RHS  
-                    psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
-                    psionehalf = psionehalf_new
+                    V_new[angle,space,:] = RHS
+                    if angle == 0:
+                        psionehalf = V_old[0, space, :]
+                    else:  
+                        psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
+                        psionehalf = psionehalf_new
 
         # print(V_new.shape)
 

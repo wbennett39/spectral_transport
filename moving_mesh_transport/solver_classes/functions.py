@@ -614,7 +614,7 @@ def finite_diff_uneven_diamond(x, ix, psi, left = False, right = False, origin =
 @njit 
 def alpha_difference(alphasp1, alphasm1, w, psionehalf, V_old, left, right, origin):
 
-    res = 2/w * (2 * alphasp1 * V_old - (alphasp1 + alphasm1) * psionehalf)
+    res = 1/w * (2 * alphasp1 * V_old - (alphasp1 + alphasm1) * psionehalf)
     return res 
 
 

@@ -43,8 +43,8 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 # N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
-N_spaces_list = [175, 200, 225, 250, 275, 300, 325, 350, 375, 400]
-# N_spaces_list = [300]
+N_spaces_list = [75, 120, 150]
+# N_spaces_list =. [300]
 MM = 1
 
 
@@ -75,8 +75,8 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['at'] = 5e-5
 
 
-    # menis_times = np.array([-22.122309, -9.4484244, -1])
     menis_times = np.array([-22.122309, -9.4484244, -1])
+    # menis_times = np.array([-22.122309, -9.4484244, -1])
 
     # menis_times = np.array([-24, -22.122309, -9.4484244])
 
@@ -119,6 +119,7 @@ for it, N_space in enumerate(N_spaces_list):
     # print('###')
     # print(f['scalar_flux'][:],'loaded scalar flux')
     f.close()
+
 
 
 

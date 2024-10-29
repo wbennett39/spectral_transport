@@ -94,7 +94,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.mesh_parameters['eval_times'] = False
 
     run.boundary_source(0,0)
-    f = h5py.File('converging_heat/converging_heat_wave_results_test1_1028.h5','r+')
+    f = h5py.File('converging_heat/results_test1_1029.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']
     if f.__contains__(f'M={M}_{spaces}_cells'):

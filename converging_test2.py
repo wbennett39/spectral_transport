@@ -43,7 +43,7 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-N_spaces_list = [45, 75, 100, 150, 200, 250, 300, 350, 400]
+N_spaces_list = [25, 50, 75, 100, 150, 200, 250, 300, 350, 400]
 # N_spaces_list = [215]
 
 run = run()
@@ -68,8 +68,8 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['e_initial'] = 0.000000000001
 
 
-    # menis_times = np.array([-58.251607, -19.068532, -1])
-    menis_times = np.array([-80,-75, -58.251607])
+    menis_times = np.array([-58.251607, -19.068532, -1])
+    # menis_times = np.array([-80,-75, -58.251607])
     # menis_times = np.array([-85,-84.5, -84])
 
     dimensional_times =  85.4678 + menis_times 

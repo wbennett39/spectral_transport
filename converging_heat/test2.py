@@ -15,14 +15,14 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 75
+spaces = 45
 M = 1
 #####
 #####
 a = 0.0137225
 c = 29.98
 #####
-sn_transport = h5py.File('converging_heat_wave_results_test2_1028.h5', 'r+')
+sn_transport = h5py.File('results_test2_1030.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 xs = tr['xs'][:]

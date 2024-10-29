@@ -44,8 +44,8 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 
-# N_spaces_list = [75, 85, 95, 100, 125, 150, 175, 200, 250,275, 300, 350, 375, 400, 450, 500]
-N_spaces_list = [215]
+N_spaces_list = [65, 75, 85, 95, 100, 125, 150, 175, 200, 250,275, 300, 350, 375, 400, 450, 500]
+# N_spaces_list = [215]
 
 run = run()
 run.load()
@@ -83,7 +83,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.mesh_parameters['eval_times'] = False
 
     run.boundary_source(0,0)
-    f = h5py.File('converging_heat/converging_heat_wave_results_test2_1025.h5','r+')
+    f = h5py.File('converging_heat/converging_heat_wave_results_test2_1028.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']
     if f.__contains__(f'M={M}_{spaces}_cells'):

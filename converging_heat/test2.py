@@ -116,9 +116,9 @@ plt.grid()
 plt.tight_layout()
 plt.savefig(f"Test2_T.pdf", bbox_inches='tight')
 ff = h5py.File('SN.h5', 'r+')
-# del ff['test2']['xs']
-# del ff['test2']['T4']
-# del ff['test2']['u']
+del ff['test2']['xs']
+del ff['test2']['T4']
+del ff['test2']['u']
 ff['test2']['xs'] = xs
 ff['test2']['T4'] = 10* rad_T
 ff['test2']['u'] = e * 10**16 #convert GJ to kelvin

@@ -331,7 +331,7 @@ class T_function(object):
              
         elif self.sigma_func['test4'] == True:
              
-             ee = e * self.a   / 10**-2  * 4 / 5 / 1.372017 * 5
+             ee = e * self.a   / 10**-2  * 4  / 1.372017 
              T1 = (np.abs(ee))
              return np.power(T1, 0.25) * np.sign(e)
                   

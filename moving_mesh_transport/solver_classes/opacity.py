@@ -241,7 +241,7 @@ class sigma_integrator():
 
             elif self.sigma_func['test2'] == 1:
                 floor = 5e-2
-                resmax = 1e5
+                resmax = 7e4
                 # resmax = 3e4 
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = (np.mean(x)+1e-8)**.5
@@ -267,12 +267,12 @@ class sigma_integrator():
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
-                resmax = 2e4
+                resmax = 5e3
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = np.mean(x )
                 if (x<0).any():
                     assert(0)
-                res = (result+1e-12) ** -3.5 * rho ** 2 
+                res = (result+1e-10) ** -3.5 * rho ** 2 
                 if (res > resmax).any():
                     for ix, xx in enumerate(res):
                         if res[ix] > resmax:

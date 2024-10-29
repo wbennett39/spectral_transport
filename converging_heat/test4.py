@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 65
+spaces = 200
 M = 1
 #####
 #####

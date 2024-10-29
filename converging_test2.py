@@ -65,6 +65,7 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['boundary_source']['x0'] = np.array([0.05])
     run.parameters['all']['rt'] = 5e-4
     run.parameters['all']['at'] = 5e-6
+    run.parameters['all']['e_initial'] = 0.000000000001
 
 
     # menis_times = np.array([-58.251607, -19.068532, -1])
@@ -82,7 +83,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.mesh_parameters['eval_times'] = False
 
     run.boundary_source(0,0)
-    f = h5py.File('converging_heat/converging_heat_wave_results_test2_1028.h5','r+')
+    f = h5py.File('converging_heat/results_test2_1030.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']
     if f.__contains__(f'M={M}_{spaces}_cells'):

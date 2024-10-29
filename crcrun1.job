@@ -4,4 +4,4 @@
 #$ -N test1
 
 module load python/3.6.4
-python3 converging_test1.py
+python3 converging_test1_215.py

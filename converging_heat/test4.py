@@ -7,8 +7,8 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 120
-M = 1
+spaces = 115
+M = 0
 #####
 #####
 a = 0.0137225

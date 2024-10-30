@@ -1,3 +1,4 @@
+
 # imports functions to run package from terminal 
 
 import sys
@@ -43,7 +44,7 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-N_spaces_list = [25, 50, 75, 100, 150, 200, 250, 300, 350, 400]
+N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
 # N_spaces_list = [215]
 
 run = run()
@@ -107,12 +108,3 @@ for it, N_space in enumerate(N_spaces_list):
     # print('###')
     # print(f['scalar_flux'][:],'loaded scalar flux')
     f.close()
-
-
-
-
-
-
-
-
-

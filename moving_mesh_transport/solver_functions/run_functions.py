@@ -241,13 +241,13 @@ class run:
             # f = lambda x: np.exp(-x**2 /(2 * 0.5**2))
             # fsol = lambda x, mu: np.exp(x * 1/mu) 
             # plt.figure(3)
-            if self.eval_times == True:
-                for it in range(self.xs[:,0].size):
-                    plt.plot(self.xs[it], self.e[it], '-^')
+            # if self.eval_times == True:
+            #     for it in range(self.xs[:,0].size):
+            #         plt.plot(self.xs[it], self.e[it], '-^')
             
-            # plt.legend()
-                plt.title('energy density')
-                plt.show()
+            # # plt.legend()
+            #     plt.title('energy density')
+            #     plt.show()
 
 
             # if parameters.sigma_func['converging'] == True:
@@ -279,16 +279,16 @@ class run:
         #     # plt.plot(r_meni, T_meni, 'b--', label = 'benchmark T')
         #     plt.legend()
         #     plt.show()
-            f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')
-            if f.__contains__('scalar_flux'):
-                del f['scalar_flux']
-                del f['energy_density']
-                del f['xs']
-            f.create_dataset('scalar_flux', data = self.phi)
-            f.create_dataset('energy_density', data = self.e)
-            f.create_dataset('xs', data = self.xs)
+            # f = h5py.File('converging_heat/converging_heat_wave_results2.h5','r+')
+            # if f.__contains__('scalar_flux'):
+            #     del f['scalar_flux']
+            #     del f['energy_density']
+            #     del f['xs']
+            # f.create_dataset('scalar_flux', data = self.phi)
+            # f.create_dataset('energy_density', data = self.e)
+            # f.create_dataset('xs', data = self.xs)
 
-            f.close()
+            # f.close()
 
 
             # if solver.sigma_func[0] == 1:

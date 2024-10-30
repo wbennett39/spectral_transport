@@ -9,7 +9,7 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 25
+spaces = 100
 M = 1
 #####
 #####
@@ -18,7 +18,7 @@ c = 29.98
 #####
 
 
-sn_transport = h5py.File('converging_heat_wave_results_test3_1028.h5', 'r+')
+sn_transport = h5py.File('results_test3_1030.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 xs = tr['xs'][:]
@@ -28,6 +28,16 @@ phi_dim = phi * a * c
 sn_transport.close()
 diff = np.loadtxt("test3_diff.txt")
 mc = np.loadtxt("test3_mc.txt")
+rho = phi_dim *0
+rho[0,:] = xs[0,:] **-.45
+rho[1,:] = xs[1,:] **-.45
+rho[2,:] = xs[2,:] **-.45
+mat_T = phi_dim * 0
+
+
+mat_T[0,:] = np.abs(e[0,:] * a * 0.1**2 / 10**-3  / (rho[0,:] **.75))**.5
+mat_T[1,:] = np.abs(e[1,:] * a * 0.1**2 / 10**-3  / (rho[1,:] **.75))**.5
+mat_T[2,:] = np.abs(e[2,:] * a * 0.1**2 / 10**-3  / (rho[2,:] **.75))**.5
 
 # analytical solution
 R = 0.001
@@ -87,6 +97,11 @@ plt.plot(r_anal/1e-4, Trt_fit(r_anal, t1), c="r", ls="--", lw=2)
 plt.plot(xs[0,:]/1e-4, 10*(np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
 plt.plot(xs[1,:]/1e-4, 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:]/1e-4, 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
+
+
+plt.plot(xs[0,:]/1e-4, 10*mat_T[0,:], 'k--', label = 'radiation temp')
+plt.plot(xs[1,:]/1e-4, 10*mat_T[1,:], 'k--')
+plt.plot(xs[2,:]/1e-4, 10*mat_T[2,:], 'k--')
 rad_T = phi*0
 rad_T[0, :] = 10*(np.abs(phi_dim[0,:])/a/c)**.25
 rad_T[1, :] = 10*(np.abs(phi_dim[1,:])/a/c)**.25
@@ -136,7 +151,7 @@ del ff['test3']['xs']
 del ff['test3']['T4']
 del ff['test3']['u']
 ff['test3']['xs'] = xs
-ff['test3']['T4'] = 10* rad_T
+ff['test3']['T4'] = 10* mat_T
 ff['test3']['u'] = e * 10**16 #convert GJ to kelvin
 ff.close()
 

@@ -15,7 +15,7 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 50
+spaces = 100
 M = 1
 #####
 #####
@@ -29,11 +29,22 @@ xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
 edges = tr['edges'][:]
 phi_dim = phi * a * c
+T_mat = phi * 0 
 rho = phi * 0
+rho[0,:] = xs[0,:]**.5
+rho[1,:] = xs[1,:]**.5
+rho[2,:] = xs[2,:]**.5
+
+
 sn_transport.close()
 diff = np.loadtxt("test2_diff.txt")
 mc = np.loadtxt("test2_mc.txt")
-ee1 = e[0,:] * a  * (0.1**1.6) / 10**-3  / 3.4 / (rho **.86)
+T_mat[0, :] = np.abs(e[0,:] * a  * (0.1**2) / 10**-3  / 3. / (rho[0,:] **.4))**.5
+T_mat[1, :] = np.abs(e[1,:] * a  * (0.1**2) / 10**-3  / 3. / (rho[1,:] **.4))**.5
+T_mat[2, :] = np.abs(e[2,:] * a  * (0.1**2) / 10**-3  / 3. / (rho[2,:] **.4))**.5
+
+
+
 rho[0,:] = np.sqrt(xs[0, :])
 
 # mat_T[0,:] = np.abs(ee1)**.625
@@ -94,7 +105,12 @@ plt.plot(r_anal, Trt_fit(r_anal, t1), c="r", ls="--", lw=2)
 plt.plot(xs[0,:], 10*(np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
 plt.plot(xs[1,:], 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:], 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
-print(xs)
+
+
+plt.plot(xs[0,:], 10*T_mat[0,:], 'k--', label = 'radiation temp')
+plt.plot(xs[1,:], 10*T_mat[1,:], 'k--')
+plt.plot(xs[2,:], 10*T_mat[2,:], 'k--')
+
 plt.plot(edges, edges*0, 'k|', markersize = 40)
 rad_T = phi*0
 rad_T[0, :] = 10*(np.abs(phi_dim[0,:])/a/c)**.25
@@ -120,7 +136,7 @@ del ff['test2']['xs']
 del ff['test2']['T4']
 del ff['test2']['u']
 ff['test2']['xs'] = xs
-ff['test2']['T4'] = 10* rad_T
+ff['test2']['T4'] =  10*T_mat
 ff['test2']['u'] = e * 10**16 #convert GJ to kelvin
 ff.close()
 

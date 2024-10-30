@@ -267,7 +267,8 @@ class sigma_integrator():
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
-                resmax = 6e3
+                # resmax = 6e3
+                resmax = 12e3
                 # resmax = 500
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = np.mean(x )

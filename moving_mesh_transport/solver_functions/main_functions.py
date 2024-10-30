@@ -36,6 +36,7 @@ from timeit import default_timer as timer
 from .wavespeed_estimator import wavespeed_estimator
 from .wave_loc_estimator import find_wave
 import chaospy
+# from .jl_integrator import integrator as jl_integrator
 
 
 
@@ -214,6 +215,9 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         tpnts = eval_array
         print(tpnts, 'time points')
     mesh_dry_run(mesh, tfinal)
+
+    # sol_JL = jl_integrator(RHS, IC, (0, tfinal), tpnts)
+
     sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
     print(sol.status, 'solution status')
     print(sol)

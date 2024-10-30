@@ -42,7 +42,7 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
+N_spaces_list = [200, 250, 300, 350, 400]
 # N_spaces_list = [215]
 # N_spaces_list =. [300]
 MM = 1
@@ -72,8 +72,8 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['boundary_source']['x0'] = np.array([1e-3])
     run.parameters['all']['Ms'] = [MM]
     run.mesh_parameters['Msigma'] = MM
-    run.parameters['all']['rt'] = 5e-4
-    run.parameters['all']['at'] = 5e-6
+    run.parameters['all']['rt'] = 5e-3
+    run.parameters['all']['at'] = 5e-4
 
 
     # menis_times = np.array([-22.122309, -9.4484244, -1])

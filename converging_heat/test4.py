@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 120
+spaces = 75
 M = 1
 #####
 #####
@@ -23,7 +23,7 @@ kev_kelvin = 1000. * ev_kelvin
 
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
-sn_transport = h5py.File('converging_heat_wave_results_test4_1025.h5', 'r+')
+sn_transport = h5py.File('results_test4_1030.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 #
@@ -86,9 +86,12 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t3 = -13.0e-8
 
 
-t1 = -14.0e-8
-t2 =-10.0e-8
-t3 =  -9.4706889e-8
+# t1 = -14.0e-8
+# t2 =-10.0e-8
+# t3 =  -9.4706889e-8
+t1 =  -14.0e-8
+t2 = -9.4706889e-8
+t3 = -2.7126998146008884e-08
 
 rho0 = 1.
 omega = -1.

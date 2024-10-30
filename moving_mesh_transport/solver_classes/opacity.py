@@ -268,7 +268,7 @@ class sigma_integrator():
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
                 # resmax = 6e3
-                resmax = 17e3
+                resmax = 15e3
                 # resmax = 950
                 # resmax = 5e3
                 # resmax = 500

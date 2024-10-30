@@ -43,11 +43,10 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-# N_spaces_list = [25,50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 350, 400]
+N_spaces_list = [150, 200, 250, 300, 350, 400]
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 # N_spaces_list = [150]
-N_spaces_list = [215]
 
 run = run()
 run.load()
@@ -55,22 +54,24 @@ run.load()
 loader = load()
 run.parameters['all']['Ms'] = [0]
 run.parameters['all']['N_spaces'] = [6]
-run.parameters['all']['tfinal'] = 0.0000001
+run.parameters['all']['tfinal'] = 0.0000000000000001
 run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False
 run.mesh_parameters['Msigma'] = 0
-
+run.parameters['boundary_source']['N_angles'] = [2]
 run.boundary_source(0,0)
 
 run.load('marshak')
 for it, N_space in enumerate(N_spaces_list):
     run.parameters['boundary_source']['x0'] = np.array([10.0])
     run.parameters['all']['N_spaces'] = [N_space]
-    run.parameters['all']['rt'] = 5e-5
-    run.parameters['all']['at'] = 1e-4
-    run.parameters['all']['e_initial'] = 0.00000000001
+    run.parameters['all']['rt'] = 5e-3
+    run.parameters['all']['at'] = 5e-4
+    run.parameters['all']['e_initial'] = 0.0000000000001
+    
 
     menis_times = np.array([-94.706889, -27.126998, -1])
+    # menis_times = np.array([-140, -94.706889, -27.126998])
     # menis_times = np.array([-140, -100, -94.706889])
     # menis_times = np.array([-145, -144, -143])
     # menis_times = np.array([-140, -135, -130])
@@ -87,7 +88,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.mesh_parameters['eval_times'] = False
 
     run.boundary_source(0,0)
-    f = h5py.File('converging_heat/results_test4_1029.h5','r+')
+    f = h5py.File('converging_heat/results_test4_1030.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']
     if f.__contains__(f'M={M}_{spaces}_cells'):
@@ -111,12 +112,3 @@ for it, N_space in enumerate(N_spaces_list):
     # print('###')
     # print(f['scalar_flux'][:],'loaded scalar flux')
     f.close()
-
-
-
-
-
-
-
-
-

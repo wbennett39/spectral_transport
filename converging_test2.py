@@ -1,3 +1,4 @@
+
 # imports functions to run package from terminal 
 
 import sys
@@ -43,9 +44,8 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-
-# N_spaces_list = [25,50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 350, 400]
-N_spaces_list = [215]
+N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
+# N_spaces_list = [215]
 
 run = run()
 run.load()
@@ -64,8 +64,9 @@ run.load('marshak')
 for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['N_spaces'] = [N_space]
     run.parameters['boundary_source']['x0'] = np.array([0.05])
-    run.parameters['all']['rt'] = 5e-6
-    run.parameters['all']['at'] = 5e-5
+    run.parameters['all']['rt'] = 5e-4
+    run.parameters['all']['at'] = 5e-6
+    run.parameters['all']['e_initial'] = 0.000000000001
 
 
     menis_times = np.array([-58.251607, -19.068532, -1])
@@ -83,7 +84,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.mesh_parameters['eval_times'] = False
 
     run.boundary_source(0,0)
-    f = h5py.File('converging_heat/results_test2_1029.h5','r+')
+    f = h5py.File('converging_heat/results_test2_1030.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']
     if f.__contains__(f'M={M}_{spaces}_cells'):
@@ -107,12 +108,3 @@ for it, N_space in enumerate(N_spaces_list):
     # print('###')
     # print(f['scalar_flux'][:],'loaded scalar flux')
     f.close()
-
-
-
-
-
-
-
-
-

@@ -393,8 +393,3 @@ class sigma_integrator():
 
 
     
-
-
-
-
-

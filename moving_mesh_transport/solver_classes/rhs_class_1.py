@@ -267,7 +267,7 @@ class rhs_class():
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
         # move mesh to time t 
-        V_new = self.V_new_floor_func(V_new)
+        # V_new = self.V_new_floor_func(V_new)
         mesh.move(t)
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0

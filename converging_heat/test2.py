@@ -15,14 +15,14 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 75
+spaces = 50
 M = 1
 #####
 #####
 a = 0.0137225
 c = 29.98
 #####
-sn_transport = h5py.File('converging_heat_wave_results_test2_1028.h5', 'r+')
+sn_transport = h5py.File('results_test2_1030.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 xs = tr['xs'][:]
@@ -116,9 +116,9 @@ plt.grid()
 plt.tight_layout()
 plt.savefig(f"Test2_T.pdf", bbox_inches='tight')
 ff = h5py.File('SN.h5', 'r+')
-# del ff['test2']['xs']
-# del ff['test2']['T4']
-# del ff['test2']['u']
+del ff['test2']['xs']
+del ff['test2']['T4']
+del ff['test2']['u']
 ff['test2']['xs'] = xs
 ff['test2']['T4'] = 10* rad_T
 ff['test2']['u'] = e * 10**16 #convert GJ to kelvin

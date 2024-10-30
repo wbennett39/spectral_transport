@@ -215,9 +215,9 @@ class rhs_class():
             # print(tracker_edge)
             # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
-            if self.N_space <= 100:
-                if self.geometry['sphere'] == True:
-                    print(mesh.edges/self.x0)
+            # if self.N_space <= 100:
+            #     if self.geometry['sphere'] == True:
+            #         print(mesh.edges/self.x0)
                 # else:
                 #     print(mesh.edges)
             print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')

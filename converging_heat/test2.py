@@ -15,14 +15,14 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 100
+spaces = 150
 M = 1
 #####
 #####
 a = 0.0137225
 c = 29.98
 #####
-sn_transport = h5py.File('results_test2_1030.h5', 'r+')
+sn_transport = h5py.File('results_test2.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 xs = tr['xs'][:]
@@ -137,7 +137,7 @@ del ff['test2']['T4']
 del ff['test2']['u']
 ff['test2']['xs'] = xs
 ff['test2']['T4'] =  10*T_mat
-ff['test2']['u'] = e * 10**16 #convert GJ to kelvin
+ff['test2']['u'] = e / 10**-3 #convert GJ to kelvin
 ff.close()
 
 

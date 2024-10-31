@@ -1,13 +1,18 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
+import h5py
 matplotlib.style.use('classic')
 matplotlib.rcParams.update({
     'font.size': 13.2,        # Default font size
 })
-
+a = 0.0137225
 diff = np.loadtxt("test2_diff.txt")
 mc = np.loadtxt("test2_mc.txt")
+sn = h5py.File('SN.h5', 'r+')
+xs = sn['test2']['xs']
+mat_T = sn['test2']['T4']
+u = sn['test2']['u']
 
 # analytical solution
 R = 0.05
@@ -62,6 +67,10 @@ plt.plot(r_anal, Trt_fit(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Ana
 plt.plot(r_anal, Trt_fit(r_anal, t2), c="r", ls="--", lw=2)
 plt.plot(r_anal, Trt_fit(r_anal, t1), c="r", ls="--", lw=2)
 
+plt.plot(xs[0,:], mat_T[0,:], c="b", ls="--", lw=2, label=r"$S_8$ transport")
+plt.plot(xs[1,:], mat_T[1,:], c="b", ls="--", lw=2)
+plt.plot(xs[2,:], mat_T[2,:], c="b", ls="--", lw=2)
+
 plt.ylabel("$T \\ [\\mathrm{{HeV}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
 plt.title("$\\mathrm{{Test \\ 2}}$", fontsize=22)
@@ -89,6 +98,11 @@ plt.plot(diff[:,0], diff[:,6], c="lime", ls="-", lw=2, )
 plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
 plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)
 plt.plot(r_anal, urt(r_anal, t1), c="r", ls="--", lw=2)
+
+plt.plot(xs[0,:], u[0,:]*a, c="b", ls="--", lw=2, label=r"$S_8$ transport")
+plt.plot(xs[1,:], u[1,:]*a, c="b", ls="--", lw=2)
+plt.plot(xs[2,:], u[2,:]*a, c="b", ls="--", lw=2)
+
 
 plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)

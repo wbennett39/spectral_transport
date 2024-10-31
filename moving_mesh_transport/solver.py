@@ -197,7 +197,7 @@ class main_class(parameter_load_class):
                 #         plt.plot(xs, (e/self.cv0)**4, '-s', mfc = 'none', label = 'T^4')
                 plt.legend()
 
-                plt.show()
+                # plt.show()
 
                 
                 # # if count == len(self.N_angles)-1:
@@ -301,7 +301,7 @@ class main_class(parameter_load_class):
                     plt.plot(tpnts, np.ones(tpnts.size)* xs[-1], 'k-')
 
                     plt.legend()
-                    plt.show()
+                    # plt.show()
                 ##################################################################
                 
                 print(N_space, "spaces", "    ", "%.4f" % (time), "time elapsed")

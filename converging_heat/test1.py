@@ -27,7 +27,7 @@ def plot_answers(spaces):
     xs = tr['xs'][:]
     phi = tr['scalar_flux'][:]
     edges = tr['edges'][:]
-    print(edges, 'edges')
+    # print(edges, 'edges')
     phi_dim = phi * a * c
     mat_T = phi_dim * 0
     rho = 19.3
@@ -96,7 +96,7 @@ def plot_answers(spaces):
     #t1 = -2.5e-08
     #t2 = -2.3e-08
     #t3 = -2.2122309472889687e-08
-
+    kappa = 7200 *  (np.abs(mat_T[2,:])+1e-8) ** (-1.5) * (0.1**1.5) * rho **1.2
 
     rho0 = 19.3
     omega = 0.
@@ -130,6 +130,9 @@ def plot_answers(spaces):
     plt.plot(xs[0,:]/1e-4, 10*mat_T[0,:], 'k--', label = 'radiation temp')
     plt.plot(xs[1,:]/1e-4, 10*mat_T[1,:], 'k--')
     plt.plot(xs[2,:]/1e-4, 10*mat_T[2,:], 'k--')
+    plt.plot(xs[2,:]/1e-4, kappa/1e10, ':')
+    print(kappa)
+  
 
 
 
@@ -146,6 +149,10 @@ def plot_answers(spaces):
     plt.grid()
     plt.tight_layout()
     plt.savefig(f"Test1_T.pdf", bbox_inches='tight')
+
+    plt.figure('Kappa')
+    
+    plt.show()
 
     ff = h5py.File('SN.h5', 'r+')
     del ff['test1']['xs']
@@ -194,5 +201,5 @@ def plot_answers(spaces):
 # plot_answers(35)
 
 # plot_answers(150)
-plot_answers(75)
+plot_answers(150)
 # plot_answers(120)

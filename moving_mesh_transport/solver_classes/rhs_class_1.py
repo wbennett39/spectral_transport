@@ -153,7 +153,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 3000
+        self.division = 1500
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -189,7 +189,7 @@ class rhs_class():
 
 
 
-    def time_step_counter(self, t, mesh):
+    def time_step_counter(self, t, mesh, V_old):
         delta_t = t - self.told
         self.delta_tavg += delta_t / self.division
         if self.counter == self.division:
@@ -205,6 +205,8 @@ class rhs_class():
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
+            print(np.max(V_old), 'max u')
+            print(np.min(V_old), 'min u')
             dimensional_t = t/29.98
             # menis_t = -29.6255 + dimensional_t
             menis_t = converging_time_function(t, self.sigma_func)
@@ -248,7 +250,7 @@ class rhs_class():
         
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
         # print out timesteps
-        self.time_step_counter(t, mesh) 
+        self.time_step_counter(t, mesh, V) 
 
 
         # allocate arrays
@@ -265,6 +267,7 @@ class rhs_class():
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
         # move mesh to time t 
+        V_new = self.V_new_floor_func(V_new)
         mesh.move(t)
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0
@@ -369,8 +372,10 @@ class rhs_class():
                 RHS_transfer -= RU
                 # if space == self.N_space -1:
                 #     print(RU)
+
                 RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                 RHS_transfer += self.c_a * PV*2 /self.sigma_t 
+                # print(np.sign(self.c_a *H /self.sigma_t), 'sign H')
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 if self.l != 1.0:
                     RHS_transfer = RHS_transfer / self.l
@@ -445,6 +450,7 @@ class rhs_class():
                     # RHS += 0.5 * S * self.c #(commented this out because c is included)
                     RHS += 0.5 * S /self.sigma_t / self.l
                     RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l
+                    # print(np.sign(self.c_a * H * 0.5 / self.sigma_t / self.l), 'sign h term')
                     RHS += PV * self.c /self.sigma_t / self.l
                     # print(VV, 'VV')
                     # print(V_old[angle, space,:], 'vold')
@@ -498,12 +504,12 @@ class rhs_class():
 
 
     def V_new_floor_func(self, V_new):
-        floor = 1e-20
+        floor = 1e-16
         for ang in range(self.N_ang + 1):
             for space in range(self.N_space):
                 for j in range(self.M+1):
                     if abs(V_new[ang, space, j])<=floor:
-                        V_new[ang, space, j] = 0.0
+                        V_new[ang, space, j] = floor * np.sign(V_new[ang, space, j])
         return V_new
     
     def make_temp(self, e_vec, mesh, rad_transfer):

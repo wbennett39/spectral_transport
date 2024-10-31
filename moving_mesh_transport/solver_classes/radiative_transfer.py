@@ -189,7 +189,7 @@ class T_function(object):
         elif self.temp_function[2] == 1:
             # print(self.sigma_a_vec)
             self.temperature[space,:] = T
-            return  np.power(T,4) * self.sigma_a_vec * np.sign(T)
+            return  np.power(T,4) * self.sigma_a_vec * np.sign(T) 
         
             
 
@@ -367,6 +367,7 @@ class T_function(object):
                         self.integrate_quad_sphere(xL, xR, j, sigma_class)
                     else:
                          self.integrate_trap_sphere(xL, xR, j, sigma_class)
+                        # self.integrate_quad_sphere(xL, xR, j, sigma_class)
         
 
 

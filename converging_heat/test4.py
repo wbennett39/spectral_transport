@@ -7,8 +7,8 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 115
-M = 0
+spaces = 150
+M = 1
 #####
 #####
 a = 0.0137225
@@ -24,6 +24,7 @@ kev_kelvin = 1000. * ev_kelvin
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
 sn_transport = h5py.File('results_test4_1030.h5', 'r+')
+print(sn_transport.keys())
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 #
@@ -44,8 +45,8 @@ mat_T[0,:] = np.abs(ee1)**.25
 ee2 = e[1,:] * a  / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[1,:] = np.abs(ee2)**.25
 
-ee2 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
-mat_T[2,:] = np.abs(ee1)**.25
+ee3 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
+mat_T[2,:] = np.abs(ee3)**.25
 
 # analytical solution
 R = 10.
@@ -90,8 +91,9 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t2 =-10.0e-8
 # t3 =  -9.4706889e-8
 t1 =  -14.0e-8
-t2 = -9.4706889e-8
-t3 = -2.7126998146008884e-08
+t2 = -10.0e-8
+t3 = -9.4706889e-8
+# t3 = -2.7126998146008884e-08
 
 rho0 = 1.
 omega = -1.

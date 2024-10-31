@@ -15,6 +15,7 @@ from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
 
+
 from moving_mesh_transport.solver_classes.functions import *
 
 # from moving_mesh_transport.plots.plot_square_s_times import main as plot_square_s_times

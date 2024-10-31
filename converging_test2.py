@@ -44,8 +44,8 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-N_spaces_list = [125]
-N_ang = 12
+N_spaces_list = [250]
+N_ang = 8
 # N_spaces_list = [215]
 
 run = run()

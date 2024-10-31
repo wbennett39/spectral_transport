@@ -21,7 +21,7 @@ def plot_answers(spaces):
 
     diff = np.loadtxt("test1_diff.txt")
     mc = np.loadtxt("test1_mc.txt")
-    sn_transport = h5py.File('results_test1_1030.h5', 'r+')
+    sn_transport = h5py.File('results_test1.h5', 'r+')
     tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
     e = tr['energy_density'][:]
     xs = tr['xs'][:]
@@ -201,5 +201,5 @@ def plot_answers(spaces):
 # plot_answers(35)
 
 # plot_answers(150)
-plot_answers(150)
+plot_answers(250)
 # plot_answers(120)

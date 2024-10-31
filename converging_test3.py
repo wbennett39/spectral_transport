@@ -43,14 +43,14 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [150]
+N_spaces_list = [250]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 # N_spaces_list = [200, 225, 250, 275, 300, 325, 350, 375, 400]
 # N_spaces_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 225, 250, 275, 300, 325, 350, 375, 400]
 # N_spaces_list = [215]
 
 
-N_ang = 12
+N_ang = 8
 run = run()
 run.load()
 

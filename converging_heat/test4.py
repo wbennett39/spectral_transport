@@ -7,8 +7,8 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 100
-M = 1
+spaces = 115
+M = 0
 #####
 #####
 a = 0.0137225
@@ -143,29 +143,33 @@ ff['test4']['u'] = e * 10**16 #convert GJ to kelvin
 ff.close()
 
 
-# plt.figure("u")
-#plt.plot(mc[:,0], mc[:,2], color="k", lw=2.5,  label="Transport IMC")
-#plt.plot(mc[:,0], mc[:,4], color="k", lw=2.5, )
-#plt.plot(mc[:,0], mc[:,6], color="k", lw=2.5, )
+plt.figure("u")
+# plt.plot(mc[:,0], mc[:,2], color="k", lw=2.5,  label="Transport IMC")
+# plt.plot(mc[:,0], mc[:,4], color="k", lw=2.5, )
+# plt.plot(mc[:,0], mc[:,6], color="k", lw=2.5, )
 
-#plt.plot(diff[:,0], diff[:,2], c="lime", ls="-", lw=2, label="Diffusion Simulation")
-#plt.plot(diff[:,0], diff[:,4], c="lime", ls="-", lw=2, )
-#plt.plot(diff[:,0], diff[:,6], c="lime", ls="-", lw=2, )
+plt.plot(diff[:,0], diff[:,2], c="lime", ls="-", lw=2, label="Diffusion Simulation")
+plt.plot(diff[:,0], diff[:,4], c="lime", ls="-", lw=2, )
+plt.plot(diff[:,0], diff[:,6], c="lime", ls="-", lw=2, )
 
-# plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
-# plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)
-# plt.plot(r_anal, urt(r_anal, t1), c="r", ls="--", lw=2)
+plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
+plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)
+plt.plot(r_anal, urt(r_anal, t1), c="r", ls="--", lw=2)
 
-# plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
-# plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
-# plt.legend(loc="upper left", fontsize=16).set_draggable(True)
-# plt.ylim(ymax=35)
-# ticks = np.linspace(0,R,11)
-# lticks = [f"{t:g}" for t in ticks]
-# plt.xticks(ticks, lticks)
-# plt.grid()
-# plt.tight_layout()
-# plt.savefig(f"Test4_u.pdf", bbox_inches='tight')
+plt.plot(xs[0,:], e[0,:]/1e-3, 'k--', label = 'radiation temp')
+plt.plot(xs[1,:], e[1,:]/1e-3, 'k--')
+plt.plot(xs[2,:], e[2,:]/1e-3, 'k--')
+
+plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
+plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
+plt.legend(loc="upper left", fontsize=16).set_draggable(True)
+plt.ylim(ymax=35)
+ticks = np.linspace(0,R,11)
+lticks = [f"{t:g}" for t in ticks]
+plt.xticks(ticks, lticks)
+plt.grid()
+plt.tight_layout()
+plt.savefig(f"Test4_u.pdf", bbox_inches='tight')
 
 plt.show()
 

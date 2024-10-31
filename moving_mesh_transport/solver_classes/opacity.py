@@ -112,7 +112,14 @@ class sigma_integrator():
     # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
     #     self.cs[k, j] = 0.5 * (b-a) 
+    def integrate_trap_sphere(self, a, b, j,t, T_old):
+        #before using this, I need to check the T eval points
+        
+        # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
+        left = (a**2 * self.sigma_function(np.array([a]), t, T_old) * 1 * normTn(j, np.array([a]), a, b))[0]
+        right = (b**2 * self.sigma_function(np.array([b]), t, T_old) * 1 * normTn(j, np.array([b]), a, b))[0]
 
+        self.H[j] =  0.5 * (b-a) * (left + right)
         
         
 
@@ -267,7 +274,10 @@ class sigma_integrator():
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
-                resmax = 6e3
+                # resmax = 6e3
+                resmax = 15e3
+                # resmax = 950
+                # resmax = 5e3
                 # resmax = 500
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = np.mean(x )

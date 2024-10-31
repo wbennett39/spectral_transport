@@ -44,7 +44,8 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-N_spaces_list = [100, 150, 200, 250, 300, 350, 400]
+N_spaces_list = [125]
+N_ang = 12
 # N_spaces_list = [215]
 
 run = run()
@@ -67,6 +68,7 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['rt'] = 5e-4
     run.parameters['all']['at'] = 5e-6
     run.parameters['all']['e_initial'] = 0.000000000001
+    run.parameters['boundary_source']['N_angles'] = [N_ang]
 
 
     menis_times = np.array([-58.251607, -19.068532, -1])
@@ -84,7 +86,7 @@ for it, N_space in enumerate(N_spaces_list):
     # run.mesh_parameters['eval_times'] = False
 
     run.boundary_source(0,0)
-    f = h5py.File('converging_heat/results_test2_1030.h5','r+')
+    f = h5py.File('converging_heat/results_test2_1031.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']
     if f.__contains__(f'M={M}_{spaces}_cells'):

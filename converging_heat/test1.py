@@ -194,5 +194,5 @@ def plot_answers(spaces):
 # plot_answers(35)
 
 # plot_answers(150)
-plot_answers(75)
+plot_answers(250)
 # plot_answers(120)

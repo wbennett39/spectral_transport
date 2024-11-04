@@ -207,6 +207,7 @@ class rhs_class():
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
             print(np.max(V_old), 'max u')
             print(np.min(V_old), 'min u')
+            # print(np.min(V_old.copy().reshape((self.N_ang+1, self.N_space, self.M+1))[-1, :, :]), 'min e vec')
             dimensional_t = t/29.98
             # menis_t = -29.6255 + dimensional_t
             menis_t = converging_time_function(t, self.sigma_func)
@@ -249,16 +250,7 @@ class rhs_class():
             # print(heat_wave_loc, 'wave x')
         
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
-        # print out timesteps
-        self.time_step_counter(t, mesh, V) 
 
-
-        # allocate arrays
-
-
-        # My (Stephen's) attempt at adding radiative transfer to this code
-
-        # Not sure if this is correct
         if self.radiative_transfer['none'] == False :  
             V_new = V.copy().reshape((self.N_ang + 1, self.N_space, self.M+1))
             V_old = V_new.copy()
@@ -266,8 +258,18 @@ class rhs_class():
             # V_new = V.copy().reshape((self.deg_freedom[0], self.deg_freedom[1], self.deg_freedom[2]))
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
+        
+        for ang in range(self.N_ang):
+            new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
+            V_old[ang,:,:] = new_energy_vec
+        
+        
+        
+        self.time_step_counter(t, mesh, V_old)
+        
         # move mesh to time t 
-        V_new = self.V_new_floor_func(V_new)
+
+        # V_new = self.V_new_floor_func(V_new)
         mesh.move(t)
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0
@@ -275,7 +277,9 @@ class rhs_class():
         # print(self.T_old[time_loc])
         # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
         #     time_loc -= 1
+  
         self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
+
         # print(self.T_eval_points, 'T eval')
         # for ix in range(self.N_space):
         #     for j in range(self.xs_quad.size):
@@ -285,7 +289,6 @@ class rhs_class():
         sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class)
         # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
-    
 
         # iterate over all cells
         for space in range(self.N_space):  
@@ -321,7 +324,7 @@ class rhs_class():
                     
                 else:
                     Minv = np.linalg.inv(Mass)
-                
+
                 # VVs = matrices.VV
             # make P 
             
@@ -345,6 +348,7 @@ class rhs_class():
             if self.radiative_transfer['none'] == False:
 
                 # print(V_old[self.N_ang, space, :], 'v old')
+
                 transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
 
                 H = transfer_class.H
@@ -353,6 +357,7 @@ class rhs_class():
                 # if (H <0).any():
                 #     print(H)
                 #     assert 0 
+
                 
                
                 #T_old saves the temperature at the zeros of the interpolating polynomial
@@ -360,7 +365,7 @@ class rhs_class():
                 # time_loc = np.argmin(np.abs(self.time_points - t))
                 # self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
                 # print(self.T_old[space], 'T old')
-    
+
                 ######### solve thermal couple ############
                 U = V_old[-1,space,:]
                 num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :]*0, True)
@@ -387,6 +392,7 @@ class rhs_class():
                 # print(RHS_transfer, 'rhs transfer')
             ########## Starting direction #########
             psionehalf = V_old[0, space, :] 
+
 
             ########## Loop over angle ############
             for angle in range(self.N_ang):
@@ -455,7 +461,7 @@ class rhs_class():
                     RHS += PV * self.c /self.sigma_t / self.l
                     # print(VV, 'VV')
                     # print(V_old[angle, space,:], 'vold')
-                    
+        
                     # print(VV,'vv')
                     # print(np.dot(Mass, U), 'MU')
                     # VV[0] = U[0]*(math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL)
@@ -478,6 +484,7 @@ class rhs_class():
 
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new)
+
             return V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
 
         else:
@@ -514,44 +521,54 @@ class rhs_class():
         return V_new
     
     def make_temp(self, e_vec, mesh, rad_transfer):
-        T_vec = np.zeros((self.N_space, self.xs_quad.size))
-        T_eval_points = np.zeros((self.N_space, self.xs_quad.size))
-        for space in range(self.N_space):
-            xR = mesh.edges[space+1]
-            xL = mesh.edges[space]
-            rad_transfer.e_vec = e_vec[space,:]
-            a = xL
-            b = xR
-            argument = (b-a)/2*self.xs_quad + (a+b)/2
-            # print(argument, 'arg in make temp')
-            # argument2 = (b-a)/2*self.t_quad + (a+b)/2
-            T_vec[space] = rad_transfer.make_T(argument, a, b)
-            # T_test = rad_transfer.make_T(argument2, a, b)
-            # spline_ob = cubic_spline(argument, T_vec[space])
-            # if np.max(np.abs(spline_ob.eval_spline(argument2)- T_test)/np.abs(T_test+1e-4))>=5e-2:
-            #     print(argument, 'arg')
-            #     print(argument2, 'arg2')
-            #     print(a,b,'a,b')
-            #     # print(spline_ob.eval_spline(argument2), T_test)
-            #     print((spline_ob.eval_spline(argument2)- T_test)/np.abs(T_test+1e-4))
-            #     assert(0)
-            T_eval_points[space] = argument
-            # print(T_vec[space], 'T vec')
-            # print(argument, 'xs')
-            # if np.isnan(T_eval_points.any()):
-            #     assert(0)
-            # elif T_vec.any() <0:
-            #     # raise ValueError('negative temperature')
-            #     assert(0)
-            # if (T_vec[space]).any() <0:
-            # T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
+        if self.lumping == True:
+            T_vec = np.zeros((self.N_space, 2))
+            T_eval_points = np.zeros((self.N_space, 2))
+            for space in range(self.N_space):
+                xR = mesh.edges[space+1]
+                xL = mesh.edges[space]
+                rad_transfer.e_vec = e_vec[space,:]
+                T_vec[space] = rad_transfer.make_T(np.array([xL,xR]), xL, xR)
+                T_eval_points[space] = np.array([xL,xR])
+        else:
+            T_vec = np.zeros((self.N_space, self.xs_quad.size))
+            T_eval_points = np.zeros((self.N_space, self.xs_quad.size))
+            for space in range(self.N_space):
+                xR = mesh.edges[space+1]
+                xL = mesh.edges[space]
+                rad_transfer.e_vec = e_vec[space,:]
+                a = xL
+                b = xR
+                argument = (b-a)/2*self.xs_quad + (a+b)/2
+                # print(argument, 'arg in make temp')
+                # argument2 = (b-a)/2*self.t_quad + (a+b)/2
+                T_vec[space] = rad_transfer.make_T(argument, a, b)
+                # T_test = rad_transfer.make_T(argument2, a, b)
+                # spline_ob = cubic_spline(argument, T_vec[space])
+                # if np.max(np.abs(spline_ob.eval_spline(argument2)- T_test)/np.abs(T_test+1e-4))>=5e-2:
+                #     print(argument, 'arg')
+                #     print(argument2, 'arg2')
+                #     print(a,b,'a,b')
+                #     # print(spline_ob.eval_spline(argument2), T_test)
+                #     print((spline_ob.eval_spline(argument2)- T_test)/np.abs(T_test+1e-4))
+                #     assert(0)
+                T_eval_points[space] = argument
+                # print(T_vec[space], 'T vec')
+                # print(argument, 'xs')
+                # if np.isnan(T_eval_points.any()):
+                #     assert(0)
+                # elif T_vec.any() <0:
+                #     # raise ValueError('negative temperature')
+                #     assert(0)
+                # if (T_vec[space]).any() <0:
+                # T_vec[space] = np.mean(T_vec[space]) + T_vec[space] * 0
 
-        # for space in range(self.N_space):
-        #     for j in range(self.xs_quad.size):
-        #         if T_vec[space, j] <0:
-        #             print(T_vec[space, j])
-        #             assert(0)
-        # print('## ## ## ## ## ## ')
+            # for space in range(self.N_space):
+            #     for j in range(self.xs_quad.size):
+            #         if T_vec[space, j] <0:
+            #             print(T_vec[space, j])
+            #             assert(0)
+            # print('## ## ## ## ## ## ')
         return T_vec, T_eval_points
 
 

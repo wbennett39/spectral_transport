@@ -112,14 +112,15 @@ class sigma_integrator():
     # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
     #     self.cs[k, j] = 0.5 * (b-a) 
-    def integrate_trap_sphere(self, a, b, j,t, T_old):
+    def integrate_trap_sphere(self, a, b, j, k, t, T_old):
         #before using this, I need to check the T eval points
-        
+
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
         left = (a**2 * self.sigma_function(np.array([a]), t, T_old) * 1 * normTn(j, np.array([a]), a, b))[0]
         right = (b**2 * self.sigma_function(np.array([b]), t, T_old) * 1 * normTn(j, np.array([b]), a, b))[0]
 
-        self.H[j] =  0.5 * (b-a) * (left + right)
+
+        self.cs[k, j] =  0.5 * (b-a) * (left + right) 
         
         
 
@@ -193,7 +194,10 @@ class sigma_integrator():
                 if self.geometry['slab'] == True:
                     self.integrate_moments(edges[k], edges[k+1], j, k, t, T_old[k,:])
                 elif self.geometry['sphere'] == True:
-                    self.integrate_moments_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:], T_eval_points)
+                    if self.lumping == True:
+                        self.integrate_trap_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:])
+                    else:
+                        self.integrate_moments_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:], T_eval_points)
 
         
     
@@ -275,15 +279,17 @@ class sigma_integrator():
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
                 # resmax = 6e3
-                resmax = 5e4
+                resmax = 5e3
                 # resmax = 950
                 # resmax = 5e3
                 # resmax = 500
+                # if(T_old<0).any():
+                #     assert 0
                 result = np.where(T_old<0.0, 0.0, T_old)
                 rho = np.mean(x )
                 if (x<0).any():
                     assert(0)
-                res = (result+1e-10) ** -3.5 * rho ** 2
+                res = (result+1e-3) ** -3.5 * rho ** 2
                 if (res<0).any():
                     assert 0
                 if (res > resmax).any():

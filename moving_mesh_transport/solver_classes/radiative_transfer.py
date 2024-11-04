@@ -57,7 +57,11 @@ data = [('temp_function', int64[:]),
         ('sigma_a_vec', float64[:]),
         ('a2', float64),
         ('sigma_func',nb.typeof(params_default)),
-        ('lumping', float64)
+        ('lumping', float64),
+        ('xs_quad_chebyshev', float64[:]),
+        ('ws_quad_chebyshev', float64[:]),
+        ('N_space', int64)
+
 
 
 
@@ -86,6 +90,8 @@ class T_function(object):
         if self.geometry['sphere'] == True:
             self.xs_quad = build.t_quad
             self.ws_quad = build.t_ws
+            self.xs_quad_chebyshev = build.xs_quad
+            self.ws_quad_chebyshev = build.ws_quad
 
         self.cv0 = build.cv0 / self.a 
         if (self.cv0) != 0.0:
@@ -95,7 +101,7 @@ class T_function(object):
         self.thermal_couple = build.thermal_couple
         self.temperature = np.zeros((build.N_space, self.xs_quad.size))
         self.e_vec = np.zeros(self.M+1)
-        
+        self.N_space = build.N_space
     def make_e(self, xs, a, b):
         temp = xs*0
         for ix in range(xs.size):
@@ -116,11 +122,13 @@ class T_function(object):
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
         self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * 1 * normTn(j, argument, a, b))
     
-    def integrate_trap_sphere(self, a, b, j, sigma_class):
-        
+    def integrate_trap_sphere(self, a, b, j, sigma_class):                      
+
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
         left = (a**2 * self.T_func(np.array([a]), a, b, sigma_class, self.space) * 1 * normTn(j, np.array([a]), a, b))[0]
         right = (b**2 * self.T_func(np.array([b]), a, b, sigma_class, self.space) * 1 * normTn(j, np.array([b]), a, b))[0]
+
+
 
         self.H[j] =  0.5 * (b-a) * (left + right)
         #assert(0)
@@ -131,12 +139,12 @@ class T_function(object):
     def make_T(self, argument, a, b):
         # print(argument, 'argument')
         e = self.make_e(argument, a, b)
-        e = self.positivize_e(e, argument, a,b)
+        # e = self.positivize_e(e, argument, a,b)
         # self.find_minimum(a,b)
 
-        if (e <0).any():
-             print(e)
-             raise ValueError('Negative energy density')
+        # if (e <-1e-5).any():
+        #      print(e)
+        #      raise ValueError('Negative energy density')
 
         if self.temp_function[0] == 1:
             T = self.su_olson_source(e, argument, a, b)
@@ -205,8 +213,11 @@ class T_function(object):
          enew = e
          floor = 1e-14
          ubar = self.cell_average(a,b)
-         if ubar <=floor:
+        #  if ubar < -floor:
+        #       print('negative ubar', ubar)
+         if abs(ubar) <=floor:
               enew = 0 * e
+         
          if (e<0).any() and ubar >floor :
             tol = 1000
             
@@ -506,6 +517,51 @@ class T_function(object):
             loc_old = loc
         # print('found min')
         return loc
+    def positivize_temperature_vector(self, e_old, edges):
+        # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
+
+        e_new = e_old * 0
+        for k in range(self.N_space):
+            a = edges[k]
+            b = edges[k+1]
+            self.e_vec = e_old[k]
+
+            argument = 0.5*(b-a)*self.xs_quad_chebyshev + (a+b) * 0.5
+            e = self.make_e(argument, a, b)
+
+            if (e<0).any():
+            # if 1 ==0:
+
+                ee = self.positivize_e(e, argument, a,b)
+                
+                for j in range(self.M+1):
+                    e_new[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad_chebyshev * ee * 2.0 * normTn(j, argument, a, b))
+                # reconstruction test
+                # etest = e*0
+                # for count in range(argument.size):
+                #     for i in range(self.M+1):
+                #             etest[count] += e_new[k, i] * normTn(i,argument[count:count+1],float(edges[k]),float(edges[k+1]))[0]
+                # if np.sqrt(np.max((etest - e)**2)) > 1e-10:
+                    #  assert 0 
+            else:
+
+                 e_new[k, :] = e_old[k]
+        return e_new
+        
+
+
+
+        # argument = (-b-a + 2 * self.xs_quad) / (b-a)
+        # if np.abs(argument - T_eval_points[k]).any() >=1e-16:
+        #     print(argument - T_eval_points[k])
+        #     assert(0)
+
+        # opacity = self.sigma_function(self.xs_quad, t, T_old)
+        #  
+         
+
+
+         
     
 
 

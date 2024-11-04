@@ -14,6 +14,7 @@ warnings.simplefilter('ignore', category=NumbaPerformanceWarning)
 from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
+from moving_mesh_transport.solver_classes.functions import T_bath, converging_time_function
 
 # from moving_mesh_transport.plots.plot_square_s_times import main as plot_square_s_times
 # from moving_mesh_transport.solution_plotter import plot_thin_nonlinear_problems as plot_thin
@@ -42,13 +43,37 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
+# menis_times = np.array([-145, -140, -135])
+# menis_times = np.array([-140, -135, -130])
+# menis_times = np.array([-160, -27.126998, -1])
+# dimensional_times =  145.4733877 + menis_times 
+# tlist = np.linspace(dimensional_times[0] * 29.98, dimensional_times[-1]*29.98, 100)
+# menis_t = converging_time_function(tlist, {'test1': False, 'test2': False, 'test3': False, 'test4': True})
+# print(menis_t)
+# run = run()
+# run.load()
+# bath = tlist * 0
+# for it, tt in enumerate(tlist):
+#     bath[it] = T_bath(menis_t[it], {'test1': False, 'test2': False, 'test3': False, 'test4': True})
+# plt.figure(18)
+# plt.plot(menis_t, bath)
+# print(bath)
+# plt.show()
+
+
+
+
+
+
+
+
 
 # N_spaces_list = [45]
 MM = 1
-N_ang = 8
+N_ang = 2
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-N_spaces_list = [150]
+N_spaces_list = [70]
 
 run = run()
 run.load()
@@ -70,15 +95,15 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['rt'] = 5e-3
     run.parameters['all']['at'] = 5e-4
     # run.parameters['all']['at'] = 5e-1
-    run.parameters['all']['e_initial'] = 0.00000000001
+    run.parameters['all']['e_initial'] = 0.0000001
     run.parameters['boundary_source']['N_angles'] = [N_ang]
     run.parameters['all']['Ms'] = [MM]
     run.mesh_parameters['Msigma'] = MM
 
-    menis_times = np.array([-94.706889, -27.126998, -1])
+    # menis_times = np.array([-94.706889, -27.126998, -1])
     # menis_times = np.array([-140, -94.706889, -27.126998])
     # menis_times = np.array([-140, -100, -94.706889])
-    # menis_times = np.array([-145, -140, -135])
+    menis_times = np.array([-145, -140, -135])
     # menis_times = np.array([-140, -135, -130])
 
     dimensional_times =  145.4733877 + menis_times 

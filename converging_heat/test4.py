@@ -65,13 +65,13 @@ Lambda = xsiR*Vxsi(xsiR)
 Ts = Trt_fit(R,times)
 Tbath = Ts * (1.+0.083391*(times/-1e-9)**(-0.537633)*Lambda)**0.25
 
-# plt.plot(times/1e-9, Ts, "r", label="surface")
-# plt.plot(times/1e-9, Tbath, "--b", label="bath")
-# plt.xlabel("$t$ [ns]")
-# plt.ylabel("$T(t)$ [HeV]")
-# plt.grid()
-# plt.legend(loc="best")
-# plt.show()
+plt.plot(times/1e-9, Ts, "r", label="surface")
+plt.plot(times/1e-9, Tbath, "--b", label="bath")
+plt.xlabel("$t$ [ns]")
+plt.ylabel("$T(t)$ [HeV]")
+plt.grid()
+plt.legend(loc="best")
+plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)

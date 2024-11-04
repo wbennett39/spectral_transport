@@ -129,11 +129,14 @@ class T_function(object):
         self.sigma_a_vec = sigma_class.sigma_function(x, 0.0, temperature)
 
     def make_T(self, argument, a, b):
+        # print(argument, 'argument')
         e = self.make_e(argument, a, b)
-        # e = self.positivize_e(e, argument, a,b)
+        e = self.positivize_e(e, argument, a,b)
         # self.find_minimum(a,b)
-        # if e.any() <0:
-        #      raise ValueError('Negative energy density')
+
+        if (e <0).any():
+             print(e)
+             raise ValueError('Negative energy density')
 
         if self.temp_function[0] == 1:
             T = self.su_olson_source(e, argument, a, b)
@@ -200,9 +203,11 @@ class T_function(object):
     def positivize_e(self, e, argument, a, b):
         #  e = self.make_e(argument, a,b)
          enew = e
-         floor = 1e-5 
+         floor = 1e-14
          ubar = self.cell_average(a,b)
-         if (e<0).any() and ubar >0.0 :
+         if ubar <=floor:
+              enew = 0 * e
+         if (e<0).any() and ubar >floor :
             tol = 1000
             
         
@@ -235,6 +240,20 @@ class T_function(object):
             
             #  elif ubar >= 0.0:
             enew = theta * (e-ubar) + ubar 
+            if (np.abs(enew) < floor).any():
+                 for it, tt in enumerate(enew):
+                      if abs(tt) < floor:
+                           enew[it] = floor
+                           
+            if (enew<0).any():
+                 print(enew, 'enew')
+                 print(theta, 'theta')
+                 print(ubar, 'ubar')
+                 print(e, 'e')
+                 print(m, 'm')
+                 assert(0)
+            # print(enew.size)
+            # print(argument)
             
             
             # if (enew<0).any():
@@ -372,27 +391,51 @@ class T_function(object):
 
 
     def cell_average(self, a, b):
+        # This isn't right because sometimes Gauss-Legendre quadrature is used, sometimes Chebyshev
         # dx = 4/3 * math.pi * (b**3-a**3)
-        dx = b-a
-        if dx <=1e-16:
-             print(a,b,'edges')
-             assert 0
-        
-        argument = (b-a)/2*self.xs_quad + (a+b)/2
-        e = self.make_e(argument,a,b)
-        ubar = 0.5 * (b-a) * np.sum(e * self.ws_quad)
 
-        # if np.abs(ubar/dx - self.e_vec[0] * normTn(0,argument,a,b)).any() >=1e-8:
+        if self.M < 2:
+             
+            ubar = self.e_vec[0] * 1/(math.sqrt(1/(-a + b))*math.sqrt(math.pi) )
+        else:
+             raise ValueError('Not implemented to this order of M yet')
+
+
+
+        dx = b-a
+        # if dx <=1e-16:
+        #      print(a,b,'edges')
         #      assert 0
+        
+        # argument = (b-a)/2*self.xs_quad + (a+b)/2
+        # e = self.make_e(argument,a,b)
+        # ubar2 = 0.5 * (b-a) * np.sum(e * self.ws_quad)
+        # print(ubar2-ubar)
+
+        # # if np.abs(ubar/dx - self.e_vec[0] * normTn(0,argument,a,b)).any() >=1e-8:
+        # #      assert 0
         # if ubar <0:
         #      print('negative ubar')
+        #      print(ubar, 'ubar')
         #      assert(0)
-        return ubar / dx
+
+        # do I need to divide by dx?
+        return ubar /dx
     
      
      
 
     def find_minimum(self, a, b, tol1 = 2**6):
+
+        if self.M == 1:
+            f1 = self.make_e(np.array([a]), a, b)[0]
+            f2 = self.make_e(np.array([b]), a, b)[0]
+            if f1 > f2:
+                 return f2
+            else:
+                 return f1
+
+
         dx = (b-a)/10
         pool_size = 1
         npts = 51

@@ -835,7 +835,7 @@ def W_converging(xi, sigma_func):
         elif xi > 2:
             res =  (xi-1)**1.102 * (0.1846 + 0.1505 * xi + 0.00004394 * xi **2)
         else:
-            assert(0)
+            res = 0
     else:
         assert 0
     return res

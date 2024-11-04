@@ -276,6 +276,7 @@ class rhs_class():
         # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
         #     time_loc -= 1
         self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
+        # print(self.T_eval_points, 'T eval')
         # for ix in range(self.N_space):
         #     for j in range(self.xs_quad.size):
         #         if self.T_old[ix, j] <0.0:
@@ -522,6 +523,7 @@ class rhs_class():
             a = xL
             b = xR
             argument = (b-a)/2*self.xs_quad + (a+b)/2
+            # print(argument, 'arg in make temp')
             # argument2 = (b-a)/2*self.t_quad + (a+b)/2
             T_vec[space] = rad_transfer.make_T(argument, a, b)
             # T_test = rad_transfer.make_T(argument2, a, b)

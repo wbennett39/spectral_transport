@@ -36,6 +36,7 @@ from timeit import default_timer as timer
 from .wavespeed_estimator import wavespeed_estimator
 from .wave_loc_estimator import find_wave
 import chaospy
+# from diffeqpy import ode
 # from .jl_integrator import integrator as jl_integrator_func
 # from diffeqpy import de
 
@@ -140,6 +141,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
 
     # t_quad = quadpy.c1.gauss_legendre(t_nodes).points
     t_quad, t_ws = quadrature(t_nodes, 'gauss_legendre')
+    print(t_quad, 't quad')
 
     # t_ws = quadpy.c1.gauss_legendre(t_nodes).weights
     half = int((N_space + 1)/2)

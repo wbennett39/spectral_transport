@@ -250,7 +250,7 @@ class rhs_class():
             # print(heat_wave_loc, 'wave x')
         
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
-
+        # print(t)
         if self.radiative_transfer['none'] == False :  
             V_new = V.copy().reshape((self.N_ang + 1, self.N_space, self.M+1))
             V_old = V_new.copy()
@@ -259,9 +259,9 @@ class rhs_class():
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
         
-        for ang in range(self.N_ang):
-            new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
-            V_old[ang,:,:] = new_energy_vec
+        # for ang in range(self.N_ang):
+        #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
+        #     V_old[ang,:,:] = new_energy_vec
         
         
         
@@ -521,7 +521,7 @@ class rhs_class():
         return V_new
     
     def make_temp(self, e_vec, mesh, rad_transfer):
-        if self.lumping == True:
+        if self.lumping == True and 0 ==1:
             T_vec = np.zeros((self.N_space, 2))
             T_eval_points = np.zeros((self.N_space, 2))
             for space in range(self.N_space):

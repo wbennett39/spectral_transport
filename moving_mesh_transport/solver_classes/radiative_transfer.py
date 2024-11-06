@@ -396,8 +396,8 @@ class T_function(object):
                     if self.lumping == False:
                         self.integrate_quad_sphere(xL, xR, j, sigma_class)
                     else:
-                         self.integrate_trap_sphere(xL, xR, j, sigma_class)
-                        # self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                        #  self.integrate_trap_sphere(xL, xR, j, sigma_class)
+                        self.integrate_quad_sphere(xL, xR, j, sigma_class)
         
 
 

@@ -195,7 +195,8 @@ class sigma_integrator():
                     self.integrate_moments(edges[k], edges[k+1], j, k, t, T_old[k,:])
                 elif self.geometry['sphere'] == True:
                     if self.lumping == True:
-                        self.integrate_trap_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:])
+                        # self.integrate_trap_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:])
+                        self.integrate_moments_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:], T_eval_points)
                     else:
                         self.integrate_moments_sphere(edges[k], edges[k+1], j, k, t, T_old[k,:], T_eval_points)
 
@@ -279,7 +280,7 @@ class sigma_integrator():
             elif self.sigma_func['test4'] == 1:
                 floor = 5e-2
                 # resmax = 6e3
-                resmax = 5e3
+                resmax = 15e3
                 # resmax = 950
                 # resmax = 5e3
                 # resmax = 500
@@ -289,7 +290,7 @@ class sigma_integrator():
                 rho = np.mean(x )
                 if (x<0).any():
                     assert(0)
-                res = (result+1e-3) ** -3.5 * rho ** 2
+                res = (result+1e-8) ** -3.5 * rho ** 2
                 if (res<0).any():
                     assert 0
                 if (res > resmax).any():

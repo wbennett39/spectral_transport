@@ -192,7 +192,7 @@ class T_function(object):
         elif self.temp_function[1] == 1:
         
                 self.temperature[space,:] = T
-                return np.power(T,4)  * self.sigma_a_vec 
+                return np.power(T,4)  * self.sigma_a_vec  * np.sign(T)
         
         # elif self.temp_function[2] == 1:
         #     return f * T ** beta * rho ** (1-mu)- self.a * T**4
@@ -200,7 +200,7 @@ class T_function(object):
         elif self.temp_function[2] == 1:
             # print(self.sigma_a_vec)
             self.temperature[space,:] = T
-            return  np.power(T,4) * self.sigma_a_vec * np.sign(T) 
+            return  np.power(T,4) * self.sigma_a_vec #* np.sign(T) 
         
             
 
@@ -396,8 +396,8 @@ class T_function(object):
                     if self.lumping == False:
                         self.integrate_quad_sphere(xL, xR, j, sigma_class)
                     else:
-                        #  self.integrate_trap_sphere(xL, xR, j, sigma_class)
-                        self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                         self.integrate_trap_sphere(xL, xR, j, sigma_class)
+                        # self.integrate_quad_sphere(xL, xR, j, sigma_class)
         
 
 

@@ -278,9 +278,10 @@ class sigma_integrator():
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
-                floor = 5e-2
+                # floor = 5e-3
                 # resmax = 6e3
                 resmax = 15e3
+                # resmax = 1e5
                 # resmax = 950
                 # resmax = 5e3
                 # resmax = 500
@@ -290,13 +291,18 @@ class sigma_integrator():
                 rho = np.mean(x )
                 if (x<0).any():
                     assert(0)
-                res = (result+1e-8) ** -3.5 * rho ** 2
+                res = (result+1e-10) ** -3.5 * rho ** 2
                 if (res<0).any():
                     assert 0
                 if (res > resmax).any():
                     for ix, xx in enumerate(res):
                         if res[ix] > resmax:
                             res[ix] = resmax
+                        # if res[ix] <floor:
+                        #     res[ix] = floor
+                # if (res!=15e3).any():
+                #     print(res, x)
+          
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
             else:

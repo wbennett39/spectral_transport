@@ -1129,8 +1129,8 @@ class mesh_class(object):
     def menis_init3(self):
 
             
-            third = int(4*(self.N_space + 1)/9)
-            rest = int(self.N_space + 1 - 2*third)
+            third = int((self.N_space + 1)/3)
+            rest = int(self.N_space + 1 - third)
             # dx = 5e-5
             # min_space = self.x0 / 1e
             min_space = self.x0/300
@@ -1153,6 +1153,7 @@ class mesh_class(object):
                 # # self.edges = np.linspace(0.0, self.x0, self.N_space+1)
                 # self.edges = np.concatenate((outside, inside))
                 self.edges = np.linspace(0, self.x0, self.N_space + 1)
+                # self.edges = np.concatenate((np.linspace(0, rfront, third +1 )[0:-1], np.linspace(rfront, self.x0, rest)))
                 self.edges0 = self.edges
 
                 self.Dedges = self.edges *0 

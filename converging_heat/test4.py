@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 110
+spaces = 220
 M = 1
 #####
 #####
@@ -40,13 +40,13 @@ phi_dim = phi * a * c
 sn_transport.close()
 mat_T = phi_dim * 0
 ee1 = e[0,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
-mat_T[0,:] = np.abs(ee1)**.25
+mat_T[0,:] = np.abs(ee1)**.25 * np.sign(ee1)
 
 ee2 = e[1,:] * a  / 10**-2  * 4 / 5 / 1.372017 * 5
-mat_T[1,:] = np.abs(ee2)**.25
+mat_T[1,:] = np.abs(ee2)**.25 * np.sign(ee2)
 
 ee3 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
-mat_T[2,:] = np.abs(ee3)**.25
+mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee2)
 
 # analytical solution
 R = 10.
@@ -115,9 +115,9 @@ plt.plot(r_anal, Trt_fit(r_anal, t3)*0.1, c="r", ls="--", lw=2, label="Diffusion
 plt.plot(r_anal, Trt_fit(r_anal, t2)*0.1, c="r", ls="--", lw=2)
 plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
 
-plt.plot(xs[0,:], (np.abs(phi_dim[0,:])/a/c)**.25, 'b-x', label = 'radiation temp')
-plt.plot(xs[1,:], (np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
-plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
+plt.plot(xs[0,:], (np.abs(phi_dim[0,:])/a/c)**.25*np.sign(phi_dim[0,:]), 'b-x', label = 'radiation temp')
+plt.plot(xs[1,:], (np.abs(phi_dim[1,:])/a/c)**.25*np.sign(phi_dim[1,:]), 'b-x')
+plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
 
 plt.plot(xs[0,:], mat_T[0,:], 'k--', label = 'radiation temp')
 plt.plot(xs[1,:], mat_T[1,:], 'k--')

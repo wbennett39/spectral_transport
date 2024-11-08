@@ -153,7 +153,7 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 1500
+        self.division = 3500
         self.counter = 0
         self.delta_tavg = 0.0
         self.l = build.l
@@ -259,7 +259,7 @@ class rhs_class():
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
         
-        # for ang in range(self.N_ang):
+        # for ang in range(self.N_ang+1):
         #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
         #     V_old[ang,:,:] = new_energy_vec
         

@@ -200,7 +200,7 @@ class T_function(object):
         elif self.temp_function[2] == 1:
             # print(self.sigma_a_vec)
             self.temperature[space,:] = T
-            return  np.power(T,4) * self.sigma_a_vec #* np.sign(T) 
+            return  np.power(T,4) * self.sigma_a_vec * np.sign(T) 
         
             
 

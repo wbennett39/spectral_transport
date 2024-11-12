@@ -92,10 +92,10 @@ run.load('marshak')
 for it, N_space in enumerate(N_spaces_list):
     run.parameters['boundary_source']['x0'] = np.array([10.0])
     run.parameters['all']['N_spaces'] = [N_space]
-    run.parameters['all']['rt'] = 1e-6
-    run.parameters['all']['at'] = 1e-8
+    run.parameters['all']['rt'] = 1e-4
+    run.parameters['all']['at'] = 1e-5
     # run.parameters['all']['at'] = 5e-1
-    run.parameters['all']['e_initial'] = 0.001
+    run.parameters['all']['e_initial'] = 0.00001
     run.parameters['boundary_source']['N_angles'] = [N_ang]
     run.parameters['all']['Ms'] = [MM]
     run.mesh_parameters['Msigma'] = MM

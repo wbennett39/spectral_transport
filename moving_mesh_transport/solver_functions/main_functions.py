@@ -168,6 +168,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
                         finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping)
 
 
+
     if sigma_func['converging'] == 1:
         f = h5py.File('heat_wavepos.h5', 'r+')
         boundary_temp = f['temperature'][:] / 10 # convert from HeV to keV
@@ -204,6 +205,9 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     transfer = T_function(initialize)
     sigma_class = sigma_integrator(initialize)
     flux.load_AAA(sigma_class.AAA)
+    if thermal_couple['none'] != 1:
+        mesh.move(0)
+        initialize.make_T4_IC(transfer, mesh.edges)
     
     # @njit
     def RHS(t, V):
@@ -239,8 +243,11 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
             sol.y[:,it] = ode15s.y
             ode15s.set_initial_value(ode15s.y, tf)
 
-        
+  
     else:
+        print(rt, 'rt')
+        print(at, 'at')
+        print('starting solve')
         sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp)
 
     # sol = ode15s.y
@@ -289,7 +296,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     elif thermal_couple['none'] != 1:
         extra_deg_freedom = 1
         sol_last = sol.y[:,-1].reshape((N_ang+1,N_space,M+1))
-        print(sol_last[-1,:,:])
+        # print(sol_last[-1,:,:])
         if eval_times == True:
             sol_array = sol.y.reshape((eval_array.size, N_ang+1,N_space,M+1)) 
 
@@ -317,7 +324,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         if thermal_couple['none'] == False:
             # print('reconstructing energy density solution')
             e = output.make_e()
-            print(e,'energy density')
+            # print(e,'energy density')
         else:
             e = phi*0
     else:

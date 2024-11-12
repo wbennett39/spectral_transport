@@ -106,7 +106,7 @@ class mesh_class(object):
         if self.test_dimensional_rhs == True:
             self.speed = 299.98
 
-        print('mesh edge velocity: ', edge_v)
+        # print('mesh edge velocity: ', edge_v)
         self.source_type = np.array(list(source_type), dtype = np.int64)
 
         if self.move_type[0] == True:
@@ -143,7 +143,7 @@ class mesh_class(object):
         self.span_speed = 0.0
         self.leader_pad = leader_pad
         self.t0 = t0
-        print(self.t0, 't0')
+        # print(self.t0, 't0')
         self.finite_domain = finite_domain
         if self.finite_domain == True:
             print('finite domain')
@@ -156,7 +156,7 @@ class mesh_class(object):
 
         if fake_sedov_v != 0 and np.all(self.source_type == 0):
             self.speed = fake_sedov_v
-            print('speed is ', self.speed)
+            # print('speed is ', self.speed)
 
         self.initialize_mesh()
     
@@ -1451,7 +1451,7 @@ class mesh_class(object):
                     else:
                         self.menis_init_final()
 
-                    print(self.Dedges_const, 'dedges const')
+                    # print(self.Dedges_const, 'dedges const')
                 else:
                     self.boundary_source_init_func(self.vnaught)
                 # boundary_source_init_func_outside(self.vnaught, self.N_space, self.x0, self.tfinal) 
@@ -1492,7 +1492,7 @@ class mesh_class(object):
 
         # self.edges0 = self.edges
         # self.Dedges_const = self.Dedges
-        print(self.Dedges_const, 'dedges const')
+        # print(self.Dedges_const, 'dedges const')
 
 
 

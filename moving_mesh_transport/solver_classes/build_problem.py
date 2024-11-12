@@ -87,7 +87,8 @@ data = [('N_ang', int64),
         ('geometry', nb.typeof(params_default)),
         ('boundary_temp', float64[:]),
         ('boundary_time', float64[:]),
-        ('lumping', int64)
+        ('lumping', int64),
+        ('T4', float64[:])
         ]
 ###############################################################################
 
@@ -158,6 +159,7 @@ class build(object):
         self.geometry = geometry
        
         self.e_init = e_initial
+        self.T4 = np.zeros(self.xs_quad.size * self.N_space)
         # self.e_initial = 1e-4
         
         
@@ -173,8 +175,23 @@ class build(object):
     def integrate_quad_sphere(self, a, b, ang, space, j, ic):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         mu = self.mus[ang]
-        self.IC[ang,space,j] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu) * 2.0 * normTn(j, argument, a, b))
+        self.IC[ang,space,j] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu, iarg = space * self.xs_quad.size, earg = (space+1)*self.xs_quad.size) * 2.0 * normTn(j, argument, a, b))
         
+    def make_T4_IC(self, RT_class, edges):
+        for space in range(self.N_space):
+            for j in range(self.M+1):
+
+                a = edges[space]
+                b = edges[space+1]
+
+                self.integrate_e_sphere(a, b, space, j)
+                RT_class.e_vec[j] = self.IC[self.N_ang,space,j]
+            argument = (b-a)/2*self.xs_quad + (a+b)/2
+            T = RT_class.make_T(argument, a, b)
+            self.T4[space * self.xs_quad.size:(space+1) * self.xs_quad.size] = T**4
+
+
+
 
     def integrate_e(self, a, b, space, j):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
@@ -192,18 +209,8 @@ class build(object):
         self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
         self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.geometry, self.sigma_func)
         edges_init = edges.edges
-
-        # The current method for handling delta functions
-        if self.moving == False and self.source_type[0] == 1 and self.uncollided == False and self.N_space%2 == 0:
-            if self.geometry['slab'] == True:
-                right_edge_index = int(self.N_space/2 + 1)
-                left_edge_index = int(self.N_space/2 - 1)
-                self.x0 = edges_init[right_edge_index] - edges_init[left_edge_index]
-            # temp = (edges_init[int(self.N_space/2 + 1)] - edges_init[self.N_space/2 - 1]) 
-            elif self.geometry['sphere'] == True:
-                self.x0 = edges_init[1] - edges_init[0]
-                print(self.x0, 'x0')
-            
+        
+        # as of now, only constant IC's are posible with Radiative transfer 
         if self.thermal_couple['none'] != 1:
             for space in range(self.N_space):
                 for j in range(self.M + 1):
@@ -211,34 +218,61 @@ class build(object):
                         self.integrate_e(edges_init[space], edges_init[space+1], space, j)
                     elif self.geometry['sphere'] == True:
                         self.integrate_e_sphere(edges_init[space], edges_init[space+1], space, j)
+            
+            ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, True, self.T4)
 
-
-        if self.moving == False and self.source_type[0] == 2 and self.uncollided == False and self.N_space%2 == 0:
-            i = 0
-            it = 0
-            while i==0:
-                if edges_init[it] <= -self.x0 <= edges_init[it+1]:
-                    i = 1
-                else:
-                    it += 1
-                if it > edges_init.size:
-                    assert(0)
-
-            x1 = edges_init[int(self.N_space/2)] - edges_init[int(self.N_space/2)+1]
-            ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, x1, self.geometry)
-        
-        else:
-            ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry)
-
-
-        for ang in range(self.N_ang):
-            for space in range(self.N_space):
-                for j in range(self.M + 1):
-                    if self.geometry['slab'] == True:
-                        print("Inside slab if statement.")
-                        self.integrate_quad(edges_init[space], edges_init[space+1], ang, space, j, ic)
-                    elif self.geometry['sphere'] == True:
+            for ang in range(self.N_ang):
+                for space in range(self.N_space):
+                    for j in range(self.M+1):
                         self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
+            print(self.T4, 'T4')
+         
+
+
+
+            
+        else:
+
+            # The current method for handling delta functions
+            if self.moving == False and self.source_type[0] == 1 and self.uncollided == False and self.N_space%2 == 0:
+                if self.geometry['slab'] == True:
+                    right_edge_index = int(self.N_space/2 + 1)
+                    left_edge_index = int(self.N_space/2 - 1)
+                    self.x0 = edges_init[right_edge_index] - edges_init[left_edge_index]
+                # temp = (edges_init[int(self.N_space/2 + 1)] - edges_init[self.N_space/2 - 1]) 
+                elif self.geometry['sphere'] == True:
+                    self.x0 = edges_init[1] - edges_init[0]
+                    print(self.x0, 'x0')
+                
+
+
+
+            if self.moving == False and self.source_type[0] == 2 and self.uncollided == False and self.N_space%2 == 0:
+                i = 0
+                it = 0
+                while i==0:
+                    if edges_init[it] <= -self.x0 <= edges_init[it+1]:
+                        i = 1
+                    else:
+                        it += 1
+                    if it > edges_init.size:
+                        assert(0)
+
+                x1 = edges_init[int(self.N_space/2)] - edges_init[int(self.N_space/2)+1]
+                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, x1, self.geometry, False, self.T4)
+            
+            else:
+                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, False, self.T4)
+
+
+            for ang in range(self.N_ang):
+                for space in range(self.N_space):
+                    for j in range(self.M + 1):
+                        if self.geometry['slab'] == True:
+                            print("Inside slab if statement.")
+                            self.integrate_quad(edges_init[space], edges_init[space+1], ang, space, j, ic)
+                        elif self.geometry['sphere'] == True:
+                            self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
 
     
         

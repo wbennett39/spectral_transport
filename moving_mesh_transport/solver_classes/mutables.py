@@ -32,10 +32,12 @@ data = [('N_ang', int64),
         ('x1', float64),
         ('mu', float64),
         ('geometry', nb.typeof(params_default)),
+        ('thermal_couple', int64),
+        ('T4', float64[:])
         ]
 @jitclass(data)
 class IC_func(object):
-    def __init__(self, source_type, uncollided, x0, source_strength, sigma, x1, geometry):
+    def __init__(self, source_type, uncollided, x0, source_strength, sigma, x1, geometry, thermal_couple, T4):
         self.source_type = np.array(list(source_type), dtype = np.int64)
         self.uncollided = uncollided
         self.x0 = x0
@@ -43,50 +45,60 @@ class IC_func(object):
         self.sigma = sigma
         self.x1 = x1
         self.geometry = geometry
+        self.thermal_couple = thermal_couple
+        self.T4 = T4
+        
 
 
-    def function(self, x, mu):
+    def function(self, x, mu, iarg = 0, earg = 0):
         if self.geometry['slab'] == True:
-            if self.uncollided == True:
-                return np.zeros(x.size)
-            elif self.uncollided == False and self.source_type[0] == 1:
-                return self.plane_and_square_IC(x)/self.x0/2.0
-                # return self.gaussian_plane(x)/2.0
-            elif self.uncollided == False and self.source_type[1] == 1:
-                return self.plane_and_square_IC(x)
-            elif self.uncollided == False and self.source_type[2] == 1:
-                return np.zeros(x.size)
-            elif self.uncollided == False and self.source_type[3] == 1:
-                if self.source_type[-1] == 1:
-                    return self.gaussian_IC_noniso(x,mu)
-                else:
-                    return self.gaussian_IC(x)
-            elif self.source_type[4] == 1 and self.source_type[3] == 0:
-                return self.MMS_IC(x)
-            elif self.source_type[0] == 2:
-                return self.dipole(x)/abs(self.x1)
-            elif self.source_type[0] == 3:
-                return self.self_sim_plane(x)
+            if self.thermal_couple == True:
+                return self.T4
             else:
-                return np.zeros(x.size)
-
-        elif self.geometry['sphere'] == True:
-            if self.uncollided == False:
-                if self.source_type[0] == 1:
-                    # return self.plane_and_square_IC(x)/self.x0/2.0 
-                    return self.point_pulse(x)/(self.x0**3)
-                elif self.source_type[1] == 1:
-                    return self.shell_IC(x)
-                # This elif below added by Stephen
-                # The problem that was causing the code not to run seems to have been here (19-06-24)
-                #elif ((self.source_type[2] == 1):
-                #    for j in range(x.size):
-                #        if np.less(np.abs(x[j]) - 510, self.x0)):
-                #            return np.zeros(x.size)
+                if self.uncollided == True:
+                    return np.zeros(x.size)
+                elif self.uncollided == False and self.source_type[0] == 1:
+                    return self.plane_and_square_IC(x)/self.x0/2.0
+                    # return self.gaussian_plane(x)/2.0
+                elif self.uncollided == False and self.source_type[1] == 1:
+                    return self.plane_and_square_IC(x)
+                elif self.uncollided == False and self.source_type[2] == 1:
+                    return np.zeros(x.size)
+                elif self.uncollided == False and self.source_type[3] == 1:
+                    if self.source_type[-1] == 1:
+                        return self.gaussian_IC_noniso(x,mu)
+                    else:
+                        return self.gaussian_IC(x)
+                elif self.source_type[4] == 1 and self.source_type[3] == 0:
+                    return self.MMS_IC(x)
+                elif self.source_type[0] == 2:
+                    return self.dipole(x)/abs(self.x1)
+                elif self.source_type[0] == 3:
+                    return self.self_sim_plane(x)
                 else:
                     return np.zeros(x.size)
+
+        elif self.geometry['sphere'] == True:
+            if self.thermal_couple == True:
+
+                return self.T4[iarg:earg] * 0.5
             else:
-                return np.zeros(x.size)
+                if self.uncollided == False:
+                    if self.source_type[0] == 1:
+                        # return self.plane_and_square_IC(x)/self.x0/2.0 
+                        return self.point_pulse(x)/(self.x0**3)
+                    elif self.source_type[1] == 1:
+                        return self.shell_IC(x)
+                    # This elif below added by Stephen
+                    # The problem that was causing the code not to run seems to have been here (19-06-24)
+                    #elif ((self.source_type[2] == 1):
+                    #    for j in range(x.size):
+                    #        if np.less(np.abs(x[j]) - 510, self.x0)):
+                    #            return np.zeros(x.size)
+                    else:
+                        return np.zeros(x.size)
+                else:
+                    return np.zeros(x.size)
 
     def point_pulse(self, x):
         temp = (np.greater(x, 0) - np.greater(x, self.x0))*self.source_strength

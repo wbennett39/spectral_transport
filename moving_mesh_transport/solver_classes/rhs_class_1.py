@@ -154,7 +154,7 @@ class rhs_class():
         
         self.mean_free_time = 1/build.sigma_t
         self.division = 3500
-        self.counter = 0
+        self.counter = 3500
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])
@@ -381,6 +381,8 @@ class rhs_class():
 
                 RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                 RHS_transfer += self.c_a * PV*2 /self.sigma_t 
+                # if np.max(np.abs(2*PV-H)) <= 1e-10:
+                #     print('equilibrium', space)
                 # print(np.sign(self.c_a *H /self.sigma_t), 'sign H')
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 if self.l != 1.0:

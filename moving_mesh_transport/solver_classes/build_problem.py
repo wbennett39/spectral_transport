@@ -186,9 +186,11 @@ class build(object):
 
                 self.integrate_e_sphere(a, b, space, j)
                 RT_class.e_vec[j] = self.IC[self.N_ang,space,j]
+
             argument = (b-a)/2*self.xs_quad + (a+b)/2
             T = RT_class.make_T(argument, a, b)
             self.T4[space * self.xs_quad.size:(space+1) * self.xs_quad.size] = T**4
+        print(self.T4, 'T4')
 
 
 
@@ -226,6 +228,7 @@ class build(object):
                     for j in range(self.M+1):
                         self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
             print(self.T4, 'T4')
+            print(self.IC, 'IC')
          
 
 

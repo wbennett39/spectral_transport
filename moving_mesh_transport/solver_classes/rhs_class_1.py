@@ -145,6 +145,7 @@ class rhs_class():
         self.sigma_a = build.sigma_a
         self.sigma_t = build.sigma_t
         self.c = build.sigma_s 
+        print(self.c, 'c')
         self.particle_v = build.particle_v
         self.lumping = build.lumping
         
@@ -368,7 +369,7 @@ class rhs_class():
 
                 ######### solve thermal couple ############
                 U = V_old[-1,space,:]
-                num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :]*0, True)
+                num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :], True)
                 RU = num_flux.LU 
                 RHS_transfer = U*0
                 if self.uncollided == True:
@@ -381,8 +382,11 @@ class rhs_class():
 
                 RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                 RHS_transfer += self.c_a * PV*2 /self.sigma_t 
-                # if np.max(np.abs(2*PV-H)) <= 1e-10:
-                #     print('equilibrium', space)
+                if np.max(np.abs(2*PV-H)) <= 1e-6:
+                    print('equilibrium', space)
+                else:
+                    print(2*PV, '2PV')
+                    print(H,'H')
                 # print(np.sign(self.c_a *H /self.sigma_t), 'sign H')
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 if self.l != 1.0:
@@ -409,7 +413,7 @@ class rhs_class():
                         assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                     # print(self.mus[])
                     
-                num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
+                num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, 0*V_old[refl_index, 0, :])
 
                 # new r=0 BC
                 # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)

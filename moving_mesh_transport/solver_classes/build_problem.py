@@ -228,7 +228,7 @@ class build(object):
                     for j in range(self.M+1):
                         self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
             print(self.T4, 'T4')
-            print(self.IC, 'IC')
+            # print(self.IC, 'IC')
          
 
 

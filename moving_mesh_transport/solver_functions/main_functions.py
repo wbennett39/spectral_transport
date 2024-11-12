@@ -209,8 +209,8 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         initialize.make_T4_IC(transfer, mesh.edges)
     initialize.make_IC()
     IC = initialize.IC
-    xs = find_nodes(edges, M, geometry)
-    phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, edges, uncollided, geometry)
+    xs = find_nodes(mesh.edges, M, geometry)
+    phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry)
     phi = phi_IC.make_phi(uncollided_sol)
     print(phi, 'phi IC')
     

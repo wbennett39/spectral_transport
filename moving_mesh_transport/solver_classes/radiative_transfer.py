@@ -60,7 +60,8 @@ data = [('temp_function', int64[:]),
         ('lumping', float64),
         ('xs_quad_chebyshev', float64[:]),
         ('ws_quad_chebyshev', float64[:]),
-        ('N_space', int64)
+        ('N_space', int64),
+        ('cs', float64[:,:])
 
 
 
@@ -102,6 +103,7 @@ class T_function(object):
         self.temperature = np.zeros((build.N_space, self.xs_quad.size))
         self.e_vec = np.zeros(self.M+1)
         self.N_space = build.N_space
+        self.cs = np.zeros((self.N_space, self.M+1))
     def make_e(self, xs, a, b):
         temp = xs*0
         for ix in range(xs.size):
@@ -111,7 +113,15 @@ class T_function(object):
                 elif self.geometry['sphere'] == True:
                     temp[ix] += normTn(j, xs[ix:ix+1], a, b)[0] * self.e_vec[j]
         return temp 
-    
+    def make_sigma_vec(self, xs, a, b, k):
+        temp = xs*0
+        for ix in range(xs.size):
+            for j in range(self.M+1):
+                if self.geometry['slab'] == True:
+                    temp[ix] += normPn(j, xs[ix:ix+1], a, b)[0] * self.cs[k,j] 
+                elif self.geometry['sphere'] == True:
+                    temp[ix] += normTn(j, xs[ix:ix+1], a, b)[0] * self.cs[k,j]
+        return temp 
     def integrate_quad(self, a, b, j, sigma_class):
         argument = (b-a)/2 * self.xs_quad + (a+b)/2
         self.H[j] = (b-a)/2 * np.sum(self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * normPn(j, argument, a, b))
@@ -135,6 +145,7 @@ class T_function(object):
     
     def get_sigma_a_vec(self, x, sigma_class, temperature):
         self.sigma_a_vec = sigma_class.sigma_function(x, 0.0, temperature)
+        self.cs = sigma_class.cs
 
     def make_T(self, argument, a, b):
         # print(argument, 'argument')
@@ -180,6 +191,7 @@ class T_function(object):
     def T_func(self, argument, a, b, sigma_class, space):
         T = self.make_T(argument, a, b)
         self.get_sigma_a_vec(argument, sigma_class, T)
+        self.sigma_a_vec = self.make_sigma_vec(argument, a, b, space)
         # self.xs_points = argument
         # self.e_points = e
         

@@ -208,6 +208,7 @@ class rhs_class():
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
             print(np.max(V_old), 'max u')
             print(np.min(V_old), 'min u')
+            print(np.argmin(np.abs(V_old - np.min(V_old))), 'location of min')
             # print(np.min(V_old.copy().reshape((self.N_ang+1, self.N_space, self.M+1))[-1, :, :]), 'min e vec')
             dimensional_t = t/29.98
             # menis_t = -29.6255 + dimensional_t
@@ -382,11 +383,11 @@ class rhs_class():
 
                 RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                 RHS_transfer += self.c_a * PV*2 /self.sigma_t 
-                if np.max(np.abs(2*PV-H)) <= 1e-6:
-                    print('equilibrium', space)
-                else:
-                    print(2*PV, '2PV')
-                    print(H,'H')
+                # if np.max(np.abs(2*PV-H)) <= 1e-6:
+                #     print('equilibrium', space)
+                # else:
+                #     print(2*PV, '2PV')
+                #     print(H,'H')
                 # print(np.sign(self.c_a *H /self.sigma_t), 'sign H')
                 RHS_transfer = np.dot(RHS_transfer, Minv)
                 if self.l != 1.0:
@@ -413,7 +414,7 @@ class rhs_class():
                         assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                     # print(self.mus[])
                     
-                num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, 0*V_old[refl_index, 0, :])
+                num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
 
                 # new r=0 BC
                 # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)

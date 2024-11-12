@@ -92,8 +92,8 @@ run.load('marshak')
 for it, N_space in enumerate(N_spaces_list):
     run.parameters['boundary_source']['x0'] = np.array([10.0])
     run.parameters['all']['N_spaces'] = [N_space]
-    run.parameters['all']['rt'] = 1e-3
-    run.parameters['all']['at'] = 1e-4
+    run.parameters['all']['rt'] = 1e-6
+    run.parameters['all']['at'] = 1e-8
     # run.parameters['all']['at'] = 5e-1
     run.parameters['all']['e_initial'] = 0.001
     run.parameters['boundary_source']['N_angles'] = [N_ang]
@@ -108,7 +108,7 @@ for it, N_space in enumerate(N_spaces_list):
     # menis_times = np.array([-140, -100, -94.706889])
     # menis_times = np.array([-140, -100, -97.706889])
     # menis_times = np.array([-145, -125, -115])
-    menis_times = np.array([-145, -144.5, -144])
+    menis_times = np.array([-145.47, -145.4, -145.3])
 
     dimensional_times =  145.4733877 + menis_times 
 

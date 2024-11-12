@@ -29,7 +29,7 @@
     'thick': False            # optically thick or thin
     'integrator': 'BDF'
     'geometry': {slab: False, sphere: True}
-    'lumping': False
+    'lumping': True
     
 # plane pulse source
 'plane_IC':

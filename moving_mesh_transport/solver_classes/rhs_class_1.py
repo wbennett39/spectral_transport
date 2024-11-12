@@ -383,6 +383,8 @@ class rhs_class():
 
                 RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                 RHS_transfer += self.c_a * PV*2 /self.sigma_t 
+                # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)>=1e-10).any():
+                #     print(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t, 'transfer change')
                 # if np.max(np.abs(2*PV-H)) <= 1e-6:
                 #     print('equilibrium', space)
                 # else:
@@ -393,6 +395,10 @@ class rhs_class():
                 if self.l != 1.0:
                     RHS_transfer = RHS_transfer / self.l
                 V_new[-1,space,:] = RHS_transfer 
+                # not changing cell if in equilibrium
+                # print(RHS_transfer, 'rhs transfer')
+                # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)<=1e-8).all():
+                #     V_new[-1,space,:] = RHS_transfer *0 
                 if np.isnan(V_new[-1, space, :]).any():
                     print('rhstransfer is nan')
                     assert(0)
@@ -429,17 +435,9 @@ class rhs_class():
                 VV = sigma_class.VV
                 # Initialize solution vector, RHS
                 U = np.zeros(self.M+1).transpose()
-                # assert(abs(G[0,0]  + 0.16666666666666666*((xL**2 + xL*xR + xR**2)*(dxL - dxR))/((xL - xR)*math.pi))<=1e-10)
+
                 U[:] = V_old[angle,space,:]
-                # RHS = np.zeros_like(V_new[angle,space,:])
 
-             
-
-                    # if self.M == 0:
-                    #     a = xL
-                    #     b = xR
-                    #     # print(Minv,  3 * math.pi/ (a*b + b**2 + a**2))
-                    #     assert(np.abs(Minv[0,0] - 3 * math.pi/ (a*b + b**2 + a**2)) <=1e-8)
                 dterm = U*0
                 if angle > 0 and angle != self.N_ang-1:
                     for j in range(self.M+1):
@@ -461,26 +459,24 @@ class rhs_class():
                     mu_derivative =  np.dot(J, dterm)
                     RHS -= mu_derivative
                     RHS += np.dot(G, U)
-                    # RHS += 0.5 * S * self.c #(commented this out because c is included)
                     RHS += 0.5 * S /self.sigma_t / self.l
                     RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l
-                    # print(np.sign(self.c_a * H * 0.5 / self.sigma_t / self.l), 'sign h term')
+
                     RHS += PV * self.c /self.sigma_t / self.l
-                    # print(VV, 'VV')
-                    # print(V_old[angle, space,:], 'vold')
-        
-                    # print(VV,'vv')
-                    # print(np.dot(Mass, U), 'MU')
-                    # VV[0] = U[0]*(math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL)
-                    # assert(abs(VV[0] - U[0]*(math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3 )
-                    # assert(abs(Mass[0,0] -  (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3/(math.pi**1.5)*math.sqrt(math.pi)*math.sqrt(xR-xL) ) <=1e-3)
-                    # assert(abs((VV-np.dot(Mass, U))[0])<=1e-3)
+
                     RHS -= VV / self.sigma_t / self.l
                     RHS -= np.dot(MPRIME, U)
                     RHS = np.dot(Minv, RHS)
+                    # if (np.abs(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l)>=1e-10).any():
+                    #     print(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l, 'radiation change')
+                    #     print(self.c_a * H * 0.5 / self.sigma_t / self.l, 'H term')
+                    #     print(VV / self.sigma_t / self.l, 'VV')
 
                
                     V_new[angle,space,:] = RHS
+                    # print(RHS, 'rhs')
+                    # if (np.abs(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l)<=1e-8).all():
+                    #     V_new[angle,space,:] = RHS * 0
                     if angle == 0:
                         psionehalf = V_old[0, space, :]
                     else:  
@@ -528,16 +524,16 @@ class rhs_class():
         return V_new
     
     def make_temp(self, e_vec, mesh, rad_transfer):
-        if self.lumping == True and 0 ==1:
-            T_vec = np.zeros((self.N_space, 2))
-            T_eval_points = np.zeros((self.N_space, 2))
-            for space in range(self.N_space):
-                xR = mesh.edges[space+1]
-                xL = mesh.edges[space]
-                rad_transfer.e_vec = e_vec[space,:]
-                T_vec[space] = rad_transfer.make_T(np.array([xL,xR]), xL, xR)
-                T_eval_points[space] = np.array([xL,xR])
-        else:
+        # if self.lumping == True and 0 ==1:
+        #     T_vec = np.zeros((self.N_space, 2))
+        #     T_eval_points = np.zeros((self.N_space, 2))
+        #     for space in range(self.N_space):
+        #         xR = mesh.edges[space+1]
+        #         xL = mesh.edges[space]
+        #         rad_transfer.e_vec = e_vec[space,:]
+        #         T_vec[space] = rad_transfer.make_T(np.array([xL,xR]), xL, xR)
+        #         T_eval_points[space] = np.array([xL,xR])
+        # else:
             T_vec = np.zeros((self.N_space, self.xs_quad.size))
             T_eval_points = np.zeros((self.N_space, self.xs_quad.size))
             for space in range(self.N_space):
@@ -576,6 +572,6 @@ class rhs_class():
             #             print(T_vec[space, j])
             #             assert(0)
             # print('## ## ## ## ## ## ')
-        return T_vec, T_eval_points
+            return T_vec, T_eval_points
 
 

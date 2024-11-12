@@ -694,11 +694,15 @@ def quadrature(n, name, testing = False):
         xs = roots
         xs[0] = -1
         xs[-1] = 1
-        for nn in range(1, n-1):
-            inn = nn + 1
-            ws[nn] = 2 / (n*(n-1)) / (sps.eval_legendre(n-1, roots[nn]))**2
-            ws[0] = 2/ (n*(n-1))
-            ws[-1] = 2/ (n*(n-1))
+        if n ==2:
+            ws[0] = 1
+            ws[1] = 1
+        else:
+            for nn in range(1, n-1):
+                inn = nn + 1
+                ws[nn] = 2 / (n*(n-1)) / (sps.eval_legendre(n-1, roots[nn]))**2
+                ws[0] = 2/ (n*(n-1))
+                ws[-1] = 2/ (n*(n-1))
         # if testing == True:
         #     testxs = quadpy.c1.gauss_lobatto(n).points
         #     testws = quadpy.c1.gauss_lobatto(n).weights

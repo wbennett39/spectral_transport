@@ -397,8 +397,8 @@ class rhs_class():
                 V_new[-1,space,:] = RHS_transfer 
                 # not changing cell if in equilibrium
                 # print(RHS_transfer, 'rhs transfer')
-                if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)<=1e-8).all():
-                    V_new[-1,space,:] = RHS_transfer *0 
+                # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)<=1e-8).all():
+                #     V_new[-1,space,:] = RHS_transfer *0 
                 if np.isnan(V_new[-1, space, :]).any():
                     print('rhstransfer is nan')
                     assert(0)
@@ -475,8 +475,18 @@ class rhs_class():
                
                     V_new[angle,space,:] = RHS
                     # print(RHS, 'rhs')
-                    if (np.abs(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l)<=1e-8).all():
-                        V_new[angle,space,:] = RHS * 0
+                    # if (np.abs(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l)<=1e-8).all():
+                    #     print(space, 'space')
+                    #     print(LU, 'LU')
+                    #     print(PV * self.c /self.sigma_t / self.l, 'PV')
+                    #     print(mu_derivative, 'J term')
+                    #     print(mul*np.dot(L,U), 'LU')
+                    #     print(0.5 * S /self.sigma_t / self.l, 'S')
+                    #     print(np.dot(G, U), 'GU')
+
+
+
+                    #     V_new[angle,space,:] = RHS * 0
                     if angle == 0:
                         psionehalf = V_old[0, space, :]
                     else:  

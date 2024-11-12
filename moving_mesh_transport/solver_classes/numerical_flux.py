@@ -285,7 +285,8 @@ class LU_surf(object):
         self.make_sol(space, u, t, u_refl)
 
 
-
+        psi_minus = 0.0
+        psi_plus = 0.0
         if leftspeed > 0: 
             psi_minus = self.v0
             # if space == 0:
@@ -296,6 +297,7 @@ class LU_surf(object):
             psi_plus = self.v2
         elif rightspeed < 0:
             psi_plus = self.v3
+        
         
         
 

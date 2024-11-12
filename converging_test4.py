@@ -70,7 +70,7 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 # N_spaces_list = [45]
 MM = 1
-N_ang = 2
+N_ang = 4
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 N_spaces_list = [100]
@@ -80,8 +80,8 @@ run.load()
 
 loader = load()
 run.parameters['all']['Ms'] = [0]
-run.parameters['all']['N_spaces'] = [6]
-run.parameters['all']['tfinal'] = 0.00000000000001
+run.parameters['all']['N_spaces'] = [4]
+run.parameters['all']['tfinal'] = 0.0000000000000001
 run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False
 run.mesh_parameters['Msigma'] = 0
@@ -95,7 +95,7 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['rt'] = 1e-4
     run.parameters['all']['at'] = 1e-5
     # run.parameters['all']['at'] = 5e-1
-    run.parameters['all']['e_initial'] = 0.00001
+    run.parameters['all']['e_initial'] = 0.0000001
     run.parameters['boundary_source']['N_angles'] = [N_ang]
     run.parameters['all']['Ms'] = [MM]
     run.mesh_parameters['Msigma'] = MM

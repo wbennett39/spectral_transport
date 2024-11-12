@@ -190,7 +190,7 @@ class build(object):
             argument = (b-a)/2*self.xs_quad + (a+b)/2
             T = RT_class.make_T(argument, a, b)
             self.T4[space * self.xs_quad.size:(space+1) * self.xs_quad.size] = T**4
-        print(self.T4, 'T4')
+        # print(self.T4, 'T4')
 
 
 

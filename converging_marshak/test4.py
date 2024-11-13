@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
+import h5py
 matplotlib.style.use('classic')
 matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
@@ -12,6 +13,11 @@ arad = 4. * sigma_sb / clight
 ev_kelvin = 1.160451812e4
 hev_kelvin = 100. * ev_kelvin
 kev_kelvin = 1000. * ev_kelvin
+sn = h5py.File('SN_test4.h5', 'r+')
+xs = sn['test4']['xs']
+mat_T = sn['test4']['T4']
+u = sn['test4']['u']
+a = 0.0137225
 
 diff = np.loadtxt("test4_diff.txt")
 mc = np.loadtxt("test4_mc.txt")
@@ -67,6 +73,10 @@ plt.plot(r_anal, Trt_fit(r_anal, t3)*0.1, c="r", ls="--", lw=2, label="Diffusion
 plt.plot(r_anal, Trt_fit(r_anal, t2)*0.1, c="r", ls="--", lw=2)
 plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
 
+plt.plot(xs[0,:], mat_T[0,:], c="b", ls="--", lw=2, label=r"$S_8$ transport")
+plt.plot(xs[1,:], mat_T[1,:], c="b", ls="--", lw=2)
+plt.plot(xs[2,:], mat_T[2,:], c="b", ls="--", lw=2)
+
 plt.ylabel("$T \\ [\\mathrm{{KeV}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)
 plt.title("$\\mathrm{{Test \\ 4}}$", fontsize=22)
@@ -92,6 +102,10 @@ plt.plot(diff[:,0], diff[:,6], c="lime", ls="-", lw=2, )
 plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analytic")
 plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)
 plt.plot(r_anal, urt(r_anal, t1), c="r", ls="--", lw=2)
+
+plt.plot(xs[0,:], 5*u[0,:]/1e13 * a, c="b", ls="--", lw=2, label=r"$S_8$ transport")
+plt.plot(xs[1,:], 5*u[1,:]/1e13 * a, c="b", ls="--", lw=2)
+plt.plot(xs[2,:], 5*u[2,:]/1e13 * a, c="b", ls="--", lw=2)
 
 plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)

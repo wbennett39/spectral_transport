@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 100
+spaces = 250
 M = 1
 #####
 #####
@@ -48,6 +48,8 @@ mat_T[1,:] = np.abs(ee2)**.25 * np.sign(ee2)
 ee3 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee2)
 
+
+T4 = mat_T * 0
 # analytical solution
 R = 10.
 delta=0.462367118894146
@@ -75,9 +77,9 @@ plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-# t1 = -9.470688883217099e-08
-# t2 = -2.7126998146008884e-08
-# t3 = -1e-9
+t1 = -9.470688883217099e-08
+t2 = -2.7126998146008884e-08
+t3 = -1e-9
 
 
 # t1 = -14.5e-8
@@ -90,9 +92,9 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t1 = -14.0e-8
 # t2 =-10.0e-8
 # t3 =  -9.4706889e-8
-t1 =  -14.0e-8
-t2 = -10.0e-8
-t3 = -9.4706889e-8
+# t1 =  -14.0e-8
+# t2 = -10.0e-8
+# t3 = -9.4706889e-8
 # t3 = -2.7126998146008884e-08
 
 rho0 = 1.
@@ -118,6 +120,11 @@ plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
 plt.plot(xs[0,:], (np.abs(phi_dim[0,:])/a/c)**.25*np.sign(phi_dim[0,:]), 'b-x', label = 'radiation temp')
 plt.plot(xs[1,:], (np.abs(phi_dim[1,:])/a/c)**.25*np.sign(phi_dim[1,:]), 'b-x')
 plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
+
+
+T4[0,:] = (np.abs(phi_dim[0,:])/a/c)**.25*np.sign(phi_dim[0,:])
+T4[1,:] = (np.abs(phi_dim[1,:])/a/c)**.25*np.sign(phi_dim[1,:])
+T4[2,:] = (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:])
 
 plt.plot(xs[0,:], mat_T[0,:], 'k--', label = 'radiation temp')
 plt.plot(xs[1,:], mat_T[1,:], 'k--')
@@ -174,5 +181,23 @@ plt.tight_layout()
 plt.savefig(f"Test4_u.pdf", bbox_inches='tight')
 
 plt.show()
+
+
+
+
+ff = h5py.File('SN_test4.h5', 'r+')
+del ff['test4']['xs']
+del ff['test4']['T4']
+del ff['test4']['u']
+# t4 = ff.create_group('test4')
+# t4.create_group('xs')
+# t4.create_group('T4')
+# t4.create_group('u')
+ff['test4']['xs'] = xs
+ff['test4']['T4'] = T4
+ff['test4']['u'] = e * 10**16 #convert GJ to kelvin
+ff.close()
+
+
 
 quit()

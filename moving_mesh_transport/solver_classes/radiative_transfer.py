@@ -61,7 +61,8 @@ data = [('temp_function', int64[:]),
         ('xs_quad_chebyshev', float64[:]),
         ('ws_quad_chebyshev', float64[:]),
         ('N_space', int64),
-        ('cs', float64[:,:])
+        ('cs', float64[:,:]),
+        ('Msigma', int64)
 
 
 
@@ -75,6 +76,7 @@ class T_function(object):
         self.temp_function = np.array(list(build.temp_function), dtype = np.int64) 
         self.H = np.zeros(build.M+1).transpose()
         self.M = build.M
+        self.Msigma = build.Msigma
         
         self.a = 0.0137225 # GJ/cm$^3$/keV$^4
         self.alpha = 4 * self.a
@@ -116,7 +118,7 @@ class T_function(object):
     def make_sigma_vec(self, xs, a, b, k):
         temp = xs*0
         for ix in range(xs.size):
-            for j in range(self.M+1):
+            for j in range(self.Msigma+1):
                 if self.geometry['slab'] == True:
                     temp[ix] += normPn(j, xs[ix:ix+1], a, b)[0] * self.cs[k,j] 
                 elif self.geometry['sphere'] == True:
@@ -132,15 +134,22 @@ class T_function(object):
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
         self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * 1 * normTn(j, argument, a, b))
     
-    def integrate_trap_sphere(self, a, b, j, sigma_class):                      
-
+    def integrate_trap_sphere(self, a, b, j, sigma_class, k):                      
+        self.get_sigma_a_vec(np.array([a]), sigma_class, self.make_T(np.array([a]), a, b))
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
-        left = (a**2 * self.T_func(np.array([a]), a, b, sigma_class, self.space) * 1 * normTn(j, np.array([a]), a, b))[0]
-        right = (b**2 * self.T_func(np.array([b]), a, b, sigma_class, self.space) * 1 * normTn(j, np.array([b]), a, b))[0]
+        # left = (a**2 * self.make_T(np.array([a]), a, b)**4 * 1 * normTn(j, np.array([a]), a, b))[0]
+        # right = (b**2 * self.T_func(np.array([b]), a, b)**4 * 1 * normTn(j, np.array([b]), a, b))[0]
+        self.H = self.H * 0
+        for n in range(self.Msigma + 1):
+            Ta = self.make_T(np.array([a]), a, b)
+            Tb = self.make_T(np.array([b]), a, b)
+            left = (a**2 * Ta**4*np.sign(Ta) * 1 * normTn(j, np.array([a]), a, b) * normTn(n, np.array([a]), a, b))[0]
+            right = (b**2 * Tb**4 * np.sign(Tb) * 1 * normTn(j, np.array([b]), a, b) * normTn(n, np.array([b]), a, b))[0]
+            self.H[j] += self.cs[k, n] * 0.5 * (b-a) * (left + right)
 
 
 
-        self.H[j] =  0.5 * (b-a) * (left + right)
+        # self.H[j] =  0.5 * (b-a) * (left + right)
         #assert(0)
     
     def get_sigma_a_vec(self, x, sigma_class, temperature):
@@ -408,8 +417,8 @@ class T_function(object):
                     if self.lumping == False:
                         self.integrate_quad_sphere(xL, xR, j, sigma_class)
                     else:
-                        #  self.integrate_trap_sphere(xL, xR, j, sigma_class)
-                        self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                         self.integrate_trap_sphere(xL, xR, j, sigma_class, space)
+                        # self.integrate_quad_sphere(xL, xR, j, sigma_class)
         
 
 

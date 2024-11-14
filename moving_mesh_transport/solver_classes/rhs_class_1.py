@@ -372,7 +372,7 @@ class rhs_class():
                 U = V_old[-1,space,:]
                 num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :], True)
                 RU = num_flux.LU 
-                RHS_transfer = U*0
+                RHS_transfer = np.copy(V_old[-1, space, :]*0)
                 if self.uncollided == True:
                     RHS_transfer += self.c_a *source.S * 2 
                     #RHS_transfer += source.S * 2

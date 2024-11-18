@@ -522,7 +522,7 @@ class rhs_class():
             # else:
             #     return mass_lumped, mass_lumped_inv
 
-            MI[0,0] = 1/2 (1/a**2 + 1/b**2)
+            MI[0,0] = 0.5 * (1/a**2 + 1/b**2)
             MI[0,1] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
             MI[1,0] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
             MI[1,1] = (a**(-2) + b**(-2))/4.

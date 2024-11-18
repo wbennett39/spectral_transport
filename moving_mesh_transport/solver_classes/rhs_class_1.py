@@ -521,11 +521,17 @@ class rhs_class():
             #     return mass_lumped, mass_lumped_inv
             # else:
             #     return mass_lumped, mass_lumped_inv
+            # a += 1e-12
+            # MI[0,0] = 0.5 * (1/a**2 + 1/b**2)
+            # MI[0,1] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
+            # MI[1,0] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
+            # MI[1,1] = (a**(-2) + b**(-2))/4.
+            # Using Simpsons
+            MI[0,0] = (6*(a**2 + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+            MI[0,1] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+            MI[1,0] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+            MI[1,1] = (6*(a**2 + a*b + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
 
-            MI[0,0] = 0.5 * (1/a**2 + 1/b**2)
-            MI[0,1] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
-            MI[1,0] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
-            MI[1,1] = (a**(-2) + b**(-2))/4.
             mass_lumped_inv = MI * math.pi
             return mass_lumped_inv
 

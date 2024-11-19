@@ -113,6 +113,8 @@ class sigma_integrator():
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
     #     self.cs[k, j] = 0.5 * (b-a) 
     def integrate_trap_sphere(self, a, b, j, k, t, T_old):
+        # I probably need rho here
+        
         #before using this, I need to check the T eval points
 
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))

@@ -88,7 +88,8 @@ data = [('N_ang', int64),
         ('boundary_temp', float64[:]),
         ('boundary_time', float64[:]),
         ('lumping', int64),
-        ('T4', float64[:])
+        ('T4', float64[:]),
+        ('edges_init', float64[:])
         ]
 ###############################################################################
 
@@ -211,7 +212,7 @@ class build(object):
         self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
         self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.geometry, self.sigma_func)
         edges_init = edges.edges
-        
+        self.edges_init = edges_init
         # as of now, only constant IC's are posible with Radiative transfer 
         if self.thermal_couple['none'] != 1:
             for space in range(self.N_space):

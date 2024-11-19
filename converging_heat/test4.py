@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 250
+spaces = 75
 M = 1
 #####
 #####
@@ -46,7 +46,7 @@ ee2 = e[1,:] * a  / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[1,:] = np.abs(ee2)**.25 * np.sign(ee2)
 
 ee3 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
-mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee2)
+mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee3)
 
 
 T4 = mat_T * 0

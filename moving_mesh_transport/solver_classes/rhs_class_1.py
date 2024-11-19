@@ -18,7 +18,7 @@ from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
 from .functions import finite_diff_uneven_diamond, alpha_difference
-from .functions import converging_time_function, converging_r
+from .functions import converging_time_function, converging_r, make_u_old
 import numba as nb
 from numba import prange
 from numba.experimental import jitclass
@@ -110,7 +110,10 @@ data = [('N_ang', int64),
         ('alphas', float64[:]),
         ('ws', float64[:]),
         ('old_percent_complete', float64),
-        ('stymie_count', int64)
+        ('stymie_count', int64),
+        ('psi_onehalf_old', float64[:,:]),
+        ('index', int64),
+        ('edges_old', float64[:])
 
         ]
 ##############################################################################
@@ -176,6 +179,11 @@ class rhs_class():
         self.make_alphas()
         self.old_percent_complete = 0.0
         self.stymie_count = 0
+        if build.thermal_couple['none'] == 1:
+            self.index = -1
+        else:
+            self.index = -2
+        self.edges_old = build.edges_init
 
         
         
@@ -272,7 +280,9 @@ class rhs_class():
         # move mesh to time t 
 
         # V_new = self.V_new_floor_func(V_new)
+        self.edges_old = mesh.edges
         mesh.move(t)
+
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0
         # time_loc = np.argmin(np.abs(self.time_points - t))
@@ -292,6 +302,7 @@ class rhs_class():
         flux.get_coeffs(sigma_class)
         # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
 
+
         # iterate over all cells
         for space in range(self.N_space):  
             # get mesh edges and derivatives          
@@ -300,6 +311,9 @@ class rhs_class():
             dxR = mesh.Dedges[space+1]
             dxL = mesh.Dedges[space]
             # matrices.matrix_test(True)
+            u_old = make_u_old(V_old[self.index, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws, self.M)
+
+
             matrices.make_all_matrices(xL, xR, dxL, dxR)
 
             L = matrices.L
@@ -316,7 +330,7 @@ class rhs_class():
             if self.geometry['sphere'] == True:
                 Mass = matrices.Mass
                 J = matrices.J
-                if (self.lumping == True) and (self.M >0):
+                if (self.lumping == False) and (self.M >0):
                     # Mass, Minv = self.mass_lumper(Mass, True) 
                     Minv = self.mass_lumper(Mass, xL, xR)
 
@@ -490,7 +504,9 @@ class rhs_class():
 
                     #     V_new[angle,space,:] = RHS * 0
                     if angle == 0:
-                        psionehalf = V_old[0, space, :]
+                        # psionehalf = V_old[0, space, :]
+                        psionehalf = u_old
+                        # psionehalf, self.psi_onehalf_old = psi_onehalf_function(self.psi_onehalf_old)÷
                     else:  
                         psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
                         psionehalf = psionehalf_new
@@ -506,34 +522,37 @@ class rhs_class():
 
             return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
         
-    def mass_lumper(self, Mass, a, b, invert = False):
+    def mass_lumper(self, Mass, a, b, invert = True):
             mass_lumped = np.zeros((self.M+1, self.M+1))
             mass_lumped_inv = np.zeros((self.M+1, self.M+1))
             MI = np.zeros((self.M+1, self.M+1))
             if self.M != 1:
                 raise ValueError('The lumped mass matrix is sigular for M >1 and there is no reason to lump the M=0 equations')
-            # for i in range(self.M+1):
-            #     for j in range(self.M+1):
-            #         mass_lumped[i,i] += Mass[i, j]
-            # if invert == True:
-            #     for i in range(self.M+1):
-            #         mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
-            #     return mass_lumped, mass_lumped_inv
-            # else:
-            #     return mass_lumped, mass_lumped_inv
-            # a += 1e-12
-            # MI[0,0] = 0.5 * (1/a**2 + 1/b**2)
-            # MI[0,1] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
-            # MI[1,0] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
-            # MI[1,1] = (a**(-2) + b**(-2))/4.
-            # Using Simpsons
-            MI[0,0] = (6*(a**2 + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
-            MI[0,1] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
-            MI[1,0] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
-            MI[1,1] = (6*(a**2 + a*b + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+            for i in range(self.M+1):
+                for j in range(self.M+1):
+                    mass_lumped[i,i] += Mass[i, j]
+            if invert == True:
+                for i in range(self.M+1):
+                    mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
+                return mass_lumped_inv
+            else:
+                return mass_lumped_inv
+            # # a += 1e-12
+            # # MI[0,0] = 0.5 * (1/a**2 + 1/b**2)
+            # # MI[0,1] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
+            # # MI[1,0] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
+            # # MI[1,1] = (a**(-2) + b**(-2))/4.
 
-            mass_lumped_inv = MI * math.pi
-            return mass_lumped_inv
+            # # Using Simpsons
+            # MI[0,0] = (6*(a**2 + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+            # MI[0,1] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+            # MI[1,0] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+            # MI[1,1] = (6*(a**2 + a*b + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
+
+            # mass_lumped_inv = MI * math.pi
+            # # mass_lumped_inv = np.linalg.inv(Mass)
+
+            # return mass_lumped_inv
 
 
 

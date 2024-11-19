@@ -931,3 +931,36 @@ def converging_time_function(t, sigma_func):
 
 # @njit 
 # def positivity_enforcer():
+# @njit
+# def psi_old_maker(vector, xs, mesh):
+
+#     cells = vector[:,0].size()
+#     J = vector[:,0].size()
+#     res = np.zeros(cells)
+#     for ix in range(cells):
+#         a = mesh[cells]
+#         b = mesh[cells+1]
+#         z = (b-a)/2 * xs + (a+b)/2
+#         for j in range(j):
+#             res[cells] += normTn(j,xs,mesh[cells], mesh[cells+1])
+#     return res
+
+
+@njit 
+def make_u_old(vector, edges_old, a, b, xs_quad, ws_quad, M):
+    res = np.zeros(M+1)
+    z = (b-a)/2 * xs_quad + (a+b)/2
+    psi = z*0
+    for iz, zz in enumerate(z):
+        ie = np.searchsorted(edges_old, zz) 
+        if edges_old[ie] > zz:
+            ie -= 1
+        for j in range(M+1):
+            psi[iz] += normTn(j,np.array([zz]),edges_old[ie], edges_old[ie+1])[0] * vector[ie, j]
+    
+    for i in range(M+1):
+        res[i] =  (b-a)/2 * np.sum(ws_quad * psi * normTn(j, z, a, b))
+    
+    return res
+
+    

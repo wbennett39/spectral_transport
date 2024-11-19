@@ -113,7 +113,8 @@ data = [('N_ang', int64),
         ('stymie_count', int64),
         ('psi_onehalf_old', float64[:,:]),
         ('index', int64),
-        ('edges_old', float64[:])
+        ('edges_old', float64[:]),
+        ('ws_quad', float64[:])
 
         ]
 ##############################################################################
@@ -128,6 +129,7 @@ class rhs_class():
         self.M = build.M
         self.mus = build.mus
         self.ws = build.ws
+        self.ws_quad = build.ws_quad
         self.tfinal = build.tfinal
         self.geometry = build.geometry
         # if self.geometry['slab'] == True:
@@ -311,7 +313,7 @@ class rhs_class():
             dxR = mesh.Dedges[space+1]
             dxL = mesh.Dedges[space]
             # matrices.matrix_test(True)
-            u_old = make_u_old(V_old[self.index, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws, self.M)
+            u_old = make_u_old(V_old[self.index, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M)
 
 
             matrices.make_all_matrices(xL, xR, dxL, dxR)

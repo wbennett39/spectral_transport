@@ -949,14 +949,19 @@ def converging_time_function(t, sigma_func):
 @njit 
 def make_u_old(vector, edges_old, a, b, xs_quad, ws_quad, M):
     res = np.zeros(M+1)
+
     z = (b-a)/2 * xs_quad + (a+b)/2
+
     psi = z*0
     for iz, zz in enumerate(z):
+
         ie = np.searchsorted(edges_old, zz) 
         if edges_old[ie] > zz:
             ie -= 1
+
         for j in range(M+1):
-            psi[iz] += normTn(j,np.array([zz]),edges_old[ie], edges_old[ie+1])[0] * vector[ie, j]
+            psi[iz] += normTn(j,z[iz:iz+1],edges_old[ie], edges_old[ie+1])[0] * vector[ie, j]
+
     
     for i in range(M+1):
         res[i] =  (b-a)/2 * np.sum(ws_quad * psi * normTn(j, z, a, b))

@@ -168,7 +168,7 @@ class mesh_class(object):
             for ix, xx in enumerate(self.edges[:-1]):
                 if xx > self.edges[ix+1]:
                     print(ix, 'index')
-                    print(xx, self.edges[ix+1], 'tanged edges')
+                    print(xx, self.edges[ix+1], 'tangled edges')
                     print('t=', t)
                     print("###############################################################################")
             raise ValueError('The mesh is tanlged. ')
@@ -960,24 +960,29 @@ class mesh_class(object):
         M = int(2*half-1)
         rest = int(Nedges-half)
         Mr = int(2*rest-1)
-        dx = 1e-6
+        dx = 1e-2
         # left = quadrature(int(2* half-1), 'gauss_legendre')[0][int((M-1)/2):] 
         left = self.thick_quad
         right = self.thick_quad_edge
+        print(right, 'right')
+        print(left, 'left')
         # right = np.flip(quadrature(int(2* rest-1), 'gauss_legendre')[int((Mr-1)/2):]) 
-        inside = (2 * right-1 - self.x0/(self.x0-dx))* (self.x0-dx) * right + self.x0
+        # inside = (2 * right-1 - self.x0/(self.x0-dx)) * (self.x0-dx) * right + self.x0
+        inside = right * (-dx) + self.x0 
         inside[-1] = self.x0
+
         # edges0 = np.concatenate((np.linspace(0, self.x0-dx, rest+1)[:-1], np.linspace(self.x0-dx, self.x0, half)))
-        edges0 = np.concatenate((left * (self.x0 -dx), inside  ))
+        edges0 = np.concatenate((left * (inside[0]), inside  ))
         print(edges0, 'initial edges')
 
         self.edges0 = edges0
         self.edges = edges0
         assert self.edges.size == self.N_space + 1
         # edgesf = np.concatenate((np.linspace(0, rfrontf, rest+1)[:-1], np.linspace(rfrontf, self.x0, half)))
-        insidef = (2 * right-1 - self.x0/rfrontf)* rfrontf * right + self.x0
+        # insidef = (2 * right-1 - self.x0/rfrontf)* rfrontf * right + self.x0
+        insidef = right * (-rfrontf) + self.x0
         insidef[-1] = self.x0
-        outsidef = left * (rfrontf)
+        outsidef = left * (insidef[0])
         edgesf = np.concatenate((outsidef, insidef))
         print(edgesf, 'final edges')
         self.Dedges_const = self.edges * 0 

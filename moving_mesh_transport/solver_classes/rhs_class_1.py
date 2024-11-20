@@ -291,10 +291,10 @@ class rhs_class():
         if mesh.told <= t:
             self.edges_old = mesh.edges
         else:
-            mesh.move(self.t_old_list[-1])
+            mesh.move(np.max((self.t_old_list < t)))
             self.edges_old = mesh.edges
 
-            print('getting mixed up')
+            print(t,np.max((self.t_old_list < t)), 't, told' )
 
 
         mesh.move(t)

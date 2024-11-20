@@ -69,7 +69,7 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 # N_spaces_list = [45]
-MM = 1
+MM = 0
 N_ang = 8
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -86,7 +86,7 @@ run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False
 run.mesh_parameters['Msigma'] = 0
 run.parameters['boundary_source']['N_angles'] = [2]
-# run.boundary_source(0,0)
+run.boundary_source(0,0)
 
 run.load('marshak')
 for it, N_space in enumerate(N_spaces_list):

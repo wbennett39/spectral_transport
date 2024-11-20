@@ -69,11 +69,11 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 # N_spaces_list = [45]
-MM = 0
-N_ang = 8
+MM = 1
+N_ang = 10
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-N_spaces_list = [31]
+N_spaces_list = [111]
 
 run = run()
 run.load()

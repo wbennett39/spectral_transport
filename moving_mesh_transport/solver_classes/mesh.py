@@ -958,12 +958,13 @@ class mesh_class(object):
         spacing = rfrontf*2/3
         Nedges = int(self.N_space+1)
         half = int(Nedges/2)
-        rest = int(Nedges-half)
+        halfhalf = int(half/2)
+        rest = int(Nedges-2*halfhalf)
         resthalf = int(rest/2)
         rest_rest = rest - resthalf
         outside1 = np.linspace(0, self.x0 - spacing, resthalf +1)[:-1]
-        outside2 = np.linspace(self.x0-spacing, self.x0-spacing/2, int(half/2) + 1 )[:-1]
-        inside1 = np.linspace(self.x0-spacing/2, self.x0 -dx, int(half - (int(half/2))) + 1 )[:-1]
+        outside2 = np.linspace(self.x0-spacing, self.x0-spacing/2, halfhalf + 1 )[:-1]
+        inside1 = np.linspace(self.x0-spacing/2, self.x0 -dx, halfhalf+ 1 )[:-1]
         inside2 = np.linspace(self.x0-dx, self.x0, rest_rest)
 
         initial_edges = np.concatenate((outside1, outside2, inside1, inside2))
@@ -973,9 +974,9 @@ class mesh_class(object):
         print(initial_edges, 'initial edges')
 
         outside1 = np.linspace(0, spacing/2, resthalf +1)[:-1]
-        outside2 = np.linspace(spacing/2, spacing, int(half/2) + 1 )[:-1]
-        inside1 = np.linspace(spacing , spacing * 3/2, int(half/2) + 1 )[:-1]
-        inside2 = np.linspace(spacing*3/2, self.x0, resthalf)
+        outside2 = np.linspace(spacing/2, spacing, halfhalf + 1 )[:-1]
+        inside1 = np.linspace(spacing , spacing * 3/2, halfhalf + 1 )[:-1]
+        inside2 = np.linspace(spacing*3/2, self.x0, rest_rest)
         final_edges = np.concatenate((outside1, outside2, inside1, inside2))
         print(final_edges, 'final')
 
@@ -984,6 +985,7 @@ class mesh_class(object):
         self.c1s = self.edges * 0
         self.c2s = self.edges * 0
         self.Dedges_const = (final_edges - self.edges0)/self.tfinal
+
 
 
 

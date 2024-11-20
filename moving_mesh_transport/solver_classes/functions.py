@@ -958,13 +958,15 @@ def make_u_old(vector, edges_old, a, b, xs_quad, ws_quad, M):
         ie = np.searchsorted(edges_old, zz) 
         if edges_old[ie] > zz:
             ie -= 1
+        if edges_old[ie+1] < zz:
+            ie -= 1
 
         for j in range(M+1):
             psi[iz] += normTn(j,z[iz:iz+1],edges_old[ie], edges_old[ie+1])[0] * vector[ie, j]
 
     
     for i in range(M+1):
-        res[i] =  (b-a)/2 * np.sum(ws_quad * psi * normTn(j, z, a, b))
+        res[i] =  (b-a)/2 * np.sum(ws_quad * psi * normTn(i, z, a, b))
     
     return res
 

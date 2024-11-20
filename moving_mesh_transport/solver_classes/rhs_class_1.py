@@ -294,7 +294,7 @@ class rhs_class():
             mesh.move(np.max((self.t_old_list < t)))
             self.edges_old = mesh.edges
 
-            print(t,np.max((self.t_old_list < t)), 't, told' )
+            # print(t,np.max((self.t_old_list < t)), 't, told' )
 
 
         mesh.move(t)

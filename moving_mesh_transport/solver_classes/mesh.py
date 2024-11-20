@@ -160,9 +160,16 @@ class mesh_class(object):
 
         self.initialize_mesh()
     
-    def check_tangle(self):
+    def check_tangle(self, t):
         if ((self.edges[1:] - self.edges[0:-1]) <=1e-14).any():
+            print("###############################################################################")
             print(self.edges)
+            for ix, xx in enumerate(self.edges[:-1]):
+                if xx > self.edges[ix+1]:
+                    print(ix, 'index')
+                    print(xx, self.edges[ix+1], 'tanged edges')
+                    print('t=', t)
+                    print("###############################################################################")
             raise ValueError('The mesh is tanlged. ')
 
 
@@ -178,7 +185,8 @@ class mesh_class(object):
         This mode moves all of the edges at a constant speed,
         linearly increasing from 0 to the wavespeed
         """
-        self.check_tangle()
+        self.told = t
+        self.check_tangle(t)
         if self.moving == True:
             # if self.source_type[1] == 1 or self.source_type[2] == 1:
                 # if t > 10.0:
@@ -942,7 +950,52 @@ class mesh_class(object):
         self.Dedges_const = (final_edges - self.edges0)/self.tfinal
         print(self.edges0, 'initial')
         print(final_edges, 'final')
-    
+
+    def menis_init_4real(self):
+        menis_tf = converging_time_function(self.tfinal, self.sigma_func)
+        rfrontf= converging_r(menis_tf, self.sigma_func)
+        dx = 1e-5
+        spacing = rfrontf*2/3
+        Nedges = int(self.N_space+1)
+        half = int(Nedges/2)
+        rest = int(Nedges-half)
+        resthalf = int(rest/2)
+        rest_rest = rest - resthalf
+        outside1 = np.linspace(0, self.x0 - spacing, resthalf +1)[:-1]
+        outside2 = np.linspace(self.x0-spacing, self.x0-spacing/2, int(half/2) + 1 )[:-1]
+        inside1 = np.linspace(self.x0-spacing/2, self.x0 -dx, int(half - (int(half/2))) + 1 )[:-1]
+        inside2 = np.linspace(self.x0-dx, self.x0, rest_rest)
+
+        initial_edges = np.concatenate((outside1, outside2, inside1, inside2))
+        self.edges0 = initial_edges
+        self.edges = self.edges0
+        assert self.edges.size == self.N_space + 1
+        print(initial_edges, 'initial edges')
+
+        outside1 = np.linspace(0, spacing/2, resthalf +1)[:-1]
+        outside2 = np.linspace(spacing/2, spacing, int(half/2) + 1 )[:-1]
+        inside1 = np.linspace(spacing , spacing * 3/2, int(half/2) + 1 )[:-1]
+        inside2 = np.linspace(spacing*3/2, self.x0, resthalf)
+        final_edges = np.concatenate((outside1, outside2, inside1, inside2))
+        print(final_edges, 'final')
+
+
+        self.Dedges_const = self.edges * 0 
+        self.c1s = self.edges * 0
+        self.c2s = self.edges * 0
+        self.Dedges_const = (final_edges - self.edges0)/self.tfinal
+
+        
+
+
+
+
+
+
+
+
+
+
     def menis_init_final(self):
         menis_tf = converging_time_function(self.tfinal, self.sigma_func)
         rfrontf= converging_r(menis_tf, self.sigma_func)
@@ -953,7 +1006,7 @@ class mesh_class(object):
         self.thick_quad_edge = np.linspace(0,1, rest+1)[:-1]
         self.thick_quad = np.linspace(0,1, half)
 
-        min_space = self.x0/500
+        min_space = self.x0/1000
         pad = min_space 
         dx = min_space * half
         edges_inside = self.x0 - np.flip(self.thick_quad) * dx
@@ -1449,7 +1502,8 @@ class mesh_class(object):
                     if self.moving == False:
                         self.menis_init3()
                     else:
-                        self.menis_init_final()
+                        # self.menis_init_final()
+                        self.menis_init_4real()
 
                     # print(self.Dedges_const, 'dedges const')
                 else:

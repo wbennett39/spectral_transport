@@ -114,7 +114,9 @@ data = [('N_ang', int64),
         ('psi_onehalf_old', float64[:,:]),
         ('index', int64),
         ('edges_old', float64[:]),
-        ('ws_quad', float64[:])
+        ('ws_quad', float64[:]),
+        ('t_old_list', float64[:]),
+        ('time_save_points', int64)
 
         ]
 ##############################################################################
@@ -186,7 +188,8 @@ class rhs_class():
         else:
             self.index = -2
         self.edges_old = build.edges_init
-
+        self.time_save_points = 100
+        self.t_old_list = np.zeros(1)
         
         
   
@@ -218,7 +221,8 @@ class rhs_class():
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
             print(np.max(V_old), 'max u')
             print(np.min(V_old), 'min u')
-            print(np.argmin(np.abs(V_old - np.min(V_old))), 'location of min')
+            # print(np.argmin(np.abs(V_old - np.min(V_old))), 'location of min')
+            
             # print(np.min(V_old.copy().reshape((self.N_ang+1, self.N_space, self.M+1))[-1, :, :]), 'min e vec')
             dimensional_t = t/29.98
             # menis_t = -29.6255 + dimensional_t
@@ -226,6 +230,7 @@ class rhs_class():
             # rfront = 0.01 * (-menis_t) ** 0.679502 
             rfront = converging_r(menis_t, self.sigma_func)
             third = int(4*(self.N_space + 1)/9)
+            print(np.min(np.abs(rfront-mesh.edges)), 'closest edge to rf')
             # tracker_edge = int(-third) 
             # print(tracker_edge)
             # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
@@ -282,7 +287,16 @@ class rhs_class():
         # move mesh to time t 
 
         # V_new = self.V_new_floor_func(V_new)
-        self.edges_old = mesh.edges
+        self.time_marching_func(t, mesh.told)
+        if mesh.told <= t:
+            self.edges_old = mesh.edges
+        else:
+            mesh.move(self.t_old_list[-1])
+            self.edges_old = mesh.edges
+
+            print('getting mixed up')
+
+
         mesh.move(t)
 
         # represent opacity as a polynomial expansion
@@ -332,7 +346,7 @@ class rhs_class():
             if self.geometry['sphere'] == True:
                 Mass = matrices.Mass
                 J = matrices.J
-                if (self.lumping == False) and (self.M >0):
+                if (self.lumping == True) and (self.M >0):
                     # Mass, Minv = self.mass_lumper(Mass, True) 
                     Minv = self.mass_lumper(Mass, xL, xR)
 
@@ -621,5 +635,14 @@ class rhs_class():
             #             assert(0)
             # print('## ## ## ## ## ## ')
             return T_vec, T_eval_points
+    def time_marching_func(self, t, told):
+        if t > told:
+            if self.t_old_list.size <  self.time_save_points:
+                self.t_old_list = np.append(self.t_old_list, t)
+            else:
+                temp = np.zeros(self.time_save_points)
 
+                temp[0:self.time_save_points-1] = self.t_old_list[1:]
+                temp[-1] = t
+                self.t_old_list = temp
 

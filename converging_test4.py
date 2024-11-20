@@ -70,10 +70,10 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 # N_spaces_list = [45]
 MM = 1
-N_ang = 4
+N_ang = 2
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-N_spaces_list = [75]
+N_spaces_list = [30]
 
 run = run()
 run.load()
@@ -103,12 +103,12 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['integrator'] = 'BDF'
     print(run.parameters['integrator'], 'integrator methods')
 
-    # menis_times = np.array([-94.706889, -27.126998, -1])
+    menis_times = np.array([-94.706889, -27.126998, -1])
     # menis_times = np.array([-1])
     # menis_times = np.array([-140, -94.706889, -27.126998])
     # menis_times = np.array([-140, -100, -94.706889])
     # menis_times = np.array([-140, -100, -97.706889])
-    menis_times = np.array([-145, -125, -115])
+    # menis_times = np.array([-145, -125, -115])
     # menis_times = np.array([-145.47, -145.4, -145.3])
 
     dimensional_times =  145.4733877 + menis_times 

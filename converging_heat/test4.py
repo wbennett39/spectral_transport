@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 75
+spaces = 30
 M = 1
 #####
 #####
@@ -26,7 +26,8 @@ diff = np.loadtxt("test4_diff.txt")
 sn_transport = h5py.File('results_test4_1030.h5', 'r+')
 print(sn_transport.keys())
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
-e = tr['energy_density'][:]
+e = tr['energy_density'][:]    
+edges = tr['edges'][:]
 #
 #
 #
@@ -77,9 +78,9 @@ plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-t1 = -9.470688883217099e-08
-t2 = -2.7126998146008884e-08
-t3 = -1e-9
+# t1 = -9.470688883217099e-08
+# t2 = -2.7126998146008884e-08
+# t3 = -1e-9
 
 
 # t1 = -14.5e-8
@@ -89,9 +90,9 @@ t3 = -1e-9
 # t3 = -13.0e-8
 
 
-# t1 = -14.0e-8
-# t2 =-10.0e-8
-# t3 =  -9.4706889e-8
+t1 = -14.0e-8
+t2 =-10.0e-8
+t3 =  -9.4706889e-8
 # t1 =  -14.0e-8
 # t2 = -10.0e-8
 # t3 = -9.4706889e-8
@@ -120,6 +121,7 @@ plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
 plt.plot(xs[0,:], (np.abs(phi_dim[0,:])/a/c)**.25*np.sign(phi_dim[0,:]), 'b-x', label = 'radiation temp')
 plt.plot(xs[1,:], (np.abs(phi_dim[1,:])/a/c)**.25*np.sign(phi_dim[1,:]), 'b-x')
 plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
+plt.plot(edges, edges*0, 'k|', markersize = 40)
 
 
 T4[0,:] = (np.abs(phi_dim[0,:])/a/c)**.25*np.sign(phi_dim[0,:])

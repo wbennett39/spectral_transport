@@ -13,6 +13,7 @@ from .functions import converging_time_function, converging_r
 from scipy.special import roots_legendre
 from .mesh_functions import boundary_source_init_func_outside
 #from mesh_functions import boundary_source_init_func_outside
+from .functions import quadrature
 import numba as nb
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
 
@@ -951,6 +952,40 @@ class mesh_class(object):
         print(self.edges0, 'initial')
         print(final_edges, 'final')
 
+    def menis_init_5real(self):
+        menis_tf = converging_time_function(self.tfinal, self.sigma_func)
+        rfrontf= converging_r(menis_tf, self.sigma_func)
+        Nedges = int(self.N_space+1)
+        half = int(Nedges/2)
+        M = int(2*half-1)
+        rest = int(Nedges-half)
+        Mr = int(2*rest-1)
+        dx = 1e-6
+        # left = quadrature(int(2* half-1), 'gauss_legendre')[0][int((M-1)/2):] 
+        left = self.thick_quad
+        right = self.thick_quad_edge
+        # right = np.flip(quadrature(int(2* rest-1), 'gauss_legendre')[int((Mr-1)/2):]) 
+        inside = (2 * right-1 - self.x0/dx)* dx * right + self.x0
+        inside[-1] = self.x0
+        # edges0 = np.concatenate((np.linspace(0, self.x0-dx, rest+1)[:-1], np.linspace(self.x0-dx, self.x0, half)))
+        edges0 = np.concatenate((left * (self.x0 -dx), inside  ))
+        print(edges0)
+
+        self.edges0 = edges0
+        self.edges = edges0
+        # edgesf = np.concatenate((np.linspace(0, rfrontf, rest+1)[:-1], np.linspace(rfrontf, self.x0, half)))
+        insidef = (2 * right-1 - self.x0/rfrontf)* rfrontf * right + self.x0
+        insidef[-1] = self.x0
+        outsidef = left * (rfrontf)
+        edgesf = np.concatenate((outsidef, insidef))
+        self.Dedges_const = self.edges * 0 
+        self.c1s = self.edges * 0
+        self.c2s = self.edges * 0
+        self.Dedges_const = (edgesf - self.edges0)/self.tfinal
+
+
+
+
     def menis_init_4real(self):
         menis_tf = converging_time_function(self.tfinal, self.sigma_func)
         rfrontf= converging_r(menis_tf, self.sigma_func)
@@ -973,10 +1008,10 @@ class mesh_class(object):
         assert self.edges.size == self.N_space + 1
         print(initial_edges, 'initial edges')
 
-        outside1 = np.linspace(0, spacing/2, resthalf +1)[:-1]
-        outside2 = np.linspace(spacing/2, spacing, halfhalf + 1 )[:-1]
-        inside1 = np.linspace(spacing , spacing * 3/2, halfhalf + 1 )[:-1]
-        inside2 = np.linspace(spacing*3/2, self.x0, rest_rest)
+        outside1 = np.linspace(0, rfrontf - spacing/2 , resthalf +1)[:-1]
+        outside2 = np.linspace(rfrontf -spacing/2,rfrontf, halfhalf + 1 )[:-1]
+        inside1 = np.linspace(rfrontf,rfrontf + spacing * 1/2, halfhalf + 1 )[:-1]
+        inside2 = np.linspace(rfrontf + spacing * 1/2, self.x0, rest_rest)
         final_edges = np.concatenate((outside1, outside2, inside1, inside2))
         print(final_edges, 'final')
 
@@ -1507,7 +1542,9 @@ class mesh_class(object):
                         self.menis_init3()
                     else:
                         # self.menis_init_final()
-                        self.menis_init_4real()
+                        # self.menis_init_4real()
+                        # self.menis_init4()
+                        self.menis_init_5real()
 
                     # print(self.Dedges_const, 'dedges const')
                 else:

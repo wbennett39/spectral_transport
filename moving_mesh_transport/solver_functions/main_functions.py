@@ -147,9 +147,13 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     # t_ws = quadpy.c1.gauss_legendre(t_nodes).weights
     half = int((N_space + 1)/2)
     rest = N_space +1 - half
-    quad_thick_source= chaospy.quadrature.clenshaw_curtis(half - 1)[0][0]
+    Mk = int(2*half-1)
+    Mkr = int(2*rest-1)
+    # quad_thick_source= chaospy.quadrature.clenshaw_curtis(half - 1)[0][0]
+    quad_thick_source = quadrature(int(2* half-1), 'gauss_legendre')[0][int((Mk-1)/2):] 
     # quad_thick_edge, blank = quadrature(int(N_space/4+1), 'gauss_lobatto')
-    quad_thick_edge = chaospy.quadrature.clenshaw_curtis(rest)[0][0][:-1]
+    # quad_thick_edge = chaospy.quadrature.clenshaw_curtis(rest)[0][0][:-1]
+    quad_thick_edge = np.flip(quadrature(int(2* rest-1), 'gauss_legendre')[int((Mkr-1)/2):])
     # quad_thick_source = quadpy.c1.gauss_lobatto(int(N_space/2+1)).points
     # quad_thick_edge = quadpy.c1.gauss_lobatto(int(N_space/4+1)).points
     # quad_thick_source = ([quad_thick_source_inside, quad_thick_source_outside])

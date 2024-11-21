@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 30
+spaces = 250
 M = 1
 #####
 #####
@@ -78,14 +78,14 @@ plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-t1 = -9.470688883217099e-08
-t2 = -2.7126998146008884e-08
-t3 = -1e-9
+# t1 = -9.470688883217099e-08
+# t2 = -2.7126998146008884e-08
+# t3 = -1e-9
 
 
-# t1 = -14.5e-8
-# t2 = -14.3e-8
-# t1 = -14.0e-8
+t1 = -14.5e-8
+t2 = -12.5e-8
+t3 = -11.5e-8
 # t2 = -13.5e-8
 # t3 = -13.0e-8
 

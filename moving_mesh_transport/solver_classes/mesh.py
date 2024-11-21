@@ -981,8 +981,10 @@ class mesh_class(object):
         assert self.edges.size == self.N_space + 1
         # edgesf = np.concatenate((np.linspace(0, rfrontf, rest+1)[:-1], np.linspace(rfrontf, self.x0, half)))
         # insidef = (2 * right-1 - self.x0/rfrontf)* rfrontf * right + self.x0
-        insidef = right * (rfrontf-self.x0) + self.x0
+        pad = self.x0 / self.N_space /100
+        insidef = right * (rfrontf+pad-self.x0) + self.x0
         insidef[-1] = self.x0
+        
         outsidef = left * (insidef[0])
         edgesf = np.concatenate((outsidef, insidef))
         print(edgesf, 'final edges')

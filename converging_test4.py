@@ -70,10 +70,10 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 # N_spaces_list = [45]
 MM = 1
-N_ang = 4
+N_ang = 8
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-N_spaces_list = [250]
+N_spaces_list = [700]
 
 run = run()
 run.load()
@@ -96,7 +96,7 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['at'] = 1e-5
     run.parameters['all']['lumping'] = False
     # run.parameters['all']['at'] = 5e-1
-    run.parameters['all']['e_initial'] = 5e-5
+    run.parameters['all']['e_initial'] = 5e-9
     run.parameters['boundary_source']['N_angles'] = [N_ang]
     run.parameters['all']['Ms'] = [MM]
     run.mesh_parameters['Msigma'] = MM

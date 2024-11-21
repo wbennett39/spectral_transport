@@ -963,8 +963,10 @@ class mesh_class(object):
         Mr = int(2*rest-1)
         dx = 1e-2
         # left = quadrature(int(2* half-1), 'gauss_legendre')[0][int((M-1)/2):] 
-        left = self.thick_quad
-        right = self.thick_quad_edge
+        # left = self.thick_quad
+        # right = self.thick_quad_edge
+        left = np.linspace(0,1, half + 1)[:-1]
+        right = np.linspace(1,0,rest)
         print(right, 'right')
         print(left, 'left')
         # right = np.flip(quadrature(int(2* rest-1), 'gauss_legendre')[int((Mr-1)/2):]) 
@@ -981,7 +983,8 @@ class mesh_class(object):
         assert self.edges.size == self.N_space + 1
         # edgesf = np.concatenate((np.linspace(0, rfrontf, rest+1)[:-1], np.linspace(rfrontf, self.x0, half)))
         # insidef = (2 * right-1 - self.x0/rfrontf)* rfrontf * right + self.x0
-        pad = self.x0 / self.N_space /100
+        # pad = self.x0 / self.N_space /100
+        pad = 0.2
         insidef = right * (rfrontf+pad-self.x0) + self.x0
         insidef[-1] = self.x0
         

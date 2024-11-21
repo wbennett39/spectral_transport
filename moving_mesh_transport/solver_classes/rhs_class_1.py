@@ -327,7 +327,7 @@ class rhs_class():
             dxR = mesh.Dedges[space+1]
             dxL = mesh.Dedges[space]
             # matrices.matrix_test(True)
-            u_old = make_u_old(V_old[self.index, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M)
+            u_old = make_u_old(V_old[0, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M)
 
 
             matrices.make_all_matrices(xL, xR, dxL, dxR)

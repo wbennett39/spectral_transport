@@ -73,7 +73,7 @@ MM = 1
 N_ang = 10
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-N_spaces_list = [111]
+N_spaces_list = [21]
 
 run = run()
 run.load()

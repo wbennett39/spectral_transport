@@ -957,7 +957,7 @@ class mesh_class(object):
         rest = int(self.N_space+1 - 2*third)
         tracker_edges = np.linspace(location_to_track + width/2, location_to_track - width/2, rest)
         left_edges = np.linspace(location_to_track - width/2, self.x0, third+1)[1:]
-        right_edges = np.linspace(0, location_to_track + width/2, third)[:-1]
+        right_edges = np.linspace(0, location_to_track + width/2, third + 1)[:-1]
         edges = np.concatenate((left_edges, tracker_edges, right_edges))
         assert edges.size == self.N_space +1
         assert (0 <= edges <= self.x0).all()

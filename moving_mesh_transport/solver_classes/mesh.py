@@ -972,6 +972,12 @@ class mesh_class(object):
         menis_tm = converging_time_function(self.tfinal/2, self.sigma_func)
         rfrontm= converging_r(menis_tm, self.sigma_func)
 
+        menis_t23 = converging_time_function(2*self.tfinal/3, self.sigma_func)
+        rfront23= converging_r(menis_t23, self.sigma_func)
+
+        edges23 = self.tracker_region_mesh(rfront23)
+
+
         edges0 = self.tracker_region_mesh(9.499)
         print(edges0, 'initial edges')
         self.edges0 = edges0
@@ -985,7 +991,9 @@ class mesh_class(object):
         self.c1s = self.edges * 0
         self.c2s = self.edges * 0
 
-        self.Dedges_const, self.c1s = self.two_point_interpolation(edgesm, edgesf, self.tfinal/2, self.tfinal, self.edges0)
+        # self.Dedges_const, self.c1s = self.two_point_interpolation(edgesm, edgesf, self.tfinal/2, self.tfinal, self.edges0)
+
+        self.Dedges_const, self.c1s, self.c2s =  self.three_point_interpolation(self.tfinal/2, 2*self.tfinal/3, self.tfinal, edgesm, edges23, edgesf, self.edges0)
 
         
 
@@ -993,8 +1001,11 @@ class mesh_class(object):
 
 
 
-
-
+    def three_point_interpolation(self, t1, t2, t3, r1, r2, r3, x0):
+        v = -((-(r3*t1**3*t2**2) + r3*t1**2*t2**3 + r2*t1**3*t3**2 - r1*t2**3*t3**2 - r2*t1**2*t3**3 + r1*t2**2*t3**3 + t1**3*t2**2*x0 - t1**2*t2**3*x0 - t1**3*t3**2*x0 + t2**3*t3**2*x0 + t1**2*t3**3*x0 - t2**2*t3**3*x0)/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3))
+        a1 = (2*(-(r3*t1**3*t2) + r3*t1*t2**3 + r2*t1**3*t3 - r1*t2**3*t3 - r2*t1*t3**3 + r1*t2*t3**3 + t1**3*t2*x0 - t1*t2**3*x0 - t1**3*t3*x0 + t2**3*t3*x0 + t1*t3**3*x0 - t2*t3**3*x0))/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3)
+        a2 = (-3*(-(r3*t1**2*t2) + r3*t1*t2**2 + r2*t1**2*t3 - r1*t2**2*t3 - r2*t1*t3**2 + r1*t2*t3**2 + t1**2*t2*x0 - t1*t2**2*x0 - t1**2*t3*x0 + t2**2*t3*x0 + t1*t3**2*x0 - t2*t3**2*x0))/(t1*(t1 - t2)*t2*(t1 - t3)*(t2 - t3)*t3)
+        return v, a1, a2
 
 
 

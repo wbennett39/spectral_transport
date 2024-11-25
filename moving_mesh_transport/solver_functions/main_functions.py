@@ -234,7 +234,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     if eval_times == True:
         tpnts = eval_array
         print(tpnts, 'time points')
-        tpnts_dense = np.linspace(tpnts[0], tpnts[1], 100)
+        tpnts_dense = np.linspace(tpnts[0], tpnts[-1], 100)
         for it, tt in enumerate(tpnts_dense):
             mesh.move(tt)
             
@@ -246,7 +246,9 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
 
             plot_edges_converging(tt, mesh.edges, rfront, 23)
         plt.draw()
-        # plt.show()
+        plt.show()
+        plt.savefig('edges_converging.pdf')
+
 
 
    
@@ -402,7 +404,7 @@ def problem_identifier():
 def plot_edges_converging(t, edges, rf, fign):
     plt.figure(fign)
     for ed in range(edges.size):
-        plt.scatter(edges[ed], t, s = 128, c = 'k', marker = "|")
+        plt.scatter(edges[ed], t, s = 128, c = 'k', marker = ".")
     plt.scatter(rf, t, c='r', marker='x')
 
 

@@ -221,6 +221,10 @@ class rhs_class():
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
             print(np.max(V_old), 'max u')
             print(np.min(V_old), 'min u')
+
+            third = int((self.N_space+1)/3)
+            rest = int(self.N_space+1 - 2*third)
+            
             # print(np.argmin(np.abs(V_old - np.min(V_old))), 'location of min')
             
             # print(np.min(V_old.copy().reshape((self.N_ang+1, self.N_space, self.M+1))[-1, :, :]), 'min e vec')
@@ -229,13 +233,16 @@ class rhs_class():
             menis_t = converging_time_function(t, self.sigma_func)
             # rfront = 0.01 * (-menis_t) ** 0.679502 
             rfront = converging_r(menis_t, self.sigma_func)
-            third = int(4*(self.N_space + 1)/9)
+ 
             print(np.min(np.abs(rfront-mesh.edges)), 'closest edge to rf')
             # tracker_edge = int(-third) 
             # print(tracker_edge)
             # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
-            # if self.N_space <= 100:
+            if mesh.moving == True:
+                tracker_edges = mesh.edges[third:third+rest]
+                rf_in_tracker_region = tracker_edges[0] <rfront < tracker_edges[-1]           # if self.N_space <= 100:
+            print('is the wavefront in the tracking region?', rf_in_tracker_region)
             #     if self.geometry['sphere'] == True:
             #         print(mesh.edges/self.x0)
                 # else:

@@ -26,6 +26,7 @@ from ..solver_classes.phi_class import scalar_flux
 from ..solver_classes.mesh import mesh_class
 from ..solver_classes.rhs_class_1 import rhs_class
 from ..solver_classes.functions import quadrature
+from ..solver_classes.functions import converging_time_function, converging_r
 # from ..solver_classes.rhs_class import rhs_class
 
 from ..solver_classes.make_phi import make_output
@@ -233,7 +234,24 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     if eval_times == True:
         tpnts = eval_array
         print(tpnts, 'time points')
+        tpnts_dense = np.linspace(tpnts[0], tpnts[1], 100)
+        for it, tt in enumerate(tpnts_dense):
+            mesh.move(tt)
+            
+            # dimensional_t = tt/29.98
+            # menis_t = -29.6255 + dimensional_t
+            menis_t = converging_time_function(tt, sigma_func)
+            # rfront = 0.01 * (-menis_t) ** 0.679502 
+            rfront = converging_r(menis_t, sigma_func)
+
+            plot_edges_converging(tt, mesh.edges, rfront, 23)
+        plt.draw()
+        # plt.show()
+
+
+   
     mesh_dry_run(mesh, tfinal)
+    
 
     # sol_JL = jl_integrator_func(RHS, IC, (0, tfinal), tpnts)
 
@@ -381,10 +399,19 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
 def problem_identifier():
     name_array = []
 
-def plot_edges(edges, fign):
+def plot_edges_converging(t, edges, rf, fign):
+    plt.figure(fign)
+    for ed in range(edges.size):
+        plt.scatter(edges[ed], t, s = 128, c = 'k', marker = "|")
+    plt.scatter(rf, t, c='r', marker='x')
+
+
+def plot_edges(edges,fign):
     plt.figure(fign)
     for ed in range(edges.size):
         plt.scatter(edges[ed], 0.0, s = 128, c = 'k', marker = "|")
+
+
 
 def x0_function(x0, source_type, count):
         if source_type[3] or source_type[4] == 1:

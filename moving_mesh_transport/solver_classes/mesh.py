@@ -951,16 +951,18 @@ class mesh_class(object):
         self.Dedges_const = (final_edges - self.edges0)/self.tfinal
         print(self.edges0, 'initial')
         print(final_edges, 'final')
+
     def tracker_region_mesh(self, location_to_track):
         width = self.x0/10
         third = int((self.N_space+1)/3)
         rest = int(self.N_space+1 - 2*third)
-        tracker_edges = np.linspace(location_to_track + width/2, location_to_track - width/2, rest)
-        left_edges = np.linspace(location_to_track - width/2, self.x0, third+1)[1:]
-        right_edges = np.linspace(0, location_to_track + width/2, third + 1)[:-1]
-        edges = np.concatenate((left_edges, tracker_edges, right_edges))
+        tracker_edges = np.linspace(location_to_track - width/2, location_to_track + width/2, rest)
+        left_edges = np.linspace(location_to_track + width/2, self.x0, third+1)[1:]
+        right_edges = np.linspace(0, location_to_track - width/2, third + 1)[:-1]
+        edges = np.concatenate((right_edges, tracker_edges, left_edges))
         assert edges.size == self.N_space +1
-        assert (0 <= edges <= self.x0).all()
+        assert (0 <= edges).all()
+        assert (edges <= self.x0).all()
         return edges
     
     def menis_init_6real(self):
@@ -970,11 +972,14 @@ class mesh_class(object):
         menis_tm = converging_time_function(self.tfinal/2, self.sigma_func)
         rfrontm= converging_r(menis_tm, self.sigma_func)
 
-        edges0 = self.tracker_region_mesh(.55)
+        edges0 = self.tracker_region_mesh(9.499)
+        print(edges0, 'initial edges')
         self.edges0 = edges0
         self.edges = edges0
         edgesm = self.tracker_region_mesh(rfrontm)
+        print(edgesm, 'middle edges')
         edgesf = self.tracker_region_mesh(rfrontf)
+        print(edgesf, 'final edges')
 
         self.Dedges_const = self.edges * 0 
         self.c1s = self.edges * 0

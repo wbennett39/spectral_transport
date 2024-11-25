@@ -86,7 +86,7 @@ run.parameters['integrator'] = 'BDF'
 run.mesh_parameters['eval_times'] = False
 run.mesh_parameters['Msigma'] = 0
 run.parameters['boundary_source']['N_angles'] = [2]
-run.boundary_source(0,0)
+# run.boundary_source(0,0)
 
 run.load('marshak')
 for it, N_space in enumerate(N_spaces_list):
@@ -96,17 +96,17 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['at'] = 1e-5
     run.parameters['all']['lumping'] = False
     # run.parameters['all']['at'] = 5e-1
-    run.parameters['all']['e_initial'] = 5e-9
+    run.parameters['all']['e_initial'] = 5e-7
     run.parameters['boundary_source']['N_angles'] = [N_ang]
     run.parameters['all']['Ms'] = [MM]
     run.mesh_parameters['Msigma'] = MM
     run.parameters['integrator'] = 'BDF'
     print(run.parameters['integrator'], 'integrator methods')
 
-    menis_times = np.array([-94.706889, -27.126998, -1])
+    # menis_times = np.array([-94.706889, -27.126998, -1])
     # menis_times = np.array([-1])
     # menis_times = np.array([-140, -94.706889, -27.126998])
-    # menis_times = np.array([-140, -100, -94.706889])
+    menis_times = np.array([-140, -100, -94.706889])
     # menis_times = np.array([-140, -100, -97.706889])
     # menis_times = np.array([-145, -125, -115])
     # menis_times = np.array([-145.47, -145.4, -145.3])

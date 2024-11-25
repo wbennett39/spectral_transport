@@ -953,7 +953,7 @@ class mesh_class(object):
         print(final_edges, 'final')
 
     def tracker_region_mesh(self, location_to_track):
-        width = self.x0/10
+        width = self.x0/6.666666666666666666666666666
         third = int((self.N_space+1)/3)
         rest = int(self.N_space+1 - 2*third)
         tracker_edges = np.linspace(location_to_track - width/2, location_to_track + width/2, rest)
@@ -978,7 +978,7 @@ class mesh_class(object):
         edges23 = self.tracker_region_mesh(rfront23)
 
 
-        edges0 = self.tracker_region_mesh(9.499)
+        edges0 = self.tracker_region_mesh(9.249)
         print(edges0, 'initial edges')
         self.edges0 = edges0
         self.edges = edges0

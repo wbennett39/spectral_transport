@@ -248,6 +248,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         plt.draw()
         plt.show()
         plt.savefig('edges_converging.pdf')
+        assert 0
 
 
 
@@ -404,7 +405,7 @@ def problem_identifier():
 def plot_edges_converging(t, edges, rf, fign):
     plt.figure(fign)
     for ed in range(edges.size):
-        plt.scatter(edges[ed], t, s = 128, c = 'k', marker = ".")
+        plt.scatter(edges[ed], t, s = 16, c = 'k', marker = ".")
     plt.scatter(rf, t, c='r', marker='x')
 
 

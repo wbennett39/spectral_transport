@@ -953,7 +953,7 @@ class mesh_class(object):
         print(final_edges, 'final')
 
     def tracker_region_mesh(self, location_to_track):
-        width = self.x0/6.666666666666666666666666666
+        width = self.x0/5
         third = int((self.N_space+1)/3)
         rest = int(self.N_space+1 - 2*third)
         tracker_edges = np.linspace(location_to_track - width/2, location_to_track + width/2, rest)
@@ -966,25 +966,31 @@ class mesh_class(object):
         return edges
     
     def menis_init_6real(self):
-        menis_tf = converging_time_function(self.tfinal, self.sigma_func)
+
+        t1 = self.tfinal/3
+        t2 = 2*self.tfinal/3
+        t3 = self.tfinal
+
+
+        menis_tf = converging_time_function(t3, self.sigma_func)
         rfrontf= converging_r(menis_tf, self.sigma_func)
 
-        menis_tm = converging_time_function(self.tfinal/2, self.sigma_func)
+        menis_tm = converging_time_function(t1, self.sigma_func)
         rfrontm= converging_r(menis_tm, self.sigma_func)
 
-        menis_t23 = converging_time_function(2*self.tfinal/3, self.sigma_func)
+        menis_t23 = converging_time_function(t2, self.sigma_func)
         rfront23= converging_r(menis_t23, self.sigma_func)
 
         edges23 = self.tracker_region_mesh(rfront23)
 
-
-        edges0 = self.tracker_region_mesh(9.249)
+        xi = 8.9
+        edges0 = self.tracker_region_mesh(xi)
         print(edges0, 'initial edges')
         self.edges0 = edges0
         self.edges = edges0
         edgesm = self.tracker_region_mesh(rfrontm)
         print(edgesm, 'middle edges')
-        edgesf = self.tracker_region_mesh(rfrontf)
+        edgesf = self.tracker_region_mesh(rfrontf +0.1)
         print(edgesf, 'final edges')
 
         self.Dedges_const = self.edges * 0 
@@ -993,7 +999,7 @@ class mesh_class(object):
 
         # self.Dedges_const, self.c1s = self.two_point_interpolation(edgesm, edgesf, self.tfinal/2, self.tfinal, self.edges0)
 
-        self.Dedges_const, self.c1s, self.c2s =  self.three_point_interpolation(self.tfinal/2, 2*self.tfinal/3, self.tfinal, edgesm, edges23, edgesf, self.edges0)
+        self.Dedges_const, self.c1s, self.c2s =  self.three_point_interpolation(t1, t2, t3, edgesm, edges23, edgesf, self.edges0)
 
         
 

@@ -247,7 +247,7 @@ class rhs_class():
             #         print(mesh.edges/self.x0)
                 # else:
                 #     print(mesh.edges)
-            print(mesh.edges)
+            # print(mesh.edges)
             print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')
             self.delta_tavg = 0.0
             self.counter = 0

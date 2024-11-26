@@ -990,7 +990,7 @@ class mesh_class(object):
         self.edges = edges0
         edgesm = self.tracker_region_mesh(rfrontm)
         print(edgesm, 'middle edges')
-        edgesf = self.tracker_region_mesh(rfrontf +0.1)
+        edgesf = self.tracker_region_mesh(rfrontf +0.005)
         print(edgesf, 'final edges')
 
         self.Dedges_const = self.edges * 0 

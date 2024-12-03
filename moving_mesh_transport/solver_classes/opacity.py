@@ -282,12 +282,13 @@ class sigma_integrator():
             elif self.sigma_func['test4'] == 1:
                 # floor = 5e-3
                 # resmax = 6e3
-                a = x[0]
-                b = x[-1]
-                resmax = 15000 * (b-a)
+                a = np.min(x)
+                b = np.max(x)
+                # resmax = 300 / (b-a)
+                resmax = 4400
                 # resmax = 1e5
                 # resmax = 950
-                # resmax = 5e3
+                # resmax = 15e3
                 # resmax = 500
                 # if(T_old<0).any():
                 #     assert 0

@@ -285,7 +285,7 @@ class sigma_integrator():
                 a = np.min(x)
                 b = np.max(x)
                 # resmax = 300 / (b-a)
-                resmax = 4400
+                resmax = 6400
                 # resmax = 1e5
                 # resmax = 950
                 # resmax = 15e3

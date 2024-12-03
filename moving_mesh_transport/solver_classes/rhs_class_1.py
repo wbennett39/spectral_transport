@@ -339,8 +339,8 @@ class rhs_class():
             if self.sigma_func['test4']== True:
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
-                if xL < rfront - self.x0/5 and rfront - self.x0/5 >0  :
-                    update = False
+                if xR < rfront - self.x0/5 and rfront - self.x0/5 >0  :
+                    update = True
             # rfront = 0.01 * (-menis_t) ** 0.679502 
             # matrices.matrix_test(True)
             if update == False:

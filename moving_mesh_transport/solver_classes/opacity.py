@@ -48,7 +48,8 @@ data = [('N_ang', int64),
         ('current_space', int64),
         ('opacity_vec', float64[:,:]),
         ('a', float64),
-        ('lumping', int64)
+        ('lumping', int64),
+        ('loud', int64)
 
         ]
 
@@ -82,6 +83,7 @@ class sigma_integrator():
         self.sigma_v = build.fake_sedov_v0
         self.geometry = build.geometry
         self.lumping = build.lumping
+        self.loud = True
         
         # initialize integrals of Basis Legendre polynomials
         self.create_integral_matrices()
@@ -285,7 +287,12 @@ class sigma_integrator():
                 a = np.min(x)
                 b = np.max(x)
                 # resmax = 300 / (b-a)
-                resmax = 6400
+                resmax = 8400
+                if self.loud == True:
+                    print('###   ###   ###   ###   ###   ###   ###   ###')
+                    print(resmax, 'max sigma')
+                    print('###   ###   ###   ###   ###   ###   ###   ###')
+                    self.loud = False
                 # resmax = 1e5
                 # resmax = 950
                 # resmax = 15e3

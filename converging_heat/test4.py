@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 120
+spaces = 100
 M = 1
 #####
 #####
@@ -162,9 +162,9 @@ plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
 
 
 
-plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
-plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
-plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
+# plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
+# plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
+# plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
 plt.plot(edges2, edges2*0, 'k|', markersize = 40)
 
 

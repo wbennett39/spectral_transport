@@ -339,12 +339,15 @@ class rhs_class():
             if self.sigma_func['test4']== True:
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
-                if xR < rfront - self.x0/5 and rfront - self.x0/5 >0  :
+                if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0)   :
+                    update = False
+                else:
                     update = True
+   
             # rfront = 0.01 * (-menis_t) ** 0.679502 
             # matrices.matrix_test(True)
             if update == False:
-                V_new[:, space, :] = V_old[:, space, :]
+                V_new[:, space, :] = V_old[:, space, :] * 0
 
             elif update == True:
                 u_old = make_u_old(V_old[0, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M)

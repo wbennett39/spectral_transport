@@ -73,7 +73,7 @@ MM = 1
 N_ang = 8
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-N_spaces_list = [300]
+N_spaces_list = [800]
 
 run = run()
 run.load()
@@ -94,6 +94,8 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['N_spaces'] = [N_space]
     run.parameters['all']['rt'] = 11e-3
     run.parameters['all']['at'] = 11e-4
+    print('rtol', run.parameters['all']['rt'] )
+    print('atol',run.parameters['all']['at'] )
     run.parameters['all']['lumping'] = False
     # run.parameters['all']['at'] = 5e-1
     run.parameters['all']['e_initial'] = 5e-10

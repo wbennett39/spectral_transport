@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 100
+spaces = 300
 M = 1
 #####
 #####
@@ -31,7 +31,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = 160
+spaces2 = 300
 
 #####
 sigma_sb = 5.670374419e-5
@@ -43,12 +43,13 @@ kev_kelvin = 1000. * ev_kelvin
 
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
-sn_transport2 = h5py.File('results_test4_1030.h5', 'r+')
+sn_transport2 = h5py.File('results_test4_12-6.h5', 'r+')
 print(sn_transport2.keys())
 tr2 = sn_transport2[f'M=[{M}]_[{spaces2}]_cells']
 e2 = tr2['energy_density'][:]    
 edges2 = tr2['edges'][:]
 #
+
 #
 #
 #
@@ -69,6 +70,8 @@ mat_T[1,:] = np.abs(ee2)**.25 * np.sign(ee2)
 ee3 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee3)
 
+print(xs, 'xs')
+print(edges, 'edges')
 
 
 xs2 = tr2['xs'][:]

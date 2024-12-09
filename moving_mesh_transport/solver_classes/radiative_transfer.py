@@ -64,7 +64,8 @@ data = [('temp_function', int64[:]),
         ('ws_quad_chebyshev', float64[:]),
         ('N_space', int64),
         ('cs', float64[:,:]),
-        ('Msigma', int64)
+        ('Msigma', int64),
+        ('cs_T4', float64[:])
 
 
 
@@ -137,6 +138,20 @@ class T_function(object):
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
         self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * 1 * normTn(j, argument, a, b))
     
+    
+    def integrate_moments_sphere(self, a, b, j, k, T4):
+        # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
+        
+        argument = 0.5*(b-a)*self.xs_quad + (a+b) * 0.5
+        # argument = (-b-a + 2 * self.xs_quad) / (b-a)
+        # if np.abs(argument - T_eval_points[k]).any() >=1e-16:
+        #     print(argument - T_eval_points[k])
+        #     assert(0)
+
+        # opacity = self.sigma_function(self.xs_quad, t, T_old)
+        #  
+        self.cs_T4[j] =  0.5 * (b-a) * np.sum(self.ws_quad * T4 * 2.0 * normTn(j, argument, a, b)) 
+    
     def integrate_trap_sphere(self, a, b, j, sigma_class, k):                      
         self.get_sigma_a_vec(np.array([a]), sigma_class, self.make_T(np.array([a]), a, b))
         # self.H[j] = 0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b) * 1 * normTn(j, argument, a, b))
@@ -146,11 +161,15 @@ class T_function(object):
         for n in range(self.Msigma + 1):
             Ta = self.make_T(np.array([a]), a, b)
             Tb = self.make_T(np.array([b]), a, b)
-            left = (a**2 * Ta**4*np.sign(Ta) * 1 * normTn(j, np.array([a]), a, b) * normTn(n, np.array([a]), a, b))[0]
-            right = (b**2 * Tb**4 * np.sign(Tb) * 1 * normTn(j, np.array([b]), a, b) * normTn(n, np.array([b]), a, b))[0]
+            left = (a**2 * Ta**4* np.sign(Ta) * normTn(j, np.array([a]), a, b) * normTn(n, np.array([a]), a, b))[0]
+            right = (b**2 * Tb**4 * np.sign(Tb) * normTn(j, np.array([b]), a, b) * normTn(n, np.array([b]), a, b))[0]
             self.H[j] += self.cs[k, n] * 0.5 * (b-a) * (left + right)
 
-
+    def project_T4_to_basis(self, a, b, T4):
+        argument = 0.5*(b-a)*self.xs_quad + (a+b) * 0.5
+        T4 = self.make_T(argument, a, b)**4
+        for j in range(0, self.M+1):
+            self.integrate_moments_sphere(a, b, j, T4)
 
         # self.H[j] =  0.5 * (b-a) * (left + right)
         #assert(0)
@@ -420,8 +439,8 @@ class T_function(object):
                     if self.lumping == False:
                         self.integrate_quad_sphere(xL, xR, j, sigma_class)
                     else:
-                         self.integrate_trap_sphere(xL, xR, j, sigma_class, space)
-                        # self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                        #  self.integrate_trap_sphere(xL, xR, j, sigma_class, space)
+                        self.integrate_quad_sphere(xL, xR, j, sigma_class)
         
 
 

@@ -92,7 +92,7 @@ class scalar_flux(object):
                             if self.geometry['slab'] == True:
                                 self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
                             elif self.geometry['sphere'] == True:
-                                if self.lumping == True:
+                                if self.lumping == True: # this is a very inefficient implementation 
                                     for ii in range(self.M+1):
                                         for jj in range(self.M+1):
                                             VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)

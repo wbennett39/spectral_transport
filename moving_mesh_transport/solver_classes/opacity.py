@@ -420,12 +420,15 @@ class sigma_integrator():
                                 for ii in range(self.M+1):
                                     for jj in range(self.M+1):
                                         VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
-                            if self.lumping == False:
-                                self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
-                            else:
-                                # self.VV[i] +=   self.cs[space, k] * u[j] * VVmatLUMPED(i, j, k, xL, xR) / (math.pi**1.5) 
                                 VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                
                                 self.VV[i] +=   self.cs[space, k] * u[j] * VV_lumped[i,j]
+
+                            elif self.lumping == False:
+                                self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
+      
+                                # self.VV[i] +=   self.cs[space, k] * u[j] * VVmatLUMPED(i, j, k, xL, xR) / (math.pi**1.5) 
+                          
 
                             # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(xR-xL))<=1e-5)
                             # self.VV[i] +=  self.cs[space, k] * u[j]  / (math.pi**1.5) * (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3

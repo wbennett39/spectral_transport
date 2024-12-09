@@ -10,7 +10,7 @@ from numba import types, typed
 import numba as nb
 from .GMAT_sphere import VV_matrix, VVmatLUMPED
 from .functions import quadrature
-
+from .functions import mass_lumper
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
 # RT_type = deferred_type()
@@ -288,7 +288,7 @@ class sigma_integrator():
                 b = np.max(x)
                 # resmax = 300 / (b-a)
                 # resmax = 10400
-                resmax = 5000
+                resmax = 15000
                 if self.loud == True:
                     print('###   ###   ###   ###   ###   ###   ###   ###')
                     print(resmax, 'max sigma')
@@ -409,16 +409,23 @@ class sigma_integrator():
         # if self.sigma_func['constant'] == True:
         #     self.VV = u * self.sigma_t
         # else:
+        VV = np.zeros((self.M+1, self.M+1))
         for i in range(self.M + 1):
                 for j in range(self.M + 1):
                     for k in range(self.Msigma + 1):
                         if self.geometry['slab'] == True:
                             self.VV[i] +=   self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
                         elif self.geometry['sphere'] == True:
+                            if self.lumping == True:
+                                for ii in range(self.M+1):
+                                    for jj in range(self.M+1):
+                                        VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
                             if self.lumping == False:
                                 self.VV[i] +=   self.cs[space, k] * u[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
                             else:
-                                self.VV[i] +=   self.cs[space, k] * u[j] * VVmatLUMPED(i, j, k, xL, xR) / (math.pi**1.5) 
+                                # self.VV[i] +=   self.cs[space, k] * u[j] * VVmatLUMPED(i, j, k, xL, xR) / (math.pi**1.5) 
+                                VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                self.VV[i] +=   self.cs[space, k] * u[j] * VV_lumped[i,j]
 
                             # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(xR-xL))<=1e-5)
                             # self.VV[i] +=  self.cs[space, k] * u[j]  / (math.pi**1.5) * (math.sqrt(1/(-xL + xR))*(xL**2 + xL*xR + xR**2))/3

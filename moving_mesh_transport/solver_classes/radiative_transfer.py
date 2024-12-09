@@ -21,6 +21,8 @@ import math
 from numba import types, typed
 import numba as nb
 from .opacity import sigma_integrator
+from .functions import mass_lumper
+
  
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)

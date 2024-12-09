@@ -74,6 +74,18 @@ print(xs, 'xs')
 print(edges, 'edges')
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 xs2 = tr2['xs'][:]
 phi2 = tr2['scalar_flux'][:]
 #edges = tr['edges'][:]

@@ -15,6 +15,7 @@ from .GMAT_sphere import VV_matrix, VVmatLUMPED
 from numba import float64, int64, deferred_type
 from numba.experimental import jitclass
 from numba import types, typed
+from .functions import mass_lumper
 import numba as nb
 ###############################################################################
 build_type = deferred_type()
@@ -82,6 +83,8 @@ class scalar_flux(object):
 
         # else:
             self.PV = self.PV*0
+            VV = np.zeros((self.M+1, self.M+1))
+
             for i in range(self.M+1):
                 for l in range(self.N_ang):
                     for j in range(self.M+1):
@@ -89,10 +92,17 @@ class scalar_flux(object):
                             if self.geometry['slab'] == True:
                                 self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
                             elif self.geometry['sphere'] == True:
-                                if self.lumping == False:
+                                if self.lumping == True:
+                                    for ii in range(self.M+1):
+                                        for jj in range(self.M+1):
+                                            VV[ii,jj] = VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                    VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                    # self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VVmatLUMPED(i, j,k, xL, xR) / (math.pi**1.5)
+                                    self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
+                                elif self.lumping == False:
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
-                                else:
-                                    self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VVmatLUMPED(i, j,k, xL, xR) / (math.pi**1.5)
+                                # else:
+
 
             if self.geometry['slab'] == True:                    
                 self.scalar_flux_term = self.PV / math.sqrt(xR-xL)

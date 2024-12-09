@@ -969,5 +969,21 @@ def make_u_old(vector, edges_old, a, b, xs_quad, ws_quad, M):
         res[i] =  (b-a)/2 * np.sum(ws_quad * psi * normTn(i, z, a, b))
     
     return res
-
+@njit
+def mass_lumper(Mass, a, b, invert = True):
+            M = Mass[0].size -1 
+            mass_lumped = np.zeros((M+1, M+1))
+            mass_lumped_inv = np.zeros((M+1, M+1))
+            MI = np.zeros((M+1, M+1))
+            if M != 1:
+                raise ValueError('The lumped mass matrix is sigular for M >1 and there is no reason to lump the M=0 equations')
+            for i in range(M+1):
+                for j in range(M+1):
+                    mass_lumped[i,i] += Mass[i, j]
+            if invert == True:
+                for i in range(M+1):
+                    mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
+                return mass_lumped, mass_lumped_inv
+            else:
+                return mass_lumped, mass_lumped_inv
     

@@ -24,6 +24,7 @@ from numba import prange
 from numba.experimental import jitclass
 from numba import int64, float64, deferred_type, prange
 from numba import types, typed
+from .functions import mass_lumper
 
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
@@ -364,6 +365,7 @@ class rhs_class():
                     flux.make_P(V_old[:,space,:], space, xL, xR)
         
                 PV = flux.scalar_flux_term
+                # source.make_source(t, xL, xR, uncollided_sol)
                 S = source.S
                 H = transfer_class.H
                 if self.geometry['sphere'] == True:
@@ -371,7 +373,7 @@ class rhs_class():
                     J = matrices.J
                     if (self.lumping == True) and (self.M >0):
                         # Mass, Minv = self.mass_lumper(Mass, True) 
-                        Minv = self.mass_lumper(Mass, xL, xR)
+                        Mass, Minv = mass_lumper(Mass, xL, xR)
 
                         # print(Minv)
                         # L = self.mass_lumper(L)
@@ -409,6 +411,8 @@ class rhs_class():
                     transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
 
                     H = transfer_class.H
+                    # if self.lumping == True:
+                    #     H = mass_lumper(H, xL, xR)[0]
                     # if self.lumping == True:
                     #     H = self.mass_lumper(H)
                     # if (H <0).any():
@@ -561,21 +565,7 @@ class rhs_class():
 
             return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
         
-    def mass_lumper(self, Mass, a, b, invert = True):
-            mass_lumped = np.zeros((self.M+1, self.M+1))
-            mass_lumped_inv = np.zeros((self.M+1, self.M+1))
-            MI = np.zeros((self.M+1, self.M+1))
-            if self.M != 1:
-                raise ValueError('The lumped mass matrix is sigular for M >1 and there is no reason to lump the M=0 equations')
-            for i in range(self.M+1):
-                for j in range(self.M+1):
-                    mass_lumped[i,i] += Mass[i, j]
-            if invert == True:
-                for i in range(self.M+1):
-                    mass_lumped_inv[i,i] = 1./mass_lumped[i,i]
-                return mass_lumped_inv
-            else:
-                return mass_lumped_inv
+    
             # # a += 1e-12
             # # MI[0,0] = 0.5 * (1/a**2 + 1/b**2)
             # # MI[0,1] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))

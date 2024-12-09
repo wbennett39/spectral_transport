@@ -66,7 +66,8 @@ class G_L:
         self.J = np.zeros((self.M+1, self.M+1))
         self.VV = np.zeros((self.N+1, self.M+1, self.M+1))
         self.MPRIME = np.zeros((self.M+1, self.M+1))
-        self.lumping = build.lumping
+        # self.lumping = build.lumping
+        self.lumping = False
 
         self.Mass_denom = Mass_denom[:]
         self.J_denom = J_denom[:]

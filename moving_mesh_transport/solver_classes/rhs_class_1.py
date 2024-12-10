@@ -193,7 +193,7 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
-        self.slope_limiter = False
+        self.slope_limiter = True
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
         

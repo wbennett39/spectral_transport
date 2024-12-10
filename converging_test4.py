@@ -41,7 +41,7 @@ from moving_mesh_transport.loading_and_saving.load_solution import load_sol as l
 import h5py 
 
 import numpy as np
-from moving_mesh_transport.solver_functions.run_functions import run
+
 
 # menis_times = np.array([-145, -140, -135])
 # menis_times = np.array([-140, -135, -130])
@@ -67,6 +67,7 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50]):
+    from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
     MM = 1

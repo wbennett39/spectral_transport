@@ -73,7 +73,7 @@ MM = 1
 N_ang = 2
 # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-N_spaces_list = [50]
+N_spaces_list = [20]
 
 run = run()
 run.load()
@@ -112,7 +112,7 @@ for it, N_space in enumerate(N_spaces_list):
     # menis_times = np.array([-140, -94.706889, -27.126998])
     # menis_times = np.array([-140, -100, -94.706889])
     # menis_times = np.array([-140, -100, -97.706889])
-    menis_times = np.array([-145, -135, -120])
+    menis_times = np.array([-145, -135, -130])
     # menis_times = np.array([-145.47, -145.4, -145.3])
 
     dimensional_times =  145.4733877 + menis_times 

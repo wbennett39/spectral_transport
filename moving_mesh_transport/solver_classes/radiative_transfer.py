@@ -87,7 +87,7 @@ class T_function(object):
         self.clight = 29.98 # cm/ns
         self.a2 = 5.67e-5 # in ergs
         # self.lumping = build.lumping
-        self.lumping = False
+        self.lumping = build.lumping
 
         self.geometry = build.geometry
         self.sigma_func = build.sigma_func

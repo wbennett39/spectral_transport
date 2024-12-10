@@ -292,8 +292,8 @@ class rhs_class():
                         # print('left is negative')
                         # V_new[angle, k, 1] = -c0 * B_left0 / B_left1    
                         V_new[angle, k, 1] = -c0 * (-1/math.sqrt(2))   
-                        print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
-                        print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
+                        # print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
+                        # print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
 
                     elif (c0 * B_right0 + c1 * B_right1) < 0:
                         # print('right is negative')
@@ -363,7 +363,7 @@ class rhs_class():
         if self.slope_limiter == True and self.M>0:
             V_old_new = self.slope_scale(V_old, mesh.edges)
             V_old = V_old_new
-            V_old = self.slope_scale(V_old, mesh.edges, stop = True)
+            # V_old = self.slope_scale(V_old, mesh.edges, stop = True)
 
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0

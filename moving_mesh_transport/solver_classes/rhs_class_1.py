@@ -260,7 +260,7 @@ class rhs_class():
 
     def slope_scale(self, V, edges, stop = False):
         floor = -1e-8
-        V_new = V * 0
+        V_new = V 
         for k in range(self.N_space):
             h = math.sqrt(edges[k+1] - edges[k])
             edgeval = 1 / h / math.sqrt(math.pi)
@@ -275,19 +275,25 @@ class rhs_class():
             for angle in range(self.N_ang+1):
                 c0 = V[angle, k, 0]
                 c1 = V[angle, k, 1]
-                if c0 >= floor:
-                    if c0 * B_left0 + c1*B_left1 < floor:
-                        if stop == True:
-                            print(c0 * B_left0 + c1*B_left1)
+                if c0 ==0:
+                    V_new[angle,k,1] = 0.0
+                elif c0 > 0:
+                    if (c0 * B_left0 + c1*B_left1) < 0:
+                        if stop == True and (c0 * B_left0 + c1*B_left1) < floor:
+                            print(c0 * B_left0 + c1*B_left1, 'left')
+                            print(c0 * B_right0 + c1 * B_right1, 'right')
+                            print(c0, 'c0')
+                            print(c1, 'c1')
                             assert 0
                         # print('left is negative')
                         V_new[angle, k, 1] = -c0 * B_left0 / B_left1    
-                    elif c0 * B_right0 + c1 * B_right1 < floor:
+
+                    elif (c0 * B_right0 + c1 * B_right1) < 0:
                         # print('right is negative')
                         V_new[angle, k, 1] = -c0 * B_right0 / B_right1
-                elif c0 < floor:
+                elif c0 < 0:
                     print('negative c0')
-            return V_new 
+        return V_new 
 
 
         
@@ -343,7 +349,7 @@ class rhs_class():
         mesh.move(t)
         V_old_new = self.slope_scale(V_old, mesh.edges)
         V_old = V_old_new
-        V_old = self.slope_scale(V_old, mesh.edges, stop = True)
+        # V_old = self.slope_scale(V_old, mesh.edges, stop = True)
 
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0

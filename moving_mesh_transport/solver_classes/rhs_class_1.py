@@ -117,7 +117,8 @@ data = [('N_ang', int64),
         ('edges_old', float64[:]),
         ('ws_quad', float64[:]),
         ('t_old_list', float64[:]),
-        ('time_save_points', int64)
+        ('time_save_points', int64),
+        ('slope_limiter', int64)
 
         ]
 ##############################################################################
@@ -191,6 +192,7 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
+        self.slope_limiter = True
         
         
   
@@ -291,8 +293,10 @@ class rhs_class():
                     elif (c0 * B_right0 + c1 * B_right1) < 0:
                         # print('right is negative')
                         V_new[angle, k, 1] = -c0 * B_right0 / B_right1
-                elif c0 < 0:
-                    print('negative c0')
+                # elif c0 < 0:
+                #     V_new[angle, k, 0] = 0
+                #     V_new[angle, k, 1] = 0 
+                    # print('negative c0')
         return V_new 
 
 
@@ -347,8 +351,9 @@ class rhs_class():
 
 
         mesh.move(t)
-        V_old_new = self.slope_scale(V_old, mesh.edges)
-        V_old = V_old_new
+        if self.slope_limiter == True:
+            V_old_new = self.slope_scale(V_old, mesh.edges)
+            V_old = V_old_new
         # V_old = self.slope_scale(V_old, mesh.edges, stop = True)
 
         # represent opacity as a polynomial expansion

@@ -277,22 +277,28 @@ class rhs_class():
             for angle in range(self.N_ang+1):
                 c0 = V[angle, k, 0]
                 c1 = V[angle, k, 1]
-                if c0 ==0:
-                    V_new[angle,k,1] = 0.0
-                elif c0 > -floor:
+                
+                # if c0 ==0:
+                #     V_new[angle,k,1] = 0.0
+                if c0 > 0:
                     if (c0 * B_left0 + c1*B_left1) < 0:
                         if stop == True and (c0 * B_left0 + c1*B_left1) < floor:
                             print(c0 * B_left0 + c1*B_left1, 'left')
                             print(c0 * B_right0 + c1 * B_right1, 'right')
                             print(c0, 'c0')
                             print(c1, 'c1')
+                            print(V[angle, k,:])
                             assert 0
                         # print('left is negative')
-                        V_new[angle, k, 1] = -c0 * B_left0 / B_left1    
+                        # V_new[angle, k, 1] = -c0 * B_left0 / B_left1    
+                        V_new[angle, k, 1] = -c0 * (-1/math.sqrt(2))   
+                        print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
+                        print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
 
                     elif (c0 * B_right0 + c1 * B_right1) < 0:
                         # print('right is negative')
-                        V_new[angle, k, 1] = -c0 * B_right0 / B_right1
+                        # V_new[angle, k, 1] = -c0 * B_right0 / B_right1
+                        V_new[angle, k, 1] = -c0 * (1/math.sqrt(2))  
 
                         if (c0 * B_left0 + V_new[angle, k, 1]*B_left1) < 0:
                             assert 0
@@ -354,7 +360,7 @@ class rhs_class():
 
 
         mesh.move(t)
-        if self.slope_limiter == True:
+        if self.slope_limiter == True and self.M>0:
             V_old_new = self.slope_scale(V_old, mesh.edges)
             V_old = V_old_new
             V_old = self.slope_scale(V_old, mesh.edges, stop = True)

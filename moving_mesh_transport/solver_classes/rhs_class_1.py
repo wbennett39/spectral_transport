@@ -181,8 +181,8 @@ class rhs_class():
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
         self.alphas = np.zeros(self.N_ang-1)
-        print(self.mus, 'mus')
-        print(self.ws, 'ws')
+        # print(self.mus, 'mus')
+        # print(self.ws, 'ws')
         self.make_alphas()
         self.old_percent_complete = 0.0
         self.stymie_count = 0
@@ -193,7 +193,8 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
-        self.slope_limiter = True
+        self.slope_limiter = False
+        print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
         
@@ -205,7 +206,7 @@ class rhs_class():
         self.alphas[0] = 0
         for ia in range(1,self.N_ang-1):
             self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia] * 2
-        print(self.alphas)
+        # print(self.alphas)
 
 
 

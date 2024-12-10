@@ -274,9 +274,11 @@ class rhs_class():
                 c1 = V[angle, k, 1]
                 if c0 >= 0:
                     if c1*B_left1 <0:
-                        V[angle, k, 1] = c0 * B_left0 / B_left1    
+                        # print('left is negative')
+                        V[angle, k, 1] = -c0 * B_left0 / B_left1    
                     elif c1 * B_right1 <0:
-                        V[angle, k, 1] = c0 * B_right0 / B_right1
+                        # print('right is negative')
+                        V[angle, k, 1] = -c0 * B_right0 / B_right1
                 elif c0 < 0:
                     print('negative c0')
             return V  

@@ -288,7 +288,7 @@ class sigma_integrator():
                 b = np.max(x)
                 # resmax = 300 / (b-a)
                 # resmax = 10400
-                resmax = 2000
+                resmax = 4000
                 if self.loud == True:
                     print('###   ###   ###   ###   ###   ###   ###   ###')
                     print(resmax, 'max sigma')

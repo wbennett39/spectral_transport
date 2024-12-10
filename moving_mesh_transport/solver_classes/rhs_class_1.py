@@ -257,6 +257,30 @@ class rhs_class():
         else:
             self.counter += 1
         self.told = t
+    def slope_scale(self, V, edges):
+        for k in range(self.N_space):
+            h = math.sqrt(edges[k+1] - edges[k])
+            edgeval = 1 / h / math.sqrt(math.pi)
+
+            B_left0 = edgeval
+            B_right0 = edgeval
+
+            B_right1 = math.sqrt(2) * edgeval
+
+            B_left1 = -B_right1
+
+            for angle in range(self.N_ang+1):
+                c0 = V[angle, k, 0]
+                c1 = V[angle, k, 1]
+                if c0 >= 0:
+                    if c1*B_left1 <0:
+                        V[angle, k, 1] = c0 * B_left0 / B_left1    
+                    elif c1 * B_right1 <0:
+                        V[angle, k, 1] = c0 * B_right0 / B_right1
+                elif c0 < 0:
+                    print('negative c0')
+            return V  
+
 
         
     def derivative_saver(self, t,  space, transfer_class):
@@ -309,6 +333,7 @@ class rhs_class():
 
 
         mesh.move(t)
+        V_old = self.slope_scale(V_old, mesh.edges)
 
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0

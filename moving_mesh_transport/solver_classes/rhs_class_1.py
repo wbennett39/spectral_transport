@@ -118,7 +118,8 @@ data = [('N_ang', int64),
         ('ws_quad', float64[:]),
         ('t_old_list', float64[:]),
         ('time_save_points', int64),
-        ('slope_limiter', int64)
+        ('slope_limiter', int64),
+        ('wavefront_estimator', float64)
 
         ]
 ##############################################################################
@@ -193,6 +194,7 @@ class rhs_class():
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
         self.slope_limiter = True
+        self.wavefront_estimator = 0.0
         
         
   
@@ -244,6 +246,7 @@ class rhs_class():
             # print(tracker_edge)
             # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
             print(rfront, 'marshak wavefront location')
+            print(self.wavefront_estimator, 'wave loc estimate')
             if mesh.moving == True:
                 tracker_edges = mesh.edges[third:third+rest]
                 rf_in_tracker_region = tracker_edges[0] <rfront < tracker_edges[-1]           # if self.N_space <= 100:
@@ -262,6 +265,7 @@ class rhs_class():
 
     def slope_scale(self, V, edges, stop = False):
         floor = -1e-8
+        posfloor = 1e-6
         V_new = V.copy() 
         for k in range(self.N_space):
             h = math.sqrt(edges[k+1] - edges[k])
@@ -282,6 +286,7 @@ class rhs_class():
                 #     V_new[angle,k,1] = 0.0
                 if c0 > 0:
                     if (c0 * B_left0 + c1*B_left1) < 0:
+                        self.wavefront_estimator = (edges[k+1] + edges[k])/2
                         if stop == True and (c0 * B_left0 + c1*B_left1) < floor:
                             print(c0 * B_left0 + c1*B_left1, 'left')
                             print(c0 * B_right0 + c1 * B_right1, 'right')
@@ -291,14 +296,14 @@ class rhs_class():
                             assert 0
                         # print('left is negative')
                         # V_new[angle, k, 1] = -c0 * B_left0 / B_left1    
-                        V_new[angle, k, 1] = -c0 * (-1/math.sqrt(2))   
+                        V_new[angle, k, 1] = posfloor/B_left1 -c0 * (-1/math.sqrt(2))   
                         # print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
                         # print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
 
                     elif (c0 * B_right0 + c1 * B_right1) < 0:
                         # print('right is negative')
                         # V_new[angle, k, 1] = -c0 * B_right0 / B_right1
-                        V_new[angle, k, 1] = -c0 * (1/math.sqrt(2))  
+                        V_new[angle, k, 1] = posfloor/ B_right1 -c0 * (1/math.sqrt(2))  
 
                         if (c0 * B_left0 + V_new[angle, k, 1]*B_left1) < 0:
                             assert 0

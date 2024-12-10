@@ -22,7 +22,7 @@ from numba import types, typed
 import numba as nb
 from .opacity import sigma_integrator
 from .functions import mass_lumper
-
+from .GMAT_sphere import VV_matrix
  
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
@@ -110,6 +110,8 @@ class T_function(object):
         self.e_vec = np.zeros(self.M+1)
         self.N_space = build.N_space
         self.cs = np.zeros((self.N_space, self.M+1))
+        self.cs_T4 = np.zeros(self.M+1)
+
     def make_e(self, xs, a, b):
         temp = xs*0
         for ix in range(xs.size):
@@ -139,10 +141,10 @@ class T_function(object):
         self.H[j] =  0.5 * (b-a) * np.sum((argument**2) * self.ws_quad * self.T_func(argument, a, b, sigma_class, self.space) * 1 * normTn(j, argument, a, b))
     
     
-    def integrate_moments_sphere(self, a, b, j, k, T4):
+    def integrate_moments_sphere(self, a, b, j, T4):
         # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
         
-        argument = 0.5*(b-a)*self.xs_quad + (a+b) * 0.5
+        argument = 0.5*(b-a)*self.xs_quad_chebyshev + (a+b) * 0.5
         # argument = (-b-a + 2 * self.xs_quad) / (b-a)
         # if np.abs(argument - T_eval_points[k]).any() >=1e-16:
         #     print(argument - T_eval_points[k])
@@ -150,7 +152,7 @@ class T_function(object):
 
         # opacity = self.sigma_function(self.xs_quad, t, T_old)
         #  
-        self.cs_T4[j] =  0.5 * (b-a) * np.sum(self.ws_quad * T4 * 2.0 * normTn(j, argument, a, b)) 
+        self.cs_T4[j] =  0.5 * (b-a) * np.sum(self.ws_quad_chebyshev * T4 * 2.0 * normTn(j, argument, a, b)) 
     
     def integrate_trap_sphere(self, a, b, j, sigma_class, k):                      
         self.get_sigma_a_vec(np.array([a]), sigma_class, self.make_T(np.array([a]), a, b))
@@ -165,9 +167,11 @@ class T_function(object):
             right = (b**2 * Tb**4 * np.sign(Tb) * normTn(j, np.array([b]), a, b) * normTn(n, np.array([b]), a, b))[0]
             self.H[j] += self.cs[k, n] * 0.5 * (b-a) * (left + right)
 
-    def project_T4_to_basis(self, a, b, T4):
-        argument = 0.5*(b-a)*self.xs_quad + (a+b) * 0.5
-        T4 = self.make_T(argument, a, b)**4
+    def project_T4_to_basis(self, a, b, sigma_class):
+        argument = 0.5*(b-a)*self.xs_quad_chebyshev + (a+b) * 0.5
+        T = self.make_T(argument, a, b)
+        T4 = T**4 * np.sign(T)
+        self.get_sigma_a_vec(argument, sigma_class, T)
         for j in range(0, self.M+1):
             self.integrate_moments_sphere(a, b, j, T4)
 
@@ -420,6 +424,7 @@ class T_function(object):
     def make_H(self, xL, xR, e_vec, sigma_class, space):
         self.e_vec = e_vec
         self.space = space
+        self.H = self.H * 0
             
         # Lines commented out are the original lines of code
 
@@ -434,13 +439,31 @@ class T_function(object):
                     self.integrate_quad(xL, xR, j, sigma_class)
 
             elif self.geometry['sphere'] == True:
-
+                
                 for j in range(self.M+1):
                     if self.lumping == False:
                         self.integrate_quad_sphere(xL, xR, j, sigma_class)
                     else:
                         #  self.integrate_trap_sphere(xL, xR, j, sigma_class, space)
                         self.integrate_quad_sphere(xL, xR, j, sigma_class)
+            
+                # self.project_T4_to_basis(xL, xR, sigma_class)
+                
+                # VV = np.zeros((self.M+1, self.M+1))
+                # for i in range(self.M + 1):
+                #     for j in range(self.M + 1):
+                #         for k in range(self.Msigma + 1):
+                #             if self.geometry['sphere'] == True:
+                #                 if self.lumping == True:
+                #                     for ii in range(self.M+1):
+                #                         for jj in range(self.M+1):
+                #                             VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
+                #                     VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                    
+                #                     self.H[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_lumped[i,j]
+
+                #                 elif self.lumping == False:
+                #                     self.H[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
         
 
 

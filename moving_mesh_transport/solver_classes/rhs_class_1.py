@@ -262,7 +262,7 @@ class rhs_class():
 
     def slope_scale(self, V, edges, stop = False):
         floor = -1e-8
-        V_new = V 
+        V_new = V.copy() 
         for k in range(self.N_space):
             h = math.sqrt(edges[k+1] - edges[k])
             edgeval = 1 / h / math.sqrt(math.pi)
@@ -279,7 +279,7 @@ class rhs_class():
                 c1 = V[angle, k, 1]
                 if c0 ==0:
                     V_new[angle,k,1] = 0.0
-                elif c0 > 0:
+                elif c0 > -floor:
                     if (c0 * B_left0 + c1*B_left1) < 0:
                         if stop == True and (c0 * B_left0 + c1*B_left1) < floor:
                             print(c0 * B_left0 + c1*B_left1, 'left')
@@ -293,6 +293,9 @@ class rhs_class():
                     elif (c0 * B_right0 + c1 * B_right1) < 0:
                         # print('right is negative')
                         V_new[angle, k, 1] = -c0 * B_right0 / B_right1
+
+                        if (c0 * B_left0 + V_new[angle, k, 1]*B_left1) < 0:
+                            assert 0
                 # elif c0 < 0:
                 #     V_new[angle, k, 0] = 0
                 #     V_new[angle, k, 1] = 0 
@@ -354,7 +357,7 @@ class rhs_class():
         if self.slope_limiter == True:
             V_old_new = self.slope_scale(V_old, mesh.edges)
             V_old = V_old_new
-        # V_old = self.slope_scale(V_old, mesh.edges, stop = True)
+            V_old = self.slope_scale(V_old, mesh.edges, stop = True)
 
         # represent opacity as a polynomial expansion
         # self.T_old[:,0] = 1.0

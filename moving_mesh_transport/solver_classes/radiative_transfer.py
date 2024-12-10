@@ -441,12 +441,12 @@ class T_function(object):
 
             elif self.geometry['sphere'] == True:
                 
-                for j in range(self.M+1):
-                    if self.lumping == False:
-                        self.integrate_quad_sphere(xL, xR, j, sigma_class)
-                    else:
-                        #  self.integrate_trap_sphere(xL, xR, j, sigma_class, space)
-                        self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                # for j in range(self.M+1):
+                #     if self.lumping == False:
+                #         self.integrate_quad_sphere(xL, xR, j, sigma_class)
+                #     else:
+                #         #  self.integrate_trap_sphere(xL, xR, j, sigma_class, space)
+                #         self.integrate_quad_sphere(xL, xR, j, sigma_class)
                 self.H2 = self.H.copy()*0
                 self.project_T4_to_basis(xL, xR, sigma_class)
                 
@@ -465,7 +465,7 @@ class T_function(object):
 
                                 elif self.lumping == False:
                                     self.H2[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_matrix(i, j, k, xL, xR) / (math.pi**1.5) 
-                print(max(np.abs(self.H-self.H2)))
+                self.H = self.H2.copy()
         
 
 

@@ -265,7 +265,7 @@ class rhs_class():
 
     def slope_scale(self, V, edges, stop = False):
         floor = -1e-8
-        posfloor = 1e-10
+        posfloor = 1e-12
         V_new = V.copy() 
         for k in range(self.N_space):
             h = math.sqrt(edges[k+1] - edges[k])
@@ -296,14 +296,14 @@ class rhs_class():
                             assert 0
                         # print('left is negative')
                         # V_new[angle, k, 1] = -c0 * B_left0 / B_left1    
-                        V_new[angle, k, 1] = min(posfloor/B_left1, c0/B_left1) -c0 * (-1/math.sqrt(2))   
+                        V_new[angle, k, 1] = posfloor/B_left1 -c0 * (-1/math.sqrt(2))   
                         # print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
                         # print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
 
                     elif (c0 * B_right0 + c1 * B_right1) < 0:
                         # print('right is negative')
                         # V_new[angle, k, 1] = -c0 * B_right0 / B_right1
-                        V_new[angle, k, 1] = min(posfloor/ B_right1, c0/ B_right1) -c0 * (1/math.sqrt(2))  
+                        V_new[angle, k, 1] = posfloor/ B_right1 -c0 * (1/math.sqrt(2))  
 
                         # if (c0 * B_left0 + V_new[angle, k, 1]*B_left1) < 0:
                             # assert 0

@@ -96,7 +96,7 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['at'] = 11e-4
     print('rtol', run.parameters['all']['rt'] )
     print('atol',run.parameters['all']['at'] )
-    run.parameters['all']['lumping'] = True
+    run.parameters['all']['lumping'] = False
     print("LUMPING"*run.parameters['all']['lumping'])
     # run.parameters['all']['at'] = 5e-1
     run.parameters['all']['e_initial'] = 5e-10

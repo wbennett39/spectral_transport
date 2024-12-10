@@ -31,7 +31,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = 300
+spaces2 = 50
 
 #####
 sigma_sb = 5.670374419e-5

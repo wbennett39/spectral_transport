@@ -266,8 +266,9 @@ class rhs_class():
         self.told = t
 
     def slope_scale(self, V, edges, stop = False):
-        floor = -5e-5
+        floor = -1e-6 
         posfloor = floor
+        theta = 0.0
         V_new = V.copy() 
         for k in range(self.N_space):
             h = math.sqrt(edges[k+1] - edges[k])
@@ -287,7 +288,9 @@ class rhs_class():
                 # if c0 ==0:
                 #     V_new[angle,k,1] = 0.0
                 if c0 > 0:
-                    if (c0 * B_left0 + c1*B_left1) < floor:
+                    left_edge = (c0 * B_left0 + c1*B_left1)
+                    right_edge = (c0 * B_right0 + c1 * B_right1)
+                    if  left_edge < floor:
                         self.wavefront_estimator = (edges[k+1] + edges[k])/2
                         if stop == True and (c0 * B_left0 + c1*B_left1) < floor:
                             print(c0 * B_left0 + c1*B_left1, 'left')
@@ -297,14 +300,16 @@ class rhs_class():
                             print(V[angle, k,:])
                             assert 0
                         # print('left is negative')
-                        # V_new[angle, k, 1] = -c0 * B_left0 / B_left1    
+                        # V_new[angle, k, 1] = -c0 * B_left0 / B_left1   
+                        posfloor = left_edge * theta 
                         V_new[angle, k, 1] = posfloor/B_left1 -c0 * (-1/math.sqrt(2))   
                         # print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
                         # print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
 
-                    elif (c0 * B_right0 + c1 * B_right1) < floor:
+                    elif right_edge < floor:
                         # print('right is negative')
                         # V_new[angle, k, 1] = -c0 * B_right0 / B_right1
+                        posfloor = right_edge * theta
                         V_new[angle, k, 1] = posfloor/ B_right1 -c0 * (1/math.sqrt(2))  
 
                         # if (c0 * B_left0 + V_new[angle, k, 1]*B_left1) < 0:

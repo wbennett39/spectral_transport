@@ -266,7 +266,7 @@ class rhs_class():
         self.told = t
 
     def slope_scale(self, V, edges, stop = False):
-        floor = -1e-6 
+        floor = -5e-7 
         posfloor = floor
         theta = 0.0
         V_new = V.copy() 

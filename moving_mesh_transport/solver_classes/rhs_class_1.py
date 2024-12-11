@@ -193,7 +193,7 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
-        self.slope_limiter = False
+        self.slope_limiter = True
         print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
@@ -266,7 +266,7 @@ class rhs_class():
         self.told = t
 
     def slope_scale(self, V, edges, stop = False):
-        floor = -1e-3
+        floor = -5e-5
         posfloor = 1e-15
         V_new = V.copy() 
         for k in range(self.N_space):
@@ -438,6 +438,7 @@ class rhs_class():
                     if (self.lumping == True) and (self.M >0):
                         # Mass, Minv = self.mass_lumper(Mass, True) 
                         Mass, Minv = mass_lumper(Mass, xL, xR)
+                        # L, Linv = mass_lumper(L, xL, xR, invert = False)
 
                         # print(Minv)
                         # L = self.mass_lumper(L)

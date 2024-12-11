@@ -93,8 +93,8 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 2):
     for it, N_space in enumerate(N_spaces_list):
         run.parameters['boundary_source']['x0'] = np.array([10.0])
         run.parameters['all']['N_spaces'] = [N_space]
-        run.parameters['all']['rt'] = 11e-6
-        run.parameters['all']['at'] = 11e-8
+        run.parameters['all']['rt'] = 11e-2
+        run.parameters['all']['at'] = 11e-3
         print('rtol', run.parameters['all']['rt'] )
         print('atol',run.parameters['all']['at'] )
         run.parameters['all']['lumping'] = True

@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 50
+spaces = 100
 M = 1
 #####
 #####
@@ -73,19 +73,6 @@ mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee3)
 print(xs, 'xs')
 print(edges, 'edges')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 xs2 = tr2['xs'][:]
 phi2 = tr2['scalar_flux'][:]
 #edges = tr['edges'][:]
@@ -143,13 +130,13 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t3 = -13.0e-8
 
 
-t1 = -14.5e-8
-t2 =-14.2e-8
-t3 =-14.0e-8
+# t1 = -14.5e-8
+# t2 =-14.2e-8
+# t3 =-14.0e-8
 
-# t1 =  -14.0e-8
-# t2 = -10.0e-8
-# t3 = -9.4706889e-8
+t1 =  -14.0e-8
+t2 = -10.0e-8
+t3 = -9.4706889e-8
 # t3 = -2.7126998146008884e-08
 
 rho0 = 1.

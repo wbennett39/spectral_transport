@@ -288,7 +288,7 @@ class sigma_integrator():
                 b = np.max(x)
                 # resmax = 300 / (b-a)
                 # resmax = 10400
-                resmax = 1e5
+                resmax = 15e3
                 if self.loud == True:
                     print('###   ###   ###   ###   ###   ###   ###   ###')
                     print(resmax, 'max sigma')
@@ -417,10 +417,11 @@ class sigma_integrator():
                             self.VV[i] +=   self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
                         elif self.geometry['sphere'] == True:
                             if self.lumping == True:
-                                for ii in range(self.M+1):
-                                    for jj in range(self.M+1):
-                                        VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
-                                VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                if k ==0:
+                                    for ii in range(self.M+1):
+                                        for jj in range(self.M+1):
+                                            VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
+                                    VV_lumped = mass_lumper(VV, xL, xR)[0]
                                 
                                 self.VV[i] +=   self.cs[space, k] * u[j] * VV_lumped[i,j]
 

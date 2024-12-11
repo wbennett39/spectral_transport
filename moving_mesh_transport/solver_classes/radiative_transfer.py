@@ -452,10 +452,11 @@ class T_function(object):
                         for j in range(self.M + 1):
                             for k in range(self.Msigma + 1):
                                 if self.geometry['sphere'] == True:
-                                        for ii in range(self.M+1):
-                                            for jj in range(self.M+1):
-                                                VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
-                                        VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                        if k ==0:
+                                            for ii in range(self.M+1):
+                                                for jj in range(self.M+1):
+                                                    VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
+                                            VV_lumped = mass_lumper(VV, xL, xR)[0]
                                         self.H2[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_lumped[i,j]
                 self.H = self.H2.copy()
         

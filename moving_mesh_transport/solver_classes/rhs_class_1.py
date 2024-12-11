@@ -193,7 +193,7 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
-        self.slope_limiter = True
+        self.slope_limiter = False
         print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
@@ -266,7 +266,7 @@ class rhs_class():
         self.told = t
 
     def slope_scale(self, V, edges, stop = False):
-        floor = -1e-8
+        floor = -1e-3
         posfloor = 1e-15
         V_new = V.copy() 
         for k in range(self.N_space):
@@ -287,7 +287,7 @@ class rhs_class():
                 # if c0 ==0:
                 #     V_new[angle,k,1] = 0.0
                 if c0 > 0:
-                    if (c0 * B_left0 + c1*B_left1) < 0:
+                    if (c0 * B_left0 + c1*B_left1) < floor:
                         self.wavefront_estimator = (edges[k+1] + edges[k])/2
                         if stop == True and (c0 * B_left0 + c1*B_left1) < floor:
                             print(c0 * B_left0 + c1*B_left1, 'left')
@@ -302,7 +302,7 @@ class rhs_class():
                         # print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
                         # print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
 
-                    elif (c0 * B_right0 + c1 * B_right1) < 0:
+                    elif (c0 * B_right0 + c1 * B_right1) < floor:
                         # print('right is negative')
                         # V_new[angle, k, 1] = -c0 * B_right0 / B_right1
                         V_new[angle, k, 1] = posfloor/ B_right1 -c0 * (1/math.sqrt(2))  

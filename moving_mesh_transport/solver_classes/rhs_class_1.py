@@ -267,7 +267,7 @@ class rhs_class():
 
     def slope_scale(self, V, edges, stop = False):
         floor = -5e-5
-        posfloor = 1e-15
+        posfloor = floor
         V_new = V.copy() 
         for k in range(self.N_space):
             h = math.sqrt(edges[k+1] - edges[k])

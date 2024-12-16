@@ -266,7 +266,7 @@ class rhs_class():
         self.told = t
 
     def slope_scale(self, V, edges, stop = False):
-        floor = -5e-6 
+        floor = -5e-2 
         posfloor = floor
         theta = 0.0
         V_new = V.copy() 
@@ -410,7 +410,7 @@ class rhs_class():
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
                 if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0)   :
-                    update = True
+                    update = False
                 else:
                     update = True
    
@@ -549,7 +549,7 @@ class rhs_class():
                             assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                         # print(self.mus[])
                         
-                    num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
+                    num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, 0*V_old[refl_index, 0, :])
 
                     # new r=0 BC
                     # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)

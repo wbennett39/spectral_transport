@@ -164,8 +164,8 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 3500
-        self.counter = 3500
+        self.division = 10000
+        self.counter = 1000
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])
@@ -266,7 +266,7 @@ class rhs_class():
         self.told = t
 
     def slope_scale(self, V, edges, stop = False):
-        floor = -1e-4#floor 1e-4 
+        floor = -1e-8#floor 1e-4 
         posfloor = floor
         theta = 0.0
         V_new = V.copy() 

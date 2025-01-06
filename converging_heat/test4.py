@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 150
+spaces = 50
 M = 1
 #####
 #####
@@ -31,7 +31,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = 150
+spaces2 = 60
 
 #####
 sigma_sb = 5.670374419e-5

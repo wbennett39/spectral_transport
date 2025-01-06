@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 50
+spaces = 60
 M = 1
 #####
 #####
@@ -31,7 +31,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = 60
+spaces2 = 100
 
 #####
 sigma_sb = 5.670374419e-5
@@ -108,19 +108,19 @@ Lambda = xsiR*Vxsi(xsiR)
 Ts = Trt_fit(R,times)
 Tbath = Ts * (1.+0.083391*(times/-1e-9)**(-0.537633)*Lambda)**0.25
 
-plt.plot(times/1e-9, Ts, "r", label="surface")
-plt.plot(times/1e-9, Tbath, "--b", label="bath")
-plt.xlabel("$t$ [ns]")
-plt.ylabel("$T(t)$ [HeV]")
-plt.grid()
-plt.legend(loc="best")
-plt.show()
+# plt.plot(times/1e-9, Ts, "r", label="surface")
+# plt.plot(times/1e-9, Tbath, "--b", label="bath")
+# plt.xlabel("$t$ [ns]")
+# plt.ylabel("$T(t)$ [HeV]")
+# plt.grid()
+# plt.legend(loc="best")
+# plt.show()
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-t1 = -9.470688883217099e-08
-t2 = -2.7126998146008884e-08
-t3 = -1e-9
+# t1 = -9.470688883217099e-08
+# t2 = -2.7126998146008884e-08
+# t3 = -1e-9
 
 
 # t1 = -14.5e-8
@@ -134,9 +134,9 @@ t3 = -1e-9
 # t2 =-14.2e-8
 # t3 =-14.0e-8
 
-# t1 =  -14.0e-8
-# t2 = -10.0e-8
-# t3 = -9.4706889e-8
+t1 =  -14.0e-8
+t2 = -10.0e-8
+t3 = -9.4706889e-8
 # t3 = -2.7126998146008884e-08
 
 rho0 = 1.
@@ -214,9 +214,11 @@ plt.plot(r_anal, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion Analyti
 plt.plot(r_anal, urt(r_anal, t2), c="r", ls="--", lw=2)
 plt.plot(r_anal, urt(r_anal, t1), c="r", ls="--", lw=2)
 
-plt.plot(xs[0,:], e[0,:]/1e-3, 'k--', label = 'radiation temp')
-plt.plot(xs[1,:], e[1,:]/1e-3, 'k--')
-plt.plot(xs[2,:], e[2,:]/1e-3, 'k--')
+plt.plot(xs[0,:], 5/4 * 1.372017 * 10**14 * mat_T[0,:]**4/1e13, 'k--', label = 'radiation temp')
+plt.plot(xs[1,:], 5/4 * 1.372017 * 10**14 * mat_T[1,:]**4/1e13 , 'k--')
+plt.plot(xs[2,:], 5/4 * 1.372017 * 10**14 * mat_T[2,:]**4/1e13, 'k--')
+print(e[0,:][0]/diff[:,2][-1], 'ratio' )
+
 
 plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{cm}}]$", fontsize=24)

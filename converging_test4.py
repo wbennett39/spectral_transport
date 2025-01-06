@@ -83,7 +83,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 2):
     run.parameters['all']['Ms'] = [0]
     run.parameters['all']['N_spaces'] = [4]
     run.parameters['all']['tfinal'] = 0.0000000000000001
-    run.parameters['integrator'] = 'BDF'
+    run.parameters['integrator'] = 'BDF_VODE'
     run.mesh_parameters['eval_times'] = False
     run.mesh_parameters['Msigma'] = 0
     run.parameters['boundary_source']['N_angles'] = [2]

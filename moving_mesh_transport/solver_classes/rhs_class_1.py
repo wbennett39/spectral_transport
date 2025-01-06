@@ -193,7 +193,7 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
-        self.slope_limiter = True
+        self.slope_limiter = True  
         print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
@@ -266,7 +266,7 @@ class rhs_class():
         self.told = t
 
     def slope_scale(self, V, edges, stop = False):
-        floor = -5e-2 
+        floor = -1e-4#floor 1e-4 
         posfloor = floor
         theta = 0.0
         V_new = V.copy() 
@@ -301,7 +301,7 @@ class rhs_class():
                             assert 0
                         # print('left is negative')
                         # V_new[angle, k, 1] = -c0 * B_left0 / B_left1   
-                        posfloor = left_edge * theta 
+                        # posfloor = left_edge * theta 
                         V_new[angle, k, 1] = posfloor/B_left1 -c0 * (-1/math.sqrt(2))   
                         # print(c0 * B_left0 + V_new[angle, k, 1]*B_left1, 'new left solution')
                         # print(c0 * B_right0 + V_new[angle, k, 1]*B_right1, 'new right solution')
@@ -309,7 +309,7 @@ class rhs_class():
                     elif right_edge < floor:
                         # print('right is negative')
                         # V_new[angle, k, 1] = -c0 * B_right0 / B_right1
-                        posfloor = right_edge * theta
+                        # posfloor = right_edge * theta
                         V_new[angle, k, 1] = posfloor/ B_right1 -c0 * (1/math.sqrt(2))  
 
                         # if (c0 * B_left0 + V_new[angle, k, 1]*B_left1) < 0:
@@ -549,7 +549,7 @@ class rhs_class():
                             assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                         # print(self.mus[])
                         
-                    num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, 0*V_old[refl_index, 0, :])
+                    num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
 
                     # new r=0 BC
                     # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)

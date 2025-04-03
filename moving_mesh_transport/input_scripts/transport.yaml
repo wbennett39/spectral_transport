@@ -17,7 +17,7 @@
     'mxstp': 1.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
     'radiative_transfer': {none: True}             # material temperature feedback. 1-True, 0 - False
-    'temperature_dependence': [0,0,0,0] # first slot is Su-Olson problem
+    'temperature_dependence': [1,0,0,0] # first slot is Su-Olson problem
     'e_initial': 0.0000000001
     'weights': 'gauss_legendre'          # usually 'gauss_lobatto'. Set to 'gauss_legendre' for S2 calculations
     'save_solution': False
@@ -28,7 +28,7 @@
     'thick': False            # optically thick or thin
     'integrator': 'DOP853'
     'geometry': {slab: False, sphere: True}
-    'N_groups': 1
+    'N_groups': 2
     
 # plane pulse source
 'plane_IC':

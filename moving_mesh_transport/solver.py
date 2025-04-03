@@ -99,6 +99,7 @@ class main_class(parameter_load_class):
         
         self.wave_loc_array = np.zeros((1,1,1))
         self.cross_section_data = np.zeros((self.N_groups, self.N_groups ))
+        # self.cross_section_data = cross_section_builder(self.sigma_func, self.N_groups)
     
         
         for nr in range(self.N_runs):
@@ -353,10 +354,16 @@ class main_class(parameter_load_class):
 
         
         
+# def cross_section_builder(sigma_func, N_groups):
+#     res = np.zeros((N_groups, N_groups))
 
-
-
-
+#     if sigma_func ==' crooked_fence':
+#         assert N_groups == 2
+#         w1 = 2/11
+#         w2 = 20/11
+#         p = 0.5
+#         for ix in range(N_groups):
+#             for iy in range(N_groups):
         
     
     

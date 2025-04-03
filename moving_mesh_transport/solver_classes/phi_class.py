@@ -43,7 +43,8 @@ data = [("P", float64[:]),
         ('sigma_func', nb.typeof(params_default)),
         ('scalar_flux_term', float64[:]),
         ('geometry', nb.typeof(params_default)),
-        ('lumping', int64)
+        ('lumping', int64),
+        ('N_groups', int64)
         ]
 ###############################################################################
 @jitclass(data)
@@ -61,6 +62,7 @@ class scalar_flux(object):
         self.scalar_flux_term = np.zeros(self.M+1)
         self.geometry = build.geometry
         self.lumping = build.lumping
+        self.N_groups = build.N_groups
         
 
     # def make_P(self, u):
@@ -82,9 +84,11 @@ class scalar_flux(object):
         #         self.scalar_flux_term = self.P 
 
         # else:
-            self.PV = self.PV*0
+            if self.g == 0: #resets PV sum at the next step. Otherwise, adds over groups
+                self.PV = self.PV*0
             VV = np.zeros((self.M+1, self.M+1))
 
+            # for g in range(self.N_groups):
             for i in range(self.M+1):
                 for l in range(self.N_ang):
                     for j in range(self.M+1):

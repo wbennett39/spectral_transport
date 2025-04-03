@@ -87,6 +87,7 @@ class sigma_integrator():
         self.geometry = build.geometry
         self.lumping = build.lumping
         self.loud = True
+        self.g=0
         
         # initialize integrals of Basis Legendre polynomials
         self.create_integral_matrices()
@@ -321,6 +322,7 @@ class sigma_integrator():
           
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
+        
             else:
                 floor = 5e-2
                 result = np.where(T_old<0.0, 0.0, T_old)
@@ -353,7 +355,14 @@ class sigma_integrator():
             
             # res = 1 * 10**(2) + x*0
             return res
-        
+        elif self.sigma_func['picket_fence'] == 1:
+                w1 = 2/11
+                w2 = 20/11
+                if self.g == 0:
+                    return w1 + x*0
+                elif self.g == 1:
+                    return w2 + x * 0       
+                 
         elif self.sigma_func['gaussian'] == 1:
             return np.exp(- x**2 /(2* self.std**2))  # probably shouldn't have sigma_a here
             # return x * 0 + 1.0

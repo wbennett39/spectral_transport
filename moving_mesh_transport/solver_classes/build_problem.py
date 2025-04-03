@@ -155,9 +155,9 @@ class build(object):
 
         
         if self.thermal_couple['none'] == 1:
-            self.IC = np.zeros((N_ang, N_space, M+1))
+            self.IC = np.zeros((N_ang, N_space, M+1, self.N_groups))
         elif self.thermal_couple['none'] != 1:
-            self.IC = np.zeros((N_ang + 1, N_space, M+1))
+            self.IC = np.zeros((N_ang + 1, N_space, M+1, self.N_groups))
         self.epsilon = epsilon
         self.geometry = geometry
        
@@ -175,10 +175,10 @@ class build(object):
         self.boundary_temp = boundary_temp
         self.boundary_time = boundary_time
 
-    def integrate_quad_sphere(self, a, b, ang, space, j, ic):
+    def integrate_quad_sphere(self, a, b, ang, space, j, g,  ic):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         mu = self.mus[ang]
-        self.IC[ang,space,j] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu, iarg = space * self.xs_quad.size, earg = (space+1)*self.xs_quad.size) * 2.0 * normTn(j, argument, a, b))
+        self.IC[ang,space,j, g] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu, iarg = space * self.xs_quad.size, earg = (space+1)*self.xs_quad.size) * 2.0 * normTn(j, argument, a, b))
         
     def make_T4_IC(self, RT_class, edges):
         for space in range(self.N_space):
@@ -225,11 +225,11 @@ class build(object):
                         self.integrate_e_sphere(edges_init[space], edges_init[space+1], space, j)
             
             ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, True, self.T4)
-
-            for ang in range(self.N_ang):
-                for space in range(self.N_space):
-                    for j in range(self.M+1):
-                        self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
+            for g in range(self.N_groups):
+                for ang in range(self.N_ang):
+                    for space in range(self.N_space):
+                        for j in range(self.M+1):
+                            self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, g, ic)
             # print(self.T4, 'T4')
             # print(self.IC, 'IC')
          

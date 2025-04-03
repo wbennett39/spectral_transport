@@ -45,9 +45,9 @@ class run:
     def __init__(self):
         self.data_folder = Path("moving_mesh_transport/input_scripts")
     
-    def load(self, problem_type = 'marshak'):
+    def load(self, problem_type = 'marshak', mesh_type = 'mesh_parameters'):
         config_file_path = self.data_folder / f"{problem_type}.yaml"
-        mesh_config_file_path = self.data_folder / "mesh_parameters.yaml"
+        mesh_config_file_path = self.data_folder / f"{mesh_type}.yaml"
         with open(config_file_path, 'r') as file:
             self.parameters = yaml.safe_load(file)
             file.close()

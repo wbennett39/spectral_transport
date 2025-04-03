@@ -47,7 +47,7 @@ class parameter_load_class:
         self.geometry = nb.typed.Dict.empty(key_type=nb.typeof('par_1'), value_type=nb.typeof(1))
         dictionary_loader(parameters['all']['geometry'], self.geometry)   
         self.lumping = int(parameters['all']['lumping'])
-        self.N_groups = int(parameters['all'['N_groups']])
+        self.N_groups = int(parameters['all']['N_groups'])
         
 
         self.thick = int(parameters['all']['thick'])

@@ -27,7 +27,7 @@ data = [('N_ang', int64),
         ('psi_out', float64[:,:,:]),
         ('phi_out', float64[:,:]), 
         ('e_out', float64[:]),
-        ('exit_dist', float64[:,:]),
+        ('exit_dist', float64[:,:,:]),
         ('geometry', nb.typeof(params_default)),
         ('N_groups', int64)
         ]
@@ -72,12 +72,13 @@ class make_output:
         
         output_phi = np.zeros((self.xs.size, self.N_groups))
         for g in range(self.N_groups):
-            output_phi[g] = np.sum(np.multiply(psi[:, :, g].transpose(), self.ws), axis = 1)
+            output_phi[:,g] = np.sum(np.multiply(psi[:, :, g].transpose(), self.ws), axis = 1)
         
         
         if self.uncollided == True:
             uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
-            output_phi += uncol 
+            for g in range(self.N_groups):
+                output_phi[:,g] += uncol 
         self.psi_out = psi
         self.phi_out = output_phi
         return output_phi
@@ -100,26 +101,29 @@ class make_output:
         return e
     
     def get_exit_dist(self, uncollided_solution):
-        psi = np.zeros((self.N_ang, 2))
-        phi = np.zeros(2)
-        self.exit_dist = np.zeros((self.N_ang, 2))
+        psi = np.zeros((self.N_ang, 2, self.N_groups))
+        phi = np.zeros((2, self.N_groups))
+        self.exit_dist = np.zeros((self.N_ang, 2, self.N_groups))
         x_eval = np.array([self.edges[0], self.edges[-1]])
-        for ang in range(self.N_ang):
-            for count in range(2):
-                idx = np.searchsorted(self.edges[:], x_eval[count])
-                if (idx == 0):
-                    idx = 1
-                if (idx >= self.edges.size):
-                    idx = self.edges.size - 1
-                if self.edges[0] <= x_eval[count] <= self.edges[-1]:
-                    for i in range(self.M+1):
-                        psi[ang, count] += self.u[ang,idx-1,i] * self.basis(i,x_eval[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+        for g in range(self.N_groups):
+            for ang in range(self.N_ang):
+                for count in range(2):
+                    idx = np.searchsorted(self.edges[:], x_eval[count])
+                    if (idx == 0):
+                        idx = 1
+                    if (idx >= self.edges.size):
+                        idx = self.edges.size - 1
+                    if self.edges[0] <= x_eval[count] <= self.edges[-1]:
+                        for i in range(self.M+1):
+                            psi[ang, count,g] += self.u[ang,idx-1,i, g] * self.basis(i,x_eval[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
         
         self.exit_dist = psi
-        output = np.sum(np.multiply(psi.transpose(), self.ws), axis = 1)
-        if self.uncollided == True:
-            uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
-            output += uncol
+        output = np.zeros((2, self.N_groups))
+        for g in range(self.N_groups):
+            output[:,g] = np.sum(np.multiply(psi[:,:,g].transpose(), self.ws), axis = 1)
+            if self.uncollided == True:
+                uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
+                output[:,g] += uncol
         return self.exit_dist, output
         
 

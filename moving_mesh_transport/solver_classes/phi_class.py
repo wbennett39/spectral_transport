@@ -44,7 +44,8 @@ data = [("P", float64[:]),
         ('scalar_flux_term', float64[:]),
         ('geometry', nb.typeof(params_default)),
         ('lumping', int64),
-        ('N_groups', int64)
+        ('N_groups', int64),
+        ('g', int64)
         ]
 ###############################################################################
 @jitclass(data)
@@ -63,6 +64,7 @@ class scalar_flux(object):
         self.geometry = build.geometry
         self.lumping = build.lumping
         self.N_groups = build.N_groups
+        self.g = 0
         
 
     # def make_P(self, u):

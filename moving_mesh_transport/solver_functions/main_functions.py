@@ -224,12 +224,14 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     def RHS(t, V, g):
         sigma_class.g = g
         source.g = g
+        flux.g = g
 
         return rhs.call(t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class)
     
     def RHS_wrap(t, V):
         VV = V*0
-        V_new = VV.copy().reshape((N_ang + 1 * thermal_couple['none'] == False, N_space, M+1, N_groups))
+        extra_deg = int(thermal_couple['none'] == False)
+        V_new = VV.copy().reshape((N_ang + extra_deg), N_space, M+1, N_groups)
         
         for ig in range(N_groups):
             VV2 = V_new[:,:,:,ig].flatten()

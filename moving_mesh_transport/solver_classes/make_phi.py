@@ -24,8 +24,8 @@ data = [('N_ang', int64),
         ('edges', float64[:]),
         ('uncollided', int64),
         ('dx_e', float64[:]),
-        ('psi_out', float64[:,:]),
-        ('phi_out', float64[:]), 
+        ('psi_out', float64[:,:,:]),
+        ('phi_out', float64[:,:]), 
         ('e_out', float64[:]),
         ('exit_dist', float64[:,:]),
         ('geometry', nb.typeof(params_default)),
@@ -79,7 +79,7 @@ class make_output:
             uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
             output_phi += uncol 
         self.psi_out = psi
-        self.phi_out = output
+        self.phi_out = output_phi
         return output_phi
     
     def make_e(self):

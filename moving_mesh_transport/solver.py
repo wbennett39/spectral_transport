@@ -171,22 +171,22 @@ class main_class(parameter_load_class):
                 
 
                 ##################################################################
-                plt.figure(1)
-                if self.eval_times == False:
-                    plt.plot(xs, phi, "-o", label = f"{N_space} spatial cells", mfc = "none")
-                    if self.benchmarking == True:
-                        plt.plot(xs, benchmark(np.abs(xs))[0], '-k')
+                # plt.figure(1)
+                # if self.eval_times == False:
+                #     plt.plot(xs, phi, "-o", label = f"{N_space} spatial cells", mfc = "none")
+                #     if self.benchmarking == True:
+                #         plt.plot(xs, benchmark(np.abs(xs))[0], '-k')
 
-                else:
-                    plt.plot(xs[-1], phi[-1,:], "-o", label = f"{N_space} spatial cells", mfc = "none")
-                    plt.plot(xs[0], phi[0,:], "-o", label = f"{N_space} spatial cells", mfc = "none")
-                    if self.benchmarking == True:
-                        plt.plot(xs, benchmark(np.abs(xs))[0], '-k')
+                # else:
+                #     plt.plot(xs[-1], phi[-1,:], "-o", label = f"{N_space} spatial cells", mfc = "none")
+                #     plt.plot(xs[0], phi[0,:], "-o", label = f"{N_space} spatial cells", mfc = "none")
+                #     if self.benchmarking == True:
+                #         plt.plot(xs, benchmark(np.abs(xs))[0], '-k')
 
-                plt.xlabel("x")
-                plt.ylabel("scalar flux")
-                if count == len(self.N_angles)-1:
-                    plot_edges(edges, 1)
+                # plt.xlabel("x")
+                # plt.ylabel("scalar flux")
+                # if count == len(self.N_angles)-1:
+                #     plot_edges(edges, 1)
                 # if self.thermal_couple == 1:
                 #     plt.plot(xs, e, "-^", label = "energy density", mfc = "none")
                 # if self.temp_function[0]==1:

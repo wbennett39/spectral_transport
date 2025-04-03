@@ -188,7 +188,7 @@ class build(object):
                 b = edges[space+1]
 
                 self.integrate_e_sphere(a, b, space, j)
-                RT_class.e_vec[j] = self.IC[self.N_ang,space,j]
+                RT_class.e_vec[j] = self.IC[self.N_ang,space,j,0]
 
             argument = (b-a)/2*self.xs_quad + (a+b)/2
             T = RT_class.make_T(argument, a, b)

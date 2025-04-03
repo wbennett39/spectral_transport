@@ -86,6 +86,7 @@ class make_output:
     def make_e(self):
         e = np.zeros((self.xs.size))
         self.dx_e = np.zeros((self.xs.size))
+        
         for count in range(self.xs.size):
             idx = np.searchsorted(self.edges[:], self.xs[count])
             if (idx == 0):
@@ -94,9 +95,9 @@ class make_output:
                 idx = self.edges.size - 1
             for i in range(self.M+1):
                 if self.edges[0] <= self.xs[count] <= self.edges[-1]:
-                    e[count] += self.u[self.N_ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
-                    if self.M <=11:
-                        self.dx_e[count] += self.u[self.N_ang,idx-1,i] * dx_normPn(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+                    e[count] += self.u[self.N_ang,idx-1,i, 0] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+                    # if self.M <=11:
+                    #     self.dx_e[count] += self.u[self.N_ang,idx-1,i] * dx_normPn(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
         self.e_out = e
         return e
     

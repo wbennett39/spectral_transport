@@ -152,9 +152,13 @@ class run:
             plt.show()
 
         if self.parameters['all']['radiative_transfer']['none'] == False :
+            plt.figure(1)
+            for g in range(int(self.parameters['all']['N_groups'])):
+                plt.plot(self.xs, self.phi[:, g], '-', label = f'group {g}')
             plt.plot(self.xs, self.e, '-.', label = 'energy density', mfc = 'none')
             plt.legend()
             plt.show()
+        
      
         # plt.title("square source")
         # plt.legend()

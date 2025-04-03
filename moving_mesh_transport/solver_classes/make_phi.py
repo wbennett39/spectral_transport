@@ -20,7 +20,7 @@ data = [('N_ang', int64),
         ('M', int64),
         ('ws', float64[:]),
         ('xs', float64[:]),
-        ('u', float64[:,:,:]),
+        ('u', float64[:,:,:,:]),
         ('edges', float64[:]),
         ('uncollided', int64),
         ('dx_e', float64[:]),
@@ -29,19 +29,23 @@ data = [('N_ang', int64),
         ('e_out', float64[:]),
         ('exit_dist', float64[:,:]),
         ('geometry', nb.typeof(params_default)),
+        ('N_groups', int64)
         ]
 @jitclass(data)
 class make_output:
-    def __init__(self, t, N_ang, ws, xs, u, M, edges, uncollided, geometry):
+    def __init__(self, t, N_ang, ws, xs, u, M, edges, uncollided, geometry, N_groups):
         self.N_ang = N_ang
         self.ws = ws
         self.xs = xs
         self.u = u 
+        
+
         self.M = M
         self.edges = edges
         self.uncollided = uncollided
         self.t = t
         self.geometry = geometry 
+        self.N_groups = N_groups
 
     def basis(self, i, x, a, b):
         if self.geometry['slab'] == True:
@@ -52,24 +56,31 @@ class make_output:
 
     def make_phi(self, uncollided_solution):
         output = self.xs*0
-        psi = np.zeros((self.N_ang, self.xs.size))
-        for ang in range(self.N_ang):
-            for count in range(self.xs.size):
-                idx = np.searchsorted(self.edges[:], self.xs[count])
-                if (idx == 0):
-                    idx = 1
-                if (idx >= self.edges.size):
-                    idx = self.edges.size - 1
-                if self.edges[0] <= self.xs[count] <= self.edges[-1]:
-                    for i in range(self.M+1):
-                        psi[ang, count] += self.u[ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
-        output = np.sum(np.multiply(psi.transpose(), self.ws), axis = 1)
+        psi = np.zeros((self.N_ang, self.xs.size, self.N_groups))
+        for g in range(self.N_groups):
+            for ang in range(self.N_ang):
+                for count in range(self.xs.size):
+                    idx = np.searchsorted(self.edges[:], self.xs[count])
+                    if (idx == 0):
+                        idx = 1
+                    if (idx >= self.edges.size):
+                        idx = self.edges.size - 1
+                    if self.edges[0] <= self.xs[count] <= self.edges[-1]:
+                        for i in range(self.M+1):
+                            psi[ang, count, g] += self.u[ang,idx-1,i, g] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+        
+        
+        output_phi = np.zeros((self.xs.size, self.N_groups))
+        for g in range(self.N_groups):
+            output_phi[g] = np.sum(np.multiply(psi[:, :, g].transpose(), self.ws), axis = 1)
+        
+        
         if self.uncollided == True:
             uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
-            output += uncol 
+            output_phi += uncol 
         self.psi_out = psi
         self.phi_out = output
-        return output
+        return output_phi
     
     def make_e(self):
         e = np.zeros((self.xs.size))

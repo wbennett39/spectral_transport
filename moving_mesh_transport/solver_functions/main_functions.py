@@ -215,7 +215,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     initialize.make_IC()
     IC = initialize.IC
     xs = find_nodes(mesh.edges, M, geometry)
-    phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry)
+    phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry, N_groups)
     phi = phi_IC.make_phi(uncollided_sol)
     
     # print(phi, 'phi IC')
@@ -358,7 +358,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         xs = specified_xs
     # print(xs, 'xs')
     if eval_times == False or sol.status == -1:
-        output = make_output(tfinal, N_ang, ws, xs, sol_last, M, edges, uncollided, geometry)
+        output = make_output(tfinal, N_ang, ws, xs, sol_last, M, edges, uncollided, geometry, N_groups)
         phi = output.make_phi(uncollided_sol)
         psi = output.psi_out # this is the collided psi
         exit_dist, exit_phi = output.get_exit_dist(uncollided_sol)
@@ -394,7 +394,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 xs = find_nodes(edges, M, geometry)
             elif choose_xs == True:
                 xs = specified_xs
-            output = make_output(tt, N_ang, ws, xs, sol.y[:,it].reshape((N_ang+extra_deg_freedom,N_space,M+1)), M, edges, uncollided, geometry)
+            output = make_output(tt, N_ang, ws, xs, sol.y[:,it].reshape((N_ang+extra_deg_freedom,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             phi[it,:] = output.make_phi(uncollided_sol)
             psi[it, :, :] = output.psi_out # this is the collided psi
             exit_dist[it], exit_phi[it] = output.get_exit_dist(uncollided_sol)

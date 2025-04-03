@@ -270,15 +270,15 @@ class build(object):
             else:
                 ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, False, self.T4)
 
-
-            for ang in range(self.N_ang):
-                for space in range(self.N_space):
-                    for j in range(self.M + 1):
-                        if self.geometry['slab'] == True:
-                            print("Inside slab if statement.")
-                            self.integrate_quad(edges_init[space], edges_init[space+1], ang, space, j, ic)
-                        elif self.geometry['sphere'] == True:
-                            self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j, ic)
+            for g in range(self.N_groups):
+                for ang in range(self.N_ang):
+                    for space in range(self.N_space):
+                        for j in range(self.M + 1):
+                            if self.geometry['slab'] == True:
+                                print("Inside slab if statement.")
+                                self.integrate_quad(edges_init[space], edges_init[space+1], ang, space, j, ic)
+                            elif self.geometry['sphere'] == True:
+                                self.integrate_quad_sphere(edges_init[space], edges_init[space+1], ang, space, j,g, ic)
 
     
         

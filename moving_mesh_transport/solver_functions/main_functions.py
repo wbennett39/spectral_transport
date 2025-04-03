@@ -191,9 +191,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
 
     if thermal_couple['none'] == 1:
-        deg_freedom = N_ang*N_space*(M+1)
+        deg_freedom = N_ang*N_space*(M+1)*N_groups
     else:
-        deg_freedom = (N_ang+1)*N_space*(M+1)
+        deg_freedom = (N_ang+1)*N_space*(M+1)*N_groups
 
     mesh = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
                       wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
@@ -216,7 +216,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     IC = initialize.IC
     xs = find_nodes(mesh.edges, M, geometry)
     phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry, N_groups)
-    phi = phi_IC.make_phi(uncollided_sol)
+    # phi = phi_IC.make_phi(uncollided_sol)
     
     # print(phi, 'phi IC')
     
@@ -227,10 +227,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
         return rhs.call(t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class)
     
-    def RHS_wrap(t, V, g):
+    def RHS_wrap(t, V):
         VV = V*0
+        V_new = VV.copy().reshape((N_ang + 1 * thermal_couple['none'] == False, N_space, M+1, N_groups))
+        
         for ig in range(N_groups):
-            VV[ig] = RHS(t, VV[ig], g)
+            VV2 = V_new[:,:,:,ig].flatten()
+            VV[ig] = RHS(t, VV2, ig)
         return VV
 
     start = timer()
@@ -290,7 +293,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         print(rt, 'rt')
         print(at, 'at')
         print('starting solve')
-        sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-3)
+        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-3)
 
     # sol = ode15s.y
 

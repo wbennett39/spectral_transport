@@ -98,7 +98,7 @@ class main_class(parameter_load_class):
         #         self.wave_loc_array = np.array([[(self.tpnts_wave)], [(self.left_wave)], [(self.right_wave)], [(self.T_wave)]])
         
         self.wave_loc_array = np.zeros((1,1,1))
-
+        self.cross_section_data = np.zeros((self.N_groups, self.N_groups ))
     
         
         for nr in range(self.N_runs):
@@ -122,17 +122,15 @@ class main_class(parameter_load_class):
                     choose_xs = False
                     specified_xs = 0.0
                 print(self.finite_domain, 'finite domain')
-                xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus = solve(self.tfinal,N_space, N_ang, M, x0_new, self.t0, self.sigma_t, 
-                self.sigma_s, self.t_nodes, self.source_type, uncollided, moving, self.move_type,
-                self.thermal_couple,self.temp_function, self.rt, self.at, self.e_initial, choose_xs, specified_xs, 
-                self.weights, self.sigma, self.particle_v, self.edge_v, self.cv0, self.estimate_wavespeed, self.find_wave_loc, 
-                self.thick, self.mxstp, self.wave_loc_array, self.find_edges_tol, self.source_strength, self.move_factor, 
-                self.integrator, self.l, self.save_wave_loc, self.pad, self.leader_pad, self.xs_quad, self.eval_times, self.eval_array,
-                self.boundary_on, self.boundary_source_strength, self.boundary_source, self.sigma_func, self.Msigma, self.finite_domain,
-                self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry, self.lumping)
+                xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus =  solve(
+                    self.tfinal,N_space, N_ang, M, self.N_groups, x0_new, self.t0, self.sigma_t, self.sigma_s, self.t_nodes, self.source_type, uncollided, moving, self.move_type, self.thermal_couple,
+                    self.temp_function, self.rt, self.at, self.e_initial, choose_xs, specified_xs, self.weights, self.sigma, self.particle_v, self.edge_v, self.cv0, self.estimate_wavespeed, 
+                    self.find_wave_loc, self.thick, self.mxstp, self.wave_loc_array, self.find_edges_tol, self.source_strength, self.move_factor, self.integrator, self.l, self.save_wave_loc, self.pad, 
+                    self.leader_pad, self.xs_quad, self.eval_times, self.eval_array,self.boundary_on, self.boundary_source_strength, self.boundary_source, self.sigma_func, self.Msigma, 
+                    self.finite_domain,self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry, self.lumping, self.cross_section_data)
                 print(edges, 'final edges')
                 # print(edges, "edges")
-                print(wave_tpnts, wave_xpnts, "wave points")
+                # print(wave_tpnts, wave_xpnts, "wave points")
                 
                 # self.xs_out = xs
                 # self.phi_out = phi

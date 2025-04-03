@@ -54,6 +54,7 @@ data = [("S", float64[:]),
         ('source_strength', float64),
         ('sigma_s', float64),
         ('geometry', nb.typeof(params_default)),
+        ('g', int64)
         
         ]
 ###############################################################################

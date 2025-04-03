@@ -89,13 +89,14 @@ data = [('N_ang', int64),
         ('boundary_time', float64[:]),
         ('lumping', int64),
         ('T4', float64[:]),
-        ('edges_init', float64[:])
+        ('edges_init', float64[:]),
+        ('N_groups', int64)
         ]
 ###############################################################################
 
 @jitclass(data)
 class build(object):
-    def __init__(self, N_ang, N_space, M, tfinal, x0, t0, mus, ws, xs_quad, ws_quad, sigma_t, sigma_s, 
+    def __init__(self, N_ang, N_space, M, N_groups, tfinal, x0, t0, mus, ws, xs_quad, ws_quad, sigma_t, sigma_s, 
     source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
      quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
@@ -108,6 +109,7 @@ class build(object):
         self.tfinal = tfinal
         self.sigma_t = sigma_t
         self.sigma_s = sigma_s
+        self.N_groups = N_groups
         self.sigma_a = sigma_t-sigma_s
         self.scattering_ratio = self.sigma_s / self.sigma_t
         self.mus = mus

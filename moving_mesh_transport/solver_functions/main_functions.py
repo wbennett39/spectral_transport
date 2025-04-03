@@ -102,12 +102,12 @@ def plot_p1_su_olson_mathematica():
     
     return [su_olson_rad, su_olson_mat]
 
-def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_type, 
+def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes, source_type, 
           uncollided, moving, move_type, thermal_couple, temp_function, rt, at, e_initial, choose_xs, specified_xs, 
           weights, sigma, particle_v, edge_v, cv0, estimate_wavespeed, find_wave_loc, thick, mxstp, wave_loc_array, 
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping):
+          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -165,7 +165,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
 
 
 
-    initialize = build(N_ang, N_space, M, tfinal, x0, t0, mus, ws, xs_quad,
+    initialize = build(N_ang, N_space, M, N_groups, tfinal, x0, t0, mus, ws, xs_quad,
                        ws_quad, sigma_t, sigma_s, source_type, uncollided, moving, move_type, t_quad, t_ws,
                        thermal_couple, temp_function, e_initial, sigma, particle_v, edge_v, cv0, thick, 
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
@@ -207,7 +207,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     flux = scalar_flux(initialize)
     rhs = rhs_class(initialize)
     transfer = T_function(initialize)
-    sigma_class = sigma_integrator(initialize)
+    sigma_class = sigma_integrator(initialize, cross_section_data)
     flux.load_AAA(sigma_class.AAA)
     if thermal_couple['none'] != 1:
         mesh.move(0)
@@ -221,9 +221,18 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
     # print(phi, 'phi IC')
     
     # @njit
-    def RHS(t, V):
+    def RHS(t, V, g):
+        sigma_class.g = g
+        source.g = g
+
         return rhs.call(t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class)
     
+    def RHS_wrap(t, V, g):
+        VV = V*0
+        for ig in range(N_groups):
+            VV[ig] = RHS(t, VV[ig], g)
+        return VV
+
     start = timer()
     reshaped_IC = IC.reshape(deg_freedom)
 
@@ -281,7 +290,7 @@ def solve(tfinal, N_space, N_ang, M, x0, t0, sigma_t, sigma_s, t_nodes, source_t
         print(rt, 'rt')
         print(at, 'at')
         print('starting solve')
-        sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp)
+        sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-3)
 
     # sol = ode15s.y
 

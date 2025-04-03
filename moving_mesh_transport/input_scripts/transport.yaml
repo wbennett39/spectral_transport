@@ -28,6 +28,7 @@
     'thick': False            # optically thick or thin
     'integrator': 'DOP853'
     'geometry': {slab: False, sphere: True}
+    'N_groups': 1
     
 # plane pulse source
 'plane_IC':

@@ -49,14 +49,17 @@ data = [('N_ang', int64),
         ('opacity_vec', float64[:,:]),
         ('a', float64),
         ('lumping', int64),
-        ('loud', int64)
+        ('loud', int64),
+        ('cross_section_data', float64[:,:]),
+        ('g', int64)
 
         ]
 
 
 @ jitclass(data)
 class sigma_integrator():
-    def __init__(self, build):
+    def __init__(self, build, cross_section_data):
+        self.cross_section_data = cross_section_data
         self.sigma_t = build.sigma_t
         self.sigma_s = build.sigma_s
         print(self.sigma_s,'sigma_s')
@@ -288,7 +291,7 @@ class sigma_integrator():
                 b = np.max(x)
                 # resmax = 300 / (b-a)
                 # resmax = 10400
-                resmax = 25e4
+                resmax = 18e3
                 if self.loud == True:
                     print('###   ###   ###   ###   ###   ###   ###   ###')
                     print(resmax, 'max sigma')

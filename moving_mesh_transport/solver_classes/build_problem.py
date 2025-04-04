@@ -178,7 +178,7 @@ class build(object):
     def integrate_quad_sphere(self, a, b, ang, space, j, g,  ic):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
         mu = self.mus[ang]
-        self.IC[ang,space,j, g] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu, iarg = space * self.xs_quad.size, earg = (space+1)*self.xs_quad.size) * 2.0 * normTn(j, argument, a, b))
+        self.IC[ang + g * self.N_ang, space,j] = 0.5 * (b-a) * np.sum(self.ws_quad * ic.function(argument, mu, iarg = space * self.xs_quad.size, earg = (space+1)*self.xs_quad.size) * 2.0 * normTn(j, argument, a, b))
         
     def make_T4_IC(self, RT_class, edges):
         for space in range(self.N_space):

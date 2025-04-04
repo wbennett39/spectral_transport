@@ -246,9 +246,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             VV2 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
             # print(VV2.shape())
             res = RHS(t, VV2, ig)
-            print(3)
+
             VV_new[ig * N_ang:(ig+1) * N_ang,:,:] = res.reshape(((N_ang + extra_deg), N_space, M+1))
-            print(4)
+
         # print(V_new[N_ang])
         return VV_new.reshape((N_ang * N_groups + extra_deg) * N_space *(M+1))
 

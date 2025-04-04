@@ -38,7 +38,7 @@ data = [('N_ang', int64),
         ('tfinal', float64),
         ('sigma_t', float64),
         ('sigma_s', float64),
-        ('IC', float64[:,:,:,:]),
+        ('IC', float64[:,:,:]),
         ('mus', float64[:]),
         ('ws', float64[:]),
         ('xs_quad', float64[:]),
@@ -155,9 +155,9 @@ class build(object):
 
         
         if self.thermal_couple['none'] == 1:
-            self.IC = np.zeros((N_ang, N_space, M+1, self.N_groups))
+            self.IC = np.zeros((N_ang * self.N_groups, N_space, M+1))
         elif self.thermal_couple['none'] != 1:
-            self.IC = np.zeros((N_ang + 1, N_space, M+1, self.N_groups))
+            self.IC = np.zeros((N_ang * self.N_groups + 1, N_space, M+1))
         self.epsilon = epsilon
         self.geometry = geometry
        
@@ -188,7 +188,7 @@ class build(object):
                 b = edges[space+1]
 
                 self.integrate_e_sphere(a, b, space, j)
-                RT_class.e_vec[j] = self.IC[self.N_ang,space,j,0]
+                RT_class.e_vec[j] = self.IC[self.N_ang * self.N_groups ,space,j,0]
 
             argument = (b-a)/2*self.xs_quad + (a+b)/2
             T = RT_class.make_T(argument, a, b)
@@ -200,11 +200,11 @@ class build(object):
 
     def integrate_e(self, a, b, space, j):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
-        self.IC[self.N_ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) * normPn(j, argument, a, b))
+        self.IC[self.N_ang * self.N_groups, space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) * normPn(j, argument, a, b))
     
     def integrate_e_sphere(self, a, b, space, j):
         argument = (b-a)/2*self.xs_quad + (a+b)/2
-        self.IC[self.N_ang,space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) *2.0* normTn(j, argument, a, b))
+        self.IC[self.N_ang * self.N_groups,space,j] = (b-a)/2 * np.sum(self.ws_quad * self.IC_e_func(argument) *2.0* normTn(j, argument, a, b))
     
     def IC_e_func(self,x):
         return np.ones(x.size) * self.e_init

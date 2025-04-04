@@ -232,15 +232,25 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         VV = V*0
         extra_deg = int(thermal_couple['none'] == False)
         print(extra_deg, 'extra degree of freedom')
-        V_new = VV.copy().reshape((N_ang + extra_deg, N_space, M+1, N_groups))
-        print(V_new.shape())
+        V_new = VV.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
+        # print(V_new)
         VV_new = V_new.copy()*0
         for ig in range(N_groups):
-            VV2 = V_new[:,:,:,ig].reshape((N_ang + extra_deg) * N_space *(M+1))
+            radiation = V_new[ig * N_ang:(ig+1) * N_ang,:,:]
+            if extra_deg != 0:
+                e = V_new[-1,:,:]
+                VV2 = np.concatenate((radiation,e))
+            else:
+                VV2 = radiation
+            # VV2 = V_new[:,:,:]
+            VV2 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
+            # print(VV2.shape())
             res = RHS(t, VV2, ig)
-            VV_new[:,:,:,ig] = res.reshape(((N_ang + extra_deg), N_space, M+1))
-        print(V_new[N_ang])
-        return VV_new.reshape((N_ang + extra_deg) * N_space *(M+1) * N_groups)
+            print(3)
+            VV_new[ig * N_ang:(ig+1) * N_ang,:,:] = res.reshape(((N_ang + extra_deg), N_space, M+1))
+            print(4)
+        # print(V_new[N_ang])
+        return VV_new.reshape((N_ang * N_groups + extra_deg) * N_space *(M+1))
 
     start = timer()
     reshaped_IC = IC.reshape(deg_freedom)
@@ -341,15 +351,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if thermal_couple['none'] == 1:
         extra_deg_freedom = 0
        
-        sol_last = sol.y[:,-1].reshape((N_ang,N_space,M+1, N_groups))
+        sol_last = sol.y[:,-1].reshape((N_ang * N_groups,N_space,M+1))
         if eval_times ==True and sol.status != -1:
-            sol_array = sol.y.reshape((eval_array.size, N_ang,N_space,M+1, N_groups)) 
+            sol_array = sol.y.reshape((eval_array.size, N_ang * N_groups, N_space, M+1)) 
     elif thermal_couple['none'] != 1:
         extra_deg_freedom = 1
-        sol_last = sol.y[:,-1].reshape((N_ang+1,N_space,M+1, N_groups))
+        sol_last = sol.y[:,-1].reshape((N_ang * N_groups+1, N_space, M+1))
         # print(sol_last[-1,:,:])
         if eval_times == True:
-            sol_array = sol.y.reshape((eval_array.size, N_ang+1,N_space,M+1, N_groups)) 
+            sol_array = sol.y.reshape((eval_array.size, N_ang * N_groups+1, N_space, M+1)) 
 
 
     

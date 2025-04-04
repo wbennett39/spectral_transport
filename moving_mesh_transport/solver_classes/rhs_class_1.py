@@ -434,7 +434,7 @@ class rhs_class():
                     flux.make_P(V_old[:,space,:], space, xL, xR)
         
                 PV = flux.scalar_flux_term
-                # source.make_source(t, xL, xR, uncollided_sol)
+                source.make_source(t, xL, xR, uncollided_sol)
                 S = source.S
                 H = transfer_class.H
                 if self.geometry['sphere'] == True:

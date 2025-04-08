@@ -12,6 +12,7 @@ import h5py
 # import quadpy 
 import matplotlib.pyplot as plt
 import math
+from .VDMD import VDMD
 from pathlib import Path
 from ..solver_classes.functions import find_nodes
 from ..solver_classes.functions import Pn, normTn
@@ -107,7 +108,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           weights, sigma, particle_v, edge_v, cv0, estimate_wavespeed, find_wave_loc, thick, mxstp, wave_loc_array, 
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data):
+          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, dense):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -193,7 +194,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if thermal_couple['none'] == 1:
         deg_freedom = N_ang*N_space*(M+1)*N_groups
     else:
-        deg_freedom = (N_ang+1)*N_space*(M+1)*N_groups
+        deg_freedom = (N_ang*N_groups+1)*N_space*(M+1)
 
     mesh = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
                       wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
@@ -239,7 +240,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             radiation = V_new[ig * N_ang:(ig+1) * N_ang,:,:]
             if extra_deg != 0:
                 e = V_new[-1,:,:]
-                VV2 = np.concatenate((radiation,e))
+                VV2 = np.zeros((N_ang+1, N_space, M+1 ))
+                VV2[:-1,:,:] = radiation
+                VV2[-1,:,:] = e
+                # VV2 = np.concatenate((radiation,e))÷ß
             else:
                 VV2 = radiation
             # VV2 = V_new[:,:,:]
@@ -309,9 +313,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         print(rt, 'rt')
         print(at, 'at')
         print('starting solve')
-        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-3)
+        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, dense_output = dense, min_step = 1e-3)
 
     # sol = ode15s.y
+
 
 
     print(sol.status, 'solution status')
@@ -323,6 +328,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # print(eval_times, 'eval times')
     end = timer()
     print('solver finished')
+
+    # if dense == True:
+    #     eiegen_vals = VDMD()
     
     if save_wave_loc == True:
         print(save_wave_loc, 'save wave')

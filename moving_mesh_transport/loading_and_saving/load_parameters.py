@@ -48,6 +48,7 @@ class parameter_load_class:
         dictionary_loader(parameters['all']['geometry'], self.geometry)   
         self.lumping = int(parameters['all']['lumping'])
         self.N_groups = int(parameters['all']['N_groups'])
+        self.dense = int(mesh_parameters['dense'])
         
 
         self.thick = int(parameters['all']['thick'])

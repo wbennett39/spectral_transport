@@ -78,8 +78,9 @@ class source_class(object):
         self.geometry = build.geometry
     
     def integrate_quad(self, t, a, b, j, func):
-        argument = (b-a)/2 * self.xs_quad + (a+b)/2
-        self.S[j] = (b-a)/2 * np.sum(self.ws_quad * func(argument, t) * normPn(j, argument, a, b))
+        a = 1
+        # argument = (b-a)/2 * self.xs_quad + (a+b)/2
+        # self.S[j] = (b-a)/2 * np.sum(self.ws_quad * func(argument, t) * normPn(j, argument, a, b))
 
     
     def integrate_quad_sphere(self, t, a, b, j, func):
@@ -145,6 +146,7 @@ class source_class(object):
             # print("In spherical if statement.") # This statement is evaluating to true
             if self.uncollided == True:
                 if (self.source_type[1] == 1) or (self.source_type[2] == 1):
+                 
                     for j in range(self.M+1):
                         self.integrate_quad_sphere(t, xL, xR, j, uncollided_solution.uncollided_solution)
             elif self.uncollided == False:
@@ -152,6 +154,7 @@ class source_class(object):
                 if self.source_type[2] == 1:
                     #print("In square source if statement.")  
                     for j in range(self.M+1):
+                        assert 0
                         self.integrate_quad_sphere(t, xL, xR, j, self.square_source)
                         #print("Integrate_quad_sphere function is returning ", self.integrate_quad_sphere(t, xL, xR, j, self.square_source))
                 elif self.source_type[5] == 1:

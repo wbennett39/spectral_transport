@@ -20,7 +20,7 @@ data = [('N_ang', int64),
         ('M', int64),
         ('ws', float64[:]),
         ('xs', float64[:]),
-        ('u', float64[:,:,:,:]),
+        ('u', float64[:,:,:]),
         ('edges', float64[:]),
         ('uncollided', int64),
         ('dx_e', float64[:]),
@@ -67,12 +67,14 @@ class make_output:
                         idx = self.edges.size - 1
                     if self.edges[0] <= self.xs[count] <= self.edges[-1]:
                         for i in range(self.M+1):
-                            psi[ang, count, g] += self.u[ang,idx-1,i, g] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+                            # radiation = self.u[g * N_ang:(ig+1) * N_ang,:,:]
+                            # psi[ang, count] += self.u[ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+                            psi[g*self.N_ang + ang, count] += self.u[g*self.N_ang +ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
         
         
         output_phi = np.zeros((self.xs.size, self.N_groups))
         for g in range(self.N_groups):
-            output_phi[:,g] = np.sum(np.multiply(psi[:, :, g].transpose(), self.ws), axis = 1)
+            output_phi[:,g] = np.sum(np.multiply(psi[g*self.N_ang:g*(self.N_ang+1), :].transpose(), self.ws), axis = 1)
         
         
         if self.uncollided == True:
@@ -95,7 +97,7 @@ class make_output:
                 idx = self.edges.size - 1
             for i in range(self.M+1):
                 if self.edges[0] <= self.xs[count] <= self.edges[-1]:
-                    e[count] += self.u[self.N_ang,idx-1,i, 0] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+                    e[count] += self.u[-1,idx-1,i, 0] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
                     # if self.M <=11:
                     #     self.dx_e[count] += self.u[self.N_ang,idx-1,i] * dx_normPn(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
         self.e_out = e

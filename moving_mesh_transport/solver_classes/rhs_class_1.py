@@ -119,7 +119,9 @@ data = [('N_ang', int64),
         ('t_old_list', float64[:]),
         ('time_save_points', int64),
         ('slope_limiter', int64),
-        ('wavefront_estimator', float64)
+        ('wavefront_estimator', float64),
+        ('Y_plus', float64[:]),
+        ('Y_minus', float64[:])
 
         ]
 ##############################################################################
@@ -188,7 +190,9 @@ class rhs_class():
         self.stymie_count = 0
         if build.thermal_couple['none'] == 1:
             self.index = -1
+            self.Y_minus = np.zeros((self.N_ang) * self.N_space * (self.M+1))
         else:
+            self.Y_minus = np.zeros((self.N_ang+1) * self.N_space * (self.M+1))
             self.index = -2
         self.edges_old = build.edges_init
         self.time_save_points = 100
@@ -197,6 +201,7 @@ class rhs_class():
         print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
+        
         
         
   
@@ -628,8 +633,15 @@ class rhs_class():
 
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new)
+            
+            res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
+            # self.Y_plus = res
+            if mesh.told < t:
+                self.Y_plus = (res - self.Y_minus)/(t-mesh.told)
+                self.Y_minus = res
 
-            return V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
+            return res
+        
 
         else:
 

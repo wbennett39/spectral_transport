@@ -232,7 +232,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     def RHS_wrap(t, V):
         VV = V*0
         extra_deg = int(thermal_couple['none'] == False)
-        print(extra_deg, 'extra degree of freedom')
+        # print(extra_deg, 'extra degree of freedom')
         V_new = VV.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
         # print(V_new)
         VV_new = V_new.copy()*0
@@ -250,8 +250,14 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             VV2 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
             # print(VV2.shape())
             res = RHS(t, VV2, ig)
+            if extra_deg != 0:
+                res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
+                VV_new[-1, :,:] = res2[-1,:,:]
+                VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
+            else:
+                VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res[:,:,:].reshape(((N_ang), N_space, M+1))
 
-            VV_new[ig * N_ang:(ig+1) * N_ang,:,:] = res.reshape(((N_ang + extra_deg), N_space, M+1))
+     
 
         # print(V_new[N_ang])
         return VV_new.reshape((N_ang * N_groups + extra_deg) * N_space *(M+1))

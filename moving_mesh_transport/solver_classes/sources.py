@@ -107,10 +107,11 @@ class source_class(object):
     
     def square_source(self, xs, t):
         temp = xs*0
-        for ix in range(xs.size):
-            # abs(xs[ix] - big number)
-            if ((abs(xs[ix]) - 510) < self.x0) and (t < self.t0):
-                temp[ix] = 1.0
+
+        # for ix in range(xs.size):
+        #     # abs(xs[ix] - big number)
+        #     if ((abs(xs[ix]) - 510) < self.x0) and (t < self.t0):
+        #         temp[ix] = 1.0
         if self.geometry['slab'] == True:
             return temp
         elif self.geometry['sphere'] == True:
@@ -154,7 +155,7 @@ class source_class(object):
                 if self.source_type[2] == 1:
                     #print("In square source if statement.")  
                     for j in range(self.M+1):
-                        assert 0
+                        # assert 0
                         self.integrate_quad_sphere(t, xL, xR, j, self.square_source)
                         #print("Integrate_quad_sphere function is returning ", self.integrate_quad_sphere(t, xL, xR, j, self.square_source))
                 elif self.source_type[5] == 1:

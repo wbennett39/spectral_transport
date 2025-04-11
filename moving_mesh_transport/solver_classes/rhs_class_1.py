@@ -121,7 +121,9 @@ data = [('N_ang', int64),
         ('slope_limiter', int64),
         ('wavefront_estimator', float64),
         ('Y_plus', float64[:]),
-        ('Y_minus', float64[:])
+        ('Y_minus', float64[:]),
+        ('save_Ys', int64),
+        ('g', int64)
 
         ]
 ##############################################################################
@@ -201,6 +203,7 @@ class rhs_class():
         print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
+        self.g = 0
         
         
         
@@ -354,7 +357,7 @@ class rhs_class():
             # V_new = V.copy().reshape((self.deg_freedom[0], self.deg_freedom[1], self.deg_freedom[2]))
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
-        
+        print(1)
         # for ang in range(self.N_ang+1):
         #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
         #     V_old[ang,:,:] = new_energy_vec
@@ -375,7 +378,7 @@ class rhs_class():
 
             # print(t,np.max((self.t_old_list < t)), 't, told' )
 
-
+        print(2)
         mesh.move(t)
         if self.slope_limiter == True and self.M>0:
             V_old_new = self.slope_scale(V_old, mesh.edges)
@@ -396,7 +399,7 @@ class rhs_class():
         #     for j in range(self.xs_quad.size):
         #         if self.T_old[ix, j] <0.0:
         #             assert(0)
-        
+        print(3)
         sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class)
         # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
@@ -411,6 +414,7 @@ class rhs_class():
             xL = mesh.edges[space]
             dxR = mesh.Dedges[space+1]
             dxL = mesh.Dedges[space]
+            update = True
             if self.sigma_func['test4']== True:
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
@@ -423,11 +427,11 @@ class rhs_class():
             # matrices.matrix_test(True)
             if update == False:
                 V_new[:, space, :] = V_old[:, space, :] * 0
-
+            
             elif update == True:
                 u_old = make_u_old(V_old[0, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M)
 
-
+        
                 matrices.make_all_matrices(xL, xR, dxL, dxR)
 
                 L = matrices.L
@@ -443,6 +447,7 @@ class rhs_class():
                 S = source.S
                 H = transfer_class.H
                 if self.geometry['sphere'] == True:
+                    print(5)
                     Mass = matrices.Mass
                     J = matrices.J
                     if (self.lumping == True) and (self.M >0):
@@ -482,9 +487,9 @@ class rhs_class():
                 if self.radiative_transfer['none'] == False:
 
                     # print(V_old[self.N_ang, space, :], 'v old')
-
-                    transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
-
+                    if self.g ==0:
+                        transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
+                    print(self.g, 'g')
                     H = transfer_class.H
                     # if self.lumping == True:
                     #     H = mass_lumper(H, xL, xR)[0]
@@ -504,19 +509,29 @@ class rhs_class():
 
                     ######### solve thermal couple ############
                     U = V_old[-1,space,:]
+                    print(6)
                     num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :], True)
                     RU = num_flux.LU 
                     RHS_transfer = np.copy(V_old[-1, space, :]*0)
+                    print(np.shape(V_old))
                     if self.uncollided == True:
                         RHS_transfer += self.c_a *source.S * 2 
+                    print(6.01)
                         #RHS_transfer += source.S * 2
                     #print("source.S = ", source.S)
                     RHS_transfer -= RU
+                    print(6.012)
                     # if space == self.N_space -1:
                     #     print(RU)
-
+                    print(6.013)
+                    print(np.shape(RHS_transfer))
+                    print(np.shape(H))
+                    print(np.shape(U))
                     RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
+                    print(6.014)
                     RHS_transfer += self.c_a * PV*2 /self.sigma_t 
+                    print(6.015)
+                    print(6.02)
                     # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)>=1e-10).any():
                     #     print(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t, 'transfer change')
                     # if np.max(np.abs(2*PV-H)) <= 1e-6:
@@ -529,6 +544,7 @@ class rhs_class():
                     if self.l != 1.0:
                         RHS_transfer = RHS_transfer / self.l
                     V_new[-1,space,:] = RHS_transfer 
+                    print(6.03)
                     # not changing cell if in equilibrium
                     # print(RHS_transfer, 'rhs transfer')
                     # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)<=1e-8).all():
@@ -540,7 +556,7 @@ class rhs_class():
                 ########## Starting direction #########
                 psionehalf = V_old[0, space, :] 
 
-
+                print(6.04)
                 ########## Loop over angle ############
                 for angle in range(self.N_ang):
                     
@@ -569,8 +585,13 @@ class rhs_class():
                     VV = sigma_class.VV
                     # Initialize solution vector, RHS
                     U = np.zeros(self.M+1).transpose()
+                    print(6.06)
+                    print(6.07)
+                    print(6.08)
+                    print(6.09)
 
                     U[:] = V_old[angle,space,:]
+                    print(6.1)
 
                     dterm = U*0
                     if angle > 0 and angle != self.N_ang-1:
@@ -593,11 +614,13 @@ class rhs_class():
                         mu_derivative =  np.dot(J, dterm)
                         RHS -= mu_derivative
                         RHS += np.dot(G, U)
+                        
                         RHS += 0.5 * S /self.sigma_t / self.l
+
                         RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l
 
                         RHS += PV * self.c /self.sigma_t / self.l
-
+                        print(6.2)
                         RHS -= VV / self.sigma_t / self.l
                         RHS -= np.dot(MPRIME, U)
                         RHS = np.dot(Minv, RHS)
@@ -633,13 +656,16 @@ class rhs_class():
 
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new)
-            
+            print(6.9)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
             # self.Y_plus = res
             if mesh.told < t:
                 self.Y_plus = (res - self.Y_minus)/(t-mesh.told)
                 self.Y_minus = res
-
+                self.save_Ys = True
+            else:
+                self.save_Ys = False
+            print(7)
             return res
         
 

@@ -67,17 +67,17 @@ class make_output:
                         idx = self.edges.size - 1
                     if self.edges[0] <= self.xs[count] <= self.edges[-1]:
                         for i in range(self.M+1):
-                            print(1)
+
                             # radiation = self.u[g * N_ang:(ig+1) * N_ang,:,:]
                             # psi[ang, count] += self.u[ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
                             psi[ang, count, g] += self.u[g*self.N_ang +ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
         
         
         output_phi = np.zeros((self.xs.size, self.N_groups))
-        print(2)
+
         for g in range(self.N_groups):
-            output_phi[:,g] = np.sum(np.multiply(psi[g*self.N_ang:g*(self.N_ang+1), :].transpose(), self.ws), axis = 1)
-        print(3)
+            output_phi[:,g] = np.sum(np.multiply(psi[:, :, g].transpose(), self.ws), axis = 1)
+
         
         if self.uncollided == True:
             uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
@@ -85,6 +85,7 @@ class make_output:
                 output_phi[:,g] += uncol 
         self.psi_out = psi
         self.phi_out = output_phi
+
         return output_phi
     
     def make_e(self):
@@ -103,6 +104,7 @@ class make_output:
                     # if self.M <=11:
                     #     self.dx_e[count] += self.u[self.N_ang,idx-1,i] * dx_normPn(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
         self.e_out = e
+
         return e
     
     def get_exit_dist(self, uncollided_solution):
@@ -110,6 +112,7 @@ class make_output:
         phi = np.zeros((2, self.N_groups))
         self.exit_dist = np.zeros((self.N_ang, 2, self.N_groups))
         x_eval = np.array([self.edges[0], self.edges[-1]])
+
         for g in range(self.N_groups):
             for ang in range(self.N_ang):
                 for count in range(2):
@@ -123,9 +126,10 @@ class make_output:
                             psi[ang, count,g] += self.u[g*self.N_ang +ang,idx-1,i] * self.basis(i,x_eval[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
         
         self.exit_dist = psi
+
         output = np.zeros((2, self.N_groups))
         for g in range(self.N_groups):
-            output[:,g] = np.sum(np.multiply(psi[:,:].transpose(), self.ws), axis = 1)
+            output[:,g] = np.sum(np.multiply(psi[:,:,g].transpose(), self.ws), axis = 1)
             if self.uncollided == True:
                 uncol = uncollided_solution.uncollided_solution(self.xs, self.t)
                 output[:,g] += uncol

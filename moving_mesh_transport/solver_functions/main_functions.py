@@ -144,7 +144,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     # t_quad = quadpy.c1.gauss_legendre(t_nodes).points
     t_quad, t_ws = quadrature(t_nodes, 'gauss_legendre')
-    print(t_quad, 't quad')
+    # print(t_quad, 't quad')
 
     # t_ws = quadpy.c1.gauss_legendre(t_nodes).weights
     half = int((N_space + 1)/2)
@@ -237,6 +237,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(V_new)
         VV_new = V_new.copy()*0
         for ig in range(N_groups):
+            rhs.g = ig
             radiation = V_new[ig * N_ang:(ig+1) * N_ang,:,:]
             if extra_deg != 0:
                 e = V_new[-1,:,:]
@@ -247,15 +248,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             else:
                 VV2 = radiation
             # VV2 = V_new[:,:,:]
-            VV2 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
+            VV3 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
             # print(VV2.shape())
-            res = RHS(t, VV2, ig)
+            res = RHS(t, VV3, ig)
             if extra_deg != 0:
                 res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
                 VV_new[-1, :,:] = res2[-1,:,:]
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
             else:
-                VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res[:,:,:].reshape(((N_ang), N_space, M+1))
+                VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res[:,:,:].reshape((N_ang, N_space, M+1))
 
      
 

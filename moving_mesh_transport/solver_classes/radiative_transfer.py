@@ -113,6 +113,7 @@ class T_function(object):
         self.cs = np.zeros((self.N_space, self.M+1))
         self.cs_T4 = np.zeros(self.M+1)
 
+
     def make_e(self, xs, a, b):
         temp = xs*0
         for ix in range(xs.size):
@@ -458,7 +459,7 @@ class T_function(object):
                                                     VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
                                             VV_lumped = mass_lumper(VV, xL, xR)[0]
                                         self.H2[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_lumped[i,j]
-                self.H = self.H2.copy()
+                    self.H = self.H2.copy()
         
 
 

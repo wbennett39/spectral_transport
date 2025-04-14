@@ -356,8 +356,10 @@ class sigma_integrator():
             # res = 1 * 10**(2) + x*0
             return res
         elif self.sigma_func['picket_fence'] == 1:
-                w1 = 2/11
-                w2 = 20/11
+                # w1 = 2/11
+                # w2 = 20/11
+                w1 = 1
+                w2 = 1
                 if self.g == 0:
                     res =  w1 + x*0
                 elif self.g == 1:

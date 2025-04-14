@@ -73,7 +73,8 @@ data = [('N_ang', int64),
         ('geometry', nb.typeof(params_default)),
         ('l', float64),
         ('c2s', float64[:]),
-        ('sigma_func', nb.typeof(params_default))
+        ('sigma_func', nb.typeof(params_default)),
+        ('shift', float64)
         # ('problem_type', int64)
         ]
 #################################################################################################
@@ -158,7 +159,7 @@ class mesh_class(object):
         if fake_sedov_v != 0 and np.all(self.source_type == 0):
             self.speed = fake_sedov_v
             # print('speed is ', self.speed)
-
+        self.shift = 0.0
         self.initialize_mesh()
     
     def check_tangle(self, t):
@@ -539,21 +540,33 @@ class mesh_class(object):
                 self.edges += 0.01
 
     def shell_source(self):
-        print('shell source function')
-        dx = 1e-5
-        N_inside = int(self.N_space/2 + 1)
-        edges_inside = np.linspace(0, self.x0, N_inside+1)
-        N_outside = int(self.N_space + 1 - N_inside )
-        edges_outside = np.linspace(self.x0, self.x0 + dx, N_outside)
-        self.edges = np.concatenate((edges_inside, edges_outside[1:]))
-        self.edges0 = self.edges
-        assert(self.edges.size == self.N_space + 1)
-        self.Dedges = np.zeros(self.N_space + 1)
+        if self.shift == 0:
+            print('shell source function')
+            dx = 1e-5
+            N_inside = int(self.N_space/2 + 1)
+            edges_inside = np.linspace(0, self.x0, N_inside+1)
+            N_outside = int(self.N_space + 1 - N_inside )
+            edges_outside = np.linspace(self.x0, self.x0 + dx, N_outside)
+            self.edges = np.concatenate((edges_inside, edges_outside[1:]))
+            self.edges0 = self.edges
+            assert(self.edges.size == self.N_space + 1)
+            self.Dedges = np.zeros(self.N_space + 1)
 
-        self.Dedges[N_inside + 1:] = (self.edges[N_inside + 1:] - self.x0)/(self.edges[-1] - self.x0) * self.speed
-        self.Dedges_const = self.Dedges
-        print(self.Dedges_const, 'dedges')
-
+            self.Dedges[N_inside + 1:] = (self.edges[N_inside + 1:] - self.x0)/(self.edges[-1] - self.x0) * self.speed
+            self.Dedges_const = self.Dedges
+            print(self.Dedges_const, 'dedges')
+        else:
+            x02 = self.x0 + self.shift
+            x03 = self.x0 - self.shift
+            self.edges = np.linspace(-x03 - self.tfinal * self.speed, x02 + self.tfinal * self.speed, self.N_space + 1 )
+            closest_left = np.argmin(np.abs(self.edges + x03))
+            closest_right = np.argmin(np.abs(self.edges - x02))
+            self.edges[closest_left] = x03
+            self.edges[closest_right] = x02
+            self.edges = np.sort(self.edges)
+            self.Dedges = self.edges * 0
+            self.Dedges_const = self.edges*0
+            print(self.edges, 'edges0')
 
         
 
@@ -1608,11 +1621,12 @@ class mesh_class(object):
                 if self.geometry['slab'] == True:
                     self.thin_square_init_func_legendre()
                 else:
-                    self.edges = np.linspace(500, 520, self.N_space + 1)
-                    self.edges[self.N_space//3] = 509.5
-                    self.edges[(2*self.N_space)//3] = 510.5
-                    self.edges = np.sort(self.edges)
-                    self.Dedges = self.edges * 0
+                    # assert 0
+                    # self.edges = np.linspace(500, 520, self.N_space + 1)
+                    # self.edges[self.N_space//3] = 509.5
+                    # self.edges[(2*self.N_space)//3] = 510.5
+                    # self.edges = np.sort(self.edges)
+                    # self.Dedges = self.edges * 0
                     self.shell_source()    
              
             elif np.all(self.source_type == 0):
@@ -1675,7 +1689,7 @@ class mesh_class(object):
             self.tactual = 0.0
             # static mesh -- puts the edges at the final positions that the moving mesh would occupy
             # sets derivatives to 0
-            # self.moving = True
+            self.moving = True
             if self.thick == True:
                 self.delta_t = self.tfinal 
             self.move(self.tfinal)

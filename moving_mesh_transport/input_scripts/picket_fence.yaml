@@ -1,16 +1,16 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'transport'
-    'tfinal': 1.0
+    'tfinal': 10.0
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
     'sigma_t': 1.0
     'sigma_s': 0.0
     't0': 5.0                       # time the source is turned off
-    'N_spaces': [5,30]                   # number of cells
+    'N_spaces': [10]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [0,3]                         # number of basis functions -1
+    'Ms': [0]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-12                         # rel tolerance for ODE integrator
     'at': 1e-10                         # abs tolerance for ODE integrator
@@ -46,16 +46,17 @@
     'x0': [0.5]
     'source_strength': 1.0
     'source_type': [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    'N_angles': [8,64]
+    'N_angles': [8]
     'move_type': [1,0]              # moving mesh function selector
     'benchmarking': False
     
 # square source
 'square_source':
     'x0': [0.5]
+    'shift': 100.0
     'source_strength': 1.0
     'source_type': [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]
-    'N_angles': [2,16]
+    'N_angles': [2]
     'move_type': [1,0]              # moving mesh function selector
     'bench_type': 'full'          # 'S2' or 'full'
     'benchmarking': False

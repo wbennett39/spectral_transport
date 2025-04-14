@@ -54,7 +54,8 @@ data = [("S", float64[:]),
         ('source_strength', float64),
         ('sigma_s', float64),
         ('geometry', nb.typeof(params_default)),
-        ('g', int64)
+        ('g', int64),
+        ('shift', float64)
         
         ]
 ###############################################################################
@@ -76,6 +77,7 @@ class source_class(object):
         # self.source_strength = 0.0137225 * 299.98
         self.source_strength = build.source_strength
         self.geometry = build.geometry
+        self.shift = 0.0
     
     def integrate_quad(self, t, a, b, j, func):
         a = 1
@@ -109,7 +111,7 @@ class source_class(object):
         temp = xs*0
 
         for ix in range(xs.size):
-            if abs(xs[ix]) <= self.x0:
+            if abs(xs[ix] - self.shift) <= self.x0 and t <self.t0:
         #     if ((abs(xs[ix]) - 510) < self.x0) and (t < self.t0):
                 temp[ix] = 1.0
         if self.geometry['slab'] == True:

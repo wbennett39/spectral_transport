@@ -108,10 +108,10 @@ class source_class(object):
     def square_source(self, xs, t):
         temp = xs*0
 
-        # for ix in range(xs.size):
-        #     # abs(xs[ix] - big number)
+        for ix in range(xs.size):
+            if abs(xs[ix]) <= self.x0:
         #     if ((abs(xs[ix]) - 510) < self.x0) and (t < self.t0):
-        #         temp[ix] = 1.0
+                temp[ix] = 1.0
         if self.geometry['slab'] == True:
             return temp
         elif self.geometry['sphere'] == True:

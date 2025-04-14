@@ -226,6 +226,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         sigma_class.g = g
         source.g = g
         flux.g = g
+        rhs.g = g
+        transfer.g = g
 
         return rhs.call(t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class)
     
@@ -233,7 +235,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         VV = V*0
         extra_deg = int(thermal_couple['none'] == False)
         # print(extra_deg, 'extra degree of freedom')
-        V_new = VV.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
+        V_new = V.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
         # print(V_new)
         VV_new = V_new.copy()*0
         for ig in range(N_groups):
@@ -256,7 +258,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 VV_new[-1, :,:] = res2[-1,:,:]
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
             else:
-                VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res[:,:,:].reshape((N_ang, N_space, M+1))
+                VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res[:,:,:]
+
 
      
 

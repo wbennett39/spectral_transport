@@ -359,9 +359,10 @@ class sigma_integrator():
                 w1 = 2/11
                 w2 = 20/11
                 if self.g == 0:
-                    return w1 + x*0
+                    res =  w1 + x*0
                 elif self.g == 1:
-                    return w2 + x * 0       
+                   res = w2 + x * 0     
+                return res  
                  
         elif self.sigma_func['gaussian'] == 1:
             return np.exp(- x**2 /(2* self.std**2))  # probably shouldn't have sigma_a here

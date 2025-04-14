@@ -108,6 +108,9 @@ class scalar_flux(object):
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
                                 elif self.lumping == False:
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                    # print(self.PV, 'PV')
+                                    # print(self.cs, 'cs')
+                                    # print(u, 'u')
                                 # else:
 
 

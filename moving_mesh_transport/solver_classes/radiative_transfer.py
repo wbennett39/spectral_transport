@@ -66,7 +66,8 @@ data = [('temp_function', int64[:]),
         ('cs', float64[:,:]),
         ('Msigma', int64),
         ('cs_T4', float64[:]),
-        ('H2', float64[:])
+        ('H2', float64[:]),
+        ('g', int64)
 
 
 
@@ -112,8 +113,8 @@ class T_function(object):
         self.N_space = build.N_space
         self.cs = np.zeros((self.N_space, self.M+1))
         self.cs_T4 = np.zeros(self.M+1)
-
-
+    
+        self.g  =0
     def make_e(self, xs, a, b):
         temp = xs*0
         for ix in range(xs.size):
@@ -426,7 +427,8 @@ class T_function(object):
     def make_H(self, xL, xR, e_vec, sigma_class, space):
         self.e_vec = e_vec
         self.space = space
-        self.H = self.H * 0
+        if self.g == 0:
+            self.H = self.H * 0
             
         # Lines commented out are the original lines of code
 

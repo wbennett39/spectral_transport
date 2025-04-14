@@ -565,7 +565,7 @@ class mesh_class(object):
             self.edges[closest_right] = x02
             self.edges = np.sort(self.edges)
             self.Dedges = self.edges * 0
-            self.Dedges_const = self.edges*0
+            self.Dedges_const = self.Dedges
             print(self.edges, 'edges0')
 
         
@@ -1689,7 +1689,7 @@ class mesh_class(object):
             self.tactual = 0.0
             # static mesh -- puts the edges at the final positions that the moving mesh would occupy
             # sets derivatives to 0
-            self.moving = True
+            # self.moving = True
             if self.thick == True:
                 self.delta_t = self.tfinal 
             self.move(self.tfinal)

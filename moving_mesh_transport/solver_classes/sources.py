@@ -111,7 +111,7 @@ class source_class(object):
         temp = xs*0
 
         for ix in range(xs.size):
-            if abs(xs[ix] - self.shift) <= self.x0 and t <self.t0:
+            if abs(xs[ix]-self.shift) <= self.x0:# and (t <self.t0):
         #     if ((abs(xs[ix]) - 510) < self.x0) and (t < self.t0):
                 temp[ix] = 1.0
         if self.geometry['slab'] == True:

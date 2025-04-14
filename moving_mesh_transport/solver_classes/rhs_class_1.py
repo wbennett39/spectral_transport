@@ -437,7 +437,7 @@ class rhs_class():
                 L = matrices.L
                 G = matrices.G
                 MPRIME = matrices.MPRIME
-                
+
                 if self.radiative_transfer['none'] == False:
                     flux.make_P(V_old[:-1,space,:], space, xL, xR)
                 else:
@@ -561,10 +561,11 @@ class rhs_class():
                     # calculate numerical flux
                     refl_index = 0
                     if space == 0:
-                        if angle >= (self.N_ang)/2:
-                            assert(self.mus[angle] > 0)
-                            refl_index = self.N_ang-angle-1
-                            assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
+                        if abs(xL) <= 1e-10:
+                            if angle >= (self.N_ang)/2:
+                                assert(self.mus[angle] > 0)
+                                refl_index = self.N_ang-angle-1
+                                assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
                         # print(self.mus[])
                         
                     num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])

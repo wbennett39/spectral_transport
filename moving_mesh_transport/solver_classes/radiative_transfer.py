@@ -427,8 +427,8 @@ class T_function(object):
     def make_H(self, xL, xR, e_vec, sigma_class, space):
         self.e_vec = e_vec
         self.space = space
-        if self.g == 0:
-            self.H = self.H * 0
+        # if self.g == 0:
+        self.H = self.H * 0
             
         # Lines commented out are the original lines of code
 

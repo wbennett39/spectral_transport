@@ -215,11 +215,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     source.shift = shift
     mesh.shift = shift
     mesh.initialize_mesh()
+    print(mesh.edges, 'edges')
+    print(mesh.Dedges_const, 'dedges const')
 
     if thermal_couple['none'] != 1:
         mesh.move(0)
         initialize.make_T4_IC(transfer, mesh.edges)
-    initialize.make_IC()
+    initialize.make_IC(mesh.edges)
     IC = initialize.IC
     xs = find_nodes(mesh.edges, M, geometry)
     phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry, N_groups)

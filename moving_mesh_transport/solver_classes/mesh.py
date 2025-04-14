@@ -557,13 +557,14 @@ class mesh_class(object):
             print(self.Dedges_const, 'dedges')
         else:
             x02 = self.x0 + self.shift
-            x03 = self.x0 - self.shift
-            self.edges = np.linspace(-x03 - self.tfinal * self.speed, x02 + self.tfinal * self.speed, self.N_space + 1 )
+            x03 = self.shift - self.x0
+            self.edges = np.linspace(x03 - self.tfinal * self.speed, x02 + self.tfinal * self.speed, self.N_space + 1 )
             closest_left = np.argmin(np.abs(self.edges + x03))
             closest_right = np.argmin(np.abs(self.edges - x02))
             self.edges[closest_left] = x03
             self.edges[closest_right] = x02
             self.edges = np.sort(self.edges)
+            # self.edges[0] = 0.0
             self.Dedges = self.edges * 0
             self.Dedges_const = self.Dedges
             print(self.edges, 'edges0')
@@ -1688,7 +1689,7 @@ class mesh_class(object):
 
             self.tactual = 0.0
             # static mesh -- puts the edges at the final positions that the moving mesh would occupy
-            # sets derivatives to 0
+            # sets derivatives to 
             # self.moving = True
             if self.thick == True:
                 self.delta_t = self.tfinal 
@@ -1699,7 +1700,8 @@ class mesh_class(object):
             # self.edges[0] = -self.x0 + -self.tfinal * self.speed
 
 
-            print(self.edges[-1], "final edges -- last edge") 
+            print(self.edges, "final edges") 
+
 
 
 

@@ -123,7 +123,8 @@ data = [('N_ang', int64),
         ('Y_plus', float64[:]),
         ('Y_minus', float64[:]),
         ('save_Ys', int64),
-        ('g', int64)
+        ('g', int64),
+        ('t_old_list', float64[:])
 
         ]
 ##############################################################################
@@ -204,6 +205,7 @@ class rhs_class():
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
         self.g = 0
+        self.t_old_list = np.array([0.0])
         
         
         
@@ -654,12 +656,13 @@ class rhs_class():
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
             # self.Y_plus = res
-            if mesh.told < t:
-                self.Y_plus = (res - self.Y_minus)/(t-mesh.told)
-                self.Y_minus = res
-                self.save_Ys = True
-            else:
-                self.save_Ys = False
+            # if mesh.told < t:
+            self.Y_plus = (res - self.Y_minus)/(t-self.t_old_list[-1])
+            self.Y_minus = res
+            self.save_Ys = True
+            self.t_old_list = np.append(self.t_old_list,t )
+            # else:
+                # self.save_Ys = False
 
             return res
         

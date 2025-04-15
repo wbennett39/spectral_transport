@@ -204,6 +204,7 @@ class rhs_class():
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
         self.g = 0
+        self.t_old_list = np.array([0.0])
         
         
         
@@ -654,12 +655,15 @@ class rhs_class():
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
             # self.Y_plus = res
-            if mesh.told < t:
-                self.Y_plus = (res - self.Y_minus)/(t-mesh.told)
-                self.Y_minus = res
-                self.save_Ys = True
-            else:
-                self.save_Ys = False
+            told = self.t_old_list[-1]
+            # if  told < t:
+            self.Y_plus = (res - self.Y_minus)/(t-told)
+            self.Y_minus = res
+            self.save_Ys = True
+            
+            # else:
+            self.save_Ys = False
+            self.t_old_list = np.append(self.t_old_list, t)
 
             return res
         

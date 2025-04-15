@@ -199,7 +199,7 @@ class rhs_class():
             self.index = -1
             self.Y_minus = np.zeros((self.N_ang) * self.N_space * (self.M+1))
         else:
-            self.Y_minus = np.zeros((self.N_ang+1) * self.N_space * (self.M+1))
+            self.Y_minus = np.zeros((self.N_ang) * self.N_space * (self.M+1))
             self.index = -2
         self.edges_old = build.edges_init
         self.time_save_points = 100
@@ -663,20 +663,38 @@ class rhs_class():
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
+            res2 = np.copy(V_new[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
+
+            print(1)
             # self.Y_plus = res
             # if mesh.told < t:
-            self.Y_plus = (res - self.Y_minus)/(t-self.t_old_list_Y[-1])
-            self.Y_minus = res
+
+            self.Y_plus = ( res2- self.Y_minus)/(t-self.t_old_list_Y[-1])
+
+            self.Y_minus = res2
+            print(2)
             self.save_Ys = True
             self.t_old_list_Y = np.append(self.t_old_list_Y,t )
+            print(3)
+
+
             Y_minus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
             Y_plus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+            print(4)
             Y_minus_new[:-1] = self.Y_minus_list
-            Y_plus_new[:-1] = self.Y_plus_list
+            Y_plus_new[:-1] = self.Y_plus_list  
+            print(5)
+
             self.Y_minus_list = np.copy(Y_minus_new)
             self.Y_plus_list = np.copy(Y_minus_new)
+            print(6)
+
+            # print(self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang].size)
+            # print(self.Y_minus.size)
+
             self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang] = self.Y_minus
             self.Y_plus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang] = self.Y_plus
+            print(7)
 
             if self.g > 0:
                 self.Y_iterator += 1

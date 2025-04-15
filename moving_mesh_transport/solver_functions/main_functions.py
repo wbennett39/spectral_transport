@@ -228,8 +228,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # phi = phi_IC.make_phi(uncollided_sol)
     
     # print(phi, 'phi IC')
-    Y_plus_list = np.zeros((N_ang * N_groups + 1) * N_space * (M+1))
-
+    # ntpnts = 100
+    # # Y_plus_list = np.zeros((ntpnts, (N_ang * N_groups ) * N_space * (M+1)))
+    # # Y_minus_list = np.zeros((ntpnts, (N_ang * N_groups) * N_space * (M+1)))
+    # it_tpnts = 0
+    # tlist = np.zeros(1)
+    # tlist[0] = 0.0
     # @njit
     def RHS(t, V, g):
         sigma_class.g = g
@@ -242,6 +246,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     def RHS_wrap(t, V):
         # VV = V*0
+        # tlist = np.append(tlist, t)
         extra_deg = int(thermal_couple['none'] == False)
         # print(extra_deg, 'extra degree of freedom')
         V_new = V.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
@@ -266,6 +271,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
                 VV_new[-1, :,:] = res2[-1,:,:]
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
+ 
             else:
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res[:,:,:]
 
@@ -348,8 +354,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     end = timer()
     print('solver finished')
 
-    # if dense == True:
-    #     eiegen_vals = VDMD()
+    if dense == True:
+        if rhs.tlist != np.sort(rhs.tlist):
+            print('t list nonconsecutive')
+        eiegen_vals = VDMD(rhs.Y_minus_list[:rhs.it_tpnts], rhs.Y_plus_list[:rhs.it_tpnts], 10)
     
     if save_wave_loc == True:
         print(save_wave_loc, 'save wave')

@@ -13,4 +13,8 @@ def VDMD(Y_minus, Y_plus, skip):
     deigs = np.linalg.eigvals(tmp3)
     #deigs = deigs[deigs>0]
     #print(np.log(deigs)/dt)
-    print(deigs)
+    print(Y_minus, 'Y-')
+    print(Y_plus, 'Y+')
+    print('############################')
+    print(deigs, 'eigen values')
+    print('############################')

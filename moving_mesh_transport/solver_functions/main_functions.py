@@ -355,13 +355,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     end = timer()
     print('solver finished')
 
-    # if dense == True:
-    #     if rhs.tlist != np.sort(rhs.tlist):
-    #         print('t list nonconsecutive')
-    #     eiegen_vals = np.zeros(rhs.tlist.size)
-    #     for it, tt in enumerate(rhs.tlist):
-    #         eiegen_vals[it] = VDMD(rhs.Y_minus_list[it], rhs.Y_plus_list[it], 10)
-    
+    if dense == True:
+        if rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y):
+            print('t list nonconsecutive')
+        # eiegen_vals = np.zeros(rhs.t_old_list_Y.size)
+        # for it, tt in enumerate(rhs.t_old_list_Y):
+        eiegen_vals = VDMD(rhs.Y_minus_list, rhs.Y_plus_list, 10)
+    print(eiegen_vals, 'time eigen vals')
     if save_wave_loc == True:
         print(save_wave_loc, 'save wave')
         wave_tpnts = rhs.times_list

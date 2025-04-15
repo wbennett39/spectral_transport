@@ -18,4 +18,7 @@ def VDMD(Y_minus, Y_plus, skip):
     print(Y_plus, 'Y+')
     print('############################')
     print(deigs, 'eigen values')
+    if (deigs >0).any():
+        print('positive eigen val', np.max(deigs))
     print('############################')
+    return deigs

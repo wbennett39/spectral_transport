@@ -236,8 +236,8 @@ class rhs_class():
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
             print(np.max(V_old), 'max u')
             print(np.min(V_old), 'min u')
-            if np.min(V_old) <= -1:
-                raise ValueError('The solution is becoming too negative')
+            # if np.min(V_old) <= -1:
+            #     raise ValueError('The solution is becoming too negative')
 
             third = int((self.N_space+1)/3)
             rest = int(self.N_space+1 - 2*third)

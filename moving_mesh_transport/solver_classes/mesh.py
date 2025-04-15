@@ -559,7 +559,7 @@ class mesh_class(object):
             x02 = self.x0 + self.shift
             x03 = self.shift - self.x0
             self.edges = np.linspace(x03 - self.tfinal * self.speed, x02 + self.tfinal * self.speed, self.N_space + 1 )
-            closest_left = np.argmin(np.abs(self.edges + x03))
+            closest_left = np.argmin(np.abs(self.edges - x03))
             closest_right = np.argmin(np.abs(self.edges - x02))
             self.edges[closest_left] = x03
             self.edges[closest_right] = x02

@@ -228,7 +228,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # phi = phi_IC.make_phi(uncollided_sol)
     
     # print(phi, 'phi IC')
-    
+    Y_plus_list = np.zeros((N_ang * N_groups + 1) * N_space * (M+1))
+
     # @njit
     def RHS(t, V, g):
         sigma_class.g = g

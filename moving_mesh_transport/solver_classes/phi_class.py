@@ -86,8 +86,8 @@ class scalar_flux(object):
         #         self.scalar_flux_term = self.P 
 
         # else:
-            if self.g == 0: #resets PV sum at the next step. Otherwise, adds over groups
-                self.PV = self.PV*0
+            # if self.g == 0: #resets PV sum at the next step. Otherwise, adds over groups
+            self.PV = self.PV*0
             VV = np.zeros((self.M+1, self.M+1))
 
             # for g in range(self.N_groups):

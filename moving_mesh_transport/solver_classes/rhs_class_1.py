@@ -128,7 +128,8 @@ data = [('N_ang', int64),
         ('Y_minus_list', float64[:,:]),
         ('Y_plus_list', float64[:,:]),
         ('Y_iterator', int64),
-        ('N_groups', int64)
+        ('N_groups', int64),
+        ('VDMD', int64)
 
         ]
 ##############################################################################
@@ -214,6 +215,7 @@ class rhs_class():
         self.N_groups = build.N_groups
         self.Y_minus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         self.Y_plus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+        self.VDMD = True
         
         
         
@@ -663,41 +665,50 @@ class rhs_class():
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
-            res2 = np.copy(V_new[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
-
-            print(1)
-            # self.Y_plus = res
-            # if mesh.told < t:
-
-            self.Y_plus = ( res2- self.Y_minus)/(t-self.t_old_list_Y[-1])
-
-            self.Y_minus = res2
-            print(2)
-            self.save_Ys = True
-            self.t_old_list_Y = np.append(self.t_old_list_Y,t )
-            print(3)
+            if self.VDMD == 'true':
+                res2 = np.copy(V_new[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
 
 
-            Y_minus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-            Y_plus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-            print(4)
-            Y_minus_new[:-1] = self.Y_minus_list
-            Y_plus_new[:-1] = self.Y_plus_list  
-            print(5)
+                # self.Y_plus = res
+                # if mesh.told < t:
 
-            self.Y_minus_list = np.copy(Y_minus_new)
-            self.Y_plus_list = np.copy(Y_minus_new)
-            print(6)
+                self.Y_plus = ( res2- self.Y_minus)/(t-self.t_old_list_Y[-1])
 
-            # print(self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang].size)
-            # print(self.Y_minus.size)
+                self.Y_minus = res2
 
-            self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang] = self.Y_minus
-            self.Y_plus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang] = self.Y_plus
-            print(7)
+                self.save_Ys = True
+                self.t_old_list_Y = np.append(self.t_old_list_Y,t )
 
-            if self.g > 0:
-                self.Y_iterator += 1
+
+
+                Y_minus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+                Y_plus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+
+                Y_minus_new[:-1] = self.Y_minus_list
+                Y_plus_new[:-1] = self.Y_plus_list  
+
+
+                self.Y_minus_list = np.copy(Y_minus_new)
+                self.Y_plus_list = np.copy(Y_minus_new)
+
+
+                # print(self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang].size)
+                # print(self.Y_minus.size)
+                # print(self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang].shape, 'Y list')
+                # print(self.Y_minus.shape, 'Y-')
+
+                Y_minus_temp = self.Y_minus_list.copy().reshape((self.Y_iterator + 1, self.N_groups * self.N_ang, self.N_space, self.M+1))
+                Y_minus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_minus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
+                Y_plus_temp = np.copy(self.Y_plus_list).reshape((self.Y_iterator + 1, self.N_groups * self.N_ang, self.N_space, self.M+1))
+                Y_plus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_plus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
+
+
+                self.Y_minus_list = Y_minus_temp.copy().reshape((self.Y_iterator + 1, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
+                self.Y_plus_list = Y_plus_temp.copy().reshape((self.Y_iterator + 1, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
+
+
+                if self.g > 0:
+                    self.Y_iterator += 1
             # else:
                 # self.save_Ys = False
 
@@ -801,4 +812,5 @@ class rhs_class():
                 temp[0:self.time_save_points-1] = self.t_old_list[1:]
                 temp[-1] = t
                 self.t_old_list = temp
+
 

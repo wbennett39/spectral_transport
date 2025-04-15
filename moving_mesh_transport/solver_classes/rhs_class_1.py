@@ -175,7 +175,7 @@ class rhs_class():
         
         self.mean_free_time = 1/build.sigma_t
         self.division = 10000
-        self.counter = 1000
+        self.counter = 10000
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])
@@ -666,7 +666,7 @@ class rhs_class():
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
             if self.VDMD == True:
-                res2 = np.copy(V_new[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
+                res2 = np.copy(V_old[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
 
 
                 # self.Y_plus = res

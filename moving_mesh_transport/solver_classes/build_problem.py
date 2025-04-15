@@ -99,8 +99,8 @@ class build(object):
     def __init__(self, N_ang, N_space, M, N_groups, tfinal, x0, t0, mus, ws, xs_quad, ws_quad, sigma_t, sigma_s, 
     source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
-     quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
-     fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping):
+    quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
+    fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping):
         self.N_ang = N_ang
         print(self.N_ang, 'angles')
         self.N_space = N_space
@@ -163,6 +163,7 @@ class build(object):
        
         self.e_init = e_initial
         self.T4 = np.zeros(self.xs_quad.size * self.N_space)
+
         # self.e_initial = 1e-4
         
         

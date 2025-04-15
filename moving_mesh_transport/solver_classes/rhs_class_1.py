@@ -124,7 +124,11 @@ data = [('N_ang', int64),
         ('Y_minus', float64[:]),
         ('save_Ys', int64),
         ('g', int64),
-        ('t_old_list_Y', float64[:])
+        ('t_old_list_Y', float64[:]), 
+        ('Y_minus_list', float64[:,:]),
+        ('Y_plus_list', float64[:,:]),
+        ('Y_iterator', int64),
+        ('N_groups', int64)
 
         ]
 ##############################################################################
@@ -206,6 +210,10 @@ class rhs_class():
         self.wavefront_estimator = 0.0
         self.g = 0
         self.t_old_list_Y = np.array([0.0])
+        self.Y_iterator = 0
+        self.N_groups = build.N_groups
+        self.Y_minus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+        self.Y_plus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         
         
         

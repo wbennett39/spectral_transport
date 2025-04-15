@@ -665,7 +665,7 @@ class rhs_class():
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
-            if self.VDMD == 'true':
+            if self.VDMD == True:
                 res2 = np.copy(V_new[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
 
 
@@ -706,8 +706,8 @@ class rhs_class():
                 self.Y_minus_list = Y_minus_temp.copy().reshape((self.Y_iterator + 1, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
                 self.Y_plus_list = Y_plus_temp.copy().reshape((self.Y_iterator + 1, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
 
-
-                if self.g > 0:
+    
+                if self.g == self.N_groups - 1:
                     self.Y_iterator += 1
             # else:
                 # self.save_Ys = False

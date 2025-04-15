@@ -356,7 +356,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     print('solver finished')
 
     if dense == True:
-        if rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y):
+        if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
             print('t list nonconsecutive')
         # eiegen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):

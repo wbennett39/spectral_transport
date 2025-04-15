@@ -669,6 +669,17 @@ class rhs_class():
             self.Y_minus = res
             self.save_Ys = True
             self.t_old_list_Y = np.append(self.t_old_list_Y,t )
+            Y_minus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+            Y_plus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+            Y_minus_new[:-1] = self.Y_minus_list
+            Y_plus_new[:-1] = self.Y_plus_list
+            self.Y_minus_list = np.copy(Y_minus_new)
+            self.Y_plus_list = np.copy(Y_minus_new)
+            self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang] = self.Y_minus
+            self.Y_plus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang] = self.Y_plus
+
+            if self.g > 0:
+                self.Y_iterator += 1
             # else:
                 # self.save_Ys = False
 

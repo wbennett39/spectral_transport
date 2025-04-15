@@ -224,7 +224,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     initialize.make_IC(mesh.edges)
     IC = initialize.IC
     xs = find_nodes(mesh.edges, M, geometry)
-    phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry, N_groups)
+    # phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry, N_groups)
     # phi = phi_IC.make_phi(uncollided_sol)
     
     # print(phi, 'phi IC')
@@ -234,12 +234,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # it_tpnts = 0
     # tlist = np.zeros(1)
     # tlist[0] = 0.0
+
     # @njit
     def RHS(t, V, g):
         sigma_class.g = g
         source.g = g
         flux.g = g
-        rhs.g = g
+        # rhs.g = g
         transfer.g = g
 
         return rhs.call(t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class)
@@ -260,7 +261,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 VV2 = np.zeros((N_ang+1, N_space, M+1 ))
                 VV2[:-1,:,:] = radiation
                 VV2[-1,:,:] = e
-                # VV2 = np.concatenate((radiation,e))÷ß
+                # VV2 = np.concatenate((radiation,e))
             else:
                 VV2 = radiation
             # VV2 = V_new[:,:,:]
@@ -354,10 +355,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     end = timer()
     print('solver finished')
 
-    if dense == True:
-        if rhs.tlist != np.sort(rhs.tlist):
-            print('t list nonconsecutive')
-        eiegen_vals = VDMD(rhs.Y_minus_list[:rhs.it_tpnts], rhs.Y_plus_list[:rhs.it_tpnts], 10)
+    # if dense == True:
+    #     if rhs.tlist != np.sort(rhs.tlist):
+    #         print('t list nonconsecutive')
+    #     eiegen_vals = np.zeros(rhs.tlist.size)
+    #     for it, tt in enumerate(rhs.tlist):
+    #         eiegen_vals[it] = VDMD(rhs.Y_minus_list[it], rhs.Y_plus_list[it], 10)
     
     if save_wave_loc == True:
         print(save_wave_loc, 'save wave')

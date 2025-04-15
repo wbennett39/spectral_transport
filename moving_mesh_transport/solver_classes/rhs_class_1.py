@@ -124,13 +124,12 @@ data = [('N_ang', int64),
         ('Y_minus', float64[:]),
         ('save_Ys', int64),
         ('g', int64),
-        ('told', float64),
-        ('tlist', float64[:]),
-        ('Y_plus_list', float64[:,:]),
-        ('Y_minus_list', float64[:,:]),
-        ('N_groups', int64),
-        ('it_tpnts', int64),
-        ('ntpnts', int64)
+        # ('tlist', float64[:]),
+        # ('Y_plus_list', float64[:,:]),
+        # ('Y_minus_list', float64[:,:]),
+        # ('N_groups', int64),
+        # ('it_tpnts', int64),
+        # ('ntpnts', int64)
 
         ]
 ##############################################################################
@@ -211,14 +210,15 @@ class rhs_class():
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
         self.g = 0
-        self.told = 0.0
-        self.tlist = np.zeros(1)
-        self.tlist[0] = 0.0
-        self.ntpnts = 100
-        self.N_groups = 1
-        Y_plus_list = np.zeros((self.ntpnts, (self.N_ang * self.N_groups ) * self.N_space * (self.M+1)))
-        Y_minus_list = np.zeros((self.ntpnts, (self.N_ang * self.N_groups) * self.N_space * (self.M+1)))
-        self.it_tpnts = 0
+        self.save_Ys = True
+
+        # self.tlist = np.zeros(1)
+        # self.tlist[0] = 0.0
+        # self.ntpnts = 10
+        # self.N_groups = 1
+        # self.Y_plus_list = np.zeros((self.ntpnts, (self.N_ang * self.N_groups ) * self.N_space * (self.M+1)))
+        # self.Y_minus_list = np.zeros((self.ntpnts, (self.N_ang * self.N_groups) * self.N_space * (self.M+1)))
+        # self.it_tpnts = 0
         
         
         
@@ -672,19 +672,26 @@ class rhs_class():
             # self.Y_plus = res
             # if self.told < t:
                
-            self.Y_plus = (res[:-1] - self.Y_minus)/(t-mesh.told)
-            self.Y_minus = res[:-1]
-            self.save_Ys = True
-            self.told = t
-            self.tlist = np.append(self.tlist, t)
-            if self.save_Ys == True:
-                    if self.it_tpnts > self.ntpnts:
-                        self.Y_plus_list = np.append(self.Y_plus_list, np.zeros((1,(self.N_ang * self.N_groups ) * self.N_space * (self.M+1))))
-                        self.Y_minus_list = np.append(self.Y_minus_list, np.zeros((1,(self.N_ang * self.N_groups ) * self.N_space * (self.M+1))))
-                    it = self.it_tpnts
-                    self.Y_plus_list[it, self.g*self.N_ang: (self.g+1)*self.N_ang] = self.Y_plus
-                    self.Y_minus_list[it, self.g*self.N_ang: (self.g+1)*self.N_ang] = self.Y_minus
-                    self.it_tpnts += 1
+            # self.Y_plus = (res[:-1] - self.Y_minus)/(t-mesh.told)
+            # self.Y_minus = res[:-1]
+            # self.save_Ys = True
+            # self.told = t
+            # self.tlist = np.append(self.tlist, t)
+            # if self.save_Ys == True:
+            #         if self.it_tpnts > self.ntpnts:
+            #             # self.Y_plus_list = np.append(self.Y_plus_list, np.zeros((1,(self.N_ang * self.N_groups ) * self.N_space * (self.M+1))))
+            #             # self.Y_minus_list = np.append(self.Y_minus_list, np.zeros((1,(self.N_ang * self.N_groups ) * self.N_space * (self.M+1))))
+            #             Y_plus_list_new = np.zeros((self.ntpnts + 1, (self.N_ang * self.N_groups ) * self.N_space * (self.M+1)))
+            #             Y_minus_list_new = np.zeros((self.ntpnts + 1, (self.N_ang * self.N_groups ) * self.N_space * (self.M+1)))
+            #             Y_plus_list_new[:-1] = self.Y_plus_list
+            #             Y_minus_list_new[:-1] = self.Y_minus_list
+            #             self.Y_plus_list = np.copy(Y_plus_list_new)
+            #             self.Y_minus_list = np.copy(Y_minus_list_new)
+            #         it = self.it_tpnts
+         
+            #         self.Y_plus_list[it, self.g*self.N_ang: (self.g+1)*self.N_ang] = self.Y_plus
+            #         self.Y_minus_list[it, self.g*self.N_ang: (self.g+1)*self.N_ang] = self.Y_minus
+            #         self.it_tpnts += 1
 
                 
                 # print(self.Y_minus)
@@ -781,6 +788,8 @@ class rhs_class():
             #             assert(0)
             # print('## ## ## ## ## ## ')
             return T_vec, T_eval_points
+    
+
     def time_marching_func(self, t, told):
         if t > told:
             if self.t_old_list.size <  self.time_save_points:

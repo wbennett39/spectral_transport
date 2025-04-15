@@ -3,6 +3,7 @@ from numpy.linalg import svd
 
 
 def VDMD(Y_minus, Y_plus, skip):
+
     [U,S,V] = svd(Y_minus[:,skip:],full_matrices=False)
     Sinv = np.zeros(S.size)
     Spos = S[S/np.cumsum(S)>1e-18]

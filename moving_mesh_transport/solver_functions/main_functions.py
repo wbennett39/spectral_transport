@@ -357,14 +357,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     if dense == True and VDMD == True:
         if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
-            print('t list nonconsecutive')
+            raise ValueError('t list nonconsecutive')
+            
         # eigen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):
         # print(rhs.Y_minus_list)
-        print(rhs.Y_minus_list, 'Y-')
-        print(rhs.Y_plus_list, 'Y+')
+        print(rhs.Y_minus_list[:rhs.Y_iterator], 'Y-')
+        print(rhs.Y_plus_list[:rhs.Y_iterator], 'Y+')
         # eigen_vals = rhs.t_old_list_Y * 0
-        eigen_vals = VDMD_func(rhs.Y_minus_list[:rhs.Y_iterator], rhs.Y_plus_list[:rhs.Y_iterator], 1)
+        eigen_vals = VDMD_func(rhs.Y_minus_list[:rhs.Y_iterator], rhs.Y_plus_list[:rhs.Y_iterator], 100)
     else:
         eigen_vals = rhs.t_old_list_Y * 0
         

@@ -14,11 +14,11 @@ def VDMD(Y_minus, Y_plus, skip):
     deigs = np.linalg.eigvals(tmp3)
     #deigs = deigs[deigs>0]
     #print(np.log(deigs)/dt)
-    print(Y_minus, 'Y-')
-    print(Y_plus, 'Y+')
+    # print(Y_minus, 'Y-')
+    # print(Y_plus, 'Y+')
     print('############################')
     print(deigs, 'eigen values')
-    if (deigs >0).any():
-        print('positive eigen val', np.max(deigs))
+    if (np.real(deigs) >0).any():
+        print('positive eigen val', np.max(np.real(deigs)))
     print('############################')
-    return deigs
+    return np.real(deigs)

@@ -239,8 +239,8 @@ class rhs_class():
                     if self.t_old_list_Y[self.Y_iterator] > t:
                         last_t -= 1
                     self.Y_iterator = last_t
-                    self.Y_minus_list[self.Y_iterator:, :] = 0
-                    self.Y_plus_list[self.Y_iterator:, :] = 0
+                    # self.Y_minus_list[self.Y_iterator:, :] = 0.0
+                    # self.Y_plus_list[self.Y_iterator:, :] = 0.0
                     t_old_temp = np.zeros(last_t)
                     t_old_temp = self.t_old_list_Y[:last_t].copy()
                     self.t_old_list_Y = t_old_temp.copy()

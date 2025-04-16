@@ -121,7 +121,7 @@ data = [('N_ang', int64),
         ('slope_limiter', int64),
         ('wavefront_estimator', float64),
         ('Y_plus', float64[:]),
-        ('Y_minus', float64[:]),
+        ('Y_minus', float64[:,:]),
         ('save_Ys', int64),
         ('g', int64),
         ('t_old_list_Y', float64[:]), 
@@ -174,8 +174,8 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 10000
-        self.counter = 10000
+        self.division = 1000
+        self.counter = 1000
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])
@@ -198,9 +198,9 @@ class rhs_class():
         self.stymie_count = 0
         if build.thermal_couple['none'] == 1:
             self.index = -1
-            self.Y_minus = np.zeros((self.N_ang) * self.N_space * (self.M+1))
+            self.Y_minus = np.zeros((self.N_groups, (self.N_ang) * self.N_space * (self.M+1)))
         else:
-            self.Y_minus = np.zeros((self.N_ang) * self.N_space * (self.M+1))
+            self.Y_minus = np.zeros((self.N_groups, (self.N_ang) * self.N_space * (self.M+1)))
             self.index = -2
         self.edges_old = build.edges_init
         self.time_save_points = 100
@@ -245,8 +245,12 @@ class rhs_class():
         res2 = np.copy(V_old[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
 
         # calculate Y+, Y-
-        self.Y_plus = ( res2- self.Y_minus)/(t-self.t_old_list_Y[-1])
-        self.Y_minus = res2
+        # It may be necessary to calculate Y+ outside of the loop or use the previous two time steps
+        if self.t_old_list_Y.size >= 2: 
+            self.Y_plus = ( res2- self.Y_minus[self.g,:])/(self.t_old_list_Y[-1]-self.t_old_list_Y[-2])
+        else:
+            self.Y_plus = self.Y_minus[self.g, :].copy()*0
+        self.Y_minus[self.g,:] = res2
 
         list_length = self.Y_minus_list[:,0].size + 1
 
@@ -260,14 +264,14 @@ class rhs_class():
 
         # Append new Y_, Y- to the new lists of vectors
         Y_minus_temp = self.Y_minus_list.copy().reshape((list_length, self.N_groups * self.N_ang, self.N_space, self.M+1))
-        Y_minus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_minus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
+        Y_minus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_minus[self.g, :].copy().reshape(((self.N_ang), self.N_space, self.M+1))
         Y_plus_temp = np.copy(self.Y_plus_list).reshape((list_length, self.N_groups * self.N_ang, self.N_space, self.M+1))
         Y_plus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_plus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
 
         # Reshape lists of vectors
         self.Y_minus_list = Y_minus_temp.copy().reshape((list_length, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
         self.Y_plus_list = Y_plus_temp.copy().reshape((list_length, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
-        
+
         # if time is increasing, that means that we are out of the energy group loop and the iterator can advance
         if t > self.t_old_list_Y[-1]:
             self.Y_iterator += 1

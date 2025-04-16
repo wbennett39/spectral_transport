@@ -361,7 +361,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # eiegen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):
         # print(rhs.Y_minus_list)
-        eiegen_vals = VDMD_func(rhs.Y_minus_list, rhs.Y_plus_list, 10)
+        eiegen_vals = VDMD_func(rhs.Y_minus_list, rhs.Y_plus_list, 20)
     print(eiegen_vals, 'time eigen vals')
     if save_wave_loc == True:
         print(save_wave_loc, 'save wave')

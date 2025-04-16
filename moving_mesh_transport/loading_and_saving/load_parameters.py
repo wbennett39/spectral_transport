@@ -49,7 +49,7 @@ class parameter_load_class:
         self.lumping = int(parameters['all']['lumping'])
         self.N_groups = int(parameters['all']['N_groups'])
         self.dense = int(mesh_parameters['dense'])
-        
+        self.VDMD = int(parameters['all']['VDMD'])
 
         self.thick = int(parameters['all']['thick'])
         if self.thick == True:

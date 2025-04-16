@@ -90,7 +90,8 @@ data = [('N_ang', int64),
         ('lumping', int64),
         ('T4', float64[:]),
         ('edges_init', float64[:]),
-        ('N_groups', int64)
+        ('N_groups', int64),
+        ('VDMD', int64)
         ]
 ###############################################################################
 
@@ -100,13 +101,14 @@ class build(object):
     source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
     quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
-    fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping):
+    fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD):
         self.N_ang = N_ang
         print(self.N_ang, 'angles')
         self.N_space = N_space
         self.M = M
         self.lumping = lumping
         self.tfinal = tfinal
+        self.VDMD = VDMD
         self.sigma_t = sigma_t
         self.sigma_s = sigma_s
         self.N_groups = N_groups

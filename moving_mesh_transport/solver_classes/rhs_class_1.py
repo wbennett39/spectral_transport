@@ -215,14 +215,69 @@ class rhs_class():
         self.N_groups = build.N_groups
         self.Y_minus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         self.Y_plus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-        self.VDMD = True
+        self.VDMD = build.VDMD
         
         
         
   
 
-    
+    def VDMD_func(self, t, V_old):
+        """
+        returns the vectors Y+ and Y-, which are the update and solution vector respectively. These are required to perform VDMD in post-processing. 
+        Also, this function handles the integrator jumping around and taking negative timesteps by deleting data appropriately. 
+
+        Args:
+            t : evaluation time
+            V_old : solution vector (before update)
+        
+        """
+        # check for nonsequential evaluation
+        if self.t_old_list_Y[-1] > t:
+                    retrograde = True
+                    last_t = np.argmin(np.abs(self.t_old_list_Y-t))
+                    if self.t_old_list_Y[self.Y_iterator] > t:
+                        last_t -= 1
+                    self.Y_iterator = last_t
+                    self.Y_minus_list[self.Y_iterator:, :] = 0
+                    self.Y_plus_list[self.Y_iterator:, :] = 0
+                    self.t_old_list_Y[self.Y_iterator:] = 0
+        # reshape solution matrix into a vector
+        res2 = np.copy(V_old[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
+
+        # calculate Y+, Y-
+        self.Y_plus = ( res2- self.Y_minus)/(t-self.t_old_list_Y[-1])
+        self.Y_minus = res2
+
+        list_length = self.Y_minus_list[:,0].size + 1
+
+        # make new lists of vectors to hold the expanded Y-, Y+
+        Y_minus_new = np.zeros((list_length,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+        Y_plus_new = np.zeros((list_length,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+        Y_minus_new[:-1] = self.Y_minus_list[:]
+        Y_plus_new[:-1] = self.Y_plus_list[:]  
+        self.Y_minus_list = np.copy(Y_minus_new)
+        self.Y_plus_list = np.copy(Y_minus_new)
+
+        # Append new Y_, Y- to the new lists of vectors
+        Y_minus_temp = self.Y_minus_list.copy().reshape((list_length, self.N_groups * self.N_ang, self.N_space, self.M+1))
+        Y_minus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_minus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
+        Y_plus_temp = np.copy(self.Y_plus_list).reshape((list_length, self.N_groups * self.N_ang, self.N_space, self.M+1))
+        Y_plus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_plus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
+
+        # Reshape lists of vectors
+        self.Y_minus_list = Y_minus_temp.copy().reshape((list_length, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
+        self.Y_plus_list = Y_plus_temp.copy().reshape((list_length, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
+        
+        # if time is increasing, that means that we are out of the energy group loop and the iterator can advance
+        if t > self.t_old_list_Y[-1]:
+            self.Y_iterator += 1
+            self.t_old_list_Y[self.Y_iterator] = t
+
+
     def make_alphas(self):
+        """
+        This function uses a recursion relation to calculate the alpha coefficients for the diamond difference angular derivative. 
+        """
         self.alphas[0] = 0
         for ia in range(1,self.N_ang-1):
             self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia] * 2
@@ -666,56 +721,7 @@ class rhs_class():
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
             if self.VDMD == True:
-                if self.t_old_list_Y[-1] >= t:
-                    retrograde = True
-                    last_t = np.argmin(np.abs(self.t_old_list_Y-t))
-                    self.Y_iterator = last_t
-                    self.Y_minus_list[self.Y_iterator:, :] = 0.0
-                    self.Y_plus_list[self.Y_iterator:, :] = 0.0
-                    self.t_old_list_Y[self.Y_iterator:] = 0.0
-                res2 = np.copy(V_old[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
-
-
-                # self.Y_plus = res
-                # if mesh.told < t:
-
-                self.Y_plus = ( res2- self.Y_minus)/(t-self.t_old_list_Y[-1])
-
-                self.Y_minus = res2
-
-                self.save_Ys = True
-                self.t_old_list_Y = np.append(self.t_old_list_Y,t )
-
-
-
-                Y_minus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-                Y_plus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-
-                Y_minus_new[:-1] = self.Y_minus_list[:self.Y_iterator]
-                Y_plus_new[:-1] = self.Y_plus_list[:self.Y_iterator]  
-
-
-                self.Y_minus_list = np.copy(Y_minus_new)
-                self.Y_plus_list = np.copy(Y_minus_new)
-
-
-                # print(self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang].size)
-                # print(self.Y_minus.size)
-                # print(self.Y_minus_list[self.Y_iterator,self.g * self.N_ang:(self.g+1)*self.N_ang].shape, 'Y list')
-                # print(self.Y_minus.shape, 'Y-')
-
-                Y_minus_temp = self.Y_minus_list.copy().reshape((self.Y_iterator + 1, self.N_groups * self.N_ang, self.N_space, self.M+1))
-                Y_minus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_minus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
-                Y_plus_temp = np.copy(self.Y_plus_list).reshape((self.Y_iterator + 1, self.N_groups * self.N_ang, self.N_space, self.M+1))
-                Y_plus_temp[self.Y_iterator, self.g * self.N_ang:(self.g+1)*self.N_ang, :, :] = self.Y_plus.copy().reshape(((self.N_ang), self.N_space, self.M+1))
-
-
-                self.Y_minus_list = Y_minus_temp.copy().reshape((self.Y_iterator + 1, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
-                self.Y_plus_list = Y_plus_temp.copy().reshape((self.Y_iterator + 1, self.N_ang * self.N_groups * self.N_space * (self.M+1)))
-
-    
-                if self.g == self.N_groups - 1:
-                    self.Y_iterator += 1
+                self.VDMD_func(t, V_old)
             # else:
                 # self.save_Ys = False
 

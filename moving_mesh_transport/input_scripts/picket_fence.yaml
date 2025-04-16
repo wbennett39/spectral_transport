@@ -30,6 +30,7 @@
     'geometry': {slab: False, sphere: True}
     'N_groups': 1
     'lumping': False
+    'VDMD': True
     
 # plane pulse source
 'plane_IC':

@@ -12,7 +12,7 @@ import h5py
 # import quadpy 
 import matplotlib.pyplot as plt
 import math
-from .VDMD import VDMD
+from .VDMD import VDMD as VDMD_func
 from pathlib import Path
 from ..solver_classes.functions import find_nodes
 from ..solver_classes.functions import Pn, normTn
@@ -108,7 +108,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           weights, sigma, particle_v, edge_v, cv0, estimate_wavespeed, find_wave_loc, thick, mxstp, wave_loc_array, 
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, dense, shift):
+          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, dense, shift, VDMD):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -171,7 +171,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        thermal_couple, temp_function, e_initial, sigma, particle_v, edge_v, cv0, thick, 
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
                         quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping)
+                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD)
 
 
 
@@ -355,12 +355,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     end = timer()
     print('solver finished')
 
-    if dense == True:
+    if dense == True and VDMD == True:
         if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
             print('t list nonconsecutive')
         # eiegen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):
-        eiegen_vals = VDMD(rhs.Y_minus_list, rhs.Y_plus_list, 10)
+        # print(rhs.Y_minus_list)
+        eiegen_vals = VDMD_func(rhs.Y_minus_list, rhs.Y_plus_list, 10)
     print(eiegen_vals, 'time eigen vals')
     if save_wave_loc == True:
         print(save_wave_loc, 'save wave')

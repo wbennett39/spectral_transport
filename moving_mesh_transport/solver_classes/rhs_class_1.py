@@ -199,8 +199,10 @@ class rhs_class():
         if build.thermal_couple['none'] == 1:
             self.index = -1
             self.Y_minus = np.zeros((self.N_groups, (self.N_ang) * self.N_space * (self.M+1)))
+            self.Y_plus = self.Y_minus.copy()*0
         else:
             self.Y_minus = np.zeros((self.N_groups, (self.N_ang) * self.N_space * (self.M+1)))
+            self.Y_plus = self.Y_minus.copy()*0
             self.index = -2
         self.edges_old = build.edges_init
         self.time_save_points = 100

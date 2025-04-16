@@ -75,6 +75,8 @@ class IC_func(object):
                     return self.dipole(x)/abs(self.x1)
                 elif self.source_type[0] == 3:
                     return self.self_sim_plane(x)
+                elif self.source_type[15] == 1:
+                    self.random_IC(x)
                 else:
                     return np.zeros(x.size)
 
@@ -89,6 +91,8 @@ class IC_func(object):
                         return self.point_pulse(x)/(self.x0**3)
                     elif self.source_type[1] == 1:
                         return self.shell_IC(x)
+                    elif self.source_type[15] == 1:
+                        self.random_IC(x)
                     # This elif below added by Stephen
                     # The problem that was causing the code not to run seems to have been here (19-06-24)
                     #elif ((self.source_type[2] == 1):
@@ -102,6 +106,11 @@ class IC_func(object):
 
     def point_pulse(self, x):
         temp = (np.greater(x, 0) - np.greater(x, self.x0))*self.source_strength
+        return temp
+
+
+    def random_IC(self, x):
+        temp = np.random.random((x.size)) * self.source_strength + 1e-12
         return temp
 
 

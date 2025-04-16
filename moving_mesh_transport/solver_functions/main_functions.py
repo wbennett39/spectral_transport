@@ -359,10 +359,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # eigen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):
         # print(rhs.Y_minus_list)
-        print(rhs.Y_minus_list[:rhs.Y_iterator-1], 'Y-')
-        print(rhs.Y_plus_list[:rhs.Y_iterator-1], 'Y+')
+        # print(rhs.Y_minus_list[:rhs.Y_iterator-1], 'Y-')
+        # print(rhs.Y_plus_list[:rhs.Y_iterator-1], 'Y+')
         # eigen_vals = rhs.t_old_list_Y * 0
-        eigen_vals = VDMD_func(rhs.Y_minus_list[:rhs.Y_iterator-1].copy(), rhs.Y_plus_list[:rhs.Y_iterator-1].copy(), 1).copy()
+        Y_minus = rhs.Y_minus_list[:rhs.Y_iterator-1].copy()
+        Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
+        eigen_vals = VDMD_func(Y_minus, Y_plus, 1)
     else:
         eigen_vals = rhs.t_old_list_Y * 0
         

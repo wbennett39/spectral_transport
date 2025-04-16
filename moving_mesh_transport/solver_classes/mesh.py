@@ -1454,7 +1454,14 @@ class mesh_class(object):
     #     self.Dedges[1:] = self.Dedges_const[1:] * dr_dt
     #     self.edges[0] = rfront*self.l - dx
     #     self.Dedges[0] = self.Dedges_const[0] * dr_dt
+    def modak_gupta(self):
+        self.edges = np.linspace(-self.x0 + self.shift, self.x0 + self.shift, self.N_space + 1)
+        self.edges0 = self.edges.copy()
+        self.Dedges = self.Dedges * 0
+        self.Dedges_const = self.Dedges
 
+
+        
     def converging_move2(self, t):
         if self.moving == True:
         # self.Dedges_const = self.Dedges_const
@@ -1629,7 +1636,8 @@ class mesh_class(object):
                     # self.edges = np.sort(self.edges)
                     # self.Dedges = self.edges * 0
                     self.shell_source()    
-             
+            elif self.source_type[15] == 1:
+                self.modak_gupta()
             elif np.all(self.source_type == 0):
                 if self.geometry['sphere'] == True:
                     if self.moving == False:

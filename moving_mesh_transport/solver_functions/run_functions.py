@@ -373,6 +373,23 @@ class run:
         # plt.title("plane IC")
         # plt.legend()
         # plt.show(block = False)
+    def random_IC(self, uncollided = True, moving = True, All = False):
+        plt.ion()
+        # plt.figure(1)
+        source_name = "random_IC"
+        print("---  ---  ---  ---  ---  ---  ---")
+        print("running random IC")
+        print("---  ---  ---  ---  ---  ---  ---")
+        
+        solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        if All == True:
+            solver.main(True, True)
+            solver.main(False, True)
+            solver.main(True, False)
+            solver.main(False, False)
+        else:
+            solver.main(uncollided, moving)
+            self.get_results(solver)
 
                 
       

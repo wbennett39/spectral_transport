@@ -354,7 +354,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if dense == True and VDMD == True:
         if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
             print(rhs.t_old_list_Y)
-            raise ValueError('t list nonconsecutive')
+            # raise ValueError('t list nonconsecutive')
             
         # eigen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):

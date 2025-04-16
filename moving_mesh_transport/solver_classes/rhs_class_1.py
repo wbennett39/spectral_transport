@@ -234,18 +234,20 @@ class rhs_class():
         """
         # check for nonsequential evaluation
         if self.t_old_list_Y[-1] > t:
-                    retrograde = True
                     last_t = np.argmin(np.abs(self.t_old_list_Y-t))
                     if self.t_old_list_Y[self.Y_iterator] > t:
                         last_t -= 1
                     self.Y_iterator = last_t
+                    self.Y_minus_list = self.Y_minus_list[:self.Y_iterator, :].copy()
+                    self.Y_plus_list = self.Y_plus_list[:self.Y_iterator, :].copy()
+
                     # self.Y_minus_list[self.Y_iterator:, :] = 0.0
                     # self.Y_plus_list[self.Y_iterator:, :] = 0.0
-                    t_old_temp = np.zeros(last_t)
-                    t_old_temp = self.t_old_list_Y[:last_t].copy()
-                    self.t_old_list_Y = t_old_temp.copy()
+                    # t_old_temp = np.zeros(last_t)
+                    self.t_old_list_Y = self.t_old_list_Y[:last_t].copy()
+                    # self.t_old_list_Y = t_old_temp.copy()
         # reshape solution matrix into a vector
-        res2 = np.copy(V_old[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
+        res2 = V_old[:-1,:,:].copy().reshape((self.N_ang ) * self.N_space * (self.M+1))
 
         # calculate Y+, Y-
         # It may be necessary to calculate Y+ outside of the loop or use the previous two time steps

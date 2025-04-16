@@ -358,11 +358,17 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if dense == True and VDMD == True:
         if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
             print('t list nonconsecutive')
-        # eiegen_vals = np.zeros(rhs.t_old_list_Y.size)
+        # eigen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):
         # print(rhs.Y_minus_list)
-        eiegen_vals = VDMD_func(rhs.Y_minus_list, rhs.Y_plus_list, 20)
-    print(eiegen_vals, 'time eigen vals')
+        print(rhs.Y_minus_list, 'Y-')
+        print(rhs.Y_plus_list, 'Y+')
+        # eigen_vals = rhs.t_old_list_Y * 0
+        eigen_vals = VDMD_func(rhs.Y_minus_list[:rhs.Y_iterator], rhs.Y_plus_list[:rhs.Y_iterator], 1)
+    else:
+        eigen_vals = rhs.t_old_list_Y * 0
+        
+    # print(eiegen_vals, 'time eigen vals')
     if save_wave_loc == True:
         print(save_wave_loc, 'save wave')
         wave_tpnts = rhs.times_list
@@ -464,7 +470,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 e = phi*0
     computation_time = end-start
     
-    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, eiegen_vals
+    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, eigen_vals
 
 
 

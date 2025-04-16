@@ -12,12 +12,11 @@ import h5py
 # import quadpy 
 import matplotlib.pyplot as plt
 import math
-from .VDMD import VDMD as VDMD_func
+from .VDMD import VDMD2 as VDMD_func
 from pathlib import Path
 from ..solver_classes.functions import find_nodes
 from ..solver_classes.functions import Pn, normTn
 from .Chebyshev_matrix_reader import file_reader
-
 from ..solver_classes.build_problem import build
 from ..solver_classes.matrices import G_L
 from ..solver_classes.numerical_flux import LU_surf
@@ -29,26 +28,23 @@ from ..solver_classes.rhs_class_1 import rhs_class
 from ..solver_classes.functions import quadrature
 from ..solver_classes.functions import converging_time_function, converging_r
 # from ..solver_classes.rhs_class import rhs_class
-
 from ..solver_classes.make_phi import make_output
 from ..solver_classes.radiative_transfer import T_function
 from ..solver_classes.opacity import sigma_integrator
-
 from timeit import default_timer as timer
 from .wavespeed_estimator import wavespeed_estimator
 from .wave_loc_estimator import find_wave
-import chaospy
+# import chaospy
 import scipy
 # from diffeqpy import ode
 # from .jl_integrator import integrator as jl_integrator_func
 # from diffeqpy import de
 
 
-
 """
-This file contains functions used by solver
+This file contains functions used by solver, most notably, the solve function which initializes all of the solver_classes and calls the rhs with 
+integrate_ivp.
 """
-
 
 
 def parameter_function(major, N_spaces, Ms, count):
@@ -357,15 +353,16 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     if dense == True and VDMD == True:
         if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
+            print(rhs.t_old_list_Y)
             raise ValueError('t list nonconsecutive')
             
         # eigen_vals = np.zeros(rhs.t_old_list_Y.size)
         # for it, tt in enumerate(rhs.t_old_list_Y):
         # print(rhs.Y_minus_list)
-        print(rhs.Y_minus_list[:rhs.Y_iterator], 'Y-')
-        print(rhs.Y_plus_list[:rhs.Y_iterator], 'Y+')
+        print(rhs.Y_minus_list[:rhs.Y_iterator-1], 'Y-')
+        print(rhs.Y_plus_list[:rhs.Y_iterator-1], 'Y+')
         # eigen_vals = rhs.t_old_list_Y * 0
-        eigen_vals = VDMD_func(rhs.Y_minus_list[:rhs.Y_iterator], rhs.Y_plus_list[:rhs.Y_iterator], 100)
+        eigen_vals = VDMD_func(rhs.Y_minus_list[:rhs.Y_iterator-1].copy(), rhs.Y_plus_list[:rhs.Y_iterator-1].copy(), 1).copy()
     else:
         eigen_vals = rhs.t_old_list_Y * 0
         

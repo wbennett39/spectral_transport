@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import svd
 
 
-def VDMD(Y_minus, Y_plus, skip):
+def VDMD2(Y_minus, Y_plus, skip):
 
     [U,S,V] = svd(Y_minus[:,skip:],full_matrices=False)
     Sinv = np.zeros(S.size)
@@ -22,3 +22,4 @@ def VDMD(Y_minus, Y_plus, skip):
         print('positive eigen val', np.max(np.real(deigs)))
     print('############################')
     return np.real(deigs)
+    # return np.array([0.0])

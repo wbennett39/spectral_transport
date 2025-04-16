@@ -216,6 +216,7 @@ class rhs_class():
         self.Y_minus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         self.Y_plus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         self.VDMD = build.VDMD
+        # self.VDMD = False
         
         
         
@@ -240,7 +241,9 @@ class rhs_class():
                     self.Y_iterator = last_t
                     self.Y_minus_list[self.Y_iterator:, :] = 0
                     self.Y_plus_list[self.Y_iterator:, :] = 0
-                    self.t_old_list_Y[self.Y_iterator:] = 0
+                    t_old_temp = np.zeros(last_t)
+                    t_old_temp = self.t_old_list_Y[:last_t].copy()
+                    self.t_old_list_Y = t_old_temp.copy()
         # reshape solution matrix into a vector
         res2 = np.copy(V_old[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
 
@@ -250,15 +253,15 @@ class rhs_class():
             self.Y_plus = ( res2- self.Y_minus[self.g,:])/(self.t_old_list_Y[-1]-self.t_old_list_Y[-2])
         else:
             self.Y_plus = self.Y_minus[self.g, :].copy()*0
-        self.Y_minus[self.g,:] = res2
+        self.Y_minus[self.g,:] = res2.copy()
 
         list_length = self.Y_minus_list[:,0].size + 1
 
         # make new lists of vectors to hold the expanded Y-, Y+
         Y_minus_new = np.zeros((list_length,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         Y_plus_new = np.zeros((list_length,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-        Y_minus_new[:-1] = self.Y_minus_list[:]
-        Y_plus_new[:-1] = self.Y_plus_list[:]  
+        Y_minus_new[:-1] = self.Y_minus_list[:].copy()
+        Y_plus_new[:-1] = self.Y_plus_list[:].copy()  
         self.Y_minus_list = np.copy(Y_minus_new)
         self.Y_plus_list = np.copy(Y_minus_new)
 
@@ -275,7 +278,7 @@ class rhs_class():
         # if time is increasing, that means that we are out of the energy group loop and the iterator can advance
         if t > self.t_old_list_Y[-1]:
             self.Y_iterator += 1
-            self.t_old_list_Y[self.Y_iterator] = t
+            self.t_old_list_Y = np.append(self.t_old_list_Y, t)
 
 
     def make_alphas(self):

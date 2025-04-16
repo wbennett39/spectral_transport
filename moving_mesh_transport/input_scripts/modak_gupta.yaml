@@ -1,7 +1,7 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'transport'
-    'tfinal': 20.0
+    'tfinal': 100.0
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
@@ -16,7 +16,7 @@
     'at': 1e-10                         # abs tolerance for ODE integrator
     'mxstp': 1.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
-    'radiative_transfer': {none: False}             # material temperature feedback. 1-True, 0 - False
+    'radiative_transfer': {none: True}             # material temperature feedback. 1-True, 0 - False
     'temperature_dependence': [1,0,0,0] # first slot is Su-Olson problem
     'e_initial': 0.0000000001
     'weights': 'gauss_legendre'          # usually 'gauss_lobatto'. Set to 'gauss_legendre' for S2 calculations

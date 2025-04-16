@@ -199,10 +199,10 @@ class rhs_class():
         if build.thermal_couple['none'] == 1:
             self.index = -1
             self.Y_minus = np.zeros((self.N_groups, (self.N_ang) * self.N_space * (self.M+1)))
-            self.Y_plus = self.Y_minus.copy()*0
+            self.Y_plus = self.Y_minus[0, :].copy()*0
         else:
             self.Y_minus = np.zeros((self.N_groups, (self.N_ang) * self.N_space * (self.M+1)))
-            self.Y_plus = self.Y_minus.copy()*0
+            self.Y_plus = self.Y_minus[0, :].copy()*0
             self.index = -2
         self.edges_old = build.edges_init
         self.time_save_points = 100
@@ -249,7 +249,10 @@ class rhs_class():
                     self.t_old_list_Y = self.t_old_list_Y[:last_t].copy()
                     # self.t_old_list_Y = t_old_temp.copy()
         # reshape solution matrix into a vector
-        res2 = V_old[:-1,:,:].copy().reshape((self.N_ang ) * self.N_space * (self.M+1))
+        if self.radiative_transfer['none'] == False:
+            res2 = V_old[:-1,:,:].copy().reshape((self.N_ang ) * self.N_space * (self.M+1))
+        else:
+            res2 = V_old[:,:,:].copy().reshape((self.N_ang ) * self.N_space * (self.M+1))
 
         # calculate Y+, Y-
         # It may be necessary to calculate Y+ outside of the loop or use the previous two time steps
@@ -435,6 +438,8 @@ class rhs_class():
             # V_new = V.copy().reshape((self.deg_freedom[0], self.deg_freedom[1], self.deg_freedom[2]))
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
+        if self.VDMD == True:
+            self.VDMD_func(t, V_old)
 
         # for ang in range(self.N_ang+1):
         #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
@@ -731,8 +736,7 @@ class rhs_class():
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
-            if self.VDMD == True:
-                self.VDMD_func(t, V_old)
+
             # else:
                 # self.save_Ys = False
 

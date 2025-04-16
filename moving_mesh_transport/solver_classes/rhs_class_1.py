@@ -666,6 +666,13 @@ class rhs_class():
             # V_new = self.V_new_floor_func(V_new)
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
             if self.VDMD == True:
+                if self.t_old_list_Y[-1] >= t:
+                    retrograde = True
+                    last_t = np.argmin(np.abs(self.t_old_list_Y-t))
+                    self.Y_iterator = last_t
+                    self.Y_minus_list[self.Y_iterator:, :] = 0.0
+                    self.Y_plus_list[self.Y_iterator:, :] = 0.0
+                    self.t_old_list_Y[self.Y_iterator:] = 0.0
                 res2 = np.copy(V_old[:-1,:,:]).reshape((self.N_ang ) * self.N_space * (self.M+1))
 
 
@@ -684,8 +691,8 @@ class rhs_class():
                 Y_minus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
                 Y_plus_new = np.zeros((self.Y_iterator+1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
 
-                Y_minus_new[:-1] = self.Y_minus_list
-                Y_plus_new[:-1] = self.Y_plus_list  
+                Y_minus_new[:-1] = self.Y_minus_list[:self.Y_iterator]
+                Y_plus_new[:-1] = self.Y_plus_list[:self.Y_iterator]  
 
 
                 self.Y_minus_list = np.copy(Y_minus_new)

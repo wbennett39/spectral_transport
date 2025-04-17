@@ -365,6 +365,10 @@ class sigma_integrator():
                 elif self.g == 1:
                    res = w2 + x * 0     
                 return res  
+        elif self.sigma_func['modak_gupta'] == 1:
+            grain_size = 0.0
+            res = self.sigma_t * x
+            return res
                  
         elif self.sigma_func['gaussian'] == 1:
             return np.exp(- x**2 /(2* self.std**2))  # probably shouldn't have sigma_a here

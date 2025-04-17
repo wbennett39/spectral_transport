@@ -215,8 +215,9 @@ class rhs_class():
         self.t_old_list_Y = np.array([0.0])
         self.Y_iterator = 0
         self.N_groups = build.N_groups
-        self.Y_minus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-        self.Y_plus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+        self.N_save_Y = 1000
+        self.Y_minus_list = np.zeros((self.N_save_Y,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
+        self.Y_plus_list = np.zeros((self.N_save_Y,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         self.VDMD = build.VDMD
         # self.VDMD = False
         
@@ -235,18 +236,18 @@ class rhs_class():
         
         """
         # check for nonsequential evaluation
-        if self.t_old_list_Y[-1] > t:
-                    last_t = np.argmin(np.abs(self.t_old_list_Y-t))
-                    if self.t_old_list_Y[self.Y_iterator] > t:
-                        last_t -= 1
-                    self.Y_iterator = last_t
-                    self.Y_minus_list = self.Y_minus_list[:self.Y_iterator, :].copy()
-                    self.Y_plus_list = self.Y_plus_list[:self.Y_iterator, :].copy()
+        # if self.t_old_list_Y[-1] > t:
+        #             last_t = np.argmin(np.abs(self.t_old_list_Y-t))
+        #             if self.t_old_list_Y[self.Y_iterator] > t:
+        #                 last_t -= 1
+        #             self.Y_iterator = last_t
+        #             self.Y_minus_list = self.Y_minus_list[:self.Y_iterator, :].copy()
+        #             self.Y_plus_list = self.Y_plus_list[:self.Y_iterator, :].copy()
 
-                    # self.Y_minus_list[self.Y_iterator:, :] = 0.0
-                    # self.Y_plus_list[self.Y_iterator:, :] = 0.0
-                    # t_old_temp = np.zeros(last_t)
-                    self.t_old_list_Y = self.t_old_list_Y[:last_t].copy()
+        #             # self.Y_minus_list[self.Y_iterator:, :] = 0.0
+        #             # self.Y_plus_list[self.Y_iterator:, :] = 0.0
+        #             # t_old_temp = np.zeros(last_t)
+        #             self.t_old_list_Y = self.t_old_list_Y[:last_t].copy()
                     # self.t_old_list_Y = t_old_temp.copy()
         # reshape solution matrix into a vector
         if self.radiative_transfer['none'] == False:

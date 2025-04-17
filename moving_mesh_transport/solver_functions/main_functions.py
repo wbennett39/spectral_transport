@@ -219,6 +219,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         initialize.make_T4_IC(transfer, mesh.edges)
     initialize.make_IC(mesh.edges)
     IC = initialize.IC
+    print(IC)
+
     xs = find_nodes(mesh.edges, M, geometry)
     # phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry, N_groups)
     # phi = phi_IC.make_phi(uncollided_sol)
@@ -264,11 +266,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             VV3 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
             # print(VV2.shape())
             res = RHS(t, VV3, ig)
+            res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
             if extra_deg != 0:
-                res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
+                
                 VV_new[-1, :,:] = res2[-1,:,:]
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
- 
             else:
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res[:,:,:]
 

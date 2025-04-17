@@ -76,7 +76,7 @@ class IC_func(object):
                 elif self.source_type[0] == 3:
                     return self.self_sim_plane(x)
                 elif self.source_type[15] == 1:
-                    self.random_IC(x)
+                    return self.random_IC(x)
                 else:
                     return np.zeros(x.size)
 
@@ -92,7 +92,8 @@ class IC_func(object):
                     elif self.source_type[1] == 1:
                         return self.shell_IC(x)
                     elif self.source_type[15] == 1:
-                        self.random_IC(x)
+
+                        return self.random_IC(x)
                     # This elif below added by Stephen
                     # The problem that was causing the code not to run seems to have been here (19-06-24)
                     #elif ((self.source_type[2] == 1):

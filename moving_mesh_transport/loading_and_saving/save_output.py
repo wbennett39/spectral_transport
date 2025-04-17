@@ -38,7 +38,9 @@ class save_output:
         else:
             print('no problem selected')
 
-        source_name_list = ["plane_IC", "square_IC", "square_s", "gaussian_IC", "MMS", "gaussian_s"]
+        source_name_list = ["plane_IC", "square_IC", "square_s", "gaussian_IC",
+                             "MMS", "gaussian_s",'blank', 'blank', 'blank', 'blank',
+                             'blank', 'blank', 'blank', 'blank', 'blank', 'random_IC']
         gaussian_sources = ["gaussian_IC", "gaussian_s"]
         index_of_source_name = np.argmin(np.abs(np.array(source_type)-1))
         self.source_name = source_name_list[index_of_source_name]  

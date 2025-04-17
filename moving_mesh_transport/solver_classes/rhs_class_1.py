@@ -215,16 +215,8 @@ class rhs_class():
         self.g = 0
         self.t_old_list_Y = np.array([0.0])
         self.Y_iterator = 0
-<<<<<<< Updated upstream
-        self.N_groups = build.N_groups
-        self.N_save_Y = 1000
-        self.Y_minus_list = np.zeros((self.N_save_Y,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-        self.Y_plus_list = np.zeros((self.N_save_Y,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
-=======
-        
         self.Y_minus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         self.Y_plus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
->>>>>>> Stashed changes
         self.VDMD = build.VDMD
         # self.VDMD = False
         

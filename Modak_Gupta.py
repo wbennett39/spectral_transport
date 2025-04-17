@@ -51,7 +51,7 @@ run = run()
 run.load('modak_gupta', 'mesh_parameters_modak_gupta')
 loader = load()
 
-run.square_source(0,0)
+run.random_IC(0,0)
 
 
 

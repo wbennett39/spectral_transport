@@ -390,7 +390,8 @@ class run:
         else:
             solver.main(uncollided, moving)
             self.get_results(solver)
-
+        plt.plot(self.xs, self.phi, 'k-')
+        plt.show()
                 
       
 

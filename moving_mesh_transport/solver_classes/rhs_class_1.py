@@ -259,15 +259,18 @@ class rhs_class():
 
         # calculate Y+, Y-
         # It may be necessary to calculate Y+ outside of the loop or use the previous two time steps
+        list_length = self.Y_minus_list[:,0].size + 1
         if self.t_old_list_Y.size >= 2: 
             dt = (self.t_old_list_Y[-1]-self.t_old_list_Y[-2])
             # print(dt)
-            self.Y_plus = ( res2- self.Y_minus[self.g,:])/dt
+            Y_minus_old = self.Y_minus_list.copy().reshape((list_length-1, self.N_ang*self.N_groups, self.N_space, self.M+1))
+            Y_minus_old_2 = Y_minus_old[self.Y_iterator, self.N_ang* self.g: self.N_ang*(self.g+1), :, :].copy().reshape((self.N_ang * self.N_space * (self.M+1)))
+            self.Y_plus = ( res2- Y_minus_old_2 )/dt
         else:
             self.Y_plus = self.Y_minus[self.g, :].copy()*0
         self.Y_minus[self.g,:] = res2.copy()
 
-        list_length = self.Y_minus_list[:,0].size + 1
+        
 
         # make new lists of vectors to hold the expanded Y-, Y+
         Y_minus_new = np.zeros((list_length,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))

@@ -352,22 +352,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     end = timer()
     print('solver finished')
 
-    if dense == True and VDMD == True:
-        if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
-            print(rhs.t_old_list_Y)
-            # raise ValueError('t list nonconsecutive')
-            
-        # eigen_vals = np.zeros(rhs.t_old_list_Y.size)
-        # for it, tt in enumerate(rhs.t_old_list_Y):
-        # print(rhs.Y_minus_list)
-        # print(rhs.Y_minus_list[:rhs.Y_iterator-1], 'Y-')
-        # print(rhs.Y_plus_list[:rhs.Y_iterator-1], 'Y+')
-        # eigen_vals = rhs.t_old_list_Y * 0
-        Y_minus = rhs.Y_minus_list[:rhs.Y_iterator-1].copy()
-        Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
-        eigen_vals = VDMD_func(Y_minus, Y_plus, 1)
-    else:
-        eigen_vals = rhs.t_old_list_Y * 0
+  
         
     # print(eiegen_vals, 'time eigen vals')
     if save_wave_loc == True:
@@ -415,12 +400,43 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     mesh.move(tfinal)
     edges = mesh.edges
-    
     if choose_xs == False:
         xs = find_nodes(edges, M, geometry)
         
     elif choose_xs == True:
         xs = specified_xs
+    if dense == True and VDMD == True:
+        if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
+            print(rhs.t_old_list_Y)
+            raise ValueError('t list nonconsecutive')
+            
+        # eigen_vals = np.zeros(rhs.t_old_list_Y.size)
+        # for it, tt in enumerate(rhs.t_old_list_Y):
+        # print(rhs.Y_minus_list)
+        # print(rhs.Y_minus_list[:rhs.Y_iterator-1], 'Y-')
+        # print(rhs.Y_plus_list[:rhs.Y_iterator-1], 'Y+')
+        # eigen_vals = rhs.t_old_list_Y * 0
+        Y_minus = rhs.Y_minus_list[:rhs.Y_iterator-1].copy()
+        Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
+        Y_plus_psi = np.zeros((rhs.Y_iterator, N_groups * N_ang * xs.size ))
+        Y_minus_psi = np.zeros((rhs.Y_iterator, N_groups * N_ang * xs.size ))
+        
+        # output = make_outpurhs.Y_it(tfinal, N_ang, ws, xs, Y_minus[0,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+        for it in range(rhs.Y_iterator):
+            tt = rhs.t_old_list_Y[it]
+            output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+            output.make_phi(uncollided_sol)
+            Y_minus_psi[it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
+            output = make_output(tt, N_ang, ws, xs, Y_plus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+            output.make_phi(uncollided_sol)
+            Y_plus_psi[it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
+
+
+        eigen_vals = VDMD_func(Y_minus_psi, Y_plus_psi, 10)
+    else:
+        eigen_vals = rhs.t_old_list_Y * 0
+    
+
     # print(xs, 'xs')
     if eval_times == False or sol.status == -1:
         output = make_output(tfinal, N_ang, ws, xs, sol_last, M, edges, uncollided, geometry, N_groups)

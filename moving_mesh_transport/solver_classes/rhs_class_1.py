@@ -8,6 +8,7 @@ Created on Mon Jan 31 11:25:35 2022
 import numpy as np
 import math
 from .cubic_spline import cubic_spline
+from .make_phi import make_output
 from .build_problem import build
 from .matrices import G_L
 from .sources import source_class
@@ -44,6 +45,8 @@ sigma_class_type = deferred_type()
 sigma_class_type.define(sigma_integrator.class_type.instance_type)
 cubic_class_type = deferred_type()
 cubic_class_type.define(cubic_spline.class_type.instance_type)
+make_phi_class_type = deferred_type()
+make_phi_class_type.define(make_output.class_type.instance_type)
 
 # kv_ty = (types.int64, types.unicode_type)
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
@@ -235,18 +238,18 @@ class rhs_class():
         
         """
         # check for nonsequential evaluation
-        # if self.t_old_list_Y[-1] > t:
-        #             last_t = np.argmin(np.abs(self.t_old_list_Y-t))
-        #             if self.t_old_list_Y[self.Y_iterator] > t:
-        #                 last_t -= 1
-        #             self.Y_iterator = last_t
-        #             self.Y_minus_list = self.Y_minus_list[:self.Y_iterator, :].copy()
-        #             self.Y_plus_list = self.Y_plus_list[:self.Y_iterator, :].copy()
+        if self.t_old_list_Y[-1] > t:
+                    last_t = np.argmin(np.abs(self.t_old_list_Y-t))
+                    if self.t_old_list_Y[self.Y_iterator] > t:
+                        last_t -= 1
+                    self.Y_iterator = last_t
+                    self.Y_minus_list = self.Y_minus_list[:self.Y_iterator, :].copy()
+                    self.Y_plus_list = self.Y_plus_list[:self.Y_iterator, :].copy()
 
-        #             # self.Y_minus_list[self.Y_iterator:, :] = 0.0
-        #             # self.Y_plus_list[self.Y_iterator:, :] = 0.0
-        #             # t_old_temp = np.zeros(last_t)
-        #             self.t_old_list_Y = self.t_old_list_Y[:last_t].copy()
+                    # self.Y_minus_list[self.Y_iterator:, :] = 0.0
+                    # self.Y_plus_list[self.Y_iterator:, :] = 0.0
+                    # t_old_temp = np.zeros(last_t)
+                    self.t_old_list_Y = self.t_old_list_Y[:last_t].copy()
                     # self.t_old_list_Y = t_old_temp.copy()
         # reshape solution matrix into a vector
         if self.radiative_transfer['none'] == False:

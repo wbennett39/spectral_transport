@@ -260,7 +260,9 @@ class rhs_class():
         # calculate Y+, Y-
         # It may be necessary to calculate Y+ outside of the loop or use the previous two time steps
         if self.t_old_list_Y.size >= 2: 
-            self.Y_plus = ( res2- self.Y_minus[self.g,:])/(self.t_old_list_Y[-1]-self.t_old_list_Y[-2])
+            dt = (self.t_old_list_Y[-1]-self.t_old_list_Y[-2])
+            # print(dt)
+            self.Y_plus = ( res2- self.Y_minus[self.g,:])/dt
         else:
             self.Y_plus = self.Y_minus[self.g, :].copy()*0
         self.Y_minus[self.g,:] = res2.copy()

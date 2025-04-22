@@ -405,7 +405,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         
     elif choose_xs == True:
         xs = specified_xs
-    if dense == True and VDMD == True:
+    if VDMD == True:
         if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
             print(rhs.t_old_list_Y)
             raise ValueError('t list nonconsecutive')
@@ -424,7 +424,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # output = make_outpurhs.Y_it(tfinal, N_ang, ws, xs, Y_minus[0,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
         for it in range(rhs.Y_iterator-1):
             tt = rhs.t_old_list_Y[it]
-            print(tt, 't')
+
             output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             output.make_phi(uncollided_sol)
             Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
@@ -432,11 +432,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             output.make_phi(uncollided_sol)
             Y_plus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
 
-        twenty_percent = int(0.2 * rhs.Y_iterator)
+        skip = int(0.1 * rhs.Y_iterator)
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
-        eigen_vals = VDMD_func(Y_minus_psi, Y_plus_psi, twenty_percent)
+        print(Y_minus_psi, 'Y-')
+        print(Y_plus_psi, 'Y+')
+        eigen_vals = VDMD_func(Y_minus_psi, Y_plus_psi, skip)
     else:
         eigen_vals = rhs.t_old_list_Y * 0
     

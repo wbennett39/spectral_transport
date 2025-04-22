@@ -367,7 +367,7 @@ class sigma_integrator():
                 return res  
         elif self.sigma_func['modak_gupta'] == 1:
             grain_size = 0.0
-            res = self.sigma_t * x
+            res = self.sigma_t + x*0
             return res
                  
         elif self.sigma_func['gaussian'] == 1:

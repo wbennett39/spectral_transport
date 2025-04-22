@@ -111,6 +111,7 @@ class IC_func(object):
 
 
     def random_IC(self, x):
+        # print(self.source_strength, 'source_strength')
         temp = np.random.random((x.size)) * self.source_strength + 1e-12
         return temp
 

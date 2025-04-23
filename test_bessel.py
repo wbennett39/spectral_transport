@@ -47,6 +47,7 @@ for i in range(Nt-1):
     yval = np.dot(update,yval)
     Yminus[:,i] = yval.copy()
     Yplus[:,i] = (yval-yold)/dt
+    print(Yplus, 'Y+')
     
 plt.plot(trange[0:-1],Yminus[0,:])
 plt.plot(trange,jv(0,trange))

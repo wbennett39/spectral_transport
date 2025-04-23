@@ -37,6 +37,7 @@ from .wave_loc_estimator import find_wave
 # import chaospy
 from .theta_DMD import theta_DMD
 import scipy
+from .test_bessel import *
 # from diffeqpy import ode
 # from .jl_integrator import integrator as jl_integrator_func
 # from diffeqpy import de
@@ -456,7 +457,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # Y_plus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size)) 
             # Y_plus_psi[:, it] *= -np.sign(Y_plus_psi[:, it])
 
-        skip = int(0.05 * rhs.Y_iterator)
+        skip = int(0.2 * rhs.Y_iterator)
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
@@ -468,7 +469,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         close_to_bench = False
         it2 = 1
         theta = 0.8417871348541741
-        while (positive_vals and close_to_bench == False) and it2 < 500:
+        while (positive_vals or close_to_bench == False) and it2 < 500:
             
             # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
             # print(Y_m_final[0, :].size, 'YM size')
@@ -484,13 +485,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             else:
                 it2 += 1
                 theta = np.random.rand()
-                print(theta, 'theta')
-                if it >= 499:
+                # print(theta, 'theta')
+                if it2 >= 499:
                     print('iterated out')
 
         print(eigen_vals, 'theta method')
         print(np.max(np.real(eigen_vals)), 'most positive eigen value')
-        print(np.max(-np.real(eigen_vals)), 'largest negative eigen value')
+        print(-np.max(-np.real(eigen_vals)), 'largest negative eigen value')
     else:
         eigen_vals = rhs.t_old_list_Y * 0
     

@@ -26,6 +26,7 @@ Yminus = np.zeros((2,Nt-1))
 Yplus = np.zeros((2,Nt-1))
 
 dts = np.logspace(-4,-1,Nt)
+ts = np.zeros(Nt)
 #dts = 0.1*np.ones(Nt)
 trange = np.cumsum(dts)
 yval = np.zeros(2)
@@ -42,13 +43,14 @@ print("A's eigenvalues", np.linalg.eigvals(A))
 #Backward Euler
 for i in range(Nt-1):
     dt = dts[i]
+    if i > 0:
+        ts[i] = ts[i-1] + dt
     A[1,1] = -1/trange[i+1]
     update = np.linalg.inv(np.identity(2) - dt*A)
     yold = yval.copy()
     yval = np.dot(update,yval)
     Yminus[:,i] = yval.copy()
     Yplus[:,i] = (yval-yold)/dt
-    print(Yplus, 'Y+')
     
 plt.plot(trange[0:-1],Yminus[0,:])
 plt.plot(trange,jv(0,trange))
@@ -66,8 +68,20 @@ tmp3=np.dot(tmp2,np.diag(Sinv))
 deigs = np.linalg.eigvals(tmp3)
 #deigs = deigs[deigs>0]
 #print(np.log(deigs)/dt)
-print(deigs)
-
+print(deigs, 'VDMD')
+close = False
+while close == False:
+    theta = np.random.rand()
+    deigs_theta = theta_DMD(Yminus[:, skip:], ts[skip:-1], theta = theta)
+    if abs((-np.sort(-np.real(deigs_theta))[0] - -np.sort(-np.real(deigs))[0])) <= 0.0001:
+        close = True
+        print('close')
+    else:
+        print(theta)
+print(theta, 'theta')
+# print(deigs_theta, 'theta')
+print(-np.sort(-np.real(deigs)), 'VDMD sorted')
+print(-np.sort(-np.real(deigs_theta)), 'theta sorted')
 #Crank-Nicolson
 
 yval = np.zeros(2)

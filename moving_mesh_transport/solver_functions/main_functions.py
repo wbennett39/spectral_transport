@@ -467,13 +467,16 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(Y_m_final[:, 2:], 'Y-')
         # print(Y_p_final[:, 2:], 'Y+')
         # print(skip, 'skip')
-        # eigen_vals = VDMD_func(Y_m_final[:, :-1], Y_p_final[:, :-1], skip)
+        eigen_vals_DMD = VDMD_func(Y_m_final[:, :-1]/2.998e10/sigma_t, Y_p_final[:, :-1], skip)
+        print(-np.max(np.real(eigen_vals_DMD)), 'Largest negative eigenval VDMD')
+        print(np.max(np.real(eigen_vals_DMD)), 'Largest eigenval VDMD')
         positive_vals = True
         close_to_bench = False
         it2 = 1
         theta = 0.8417871348541741
         theta_all_negative = []
         theta_close_to_bench = []
+
         while (positive_vals or close_to_bench == False) and it2 < 500:
 
         # while it2 <= 500:
@@ -481,7 +484,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # print(Y_m_final[0, :].size, 'YM size')
             # print(rhs.Y_iterator, 'Y iterator')
 
-            eigen_vals = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/2.998e10/10.0, theta = theta)
+            eigen_vals = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/2.998e10/sigma_t, theta = theta)
             # eigen_vals = theta_DMD(Y_minus_flipped[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/2.998e10/10.0, theta = theta)
             if (eigen_vals < 0).all():
                 # print(theta, 'theta no positive vals')

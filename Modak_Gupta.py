@@ -48,6 +48,8 @@ from moving_mesh_transport.solver_functions.run_functions import run
 
 
 run = run()
+run.load('transport', 'mesh_parameters_modak_gupta')
+run.plane_IC(0,0)
 run.load('modak_gupta', 'mesh_parameters_modak_gupta')
 loader = load()
 

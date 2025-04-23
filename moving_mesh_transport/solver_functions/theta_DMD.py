@@ -56,6 +56,7 @@ def theta_DMD(
     #    For large data, consider a truncated SVD or randomized SVD if needed.
     # ----------------------------------------------------------------
     U0, s0, VT0 = np.linalg.svd(data, full_matrices=False)  # shape: U0=(n_feat,ns), s0=(ns,), VT0=(ns,ns)
+
     
     if rank_spatial is not None:
         # Truncate
@@ -121,13 +122,17 @@ def theta_DMD(
     #    This is the “reduced” operator that approximates A_c from the paper.
     # ----------------------------------------------------------------
     U1, s1, VT1 = np.linalg.svd(X, full_matrices=False)  # shapes: U1=(r0,r0), s1=(r0,), VT1=(r0,ns-1)
+    Sinv = np.zeros(s1.size)
+    Spos = s1[s1/np.cumsum(s1)>1e-18]
+    Sinv[0:Spos.size] = 1.0/Spos.copy()
     
     if rank_system is not None:
         U1 = U1[:, :rank_system]
         s1 = s1[:rank_system]
         VT1 = VT1[:rank_system, :]
     
-    S1_inv = np.diag(1.0/s1)                # shape (rtilde, rtilde)
+    # S1_inv = np.diag(1.0/s1)                # shape (rtilde, rtilde)
+    S1_inv = np.diag(Sinv)
     L1 = U1                                 # shape (r0,   rtilde)
     R1 = VT1.T                              # shape (ns-1, rtilde)
     

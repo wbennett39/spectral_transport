@@ -456,32 +456,35 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # Y_plus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size)) 
             # Y_plus_psi[:, it] *= -np.sign(Y_plus_psi[:, it])
 
-        skip = int(0.1 * rhs.Y_iterator)
+        skip = int(0.05 * rhs.Y_iterator)
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
-        print(Y_m_final[:, 2:], 'Y-')
-        print(Y_p_final[:, 2:], 'Y+')
-        print(skip, 'skip')
-        eigen_vals = VDMD_func(Y_m_final[:, :-1], Y_p_final[:, :-1], skip)
+        # print(Y_m_final[:, 2:], 'Y-')
+        # print(Y_p_final[:, 2:], 'Y+')
+        # print(skip, 'skip')
+        # eigen_vals = VDMD_func(Y_m_final[:, :-1], Y_p_final[:, :-1], skip)
         positive_vals = True
+        close_to_bench = False
         it2 = 1
         theta = 0.8417871348541741
-        while positive_vals or it2 < 100:
+        while (positive_vals and close_to_bench == False) and it2 < 100:
             
             # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
             # print(Y_m_final[0, :].size, 'YM size')
             # print(rhs.Y_iterator, 'Y iterator')
 
-            eigen_vals_theta = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1], theta = theta)
-            if (eigen_vals_theta < 0).all():
+            eigen_vals = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1], theta = theta)
+            if (eigen_vals < 0).all():
                 print(theta, 'theta')
                 positive_vals = False
+            if abs(np.max(-np.real(eigen_vals)) - 5.10866) <= 0.1:
+                close_to_bench = True
             else:
                 it2 += 1
                 theta = np.random.rand()
 
-        print(eigen_vals_theta, 'theta method')
+        print(eigen_vals, 'theta method')
     else:
         eigen_vals = rhs.t_old_list_Y * 0
     

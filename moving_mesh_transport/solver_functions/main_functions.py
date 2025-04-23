@@ -441,7 +441,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             phi = output.make_phi(uncollided_sol)
             Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
+            # print(Y_minus_psi[:, it], 'psi')
             Y_minus_flipped[:, it] = Y_minus[it,:]
+            plt.ion()
+            plt.plot(xs, phi)
             if integrator == 'BDF':
                 Y_m_final[:, it] = Y_minus_psi[:, it]
                 dt = (rhs.t_old_list_Y[it+1] - rhs.t_old_list_Y[it])/2.998e10/sigma_t # because the list is t old, use it+1 and it to calculate dt 
@@ -460,7 +463,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # Y_plus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size)) 
             # Y_plus_psi[:, it] *= -np.sign(Y_plus_psi[:, it])
 
-        skip = int(0.2 * rhs.Y_iterator)
+        # skip = int(0.2 * rhs.Y_iterator)skip 
+        skip = 3
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
@@ -468,7 +472,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(Y_p_final[:, 2:], 'Y+')
         # print(skip, 'skip')
         eigen_vals_DMD = VDMD_func(Y_m_final[:, :-1] + 1e-18, Y_p_final[:, :-1] + 1e-18, skip)
-        print(-np.max(np.real(eigen_vals_DMD)), 'Largest negative eigenval VDMD')
+        # print(-np.max(np.real(eigen_vals_DMD)), 'Largest negative eigenval VDMD')
         print(np.max(np.real(eigen_vals_DMD)), 'Largest eigenval VDMD')
         positive_vals = True
         close_to_bench = False
@@ -477,14 +481,17 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         theta_all_negative = []
         theta_close_to_bench = []
 
-        while (positive_vals or close_to_bench == False) and it2 < 50:
+        while (positive_vals or close_to_bench == False) and it2 < 500:
 
         # while it2 <= 500:
             # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
             # print(Y_m_final[0, :].size, 'YM size')
             # print(rhs.Y_iterator, 'Y iterator')
 
-            eigen_vals = theta_DMD(Y_m_final[:, skip:]+1e-18, rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/2.998e10/sigma_t, theta = theta)
+            eigen_vals = theta_DMD(Y_minus_psi[:, skip:]+1e-18, rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/sigma_t, theta = theta)
+            # print(np.max(np.real(eigen_vals)), 'Largest negative eigenval')
+            print(np.max(np.real(eigen_vals)), 'Largest eigenval')
+            print(theta, 'theta')
             # eigen_vals = theta_DMD(Y_minus_flipped[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/2.998e10/10.0, theta = theta)
             if (eigen_vals < 0).all():
                 # print(theta, 'theta no positive vals')
@@ -495,7 +502,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
             # else:
                 
-            if abs(np.max(-np.real(eigen_vals)) - 5.10866) <= 0.1:
+            if abs(np.max(np.real(eigen_vals)) - -.763507) <= 0.1:
                 close_to_bench = True
                 theta_close_to_bench.append(theta)
                 # print(abs(np.max(-np.real(eigen_vals)) - 5.10866))
@@ -503,6 +510,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 # print(np.max(np.real(eigen_vals)), 'largest eigenvalue')
       
             it2 += 1
+            print(it2)
 
             
             # theta = 2 * np.random.rand()
@@ -510,16 +518,17 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             if it2 >= 499:
                 print('iterated out')
             theta = np.random.rand() * 2
-            if integrator == 'BDF':
-                theta = random.uniform(0.7, 2.0)
+            # if integrator == 'BDF':
+            #     theta = random.uniform(0.7, 2.0)
 
         # print(eigen_vals, 'theta method')
         print(skip, 'skip')
         print(rhs.t_old_list_Y[skip], 'first time snapshot')
         print(theta, 'theta')
-        print(np.max(np.real(eigen_vals)), 'most positive eigen value')
-        print(-np.max(-np.real(eigen_vals)), 'largest negative eigen value')
-        print(np.min(np.array(theta_all_negative)),np.max(np.array(theta_all_negative)),'range of thetas for all values negative' )
+        print(np.max(np.real(eigen_vals)), 'largest eigen value')
+        # print(-np.max(-np.real(eigen_vals) /2.9E10), 'largest negative eigen value')
+        if len(theta_all_negative) != 0:
+            print(np.min(np.array(theta_all_negative)),np.max(np.array(theta_all_negative)),'range of thetas for all values negative' )
         if len(theta_close_to_bench) != 0:
             print(np.min(np.array(theta_close_to_bench)),np.max(np.array(theta_close_to_bench)),'range of thetas for eigen close to bench' )
     else:
@@ -581,6 +590,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
 
 def problem_identifier():
+
     name_array = []
 
 def plot_edges_converging(t, edges, rf, fign):

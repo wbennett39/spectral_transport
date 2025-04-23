@@ -52,8 +52,8 @@ for i in range(Nt-1):
     Yminus[:,i] = yval.copy()
     Yplus[:,i] = (yval-yold)/dt
     
-plt.plot(trange[0:-1],Yminus[0,:])
-plt.plot(trange,jv(0,trange))
+# plt.plot(trange[0:-1],Yminus[0,:])
+# plt.plot(trange,jv(0,trange))
 
 
 skip = 0
@@ -72,7 +72,7 @@ print(deigs, 'VDMD')
 close = False
 while close == False:
     # theta = np.random.rand()
-    theta = random.uniform(0.0, 0.1)
+    theta = random.uniform(0.0, 0.02)
     deigs_theta = theta_DMD(Yminus[:, skip:], ts[skip:-1], theta = theta)
     if abs((-np.sort(-np.real(deigs_theta))[0] - -np.sort(-np.real(deigs))[0])) <= 0.0001:
         close = True
@@ -100,7 +100,7 @@ for i in range(Nt-1):
     Yminus[:,i] = 0.5*(yval + yold)
     Yplus[:,i] = (yval-yold)/dt
     
-plt.plot(trange[0:-1],Yminus[0,:],'--')
+# plt.plot(trange[0:-1],Yminus[0,:],'--')
 [U,S,V] = svd(Yminus[:,skip:],full_matrices=False)
 Sinv = np.zeros(S.size)
 Spos = S[S/np.cumsum(S)>1e-18]

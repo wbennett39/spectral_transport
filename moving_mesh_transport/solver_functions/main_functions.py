@@ -447,7 +447,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             plt.plot(xs, phi)
             if integrator == 'BDF':
                 Y_m_final[:, it] = Y_minus_psi[:, it]
-                dt = (rhs.t_old_list_Y[it+1] - rhs.t_old_list_Y[it])/2.998e10/sigma_t # because the list is t old, use it+1 and it to calculate dt 
+                dt = (rhs.t_old_list_Y[it+1] - rhs.t_old_list_Y[it])/sigma_t # because the list is t old, use it+1 and it to calculate dt 
                 Y_p_final[:, it] =  3/2/dt * (Y_minus_psi[:, it] - 4 * Y_minus_psi[:, it-1]/3 + Y_minus_psi[:, it-2]/3)
 
       
@@ -480,15 +480,17 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         theta = 0.8417871348541741
         theta_all_negative = []
         theta_close_to_bench = []
-
-        while (positive_vals or close_to_bench == False) and it2 < 500:
+        theta_old = theta
+        eigen_vals_old = theta_DMD(Y_minus_psi[:, skip:]+1e-18, rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/sigma_t, theta = theta)
+        err_old = math.sqrt(np.mean((np.sort(np.real(eigen_vals)[0:4]) - np.array([-.763507, -1.57201, -2.98348, -5.10866]))**2))
+        while  it2 < 500:
 
         # while it2 <= 500:
             # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
             # print(Y_m_final[0, :].size, 'YM size')
             # print(rhs.Y_iterator, 'Y iterator')
-
-            eigen_vals = theta_DMD(Y_minus_psi[:, skip:]+1e-18, rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/sigma_t, theta = theta)
+            theta_new = theta + 0.05 * theta * (np.random.rand()*2-1)
+            eigen_vals = theta_DMD(Y_minus_psi[:, skip:]+1e-18, rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/sigma_t, theta = theta_new)
             # print(np.max(np.real(eigen_vals)), 'Largest negative eigenval')
             print(np.max(np.real(eigen_vals)), 'Largest eigenval')
             print(theta, 'theta')
@@ -517,7 +519,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # print(theta, 'theta')
             if it2 >= 499:
                 print('iterated out')
-            theta = np.random.rand() * 2
+            # theta_new = np.random.rand() * 2
+            err = math.sqrt(np.mean((np.sort(np.real(eigen_vals))[0:4] - np.array([-.763507, -1.57201, -2.98348, -5.10866]))**2))
+            if err < err_old:
+                eigenvals_old = np.sort(np.real(eigen_vals))[0:4]
+                theta = theta_new
+            
             # if integrator == 'BDF':
             #     theta = random.uniform(0.7, 2.0)
 

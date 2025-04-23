@@ -418,8 +418,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # eigen_vals = rhs.t_old_list_Y * 0
         Y_minus = rhs.Y_minus_list[:rhs.Y_iterator-1].copy()
         Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
-        Y_plus_psi = np.zeros((N_groups * N_ang * xs.size,rhs.Y_iterator))
-        Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size,rhs.Y_iterator))
+        Y_plus_psi = np.zeros((N_groups * N_ang * xs.size,rhs.Y_iterator-1))
+        Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size,rhs.Y_iterator-1))
         
         # output = make_outpurhs.Y_it(tfinal, N_ang, ws, xs, Y_minus[0,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
         for it in range(rhs.Y_iterator-1):
@@ -432,7 +432,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             output.make_phi(uncollided_sol)
             Y_plus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
 
-        skip = int(0.1 * rhs.Y_iterator)
+        skip = int(0.4 * rhs.Y_iterator)
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]

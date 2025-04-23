@@ -262,6 +262,7 @@ class rhs_class():
         if self.t_old_list_Y.size >= 2: 
             dt = (self.t_old_list_Y[-1]-self.t_old_list_Y[-2])
             # print(dt)
+            # Y_minus_old = self.Y_minus_list[se]
             self.Y_plus = ( res2- self.Y_minus[self.g,:])/dt
         else:
             self.Y_plus = self.Y_minus[self.g, :].copy()*0

@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from scipy.special import jv
 from numpy.linalg import svd
 from .theta_DMD import theta_DMD
-
+import random
 Nt = 2000
 
 dt = 0.1
@@ -71,7 +71,8 @@ deigs = np.linalg.eigvals(tmp3)
 print(deigs, 'VDMD')
 close = False
 while close == False:
-    theta = np.random.rand()
+    # theta = np.random.rand()
+    theta = random.uniform(0.0, 0.1)
     deigs_theta = theta_DMD(Yminus[:, skip:], ts[skip:-1], theta = theta)
     if abs((-np.sort(-np.real(deigs_theta))[0] - -np.sort(-np.real(deigs))[0])) <= 0.0001:
         close = True

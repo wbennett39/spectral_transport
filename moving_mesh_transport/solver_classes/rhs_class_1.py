@@ -167,7 +167,7 @@ class rhs_class():
         self.sigma_s = build.sigma_s
         self.sigma_a = build.sigma_a
         self.sigma_t = build.sigma_t
-        self.c = build.sigma_s 
+        self.c = build.sigma_s/ build.sigma_t 
         print(self.c, 'c')
         self.particle_v = build.particle_v
         self.lumping = build.lumping

@@ -280,7 +280,7 @@ class rhs_class():
         Y_minus_new[:-1] = self.Y_minus_list[:].copy()
         Y_plus_new[:-1] = self.Y_plus_list[:].copy()  
         self.Y_minus_list = np.copy(Y_minus_new)
-        self.Y_plus_list = np.copy(Y_minus_new)
+        self.Y_plus_list = np.copy(Y_plus_new)
 
         # Append new Y_, Y- to the new lists of vectors
         Y_minus_temp = self.Y_minus_list.copy().reshape((list_length, self.N_groups * self.N_ang, self.N_space, self.M+1))

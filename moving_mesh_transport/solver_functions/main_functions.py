@@ -420,7 +420,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         Y_minus = rhs.Y_minus_list[:rhs.Y_iterator-1].copy()
         Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
         Y_plus_psi = np.zeros((N_groups * N_ang * xs.size,rhs.Y_iterator-1))
-        Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size,rhs.Y_iterator-1))
+        Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size, rhs.Y_iterator-1))
         Y_m_final = Y_minus_psi.copy()*0
         Y_p_final = Y_plus_psi.copy()*0
         # Mdelta = np.zeros((rhs.Y_iterator-1, rhs.Y_iterator-2))
@@ -466,14 +466,20 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         eigen_vals = VDMD_func(Y_m_final[:, :-1], Y_p_final[:, :-1], skip)
         positive_vals = True
         it2 = 1
+        theta = 0.8417871348541741
         while positive_vals or it2 < 100:
-            theta = np.random.rand()
-            eigen_vals_theta = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:-1], theta = theta)
+            
+            # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
+            # print(Y_m_final[0, :].size, 'YM size')
+            # print(rhs.Y_iterator, 'Y iterator')
+
+            eigen_vals_theta = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1], theta = theta)
             if (eigen_vals_theta < 0).all():
                 print(theta, 'theta')
                 positive_vals = False
             else:
                 it2 += 1
+                theta = np.random.rand()
 
         print(eigen_vals_theta, 'theta method')
     else:

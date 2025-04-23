@@ -420,25 +420,33 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
         Y_plus_psi = np.zeros((N_groups * N_ang * xs.size,rhs.Y_iterator-1))
         Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size,rhs.Y_iterator-1))
-        
+        Y_m_final = Y_minus_psi.copy()*0
+        Y_p_final = Y_plus_psi.copy()*0
         # output = make_outpurhs.Y_it(tfinal, N_ang, ws, xs, Y_minus[0,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
-        for it in range(rhs.Y_iterator-1):
+        for it in range(1, rhs.Y_iterator-2):
             tt = rhs.t_old_list_Y[it]
 
             output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             output.make_phi(uncollided_sol)
             Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
-            output = make_output(tt, N_ang, ws, xs, Y_plus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
-            output.make_phi(uncollided_sol)
-            Y_plus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
+            if integrator == 'BDF':
+                Y_m_final[:, it] = Y_minus_psi[:, it]
+                dt = rhs.t_old_list_Y[it] - rhs.t_old_list_Y[it-1] 
+                Y_p_final[:, it] =  3/2/dt * (Y_minus_psi[:, it+1] - 4 * Y_minus_psi[:, it]/3 + Y_minus_psi[:, it-1]/3)
 
-        skip = int(0.4 * rhs.Y_iterator)
+
+            # output = make_output(tt, N_ang, ws, xs, Y_plus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+            # output.make_phi(uncollided_sol)
+            # Y_plus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size)) 
+            # Y_plus_psi[:, it] *= -np.sign(Y_plus_psi[:, it])
+
+        skip = int(0.2 * rhs.Y_iterator)
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
         print(Y_minus_psi, 'Y-')
         print(Y_plus_psi, 'Y+')
-        eigen_vals = VDMD_func(Y_minus_psi, Y_plus_psi, skip)
+        eigen_vals = VDMD_func(Y_m_final, Y_p_final, skip)
     else:
         eigen_vals = rhs.t_old_list_Y * 0
     

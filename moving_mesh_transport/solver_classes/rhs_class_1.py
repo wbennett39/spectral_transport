@@ -261,9 +261,13 @@ class rhs_class():
         # It may be necessary to calculate Y+ outside of the loop or use the previous two time steps
         if self.t_old_list_Y.size >= 2: 
             dt = (self.t_old_list_Y[-1]-self.t_old_list_Y[-2])
-            # print(dt)
-            # Y_minus_old = self.Y_minus_list[se]
-            self.Y_plus = ( res2- self.Y_minus[self.g,:])/dt
+            if dt < 0:
+                raise ValueError('negative timestep')
+            Y_minus_old = self.Y_minus_list[self.Y_iterator,:].copy().reshape((self.N_ang * self.N_groups, self.N_space, self.M+1))
+            Y_minus_old_g = Y_minus_old[self.g * self.N_ang : (self.g+1) * self.N_ang, :, :].copy().reshape((self.N_ang * self.N_space * (self.M+1)))
+            # self.Y_plus = ( res2- self.Y_minus[self.g,:])/dt
+            self.Y_plus = ( res2- Y_minus_old_g)/dt
+
         else:
             self.Y_plus = self.Y_minus[self.g, :].copy()*0
         self.Y_minus[self.g,:] = res2.copy()

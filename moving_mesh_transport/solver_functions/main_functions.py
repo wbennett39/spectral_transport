@@ -469,6 +469,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         close_to_bench = False
         it2 = 1
         theta = 0.8417871348541741
+        theta_all_negative = []
         while (positive_vals or close_to_bench == False) and it2 < 500:
             
             # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
@@ -477,14 +478,18 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
             eigen_vals = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1], theta = theta)
             if (eigen_vals < 0).all():
-                print(theta, 'theta')
+                print(theta, 'theta no positive vals')
                 positive_vals = False
-            if abs(np.max(-np.real(eigen_vals)) - 5.10866) <= 0.1:
+                theta_all_negative.append(theta)
+            else:
+                positive_vals = True
+            if abs(np.max(-np.real(eigen_vals)) - 5.10866) <= 0.5:
                 close_to_bench = True
-                print(np.sort(-np.real(eigen_vals))[:4], 'top 4 modes')
+                print(abs(np.max(-np.real(eigen_vals)) - 5.10866))
+                print(np.sort(np.real(eigen_vals))[:4], 'top 4 modes')
             else:
                 it2 += 1
-                theta = np.random.rand()
+                theta = 2 * np.random.rand()
                 # print(theta, 'theta')
                 if it2 >= 499:
                     print('iterated out')
@@ -492,6 +497,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         print(eigen_vals, 'theta method')
         print(np.max(np.real(eigen_vals)), 'most positive eigen value')
         print(-np.max(-np.real(eigen_vals)), 'largest negative eigen value')
+        print(np.min(np.array(theta_all_negative)),np.max(np.array(theta_all_negative)),'range of thetas for all values negative' )
     else:
         eigen_vals = rhs.t_old_list_Y * 0
     

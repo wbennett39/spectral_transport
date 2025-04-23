@@ -468,7 +468,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         it2 = 1
         while positive_vals or it2 < 100:
             theta = np.random.rand()
-            eigen_vals_theta = theta_DMD(Y_m_final, rhs.t_old_list_Y[:, skip:], theta = theta)
+            eigen_vals_theta = theta_DMD(Y_m_final[:, skip:], rhs.t_old_list_Y[skip:-1], theta = theta)
             if (eigen_vals_theta < 0).all():
                 print(theta, 'theta')
                 positive_vals = False

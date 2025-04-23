@@ -1,5 +1,5 @@
 import numpy as np
-
+# This was written by ChatGPT
 def theta_DMD(
     data, 
     time_array, 

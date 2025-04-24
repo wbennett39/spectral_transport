@@ -79,7 +79,7 @@ while close == False:
         print('close')
     else:
         print(theta)
-print(theta, 'theta')
+print(theta, 'theta Backward Euler')
 # print(deigs_theta, 'theta')
 print(-np.sort(-np.real(deigs)), 'VDMD sorted')
 print(-np.sort(-np.real(deigs_theta)), 'theta sorted')
@@ -111,5 +111,19 @@ tmp3=np.dot(tmp2,np.diag(Sinv))
 deigs = np.linalg.eigvals(tmp3)
 #deigs = deigs[deigs>0]
 #print(np.log(deigs)/dt)
-print(deigs)
+print(deigs, 'VDMD')
+close = False
+while close == False:
+    # theta = np.random.rand()
+    theta = random.uniform(.4, .6)
+    deigs_theta = theta_DMD(Yminus[:, skip:], ts[skip:-1], theta = theta)
+    if abs((-np.sort(-np.real(deigs_theta))[0] - -np.sort(-np.real(deigs))[0])) <= 0.00001:
+        close = True
+        print('close')
+    else:
+        print(theta)
+print(theta, 'theta Crank-Nicholson')
+# print(deigs_theta, 'theta')
+print(-np.sort(-np.real(deigs)), 'VDMD sorted')
+print(-np.sort(-np.real(deigs_theta)), 'theta sorted')
 

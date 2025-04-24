@@ -39,6 +39,7 @@ from .theta_DMD import theta_DMD
 import random
 import scipy
 from .test_bessel import *
+import tqdm
 # from diffeqpy import ode
 # from .jl_integrator import integrator as jl_integrator_func
 # from diffeqpy import de
@@ -605,7 +606,7 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         close_to_bench = False
         it2 = 1
         # theta = 0.8417871348541741
-        theta = 1.0
+        theta = 0.5
         theta_all_negative = []
         theta_close_to_bench = []
         theta_old = theta
@@ -614,18 +615,23 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         theta_old_list = []
         it_list = []
         stagnancy_count = 0
+        err_list = []
         print('iterating theta')
-        while  it2 < 500:
+        for it2 in tqdm.tqdm(range(500)):
             # print(it2)
             
         # while it2 <= 500:
             # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
             # print(Y_m_final[0, :].size, 'YM size')
             # print(rhs.Y_iterator, 'Y iterator')
-            theta_new = theta_old + 0.01 * theta_old * (np.random.rand()*2-1)
+            if stagnancy_count < 100:
+                theta_new = theta_old + 0.01 * theta_old * (np.random.rand()*2-1)
+            else:
+                theta_new = np.random.rand()
+                # stagnancy_count = 0
             
-            if theta_new > 2:
-                theta_new = 2
+            if theta_new > 1:
+                theta_new = 1
             elif theta_new < 0:
                 theta_new = 0
             # print(theta_new, 'theta')
@@ -669,10 +675,13 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
                 err_old = err
                 theta_old_list.append(theta_old)
                 it_list.append(it2)
+                stagnancy_count = 0
+                err_list.append(err_old)
             else:
                 stagnancy_count += 1
                 theta_old_list.append(theta_old)
                 it_list.append(it2)
+                err_list.append(err_old)
 
                 # print('updating theta')
             
@@ -682,10 +691,24 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         # print(eigen_vals, 'theta method')
         theta_old_list = np.array(theta_old_list)
         it_list = np.array(it_list)
+        fig, ax1 = plt.subplots()
+        color = 'tab:blue'
+        ax1.set_xlabel('iterations', fontsize = 16)
+        ax1.set_ylabel(r'$\theta$', fontsize = 16, color = color)
+        ax1.plot(it_list, theta_old_list, '-x', label = f'theta {N_space} cells, {M+1} basis functions, {N_ang} angles')
+        ax1.tick_params(axis='y', labelcolor=color)
+        ax2 = ax1.twinx()  # instantiate a second Axes that shares the same x-axis
+        color = 'tab:blue'
+        ax2.set_ylabel('error', color=color)  # we already handled the x-label with ax1
+        ax2.plot(it_list, err_list, color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
+
+        fig.tight_layout()  # otherwise the right y-label is slightly clipped
+        plt.show()
         plt.figure(2)
-        plt.plot(it_list, theta_old_list, '-x', mfc = 'none', label = f'{N_space} cells, {M+1} basis functions, {N_ang} angles')
-        plt.xlabel('iterations', fontsize = 16)
-        plt.ylabel(r'$\theta$', fontsize = 16)
+        plt.plot(it_list, err_list, '-', label = f'error {N_space} cells, {M+1} basis functions, {N_ang} angles')
+        # plt.xlabel('iterations', fontsize = 16)
+        # plt.ylabel(r'$\theta$', fontsize = 16)
         plt.legend()
         plt.savefig('theta_iterations.pdf')
         # plt.show()

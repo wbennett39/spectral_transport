@@ -74,7 +74,7 @@ while close == False:
     # theta = np.random.rand()
     theta = random.uniform(0.0, 0.02)
     deigs_theta = theta_DMD(Yminus[:, skip:], ts[skip:-1], theta = theta)
-    if abs((-np.sort(-np.real(deigs_theta))[0] - -np.sort(-np.real(deigs))[0])) <= 0.0001:
+    if abs((-np.sort(-np.real(deigs_theta))[0] - -np.sort(-np.real(deigs))[0])) <= 0.000001:
         close = True
         print('close')
     else:

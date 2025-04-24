@@ -16,10 +16,10 @@ def VDMD2(Y_minus, Y_plus, skip):
     #print(np.log(deigs)/dt)
     # print(Y_minus, 'Y-')
     # print(Y_plus, 'Y+')
-    print('############################')
-    print(deigs, 'eigen values')
-    if (np.real(deigs) >0).any():
-        print('positive eigen val', np.max(np.real(deigs)))
-    print('############################')
+    # print('############################')
+    # print(deigs, 'eigen values')
+    # if (np.real(deigs) >0).any():
+        # print('positive eigen val', np.max(np.real(deigs)))
+    # print('############################')
     return np.real(deigs)
     # return np.array([0.0])

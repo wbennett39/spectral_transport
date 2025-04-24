@@ -409,6 +409,133 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     elif choose_xs == True:
         xs = specified_xs
     if VDMD == True:
+        eigen_vals = DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t)
+    else:
+        eigen_vals = rhs.t_old_list_Y * 0
+    
+    
+
+    # print(xs, 'xs')
+    if eval_times == False or sol.status == -1:
+        output = make_output(tfinal, N_ang, ws, xs, sol_last, M, edges, uncollided, geometry, N_groups)
+        phi = output.make_phi(uncollided_sol)
+        psi = output.psi_out # this is the collided psi
+        exit_dist, exit_phi = output.get_exit_dist(uncollided_sol)
+        xs_ret = xs
+        if thermal_couple['none'] == False:
+            # print('reconstructing energy density solution')
+            e = output.make_e()
+            # print(e,'energy density')
+        else:
+            e = phi*0
+    else:
+        phi = np.zeros((eval_array.size, xs.size))
+        e = np.zeros((eval_array.size, xs.size))
+        psi = np.zeros((eval_array.size, N_ang, xs.size))
+        exit_dist = np.zeros((eval_array.size, N_ang, 2))
+        exit_phi = np.zeros((eval_array.size, 2))
+        xs_ret = np.zeros((eval_array.size, xs.size))
+        # initialize = build(N_ang, N_space, M, tfinal, x0, t0, mus, ws, xs_quad,
+        #                ws_quad, sigma_t, sigma_s, source_type, uncollided, moving, move_type, t_quad, t_ws,
+        #                thermal_couple, temp_function, e_initial, sigma, particle_v, edge_v, cv0, thick, 
+        #                wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
+        #                 quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
+        #                 finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry)
+        
+        fake_mesh  = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
+                      wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
+                      domain_width, fake_sedov_v0, boundary_on, t0, geometry, sigma_func) 
+        for it, tt in enumerate(eval_array):
+            fake_mesh.move(tt)
+            edges = fake_mesh.edges
+            # print(edges, 'edges', tt, 't')
+            if choose_xs == False:
+                xs = find_nodes(edges, M, geometry)
+            elif choose_xs == True:
+                xs = specified_xs
+            output = make_output(tt, N_ang, ws, xs, sol.y[:,it].reshape((N_ang+extra_deg_freedom,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+            phi[it,:] = output.make_phi(uncollided_sol)
+            psi[it, :, :] = output.psi_out # this is the collided psi
+            exit_dist[it], exit_phi[it] = output.get_exit_dist(uncollided_sol)
+            xs_ret[it] = xs
+            if thermal_couple['none'] == False:
+                e[it,:] = output.make_e()
+                
+            else:
+                e = phi*0
+    computation_time = end-start
+    
+    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, eigen_vals
+
+
+
+def problem_identifier():
+
+    name_array = []
+
+def plot_edges_converging(t, edges, rf, fign):
+    plt.figure(fign)
+    for ed in range(edges.size):
+        plt.scatter(edges[ed], t, s = 16, c = 'k', marker = ".")
+    plt.scatter(rf, t, c='r', marker='x')
+
+
+def plot_edges(edges,fign):
+    plt.figure(fign)
+    for ed in range(edges.size):
+        plt.scatter(edges[ed], 0.0, s = 128, c = 'k', marker = "|")
+
+
+
+def x0_function(x0, source_type, count):
+        if source_type[3] or source_type[4] == 1:
+            x0_new = x0[count]
+        else:
+            x0_new = x0[0]
+        return x0_new
+
+
+
+
+
+
+
+
+
+
+# def matmul(a,b):
+
+#     res = [[0 for x in range(3)] for y in range(3)] 
+    
+#     # explicit for loops
+#     for i in range(len(matrix1)):
+#         for j in range(len(matrix2[0])):
+#             for k in range(len(matrix2)):
+    
+#                 # resulted matrix
+#     return res
+
+
+ 
+def mesh_dry_run(mesh, tfinal):
+    tlist = np.linspace(0.0, tfinal, 500)
+    for it, tt in enumerate(tlist):
+        mesh.move(tt)
+    print('mesh dry run complete')
+    mesh.move(0.0)
+
+
+class sol_class_ode_solver():
+    def __init__(self, y, t, tpnts):
+        self.y = np.zeros(( y.size, tpnts.size,))
+        self.y[:,0] = y
+        self.t = tpnts
+        self.status = 1
+        self.message = 'sup'
+
+
+
+def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t ):
         if (rhs.t_old_list_Y != np.sort(rhs.t_old_list_Y)).any():
             print(rhs.t_old_list_Y)
             raise ValueError('t list nonconsecutive')
@@ -546,7 +673,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(eigen_vals, 'theta method')
         theta_old_list = np.array(theta_old_list)
         it_list = np.array(it_list)
+        plt.figure(2)
         plt.plot(it_list, theta_old_list, 'o', mfc = 'none')
+        plt.xlabel('iterations', fontsize = 16)
+        plt.ylabel(r'$\theta$', fontsize = 16)
+        plt.savefig('theta_iterations.pdf')
+
         print(skip, 'skip')
         print(rhs.t_old_list_Y[skip], 'first time snapshot')
         print(theta_old, 'theta')
@@ -557,124 +689,4 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             print(np.min(np.array(theta_all_negative)),np.max(np.array(theta_all_negative)),'range of thetas for all values negative' )
         if len(theta_close_to_bench) != 0:
             print(np.min(np.array(theta_close_to_bench)),np.max(np.array(theta_close_to_bench)),'range of thetas for eigen close to bench' )
-    else:
-        eigen_vals = rhs.t_old_list_Y * 0
-    
-
-    # print(xs, 'xs')
-    if eval_times == False or sol.status == -1:
-        output = make_output(tfinal, N_ang, ws, xs, sol_last, M, edges, uncollided, geometry, N_groups)
-        phi = output.make_phi(uncollided_sol)
-        psi = output.psi_out # this is the collided psi
-        exit_dist, exit_phi = output.get_exit_dist(uncollided_sol)
-        xs_ret = xs
-        if thermal_couple['none'] == False:
-            # print('reconstructing energy density solution')
-            e = output.make_e()
-            # print(e,'energy density')
-        else:
-            e = phi*0
-    else:
-        phi = np.zeros((eval_array.size, xs.size))
-        e = np.zeros((eval_array.size, xs.size))
-        psi = np.zeros((eval_array.size, N_ang, xs.size))
-        exit_dist = np.zeros((eval_array.size, N_ang, 2))
-        exit_phi = np.zeros((eval_array.size, 2))
-        xs_ret = np.zeros((eval_array.size, xs.size))
-        # initialize = build(N_ang, N_space, M, tfinal, x0, t0, mus, ws, xs_quad,
-        #                ws_quad, sigma_t, sigma_s, source_type, uncollided, moving, move_type, t_quad, t_ws,
-        #                thermal_couple, temp_function, e_initial, sigma, particle_v, edge_v, cv0, thick, 
-        #                wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
-        #                 quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-        #                 finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry)
-        
-        fake_mesh  = mesh_class(N_space, x0, tfinal, moving, move_type, source_type, edge_v, thick, move_factor,
-                      wave_loc_array, pad, leader_pad, quad_thick_source, quad_thick_edge, finite_domain,
-                      domain_width, fake_sedov_v0, boundary_on, t0, geometry, sigma_func) 
-        for it, tt in enumerate(eval_array):
-            fake_mesh.move(tt)
-            edges = fake_mesh.edges
-            # print(edges, 'edges', tt, 't')
-            if choose_xs == False:
-                xs = find_nodes(edges, M, geometry)
-            elif choose_xs == True:
-                xs = specified_xs
-            output = make_output(tt, N_ang, ws, xs, sol.y[:,it].reshape((N_ang+extra_deg_freedom,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
-            phi[it,:] = output.make_phi(uncollided_sol)
-            psi[it, :, :] = output.psi_out # this is the collided psi
-            exit_dist[it], exit_phi[it] = output.get_exit_dist(uncollided_sol)
-            xs_ret[it] = xs
-            if thermal_couple['none'] == False:
-                e[it,:] = output.make_e()
-                
-            else:
-                e = phi*0
-    computation_time = end-start
-    
-    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, eigen_vals
-
-
-
-def problem_identifier():
-
-    name_array = []
-
-def plot_edges_converging(t, edges, rf, fign):
-    plt.figure(fign)
-    for ed in range(edges.size):
-        plt.scatter(edges[ed], t, s = 16, c = 'k', marker = ".")
-    plt.scatter(rf, t, c='r', marker='x')
-
-
-def plot_edges(edges,fign):
-    plt.figure(fign)
-    for ed in range(edges.size):
-        plt.scatter(edges[ed], 0.0, s = 128, c = 'k', marker = "|")
-
-
-
-def x0_function(x0, source_type, count):
-        if source_type[3] or source_type[4] == 1:
-            x0_new = x0[count]
-        else:
-            x0_new = x0[0]
-        return x0_new
-
-
-
-
-
-
-
-
-
-
-# def matmul(a,b):
-
-#     res = [[0 for x in range(3)] for y in range(3)] 
-    
-#     # explicit for loops
-#     for i in range(len(matrix1)):
-#         for j in range(len(matrix2[0])):
-#             for k in range(len(matrix2)):
-    
-#                 # resulted matrix
-#     return res
-
-
- 
-def mesh_dry_run(mesh, tfinal):
-    tlist = np.linspace(0.0, tfinal, 500)
-    for it, tt in enumerate(tlist):
-        mesh.move(tt)
-    print('mesh dry run complete')
-    mesh.move(0.0)
-
-
-class sol_class_ode_solver():
-    def __init__(self, y, t, tpnts):
-        self.y = np.zeros(( y.size, tpnts.size,))
-        self.y[:,0] = y
-        self.t = tpnts
-        self.status = 1
-        self.message = 'sup'
+        return eigen_vals

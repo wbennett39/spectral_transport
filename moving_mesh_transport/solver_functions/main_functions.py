@@ -591,7 +591,7 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
             # Y_plus_psi[:, it] *= -np.sign(Y_plus_psi[:, it])
 
         # skip = int(0.2 * rhs.Y_iterator)skip 
-        skip = 3
+        skip = 5
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
@@ -604,7 +604,8 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         positive_vals = True
         close_to_bench = False
         it2 = 1
-        theta = 0.8417871348541741
+        # theta = 0.8417871348541741
+        theta = 1.0
         theta_all_negative = []
         theta_close_to_bench = []
         theta_old = theta
@@ -614,14 +615,14 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         it_list = []
         stagnancy_count = 0
         print('iterating theta')
-        while  it2 < 500 and stagnancy_count < 10:
+        while  it2 < 500:
             # print(it2)
             
         # while it2 <= 500:
             # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
             # print(Y_m_final[0, :].size, 'YM size')
             # print(rhs.Y_iterator, 'Y iterator')
-            theta_new = theta_old + 0.005 * theta_old * (np.random.rand()*2-1)
+            theta_new = theta_old + 0.01 * theta_old * (np.random.rand()*2-1)
             
             if theta_new > 2:
                 theta_new = 2
@@ -661,7 +662,7 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
             err = abs(np.max(np.real(eigen_vals)) - -0.763507)
             # print(err, 'err')
             
-            if err < err_old and np.max(np.real(eigen_vals)) <0:
+            if err < err_old:
                 eigenvals_old = np.sort(np.real(eigen_vals))[0:4]
                 theta = theta_new
                 theta_old = theta_new
@@ -670,6 +671,9 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
                 it_list.append(it2)
             else:
                 stagnancy_count += 1
+                theta_old_list.append(theta_old)
+                it_list.append(it2)
+
                 # print('updating theta')
             
             # if integrator == 'BDF':
@@ -692,14 +696,16 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         print(theta_old, 'theta')
         eigen_vals = np.sort(np.real(theta_DMD(Y_minus_psi[:, skip:]+1e-18, rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/sigma_t, theta = theta_old)))
         return_vals = np.array([eigen_vals[-1]])
+        it = 0
         for ix in range(1, eigen_vals.size):
-            if abs(eigen_vals[ix] - return_vals[ix-1]) > 1e-12:
-                return_vals = np.append(eigen_vals[ix])
+            if abs(eigen_vals[ix] - return_vals[it]) > 1e-12:
+                return_vals = np.append(return_vals, eigen_vals[ix])
+                it += 1
         sorted_eigs = return_vals
         print(sorted_eigs[-1], sorted_eigs[-2], sorted_eigs[-3], sorted_eigs[-4], 'first four eigen values')
         # print(-np.max(-np.real(eigen_vals) /2.9E10), 'largest negative eigen value')
-        if len(theta_all_negative) != 0:
-            print(np.min(np.array(theta_all_negative)),np.max(np.array(theta_all_negative)),'range of thetas for all values negative' )
-        if len(theta_close_to_bench) != 0:
-            print(np.min(np.array(theta_close_to_bench)),np.max(np.array(theta_close_to_bench)),'range of thetas for eigen close to bench' )
+        # if len(theta_all_negative) != 0:
+        #     print(np.min(np.array(theta_all_negative)),np.max(np.array(theta_all_negative)),'range of thetas for all values negative' )
+        # if len(theta_close_to_bench) != 0:
+        #     print(np.min(np.array(theta_close_to_bench)),np.max(np.array(theta_close_to_bench)),'range of thetas for eigen close to bench' )
         return return_vals

@@ -106,8 +106,8 @@ def theta_DMD(
         #    c * M_delta = Ac ( c * M_theta ).
         # You can cross-check eq. (19)/(20) if needed, but the simplest approach is:
         
-        M_theta[j,   j] = theta
-        M_theta[j+1, j] = (1.0 - theta)
+        M_theta[j,   j] = 1- theta
+        M_theta[j+1, j] = (theta)
     
     # ----------------------------------------------------------------
     # 3) FORM X and Y from C and the above M_delta, M_theta.

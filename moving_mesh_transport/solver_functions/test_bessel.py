@@ -72,7 +72,7 @@ print(deigs, 'VDMD')
 close = False
 while close == False:
     # theta = np.random.rand()
-    theta = random.uniform(0.0, 0.02)
+    theta = random.uniform(0.8, 1)
     deigs_theta = theta_DMD(Yminus[:, skip:], ts[skip:-1], theta = theta)
     if abs((-np.sort(-np.real(deigs_theta))[0] - -np.sort(-np.real(deigs))[0])) <= 0.00001:
         close = True

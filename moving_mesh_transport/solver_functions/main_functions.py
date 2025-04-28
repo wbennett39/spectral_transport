@@ -790,7 +790,7 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         #     Mdelta[it + 1, it] = 1/ delta_t
         # print(Mdelta, 'Mdelta')
         # output = make_outpurhs.Y_it(tfinal, N_ang, ws, xs, Y_minus[0,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
-        for it in range(2, sol.t.size):
+        for it in range(1, sol.t.size):
             tt = sol.t[it]
             output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             phi = output.make_phi(uncollided_sol)
@@ -802,8 +802,9 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
             plt.show()
             # if integrator == 'BDF':
             Y_m_final[:, it] = Y_minus_psi[:, it]
-            dt = (sol.t[it+1] - sol.t[it])/sigma_t # because the list is t old, use it+1 and it to calculate dt 
-            Y_p_final[:, it] =  3/2/dt * (Y_minus_psi[:, it] - 4 * Y_minus_psi[:, it-1]/3 + Y_minus_psi[:, it-2]/3)
+            dt = (sol.t[it] - sol.t[it-1])/sigma_t # because the list is t old, use it+1 and it to calculate dt 
+            # Y_p_final[:, it] =  3/2/dt * (Y_minus_psi[:, it] - 4 * Y_minus_psi[:, it-1]/3 + Y_minus_psi[:, it-2]/3)
+            Y_p_final[:, it] = (Y_minus_psi[:, it] - Y_minus_psi[:, it-1])/dt
 
       
 
@@ -826,10 +827,10 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         # print(Y_m_final[:, 2:], 'Y-')
         # print(Y_p_final[:, 2:], 'Y+')
         # print(skip, 'skip')
-        eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_m_final[:, :-1] + 1e-18, Y_p_final[:, :-1], skip)) )
-        eigen_vals_DMD2 = np.sort(np.real(VDMD_func(Y_minus_psi[:, :-1] + 1e-18, Y_plus_psi[:, :-1], skip)) )
+        eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_m_final[:, :] + 1e-18, Y_p_final[:, :], skip)) )
+        # eigen_vals_DMD2 = np.sort(np.real(VDMD_func(Y_minus_psi[:, :-1] + 1e-18, Y_plus_psi[:, :-1], skip)) )
         print(eigen_vals_DMD, 'VDMD function 2 raw')
-        print(eigen_vals_DMD, 'VDMD function 2 psi')
+        # print(eigen_vals_DMD, 'VDMD function 2 psi')
         # print(-np.max(np.real(eigen_vals_DMD)), 'Largest negative eigenval VDMD')
         # print(np.max(np.real(eigen_vals_DMD)), 'Largest eigenval VDMD')
         positive_vals = True
@@ -931,8 +932,8 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         print(skip, 'skip')
 
         print(theta_old, 'theta')
-        eigen_vals2 = np.sort(np.real(theta_DMD(Y_minus_psi[:, skip:]+1e-18, sol.t[skip:sol.t.size -1]/sigma_t, theta = theta_old)))
-        eigen_vals = np.sort(np.real(theta_DMD(Y_minus_flipped[:, skip:]+1e-18, sol.t[skip:sol.t.size -1]/sigma_t, theta = theta_old)))
+        eigen_vals2 = np.sort(np.real(theta_DMD(Y_minus_psi[:, skip:]+1e-18, sol.t[skip:sol.t.size]/sigma_t, theta = theta_old)))
+        eigen_vals = np.sort(np.real(theta_DMD(Y_minus_flipped[:, skip:]+1e-18, sol.t[skip:sol.t.size]/sigma_t, theta = theta_old)))
         return_vals = np.array([eigen_vals[-1]])
         it = 0
         print(eigen_vals, 'theta-DMD function 2 raw')

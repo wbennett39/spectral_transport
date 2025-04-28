@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
 # @njit
-def backward_euler(f, ts, y0, jac=None, tol=1e-8, maxiter=50):
+def backward_euler(f, ts, y0, jac=None, tol=1e-8, maxiter=10):
     """
     Solve y' = f(t,y) with the backward‐Euler method on time‐grid ts.
 
@@ -29,16 +29,19 @@ def backward_euler(f, ts, y0, jac=None, tol=1e-8, maxiter=50):
     ts = np.asarray(ts)
     m  = y0.size
     Y  = np.zeros((m, len(ts)))
+    Y =  np.ascontiguousarray(Y)
     Y[:,0] = y0
 
     for i in range(len(ts)-1):
 
+
         t_prev, t_next = ts[i], ts[i+1]
         dt = t_next - t_prev
         y_prev = Y[:,i]
-
+        y_prev = np.ascontiguousarray(y_prev)
         # initial guess: explicit Euler
         y_new = y_prev + dt * f(t_prev, y_prev)
+        y_new = np.ascontiguousarray(y_new)
 
         # Newton solve:  G(y) = y - y_prev - dt * f(t_next, y) = 0
         for _ in range(maxiter):

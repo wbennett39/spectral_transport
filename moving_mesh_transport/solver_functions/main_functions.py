@@ -338,7 +338,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 500)
-        ts = np.logspace(-1,math.log10(tfinal), 10 + 1)
+        ts = np.logspace(-1,math.log10(tfinal), 12 + 1)
         Y = backward_euler(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)
@@ -610,7 +610,9 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         # print(Y_p_final[:, 2:], 'Y+')
         # print(skip, 'skip')
         eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_m_final[:, :-1] + 1e-18, Y_p_final[:, :-1] + 1e-18, skip)))
-        print(eigen_vals_DMD[-1],eigen_vals_DMD[-2],eigen_vals_DMD[-3],eigen_vals_DMD[-4], 'First four eigen vals VDMD' )
+        print(eigen_vals_DMD[-1],eigen_vals_DMD[-2],eigen_vals_DMD[-3],eigen_vals_DMD[-4], 'First four eigen vals VDMD raw' )
+        eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus_psi[:, :-1] + 1e-18, Y_plus_psi[:, :-1] + 1e-18, skip)))
+        print(eigen_vals_DMD[-1],eigen_vals_DMD[-2],eigen_vals_DMD[-3],eigen_vals_DMD[-4], 'First four eigen vals VDMD psi' )
         # print(-np.max(np.real(eigen_vals_DMD)), 'Largest negative eigenval VDMD')
         # print(np.max(np.real(eigen_vals_DMD)), 'Largest eigenval VDMD')
         positive_vals = True
@@ -629,8 +631,8 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
         err_list = []
         err_2list = []
         print('iterating theta')
-        if integrator == 'BDF':
-            for it2 in tqdm.tqdm(range(500)):
+        if integrator == 'BDF' or integrator == 'Euler':
+            for it2 in tqdm.tqdm(range(250)):
                 # print(it2)
                 
             # while it2 <= 500:
@@ -705,7 +707,7 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
                     # print('updating theta')
                 
                 if integrator == 'BDF':
-                    theta = random.uniform(0.7, 2.0)
+                    theta = random.uniform(0.0, 1.0)
 
             
             theta_old_list = np.array(theta_old_list)
@@ -735,7 +737,7 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
             plt.savefig(f'theta_iterations_{N_space}_{integrator}.pdf')
             plt.show()
             plt.close()
-            print(eigen_vals, 'theta method')
+            # print(eigen_vals, 'theta method')
 
         print(skip, 'skip')
         print(rhs.t_old_list_Y[skip], 'first time snapshot')
@@ -788,9 +790,8 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         #     Mdelta[it + 1, it] = 1/ delta_t
         # print(Mdelta, 'Mdelta')
         # output = make_outpurhs.Y_it(tfinal, N_ang, ws, xs, Y_minus[0,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
-        for it in range(2, sol.t.size-2):
+        for it in range(2, sol.t.size-1):
             tt = sol.t[it]
-
             output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             phi = output.make_phi(uncollided_sol)
             Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
@@ -826,7 +827,9 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         # print(Y_p_final[:, 2:], 'Y+')
         # print(skip, 'skip')
         eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_m_final[:, :-1] + 1e-18, Y_p_final[:, :-1], skip)) )
-        print(eigen_vals_DMD, 'VDMD')
+        eigen_vals_DMD2 = np.sort(np.real(VDMD_func(Y_minus_psi[:, :-1] + 1e-18, Y_plus_psi[:, :-1], skip)) )
+        print(eigen_vals_DMD, 'VDMD function 2 raw')
+        print(eigen_vals_DMD, 'VDMD function 2 psi')
         # print(-np.max(np.real(eigen_vals_DMD)), 'Largest negative eigenval VDMD')
         # print(np.max(np.real(eigen_vals_DMD)), 'Largest eigenval VDMD')
         positive_vals = True
@@ -844,7 +847,85 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         stagnancy_count = 0
         err_list = []
         err_2list = []
+        tf_it = sol.t.size-1
         print('iterating theta')
+        if integrator == 'BDF' or integrator == 'Euler':
+            for it2 in tqdm.tqdm(range(250)):
+                # print(it2)
+                
+            # while it2 <= 500:
+                # print(rhs.t_old_list_Y[0:rhs.Y_iterator-1].size, 't list size')
+                # print(Y_m_final[0, :].size, 'YM size')
+                # print(rhs.Y_iterator, 'Y iterator')
+                if stagnancy_count < 100:
+                    theta_new = theta_old + 0.01 * theta_old * (np.random.rand()*2-1)
+                else:
+                    theta_new = np.random.rand()
+                    # stagnancy_count = 0
+                
+                if theta_new > 1.0:
+                    theta_new = 1.0
+                elif theta_new < 0.0:
+                    theta_new = 0.0
+                # print(theta_new, 'theta')
+                eigen_vals2 = theta_DMD(Y_minus_psi[:, skip:]+1e-18, sol.t[skip:tf_it]/sigma_t, theta = theta_new)
+                eigen_vals = theta_DMD(Y_minus_flipped[:, skip:]+1e-18, sol.t[skip:tf_it]/sigma_t, theta = theta_new)
+
+                # print(abs(np.sort(eigen_vals2)[-1] - np.sort(eigen_vals)[-1]), 'difference in using psi vs coefficients')
+                # print(np.max(np.real(eigen_vals)), 'Largest negative eigenval')
+                # print(np.max(np.real(eigen_vals)), 'Largest eigenval')
+                # print(theta, 'theta')
+                # eigen_vals = theta_DMD(Y_minus_flipped[:, skip:], rhs.t_old_list_Y[skip:rhs.Y_iterator -1]/2.998e10/10.0, theta = theta)
+                if (eigen_vals < 0).all():
+                    # print(theta, 'theta no positive vals')
+                    positive_vals = False
+                    theta_all_negative.append(theta_new)
+                else:
+                    positive_vals = True
+
+                # else:
+                    
+                if abs(np.max(np.real(eigen_vals)) - -.763507) <= 0.1:
+                    close_to_bench = True
+                    theta_close_to_bench.append(theta_new)
+                    # print(abs(np.max(-np.real(eigen_vals)) - 5.10866))
+                    # print(np.sort(np.real(eigen_vals))[:4], 'top 4 modes')
+                    # print(np.max(np.real(eigen_vals)), 'largest eigenvalue')
+        
+                it2 += 1
+                
+
+                
+                # theta = 2 * np.random.rand()
+                # print(theta, 'theta')
+                if it2 >= 500:
+                    print('iterated out')
+                # theta_new = np.random.rand() * 2
+                err = abs(np.max(np.real(eigen_vals)) - -0.763507)
+                err2 = abs(np.sort(np.real(eigen_vals))[-2] - -1.57201)
+                # print(err, 'err')
+                
+                if err < err_old:
+                    eigenvals_old = np.sort(np.real(eigen_vals))[0:4]
+                    theta = theta_new
+                    theta_old = theta_new
+                    err_old = err
+                    theta_old_list.append(theta_old)
+                    it_list.append(it2)
+                    stagnancy_count = 0
+                    err_list.append(err_old)
+                    err_2list.append(err2)
+                else:
+                    stagnancy_count += 1
+                    theta_old_list.append(theta_old)
+                    it_list.append(it2)
+                    err_list.append(err_old)
+                    err_2list.append(err2)
+
+                    # print('updating theta')
+                
+                # if integrator == 'BDF':
+                #     theta = random.uniform(0.0, 1.0)
             
           
         print(skip, 'skip')
@@ -854,7 +935,8 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         eigen_vals = np.sort(np.real(theta_DMD(Y_minus_flipped[:, skip:]+1e-18, sol.t[skip:sol.t.size -1]/sigma_t, theta = theta_old)))
         return_vals = np.array([eigen_vals[-1]])
         it = 0
-        print(eigen_vals)
+        print(eigen_vals, 'theta-DMD function 2 raw')
+        print(eigen_vals2, 'theta-DMD function 2 psi')
         for ix in range(1, eigen_vals.size):
             if abs(eigen_vals[ix] - return_vals[it]) > 1e-12:
                 return_vals = np.append(return_vals, eigen_vals[ix])

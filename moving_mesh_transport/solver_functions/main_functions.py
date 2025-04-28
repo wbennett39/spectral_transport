@@ -338,8 +338,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 500)
-        ts = np.logspace(-1,math.log10(tfinal), 50 + 1)
-        Y = backward_euler(RHS_wrap, ts, reshaped_IC)
+        ts = np.logspace(-1,math.log10(tfinal), 10 + 1)
+        Y = backward_euler(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+        # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)
 
   
@@ -601,7 +602,7 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
             # Y_plus_psi[:, it] *= -np.sign(Y_plus_psi[:, it])
 
         # skip = int(0.2 * rhs.Y_iterator)skip 
-        skip = 2
+        skip = 4
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
@@ -773,10 +774,10 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         for it in range(sol.t.size-1):
             Y_minus[it, :] = sol.y[:, it]
         # Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
-        # Y_plus_psi = np.zeros((N_groups * N_ang * xs.size,rhs.Y_iterator-1))
+        Y_plus_psi = np.zeros((N_groups * N_ang * xs.size, sol.t.size-1))
         Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size, sol.t.size-1))
         Y_m_final = Y_minus_psi.copy()*0
-        # Y_p_final = Y_plus_psi.copy()*0
+        Y_p_final = Y_plus_psi.copy()*0
         Y_minus_flipped = np.zeros((N_groups * N_ang * N_space * (M+1), sol.t.size-1))
         # Mdelta = np.zeros((rhs.Y_iterator-1, rhs.Y_iterator-2))
         # Mtheta = np.zeros((rhs.Y_iterator-1, rhs.Y_iterator-2))
@@ -800,7 +801,7 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
             plt.show()
             # if integrator == 'BDF':
             Y_m_final[:, it] = Y_minus_psi[:, it]
-            dt = (rhs.t_old_list_Y[it+1] - rhs.t_old_list_Y[it])/sigma_t # because the list is t old, use it+1 and it to calculate dt 
+            dt = (sol.t[it+1] - sol.t[it])/sigma_t # because the list is t old, use it+1 and it to calculate dt 
             Y_p_final[:, it] =  3/2/dt * (Y_minus_psi[:, it] - 4 * Y_minus_psi[:, it-1]/3 + Y_minus_psi[:, it-2]/3)
 
       
@@ -817,14 +818,15 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
             # Y_plus_psi[:, it] *= -np.sign(Y_plus_psi[:, it])
 
         # skip = int(0.2 * rhs.Y_iterator)skip 
-        skip = 2
+        skip = 4
         # #swap column
         # Y_minus_psi[:,[rhs.Y_iterator-1,0]] = Y_minus_psi[:,[0, rhs.Y_iterator-1]]
         # Y_plus_psi[:,[rhs.Y_iterator-1,0]]= Y_plus_psi[:,[0, rhs.Y_iterator-1]]
         # print(Y_m_final[:, 2:], 'Y-')
         # print(Y_p_final[:, 2:], 'Y+')
         # print(skip, 'skip')
-        # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_m_final[:, :-1] + 1e-18, Y_p_final[:, :-1]÷rst four eigen vals VDMD' )
+        eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_m_final[:, :-1] + 1e-18, Y_p_final[:, :-1], skip)) )
+        print(eigen_vals_DMD, 'VDMD')
         # print(-np.max(np.real(eigen_vals_DMD)), 'Largest negative eigenval VDMD')
         # print(np.max(np.real(eigen_vals_DMD)), 'Largest eigenval VDMD')
         positive_vals = True
@@ -868,3 +870,51 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         # if len(theta_close_to_bench) != 0:
         #     print(np.min(np.array(theta_close_to_bench)),np.max(np.array(theta_close_to_bench)),'range of thetas for eigen close to bench' )
         return return_vals
+
+
+@njit
+def RHS_jit(t, V, g, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, rhs ):
+    sigma_class.g = g
+    source.g = g
+    flux.g = g
+    # rhs.g = g
+    transfer.g = g
+
+    return rhs.call(t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class)
+@njit 
+def RHS_wrap_jit(t, V,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs):
+    # VV = V*0
+    # tlist = np.append(tlist, t)
+    extra_deg = int(thermal_couple['none'] == False)
+    # print(extra_deg, 'extra degree of freedom')
+    V_new = V.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
+    # print(V_new)
+    VV_new = V_new.copy()*0
+    for ig in range(N_groups):
+        rhs.g = ig
+        radiation = np.ascontiguousarray(V_new[ig * N_ang:(ig+1) * N_ang,:,:])
+        if extra_deg != 0:
+            e = V_new[-1,:,:]
+            VV2 = np.zeros((N_ang+1, N_space, M+1 ))
+            VV2[:-1,:,:] = radiation
+            VV2[-1,:,:] = e
+            # VV2 = np.concatenate((radiation,e))
+        else:
+            VV2 = radiation
+        # VV2 = V_new[:,:,:]
+        VV3 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
+        # print(VV2.shape())
+        res = RHS_jit(t, VV3, ig,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, rhs )
+        res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
+        if extra_deg != 0:
+            
+            VV_new[-1, :,:] = res2[-1,:,:]
+            VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
+        else:
+            VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:,:,:]
+
+
+    
+
+    # print(V_new[N_ang])
+    return VV_new.reshape((N_ang * N_groups + extra_deg) * N_space *(M+1))

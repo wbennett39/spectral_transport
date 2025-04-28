@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
-# @njit
-def backward_euler(f, ts, y0, jac=None, tol=1e-8, maxiter=10):
+@njit
+def backward_euler(f, ts, y0,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs,jac=None, tol=1e-7, maxiter=10):
     """
     Solve y' = f(t,y) with the backward‐Euler method on time‐grid ts.
 
@@ -35,18 +35,19 @@ def backward_euler(f, ts, y0, jac=None, tol=1e-8, maxiter=10):
     for i in range(len(ts)-1):
 
 
-        t_prev, t_next = ts[i], ts[i+1]
+        t_prev = ts[i]
+        t_next =  ts[i+1]
         dt = t_next - t_prev
         y_prev = Y[:,i]
         y_prev = np.ascontiguousarray(y_prev)
         # initial guess: explicit Euler
-        y_new = y_prev + dt * f(t_prev, y_prev)
+        y_new = y_prev + dt * f(t_prev, y_prev,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         y_new = np.ascontiguousarray(y_new)
 
         # Newton solve:  G(y) = y - y_prev - dt * f(t_next, y) = 0
         for _ in range(maxiter):
 
-            F = y_new - y_prev - dt * f(t_next, y_new)
+            F = y_new - y_prev - dt * f(t_next, y_new,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
             if np.linalg.norm(F) < tol:
                 break
 
@@ -56,12 +57,12 @@ def backward_euler(f, ts, y0, jac=None, tol=1e-8, maxiter=10):
             else:
                 # finite-difference approx
                 eps = np.sqrt(np.finfo(float).eps)
-                f0  = f(t_next, y_new)
+                f0  = f(t_next, y_new,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
                 Jf  = np.zeros((m,m))
                 for j in range(m):
                     y_eps     = y_new.copy()
                     y_eps[j] += eps
-                    Jf[:,j] = (f(t_next, y_eps) - f0) / eps
+                    Jf[:,j] = (f(t_next, y_eps,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs) - f0) / eps
 
             J = np.eye(m) - dt * Jf
             delta = np.linalg.solve(J, -F)
@@ -85,11 +86,11 @@ if __name__ == '__main__':
     ts = np.linspace(0, 5, 5001)
     y0 = np.array([1.0])
 
-    Y = backward_euler(f, ts, y0, jac=jac)
+    Y = backward_euler(f, ts, y0)
 
     # Compare to exact:
     import matplotlib.pyplot as plt
-    plt.plot(ts, Y[:,0], 'o', label='BEuler')
+    plt.plot(ts, Y[0,:], 'o', label='BEuler')
     plt.plot(ts, np.exp(-ts), '-', label='exact')
     plt.legend()
     plt.show()

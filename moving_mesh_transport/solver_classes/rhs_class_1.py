@@ -448,8 +448,8 @@ class rhs_class():
             # V_new = V.copy().reshape((self.deg_freedom[0], self.deg_freedom[1], self.deg_freedom[2]))
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
-        if self.VDMD == True:
-            self.VDMD_func(t, V_old)
+        # if self.VDMD == True:
+        #     self.VDMD_func(t, V_old)
 
         # for ang in range(self.N_ang+1):
         #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)

@@ -338,7 +338,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 500)
-        ts = np.logspace(-1,math.log10(tfinal), 12 + 1)
+        ts = np.logspace(-1,math.log10(tfinal), 14 + 1)
         Y = backward_euler(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)
@@ -418,8 +418,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     elif choose_xs == True:
         xs = specified_xs
     if VDMD == True:
-        eigen_vals = DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t)
-        eigen_vals2 = DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t)
+        # eigen_vals = DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t)
+        eigen_vals = DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t)
     else:
         eigen_vals = rhs.t_old_list_Y * 0
     
@@ -772,15 +772,15 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         # print(rhs.Y_minus_list[:rhs.Y_iterator-1], 'Y-')
         # print(rhs.Y_plus_list[:rhs.Y_iterator-1], 'Y+')
         # eigen_vals = rhs.t_old_list_Y * 0
-        Y_minus = np.zeros((sol.t.size-1, sol.y[:,0].size))
-        for it in range(sol.t.size-1):
+        Y_minus = np.zeros((sol.t.size, sol.y[:,0].size))
+        for it in range(sol.t.size):
             Y_minus[it, :] = sol.y[:, it]
         # Y_plus = rhs.Y_plus_list[:rhs.Y_iterator-1].copy()
-        Y_plus_psi = np.zeros((N_groups * N_ang * xs.size, sol.t.size-1))
-        Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size, sol.t.size-1))
+        Y_plus_psi = np.zeros((N_groups * N_ang * xs.size, sol.t.size))
+        Y_minus_psi = np.zeros(( N_groups * N_ang * xs.size, sol.t.size))
         Y_m_final = Y_minus_psi.copy()*0
         Y_p_final = Y_plus_psi.copy()*0
-        Y_minus_flipped = np.zeros((N_groups * N_ang * N_space * (M+1), sol.t.size-1))
+        Y_minus_flipped = np.zeros((N_groups * N_ang * N_space * (M+1), sol.t.size))
         # Mdelta = np.zeros((rhs.Y_iterator-1, rhs.Y_iterator-2))
         # Mtheta = np.zeros((rhs.Y_iterator-1, rhs.Y_iterator-2))
         # for it in range(rhs.Y_iterator-1):
@@ -790,7 +790,7 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         #     Mdelta[it + 1, it] = 1/ delta_t
         # print(Mdelta, 'Mdelta')
         # output = make_outpurhs.Y_it(tfinal, N_ang, ws, xs, Y_minus[0,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
-        for it in range(2, sol.t.size-1):
+        for it in range(2, sol.t.size):
             tt = sol.t[it]
             output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             phi = output.make_phi(uncollided_sol)
@@ -840,14 +840,14 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
         theta_all_negative = []
         theta_close_to_bench = []
         theta_old = theta
-        eigen_vals_old = theta_DMD(Y_minus_psi[:, skip:]+1e-18, sol.t[skip:sol.t.size-1]/sigma_t, theta = theta)
+        eigen_vals_old = theta_DMD(Y_minus_psi[:, skip:]+1e-18, sol.t[skip:sol.t.size]/sigma_t, theta = theta)
         err_old = abs(np.max(np.real(eigen_vals_old)) - -0.763507)
         theta_old_list = []
         it_list = []
         stagnancy_count = 0
         err_list = []
         err_2list = []
-        tf_it = sol.t.size-1
+        tf_it = sol.t.size
         print('iterating theta')
         if integrator == 'BDF' or integrator == 'Euler':
             for it2 in tqdm.tqdm(range(250)):

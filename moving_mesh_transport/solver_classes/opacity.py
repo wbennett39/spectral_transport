@@ -119,7 +119,7 @@ class sigma_integrator():
         # opacity = self.sigma_function(self.xs_quad, t, T_old)
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
-        self.csP[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
+        self.csP[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacityP * 2.0 * normTn(j, argument, a, b)) 
 
     # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
@@ -371,6 +371,7 @@ class sigma_integrator():
                 elif self.g == 1:
                    res = w2 + x * 0     
                 return res  
+        
         elif self.sigma_func['modak_gupta0'] == 1:
             grain_size = 0.0
             res = self.sigma_t + x*0
@@ -380,7 +381,7 @@ class sigma_integrator():
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x 
+                res = x * 0
                 for ix in range(x.size):
                     z = (x[ix] - self.shift)/5
                     z0 = self.x0/5
@@ -388,7 +389,7 @@ class sigma_integrator():
                         res[ix] =  self.sigma_t * 0.9 
                     else:
                         res[ix] = self.sigma_t
-                return res
+            return res
         elif self.sigma_func['modak_gupta1'] == 1:
             grain_size = 0.1
             if scattering == False:
@@ -402,7 +403,7 @@ class sigma_integrator():
                         res[ix] =  self.sigma_t * 0.9 
                     else:
                         res[ix] = self.sigma_t
-                return res
+            return res
         elif self.sigma_func['modak_gupta25'] == 1:
             grain_size = 0.25
             if scattering == False:
@@ -416,7 +417,7 @@ class sigma_integrator():
                         res[ix] =  self.sigma_t * 0.9 
                     else:
                         res[ix] = self.sigma_t
-                return res
+            return res
         elif self.sigma_func['modak_gupta5'] == 1:
             grain_size = 0.5
             if scattering == False:
@@ -430,7 +431,7 @@ class sigma_integrator():
                         res[ix] =  self.sigma_t * 0.9 
                     else:
                         res[ix] = self.sigma_t
-                return res
+            return res
 
         elif self.sigma_func['gaussian'] == 1:
             return np.exp(- x**2 /(2* self.std**2))  # probably shouldn't have sigma_a here

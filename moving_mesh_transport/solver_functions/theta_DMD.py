@@ -1,5 +1,7 @@
 import numpy as np
+from numba import njit
 # This was written by ChatGPT
+# @njit
 def theta_DMD(
     data, 
     time_array, 

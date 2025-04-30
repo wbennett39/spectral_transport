@@ -14,7 +14,7 @@ warnings.simplefilter('ignore', category=NumbaPerformanceWarning)
 from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
-
+import h5py 
 
 from moving_mesh_transport.solver_classes.functions import *
 
@@ -39,12 +39,8 @@ from moving_mesh_transport.solver_classes.functions import test_s2_sol
 
 # from moving_mesh_transport.solver_classes.functions import test_s2_sol
 from moving_mesh_transport.loading_and_saving.load_solution import load_sol as load
-
-
-
-
 from moving_mesh_transport.solver_functions.run_functions import run
-
+from moving_mesh_transport.solver_functions.DMD_functions import DMD_func3
 
 
 run = run()
@@ -53,7 +49,60 @@ run = run()
 run.load('modak_gupta', 'mesh_parameters_modak_gupta')
 loader = load()
 
-run.random_IC(0,0)
+benchmark_vals = {'0.0': np.array([-.763507, -1.57201, -2.98348, -5.10866]), '0.05': np.array([-.758893, -1.56062, -2.97899, -5.21764]),
+                   '0.1': np.array([-.749672, -1.56062, -2.96323, -5.18772]), '0.25': np.array([-.703578, -1.45315, -3.07282, -5.26925]),
+                   '0.5': np.array([-.551429, -1.71149, -2.94399, -5.28234])}
+grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
+run_results = True
+
+problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
+
+if run_results == True:
+    for sigma_name in problem_list:
+        run.mesh_parameters['modak_gupta0'] = False
+        run.mesh_parameters[sigma_name] == True
+        if sigma_name == 'modak_gupta0':
+             run.parameters['all']['sigma_s'] = 0.95
+        run.random_IC(0,0)
+        Yminus = run.sol_ob
+        f = h5py.File('modak_gupta_results.h5', 'w')
+        f[sigma_name].create_dataset('Y_minus', data = Yminus)
+        f[sigma_name].create_dataset('t', data = run.sol_ob.t)
+        f.close()
+
+
+print('### ### ### ### ### ### ### ### ### ')
+print('### ### ### ### ### ### ### ### ### ')
+print('### ### ### ### ### ### ### ### ### ')
+print('### ### ### ### ### ### ### ### ### ')
+print('### ### ### ### ### ### ### ### ### ')
+print('### ### ### ### ### ### ### ### ### ')
+
+for iterator in range(5):
+        sigma_name = problem_list[iterator]
+        benchmark_eigen = benchmark_vals[grain_sizes[iterator]] 
+        f = h5py.File('modak_gupta_results.h5', 'r+')
+        Y_minus = f[sigma_name][Y_minus]
+        ts = f[sigma_name]['t']
+        f.close()
+        integrator = run.parameters['all']['integrator']
+        sigma_t = run.parameters['all']['sigma_t']
+        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = 4)
+        first_four_eigen_vals = np.flip(eigen_vals)[0:4] 
+        print('----------------------------------------------')
+        print('grain size: ', grain_sizes[iterator])
+        print('solver eigen values ')
+        print(first_four_eigen_vals)
+        print('benchmark eigen values ')
+        print(benchmark_eigen)
+        print('error ')
+        print(first_four_eigen_vals - benchmark_eigen)
+
+
+
+
+    
+
 
 
 

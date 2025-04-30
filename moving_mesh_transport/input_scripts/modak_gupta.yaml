@@ -6,11 +6,11 @@
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
     'sigma_t': 10.0
-    'sigma_s': 9.5
+    'sigma_s': 10.0
     't0': 5.0                       # time the source is turned off
-    'N_spaces': [3,15]                   # number of cells
+    'N_spaces': [2, 21]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [0, 1]                         # number of basis functions -1
+    'Ms': [0, 2]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-12                         # rel tolerance for ODE integrator
     'at': 1e-10                         # abs tolerance for ODE integrator
@@ -26,7 +26,7 @@
     'cv_const': 0.0
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'Euler'
+    'integrator': 'BDF'
     'geometry': {slab: False, sphere: True}
     'N_groups': 1
     'lumping': False

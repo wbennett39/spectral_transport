@@ -137,7 +137,7 @@ class scalar_flux(object):
 
 
     def get_coeffs(self, opacity_class):
-        self.cs = opacity_class.cs
+        self.cs = opacity_class.csP
 
 
     

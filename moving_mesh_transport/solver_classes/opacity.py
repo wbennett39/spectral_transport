@@ -37,6 +37,7 @@ data = [('N_ang', int64),
         ('edges', float64[:]),
         ('std', float64), 
         ('cs', float64[:,:]), 
+        ('csP', float64[:,:]), 
         ('VV', float64[:]),
         ('VP', float64[:]),
         ('moving', float64),
@@ -51,7 +52,8 @@ data = [('N_ang', int64),
         ('lumping', int64),
         ('loud', int64),
         ('cross_section_data', float64[:,:]),
-        ('g', int64)
+        ('g', int64),
+        ('shift', float64)
 
         ]
 
@@ -75,6 +77,7 @@ class sigma_integrator():
         self.N_space = build.N_space
         self.edges = np.zeros(self.N_space + 1)
         self.cs = np.zeros((self.N_space, self.Msigma+ 1))
+        self.csP = np.zeros((self.N_space, self.Msigma+ 1))
         self.VV = np.zeros(self.M+1)
         self.VP = np.zeros(self.M+1)
         self.AAA = np.zeros((self.M+1, self.M + 1, self.Msigma + 1))
@@ -88,6 +91,7 @@ class sigma_integrator():
         self.lumping = build.lumping
         self.loud = True
         self.g=0
+        self.shift = build.shift
         
         # initialize integrals of Basis Legendre polynomials
         self.create_integral_matrices()
@@ -111,9 +115,11 @@ class sigma_integrator():
         #     print(argument - T_eval_points[k])
         #     assert(0)
         opacity = self.sigma_function(argument, t, T_old)
+        opacityP = self.sigma_function(argument, t, T_old, scattering = True)
         # opacity = self.sigma_function(self.xs_quad, t, T_old)
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
+        self.csP[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
 
     # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
@@ -226,7 +232,7 @@ class sigma_integrator():
                 return_array[ix] = 0.0
         return return_array
 
-    def sigma_function(self, x, t, T_old):
+    def sigma_function(self, x, t, T_old, scattering = False):
 
         if self.sigma_func['constant'] == 1:
             return x * 0 + 1.0
@@ -365,11 +371,67 @@ class sigma_integrator():
                 elif self.g == 1:
                    res = w2 + x * 0     
                 return res  
-        elif self.sigma_func['modak_gupta'] == 1:
+        elif self.sigma_func['modak_gupta0'] == 1:
             grain_size = 0.0
             res = self.sigma_t + x*0
             return res
-                 
+        elif self.sigma_func['modak_gupta05'] == 1:
+            grain_size = 0.05
+            if scattering == False:
+                res = self.sigma_t + x*0
+            else:
+                res = x(0)
+                for ix in range(x.size):
+                    z = (x[ix] - self.shift)/5
+                    z0 = self.x0/5
+                    if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size<= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
+                        res[ix] =  self.sigma_t * 0.9 
+                    else:
+                        res[ix] = self.sigma_t
+                return res
+        elif self.sigma_func['modak_gupta1'] == 1:
+            grain_size = 0.1
+            if scattering == False:
+                res = self.sigma_t + x*0
+            else:
+                res = x(0)
+                for ix in range(x.size):
+                    z = (x[ix] - self.shift)/5
+                    z0 = self.x0/5
+                    if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size<= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size):
+                        res[ix] =  self.sigma_t * 0.9 
+                    else:
+                        res[ix] = self.sigma_t
+                return res
+        elif self.sigma_func['modak_gupta25'] == 1:
+            grain_size = 0.25
+            if scattering == False:
+                res = self.sigma_t + x*0
+            else:
+                res = x(0)
+                for ix in range(x.size):
+                    z = (x[ix] - self.shift)/5
+                    z0 = self.x0/5
+                    if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size):
+                        res[ix] =  self.sigma_t * 0.9 
+                    else:
+                        res[ix] = self.sigma_t
+                return res
+        elif self.sigma_func['modak_gupta5'] == 1:
+            grain_size = 0.5
+            if scattering == False:
+                res = self.sigma_t + x*0
+            else:
+                res = x(0)
+                for ix in range(x.size):
+                    z = (x[ix] - self.shift)/5
+                    z0 = self.x0/5
+                    if (-z0 <= z <= -z0 + grain_size):
+                        res[ix] =  self.sigma_t * 0.9 
+                    else:
+                        res[ix] = self.sigma_t
+                return res
+
         elif self.sigma_func['gaussian'] == 1:
             return np.exp(- x**2 /(2* self.std**2))  # probably shouldn't have sigma_a here
             # return x * 0 + 1.0

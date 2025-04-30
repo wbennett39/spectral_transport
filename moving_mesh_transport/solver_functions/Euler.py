@@ -187,7 +187,7 @@ if __name__ == "__main__":
     print("Solution at t=5:", Y[-1, 0])
 
 # Display the function definition to the user
-print(backward_euler_krylov.__doc__)
+# print(backward_euler_krylov.__doc__)
 # Example: dy/dt = -y  ⇒  y(t)=y0*exp(-t)
 if __name__ == '__main__':
     def f(t, y):

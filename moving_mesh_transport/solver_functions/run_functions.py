@@ -412,7 +412,7 @@ class run:
         self.exit_phi = solver.exit_phi
         self.eval_times = solver.eval_times
         self.edges = solver.edges
-        
+        self.sol_ob = solver.sol_object
         
     def run_all(self):
         # self.plane_IC(True, True)

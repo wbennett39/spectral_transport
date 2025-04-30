@@ -61,7 +61,7 @@ if run_results == True:
     # prime solver
     run.parameters['all']['N_spaces'] = [2]
     run.parameters['all']['Ms'] = [0]
-    run.parameters['random_IC']['N_angles'] = 2
+    run.parameters['random_IC']['N_angles'] = [2]
     run.random_IC(0,0)
     for sigma_name in problem_list:
         run.load('modak_gupta', 'mesh_parameters_modak_gupta')

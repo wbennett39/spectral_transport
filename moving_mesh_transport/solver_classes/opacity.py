@@ -380,7 +380,7 @@ class sigma_integrator():
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x(0)
+                res = x 
                 for ix in range(x.size):
                     z = (x[ix] - self.shift)/5
                     z0 = self.x0/5
@@ -394,7 +394,7 @@ class sigma_integrator():
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x(0)
+                res = x * 0
                 for ix in range(x.size):
                     z = (x[ix] - self.shift)/5
                     z0 = self.x0/5
@@ -408,7 +408,7 @@ class sigma_integrator():
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x(0)
+                res = x * 0
                 for ix in range(x.size):
                     z = (x[ix] - self.shift)/5
                     z0 = self.x0/5
@@ -422,7 +422,7 @@ class sigma_integrator():
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x(0)
+                res = x * 0
                 for ix in range(x.size):
                     z = (x[ix] - self.shift)/5
                     z0 = self.x0/5

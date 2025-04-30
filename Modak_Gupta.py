@@ -58,6 +58,9 @@ run_results = True
 problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 if run_results == True:
+    # ping save file
+    f = h5py.File('modak_gupta_results.h5', 'r+')
+    f.close()
     # prime solver
     run.parameters['all']['N_spaces'] = [5]
     run.parameters['all']['Ms'] = [0]

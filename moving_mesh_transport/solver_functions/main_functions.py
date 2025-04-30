@@ -341,7 +341,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 500)
-        ts = np.logspace(-5,math.log10(tfinal), 6 + 1)
+        ts = np.logspace(-5,math.log10(tfinal), 200 + 1)
         Y = backward_euler(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)

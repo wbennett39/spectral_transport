@@ -8,9 +8,9 @@
     'sigma_t': 10.0
     'sigma_s': 10.0
     't0': 5.0                       # time the source is turned off
-    'N_spaces': [80]                   # number of cells
+    'N_spaces': [40]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [2]                         # number of basis functions -1
+    'Ms': [0]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-12                         # rel tolerance for ODE integrator
     'at': 1e-10                         # abs tolerance for ODE integrator
@@ -127,6 +127,6 @@
     'shift': 500.0
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [256]    # corresponds to N_spaces
+    'N_angles': [2]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

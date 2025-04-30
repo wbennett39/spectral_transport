@@ -484,8 +484,8 @@ class rhs_class():
         # print(self.T_old[time_loc])
         # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
         #     time_loc -= 1
-  
-        self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
+        if self.radiative_transfer['none'] == 0:
+            self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
 
         # print(self.T_eval_points, 'T eval')
         # for ix in range(self.N_space):

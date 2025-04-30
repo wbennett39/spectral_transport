@@ -55,7 +55,7 @@ benchmark_vals = {'0.0': np.array([-.763507, -1.57201, -2.98348, -5.10866]), '0.
 grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
 run_results = True
 
-problem_list = ['modak_gupta05', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
+problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 if run_results == True:
     # prime solver
@@ -63,15 +63,21 @@ if run_results == True:
     run.parameters['all']['Ms'] = [0]
     run.parameters['random_IC']['N_angles'] = [2]
     run.random_IC(0,0)
+    
     for sigma_name in problem_list:
+
+        print(sigma_name, 'sigma function')
         run.load('modak_gupta', 'mesh_parameters_modak_gupta')
         run.mesh_parameters['modak_gupta0'] = False
         sigma_name == 'modak_gupta0'
         if sigma_name == 'modak_gupta0':
-             run.parameters['all']['sigma_s'] = 0.95
+             run.parameters['all']['sigma_s'] = 9.5
         run.random_IC(0,0)
         Yminus = run.sol_ob.y
-        f = h5py.File('modak_gupta_results.h5', 'w')
+        print('saving results')
+        f = h5py.File('modak_gupta_results.h5', 'r+')
+        if f.__contains__(sigma_name):
+            del f[sigma_name]
         f.create_group(sigma_name)
         f[sigma_name].create_dataset('Y_minus', data = Yminus)
         f[sigma_name].create_dataset('t', data = run.sol_ob.t)
@@ -89,12 +95,14 @@ for iterator in range(5):
         sigma_name = problem_list[iterator]
         benchmark_eigen = benchmark_vals[grain_sizes[iterator]] 
         f = h5py.File('modak_gupta_results.h5', 'r+')
-        Y_minus = f[sigma_name][Y_minus]
-        ts = f[sigma_name]['t']
+        Y_minus = f[sigma_name]['Y_minus'][:,:]
+        ts = f[sigma_name]['t'][:]
         f.close()
         integrator = run.parameters['all']['integrator']
         sigma_t = run.parameters['all']['sigma_t']
         eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = 4)
+        if eigen_vals.size < 4:
+             eigen_vals = np.append(np.zeros(4), eigen_vals)
         first_four_eigen_vals = np.flip(eigen_vals)[0:4] 
         print('----------------------------------------------')
         print('grain size: ', grain_sizes[iterator])

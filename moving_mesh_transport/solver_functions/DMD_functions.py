@@ -425,7 +425,7 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
 
 def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4 ):
 
-        Y_plus = np.zeros((Y_minus[:,0], t.size))
+        Y_plus = np.zeros((Y_minus[:,0].size, t.size))
         # populate Y+ assuming Backward Euler 
         for it in range(1, t.size):
             tt = t[it]

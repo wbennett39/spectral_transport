@@ -1,4 +1,4 @@
-from ..solver_classes import make_output
+from ..solver_classes.make_phi import make_output
 import numpy as np
 import matplotlib.pyplot as plt
 import tqdm

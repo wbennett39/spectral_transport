@@ -26,7 +26,7 @@
     'cv_const': 0.0
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'BDF'
+    'integrator': 'Euler'
     'geometry': {slab: False, sphere: True}
     'N_groups': 1
     'lumping': False

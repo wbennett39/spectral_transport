@@ -103,7 +103,7 @@ for iterator in range(5):
         f.close()
         integrator = run.parameters['all']['integrator']
         sigma_t = run.parameters['all']['sigma_t']
-        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = 4)
+        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = 2)
         if eigen_vals.size < 4:
              eigen_vals = np.append(np.zeros(4), eigen_vals)
         first_four_eigen_vals = np.flip(eigen_vals)[0:4] 

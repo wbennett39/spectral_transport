@@ -58,7 +58,13 @@ run_results = True
 problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 if run_results == True:
+    # prime solver
+    run.parameters['all']['N_spaces'] = [2]
+    run.parameters['all']['Ms'] = [0]
+    run.parameters['random_IC']['N_angles'] = 2
+    run.random_IC(0,0)
     for sigma_name in problem_list:
+        run.load('modak_gupta', 'mesh_parameters_modak_gupta')
         run.mesh_parameters['modak_gupta0'] = False
         run.mesh_parameters[sigma_name] == True
         if sigma_name == 'modak_gupta0':

@@ -216,6 +216,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     source.shift = shift
     mesh.shift = shift
     mesh.initialize_mesh()
+    build.shift = shift
     print(mesh.edges, 'edges')
     print(mesh.Dedges_const, 'dedges const')
 

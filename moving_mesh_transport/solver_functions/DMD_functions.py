@@ -2,7 +2,7 @@ from ..solver_classes.make_phi import make_output
 import numpy as np
 import matplotlib.pyplot as plt
 import tqdm
-from theta_DMD import theta_DMD
+from .theta_DMD import theta_DMD
 from VDMD import VDMD2 as VDMD_func
 import random
 

@@ -115,7 +115,7 @@ class sigma_integrator():
         #     print(argument - T_eval_points[k])
         #     assert(0)
         opacity = self.sigma_function(argument, t, T_old)
-        opacityP = self.sigma_function(argument, t, T_old, scattering = True)
+        opacityP = self.sigma_function(argument, t, T_old, True)
         # opacity = self.sigma_function(self.xs_quad, t, T_old)
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
@@ -378,59 +378,87 @@ class sigma_integrator():
             return res
         elif self.sigma_func['modak_gupta05'] == 1:
             grain_size = 0.05
+            grain1 = False
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x * 0
+                res = x * 0 + self.sigma_t
                 for ix in range(x.size):
-                    z = (x[ix] - self.shift)/5
+                    z = (x[ix] - self.shift)/5.0
                     z0 = self.x0/5
-                    if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size<= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
+                    intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size], [-z0 + 4*grain_size, -z0 + 5*grain_size],
+                                          [-z0 + 6*grain_size, -z0 + 7*grain_size], [-z0 + 8*grain_size, -z0 + 9*grain_size], [-z0 + 10*grain_size, -z0 + 11*grain_size], 
+                                          [-z0 + 12*grain_size, -z0 + 13*grain_size], [-z0 + 14*grain_size, -z0 + 15*grain_size], [-z0 + 16*grain_size, -z0 + 17*grain_size], 
+                                          [-z0 + 18*grain_size, -z0 + 19*grain_size]])
+                    # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
+                    for itt in range(10):
+                        if intervals[itt,0] < z < intervals[itt, 1]:
+                            grain1 = True
+                    if grain1 == True:
                         res[ix] =  self.sigma_t * 0.9 
                     else:
-                        res[ix] = self.sigma_t
+                        res[ix] = self.sigma_t * 1.0
             return res
         elif self.sigma_func['modak_gupta1'] == 1:
             grain_size = 0.1
+            grain1 = False
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x * 0
+                res = self.sigma_t + x*0
                 for ix in range(x.size):
-                    z = (x[ix] - self.shift)/5
+                    z = (x[ix] - self.shift)/5.0
                     z0 = self.x0/5
-                    if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size<= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size):
+                    intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size], [-z0 + 4*grain_size, -z0 + 5*grain_size],
+                                          [-z0 + 6*grain_size, -z0 + 7*grain_size], [-z0 + 8*grain_size, -z0 + 9*grain_size]])
+                    # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
+                    for itt in range(5):
+                        if intervals[itt,0] < z < intervals[itt, 1]:
+                            grain1 = True
+                    if grain1 == True:
                         res[ix] =  self.sigma_t * 0.9 
                     else:
-                        res[ix] = self.sigma_t
+                        res[ix] = self.sigma_t * 1.0
             return res
         elif self.sigma_func['modak_gupta25'] == 1:
             grain_size = 0.25
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x * 0
+                res = self.sigma_t + x*0
                 for ix in range(x.size):
-                    z = (x[ix] - self.shift)/5
+                    z = (x[ix] - self.shift)/5.0
                     z0 = self.x0/5
-                    if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size):
+                    intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size]])
+                    # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
+                    for itt in range(2):
+                        if intervals[itt,0] < z < intervals[itt, 1]:
+                            grain1 = True
+                    if grain1 == True:
                         res[ix] =  self.sigma_t * 0.9 
                     else:
-                        res[ix] = self.sigma_t
+                        res[ix] = self.sigma_t * 1.0
             return res
         elif self.sigma_func['modak_gupta5'] == 1:
             grain_size = 0.5
             if scattering == False:
                 res = self.sigma_t + x*0
             else:
-                res = x * 0
+                res = self.sigma_t + x*0
                 for ix in range(x.size):
-                    z = (x[ix] - self.shift)/5
+                    z = (x[ix] - self.shift)/5.0
                     z0 = self.x0/5
-                    if (-z0 <= z <= -z0 + grain_size):
+                    if z < 0:
                         res[ix] =  self.sigma_t * 0.9 
                     else:
-                        res[ix] = self.sigma_t
+                        res[ix] = self.sigma_t * 1.0
+                # for ix in range(x.size):
+                #     z = (x[ix] - self.shift)/5
+                #     z0 = self.x0/5
+                #     if (-z0 <= z <= -z0 + grain_size):
+                #         res[ix] =  self.sigma_t * 0.9 
+                #     else:
+                #         res[ix] = self.sigma_t
             return res
 
         elif self.sigma_func['gaussian'] == 1:

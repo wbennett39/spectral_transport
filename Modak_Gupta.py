@@ -55,23 +55,24 @@ benchmark_vals = {'0.0': np.array([-.763507, -1.57201, -2.98348, -5.10866]), '0.
 grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
 run_results = True
 
-problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
+problem_list = ['modak_gupta05', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 if run_results == True:
     # prime solver
-    run.parameters['all']['N_spaces'] = [2]
+    run.parameters['all']['N_spaces'] = [5]
     run.parameters['all']['Ms'] = [0]
     run.parameters['random_IC']['N_angles'] = [2]
     run.random_IC(0,0)
     for sigma_name in problem_list:
         run.load('modak_gupta', 'mesh_parameters_modak_gupta')
         run.mesh_parameters['modak_gupta0'] = False
-        run.mesh_parameters[sigma_name] == True
+        sigma_name == 'modak_gupta0'
         if sigma_name == 'modak_gupta0':
              run.parameters['all']['sigma_s'] = 0.95
         run.random_IC(0,0)
-        Yminus = run.sol_ob
+        Yminus = run.sol_ob.y
         f = h5py.File('modak_gupta_results.h5', 'w')
+        f.create_group(sigma_name)
         f[sigma_name].create_dataset('Y_minus', data = Yminus)
         f[sigma_name].create_dataset('t', data = run.sol_ob.t)
         f.close()

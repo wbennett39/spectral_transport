@@ -166,6 +166,7 @@ class build(object):
        
         self.e_init = e_initial
         self.T4 = np.zeros(self.xs_quad.size * self.N_space)
+        self.shift = 0.0
 
         # self.e_initial = 1e-4
         

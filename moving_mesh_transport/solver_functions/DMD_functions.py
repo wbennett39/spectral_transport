@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tqdm
 from .theta_DMD import theta_DMD
-from VDMD import VDMD2 as VDMD_func
+from .VDMD import VDMD2 as VDMD_func
 import random
 
 

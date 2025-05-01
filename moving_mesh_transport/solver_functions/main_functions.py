@@ -325,19 +325,24 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     # sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
     if integrator == 'BDF_VODE':
-        ode15s = scipy.integrate.ode(RHS)
+        ts = np.logspace(-5,math.log10(tfinal), 100 + 1)
+        ode15s = scipy.integrate.ode(RHS_wrap_jit)
         ode15s.set_integrator('lsoda', method='bdf', atol = at, rtol = rt)
         ode15s.set_initial_value(reshaped_IC, 0.0)
-        sol = sol_class_ode_solver(ode15s.y, ode15s.t, np.array(tpnts))
+        ode15s.max_order_s = 2
+        sol = sol_class_ode_solver(ode15s.y, np.array(ts), np.array(ts))
 
-        for it in range(len(tpnts)):
+        for it in range(len(ts)):
             
-            tf = tpnts[it]
+            tf = ts[it]
             # print(tf, 'next integration target time')
             # with stdout_redirected():
             ode15s.integrate(tf)
             sol.y[:,it] = ode15s.y
-            ode15s.set_initial_value(ode15s.y, tf)
+            sol.t[it] = ode15s.t
+        # ode15s.set_initial_value(ode15s.y, tf)
+        
+
     
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 500)

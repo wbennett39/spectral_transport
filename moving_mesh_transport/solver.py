@@ -215,7 +215,7 @@ class main_class(parameter_load_class):
                     self.xs = xs
                     self.phi = phi
                     self.e = e
-                    print(self.e,'energy density')
+                    # print(self.e,'energy density')
                     self.psi = psi
                     self.exit_dist = exit_dist
                     self.ws = ws

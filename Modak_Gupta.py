@@ -45,6 +45,22 @@ from moving_mesh_transport.solver_functions.DMD_functions import DMD_func3
 def RMS(l1, l2):
     return np.sqrt(np.mean((l1-l2)**2))
 
+
+def sparsify_estimator(Y):
+    U0, s0, VT0 = np.linalg.svd(Y, full_matrices=False)
+    it = 0
+    stop =False
+    tol = 1e-10
+    while stop == False and it < s0.size:
+        if abs(s0[it]) < tol:
+            stop = True
+        else:
+            it += 1
+    print(s0[:it], 's')
+    return it
+
+
+
 def sparsify_data_mat(ts, Y_minus, t1, t2, npnts):
      ts2= np.logspace(t1, t2, npnts)
      indices = []
@@ -67,12 +83,12 @@ def theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip, theta, benchmark):
     direction = -1
     speed = 0.1
     converge_count = 0
-    while itt < 500:
-        if converge_count <=50:
-            theta_new = theta + speed * np.random.rand() * (np.random.rand()*2 - 1)
-        else:
-            theta_new = np.random.rand()
-            converge_count = 0
+    while itt < 1500:
+        # if converge_count <=50:
+            # theta_new = theta + speed * np.random.rand() * (np.random.rand()*2 - 1)
+        # else:
+        theta_new = np.random.rand()
+        converge_count = 0
 
         if theta_new < 0.0:
             theta_new = 0.0
@@ -113,10 +129,11 @@ grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
 problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 
-def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, sparse_time_points = 10):
+def results(theta = 0.55, run_results = True, skip = 3, iterate_theta = False, sparse_time_points = 10):
     if run_results == True:
         # ping save file
-        f = h5py.File('modak_gupta_results.h5', 'r+')
+        integrator = run.parameters['all']['integrator']
+        f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
         f.close()
         # prime solver
         run.parameters['all']['N_spaces'] = [5]
@@ -160,22 +177,26 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
             # f = h5py.File(f'modak_gupta_results.h5', 'r+')
             Y_minus = f[sigma_name]['Y_minus'][:,:]
             ts = f[sigma_name]['t'][:]
-            ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), 20)
+            # sparse_time_points = int(sparsify_estimator(Y_minus) * 1)
+            print('number of snapshots', sparse_time_points)
+            ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
             ts = ts_sparse
             Y_minus = Y_minus_sparse
             f.close()
             sigma_t = run.parameters['all']['sigma_t']
             if iterate_theta == True and integrator =='BDF':
                 theta = theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta, benchmark = benchmark_eigen)    
-                print('theta = ', theta)
+                
 
 
             eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta)
+            
 
             if eigen_vals.size < 4:
                 eigen_vals = np.append(np.zeros(4), eigen_vals)
             first_four_eigen_vals = np.flip(eigen_vals)[0:4] 
             print('----------------------------------------------')
+            print('theta = ', theta)
             print('grain size: ', grain_sizes[iterator])
             print('solver eigen values ')
             print(first_four_eigen_vals)

@@ -433,12 +433,14 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1):
             if integrator == 'Euler':
                 Y_plus[:, it] = (Y_minus[:, it] - Y_minus[:, it-1])/dt
             elif integrator == 'BDF_VODE':
-                Y_plus[:, it] =  3/2/dt * (Y_minus[:, it] - 4 * Y_minus[:, it-1]/3 + Y_minus[:, it-2]/3)
+                if it > 1:
+                    Y_plus[:, it] =  1.5 / dt * (Y_minus[:, it] - 4 * Y_minus[:, it-1]/3 + Y_minus[:, it-2]/3)
         if integrator == 'BDF':
             # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
-            eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:]+1e-18, t[skip:]/sigma_t, theta = theta)))
+            eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:]+1e-20, t[skip:]/sigma_t, theta = theta)))
         elif integrator == 'Euler' or integrator == 'BDF_VODE':
-            eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
+            eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-20, Y_plus[:, :]+ 1e-20, skip)) )
+            print(Y_plus, 'yp')
         else:
             raise ValueError('Integration method not implemented')
 

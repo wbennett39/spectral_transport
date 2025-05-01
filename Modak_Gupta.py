@@ -129,7 +129,7 @@ grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
 problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 
-def results(theta = 0.55, run_results = True, skip = 3, iterate_theta = False, sparse_time_points = 10):
+def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, sparse_time_points = 10):
     if run_results == True:
         # ping save file
         integrator = run.parameters['all']['integrator']
@@ -172,7 +172,8 @@ def results(theta = 0.55, run_results = True, skip = 3, iterate_theta = False, s
     for iterator in range(5):
             sigma_name = problem_list[iterator]
             benchmark_eigen = benchmark_vals[grain_sizes[iterator]] 
-            integrator = run.parameters['all']['integrator']
+            # integrator = run.parameters['all']['integrator']
+            integrator = 'BDF_VODE'
             f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
             # f = h5py.File(f'modak_gupta_results.h5', 'r+')
             Y_minus = f[sigma_name]['Y_minus'][:,:]
@@ -184,7 +185,7 @@ def results(theta = 0.55, run_results = True, skip = 3, iterate_theta = False, s
             Y_minus = Y_minus_sparse
             f.close()
             sigma_t = run.parameters['all']['sigma_t']
-            if iterate_theta == True and integrator =='BDF':
+            if iterate_theta == True and (integrator =='BDF' or integrator == 'BDF_VODE'):
                 theta = theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta, benchmark = benchmark_eigen)    
                 
 
@@ -210,4 +211,4 @@ def results(theta = 0.55, run_results = True, skip = 3, iterate_theta = False, s
 
     
 
-results()
+# results()

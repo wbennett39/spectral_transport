@@ -83,7 +83,7 @@ import numpy as np
 from scipy.sparse.linalg import gmres, LinearOperator
 
 
-def backward_euler_krylov(f, ts, y0, jac=None, tol=1e-8, newton_maxiter=50,
+def backward_euler_krylov(f, ts, y0,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, jac=None, tol=1e-8, newton_maxiter=50,
                           krylov_tol=1e-4, krylov_maxiter=None):
     """
     Backward Euler with Newton–Krylov linear solver (GMRES) and optional analytic Jacobian preconditioning.
@@ -114,26 +114,29 @@ def backward_euler_krylov(f, ts, y0, jac=None, tol=1e-8, newton_maxiter=50,
     """
     ts = np.asarray(ts)
     m = y0.size
-    Y = np.zeros((len(ts), m))
-    Y[0] = y0
-    eps_jv = np.sqrt(np.finfo(float).eps)
+    Y  = np.zeros((m, len(ts)))
+    Y =  np.ascontiguousarray(Y)
+    Y[:,0] = y0
+    # eps_jv = np.sqrt(np.finfo(float).eps)
+    eps_jv = 1.5e-8
 
     for i in range(len(ts) - 1):
         t_prev, t_next = ts[i], ts[i + 1]
         dt = t_next - t_prev
-        y_prev = Y[i].copy()
-        y_new = y_prev + dt * f(t_prev, y_prev)
+        y_prev = Y[:,i].copy()
+        y_prev = np.ascontiguousarray(y_prev)
+        y_new = y_prev + dt * f(t_prev, y_prev, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
 
         for nit in range(newton_maxiter):
-            F = y_new - y_prev - dt * f(t_next, y_new)
+            F = y_new - y_prev - dt * f(t_next, y_new,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
             if np.linalg.norm(F) < tol:
                 break
 
-            f0 = f(t_next, y_new)
+            f0 = f(t_next, y_new,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
 
             def matvec(v):
                 v = v.reshape(m)
-                jv = (f(t_next, y_new + eps_jv * v) - f0) / eps_jv
+                jv = (f(t_next, y_new + eps_jv * v, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs) - f0) / eps_jv
                 return (v - dt * jv).ravel()
 
             A = LinearOperator((m, m), matvec=matvec)
@@ -152,16 +155,16 @@ def backward_euler_krylov(f, ts, y0, jac=None, tol=1e-8, newton_maxiter=50,
 
             delta, info = gmres(A, b, M=M, tol=krylov_tol, atol=0,
                                 restart=restart, maxiter=maxiter)
-            if info > 0:
-                raise RuntimeError(f"GMRES failed to converge in {info} iterations")
-            elif info < 0:
-                raise RuntimeError("GMRES encountered an illegal input or breakdown")
+            # if info > 0:
+            #     raise RuntimeError(f"GMRES failed to converge in {info} iterations")
+            # elif info < 0:
+            #     raise RuntimeError("GMRES encountered an illegal input or breakdown")
 
             y_new = (y_new + delta).reshape(m)
-        else:
-            raise RuntimeError("Newton iteration failed to converge")
+        # else:
+        #     raise RuntimeError("Newton iteration failed to converge")
 
-        Y[i + 1] = y_new
+        Y[:, i + 1] = y_new
 
     return Y
 

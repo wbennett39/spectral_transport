@@ -42,6 +42,17 @@ from moving_mesh_transport.loading_and_saving.load_solution import load_sol as l
 from moving_mesh_transport.solver_functions.run_functions import run
 from moving_mesh_transport.solver_functions.DMD_functions import DMD_func3
 
+def sparsify_data_mat(ts, Y_minus, t1, t2, npnts):
+     ts2= np.logspace(t1, t2, npnts)
+     indices = np.argmin(np.abs(ts-ts2))
+     Y_minus_out = np.zeros((Y_minus[:,0].size, npnts))
+     ts_out = np.zeros(npnts)
+     for it in range(npnts):
+          Y_minus_out[:, it] = Y_minus[:,indices[it]]
+          ts_out[it] = ts[indices[it]]
+     return ts, Y_minus_out
+
+
 
 run = run()
 # run.load('transport', 'mesh_parameters_modak_gupta')
@@ -78,7 +89,8 @@ if run_results == True:
         run.random_IC(0,0)
         Yminus = run.sol_ob.y
         print('saving results')
-        f = h5py.File('modak_gupta_results.h5', 'r+')
+        integrator = run.parameters['all']['integrator']
+        f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
         if f.__contains__(sigma_name):
             del f[sigma_name]
         f.create_group(sigma_name)
@@ -97,13 +109,17 @@ print('### ### ### ### ### ### ### ### ### ')
 for iterator in range(5):
         sigma_name = problem_list[iterator]
         benchmark_eigen = benchmark_vals[grain_sizes[iterator]] 
-        f = h5py.File('modak_gupta_results.h5', 'r+')
+        integrator = run.parameters['all']['integrator']
+        f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
         Y_minus = f[sigma_name]['Y_minus'][:,:]
         ts = f[sigma_name]['t'][:]
+        ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), 10)
+        ts = ts_sparse
+        Y_minus = Y_minus_sparse
         f.close()
-        integrator = run.parameters['all']['integrator']
+        
         sigma_t = run.parameters['all']['sigma_t']
-        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = 2)
+        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = 3)
         if eigen_vals.size < 4:
              eigen_vals = np.append(np.zeros(4), eigen_vals)
         first_four_eigen_vals = np.flip(eigen_vals)[0:4] 
@@ -120,7 +136,5 @@ for iterator in range(5):
 
 
     
-
-
 
 

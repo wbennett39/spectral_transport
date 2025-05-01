@@ -5,6 +5,7 @@ from numpy.linalg import svd
 def VDMD2(Y_minus, Y_plus, skip):
 
     [U,S,V] = svd(Y_minus[:,skip:],full_matrices=False)
+    print(S, 'singular values vector')
     Sinv = np.zeros(S.size)
     Spos = S[S/np.cumsum(S)>1e-18]
     Sinv[0:Spos.size] = 1.0/Spos.copy()

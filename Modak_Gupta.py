@@ -65,11 +65,11 @@ def theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip, theta, benchmark):
     eigen = np.flip(DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta))[0:4]
     RMS_old = RMS(eigen, benchmark)
     direction = -1
-    speed = 0.05
+    speed = 0.1
     converge_count = 0
     while itt < 500:
         if converge_count <=50:
-            theta_new = theta + speed * np.random.rand() * direction
+            theta_new = theta + speed * np.random.rand() * (np.random.rand()*2 - 1)
         else:
             theta_new = np.random.rand()
             converge_count = 0
@@ -113,7 +113,7 @@ grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
 problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 
-def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False):
+def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, sparse_time_points = 10):
     if run_results == True:
         # ping save file
         f = h5py.File('modak_gupta_results.h5', 'r+')

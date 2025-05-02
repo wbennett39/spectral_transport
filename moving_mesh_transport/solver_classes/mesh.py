@@ -1636,7 +1636,7 @@ class mesh_class(object):
                     # self.edges = np.sort(self.edges)
                     # self.Dedges = self.edges * 0
                     self.shell_source()    
-            elif self.source_type[15] == 1:
+            elif self.source_type[15] == 1 or self.source_type[16] ==1:
                 self.modak_gupta()
             elif np.all(self.source_type == 0):
                 if self.geometry['sphere'] == True:

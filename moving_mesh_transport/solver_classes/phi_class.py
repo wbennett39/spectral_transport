@@ -92,7 +92,7 @@ class scalar_flux(object):
                 for i in range(self.M+1):
                     for j in range(self.M+1):
                         for l in range(self.N_ang):
-                            self.P_fixed[k, ig, i] +=  u[l, j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                            self.P_fixed[k, ig, i] +=  u[l, j] * self.ws[l] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
 
     def make_P(self, u, space, xL, xR):
         # if self.sigma_func['constant'] == True: # if the opacity is constant

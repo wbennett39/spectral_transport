@@ -281,10 +281,10 @@ class build(object):
                         assert(0)
 
                 x1 = edges_init[int(self.N_space/2)] - edges_init[int(self.N_space/2)+1]
-                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, x1, self.geometry, False, self.T4)
+                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, x1, self.geometry, False, self.T4, False)
             
             else:
-                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, False, self.T4)
+                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, False, self.T4, False)
 
             for g in range(self.N_groups):
                 for ang in range(self.N_ang):

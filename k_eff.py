@@ -56,7 +56,7 @@ loader = load()
 run.parameters['all']['N_spaces'] = [5]
 run.parameters['all']['Ms'] = [0]
 run.parameters['random_IC']['N_angles'] = [2]
-run.custom_source(0,0)
+run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
 def power_iterate(kguess = 1.0, tol = 1e-4):
     

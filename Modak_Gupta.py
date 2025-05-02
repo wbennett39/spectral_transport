@@ -60,35 +60,6 @@ def sparsify_estimator(Y):
     return it
 
 
-def sparsify_data_mat(ts, Y_minus, t1, t2, npnts, type = 'log'):
-     if type == 'log':
-        ts2= np.logspace(t1, t2, npnts)
-     elif type == 'const':
-         ts2 = []
-         itt = 1
-         index = int(ts.size/npnts)
-         for it2 in range(ts.size):
-             if itt == index:
-                 ts2.append(ts[it2])
-                 itt = 0
-             itt += 1
-     npnts = np.array(ts2).size
-     print(ts2, 'ts2')
-     indices = []
-     for it in range(npnts):
-        indices.append(np.argmin(np.abs(ts-ts2[it])))
-     indices = np.unique(np.array(indices))
-     npnts2 = indices.size
-     Y_minus_out = np.zeros((Y_minus[:,0].size, npnts2))
-     ts_out = np.zeros(npnts2)
-     for it in range(npnts2):
-          Y_minus_out[:, it] = Y_minus[:,indices[it]]
-          ts_out[it] = ts[indices[it]]
-     return ts_out, Y_minus_out
-
-
-
-
 
 def theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip, theta, benchmark):
     itt = 0
@@ -168,10 +139,10 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
                 run.parameters['all']['sigma_s'] = 9.5
             run.random_IC(0,0)
             Yminus = run.sol_ob.y
-            plt.ion()
-            for itt in range(run.sol_ob.y[0, :]):
-                plt.plot(run.xs, run.sol_ob.y[:,itt])
-            plt.show()
+            # plt.ion()
+            # for itt in range(run.sol_ob.y[0, :].size):
+            #     plt.plot(run.xs, run.sol_ob.y[:,itt])
+            # plt.show()
             print('saving results')
             integrator = run.parameters['all']['integrator']
             # run.parameters['all']['integrator'] = 'BDF'
@@ -203,13 +174,7 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
             ts = f[sigma_name]['t'][:]
             # sparse_time_points = int(sparsify_estimator(Y_minus) * 1)
             print('number of snapshots', sparse_time_points)
-            if integrator == 'Euler':
-                ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
-            else:
-                ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
-            ts = ts_sparse
-            # print(ts, 'sparse time array')
-            Y_minus = Y_minus_sparse
+            
 
             f.close()
             sigma_t = run.parameters['all']['sigma_t']

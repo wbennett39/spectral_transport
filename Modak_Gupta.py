@@ -183,7 +183,7 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
                 
 
 
-            eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta)
+            eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
             
 
             if eigen_vals.size < 4:

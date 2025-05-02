@@ -17,12 +17,15 @@ from .uncollided_solutions import uncollided_solution
 from scipy.special import expi as expi2
 from numba import types, typed
 import numba as nb
+
 ###############################################################################
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
 uncollided_solution_type = deferred_type()
 uncollided_solution_type.define(uncollided_solution.class_type.instance_type)
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
+
+
 
 data = [("S", float64[:]),
         ("source_type", int64[:]),
@@ -55,7 +58,8 @@ data = [("S", float64[:]),
         ('sigma_s', float64),
         ('geometry', nb.typeof(params_default)),
         ('g', int64),
-        ('shift', float64)
+        ('shift', float64),
+
         
         ]
 ###############################################################################
@@ -78,7 +82,28 @@ class source_class(object):
         self.source_strength = build.source_strength
         self.geometry = build.geometry
         self.shift = 0.0
+
+
+
+
+
+
+    # def evaluate_fixed_source(self, xs, a, b):
+
+
+
+
+
+    #     temp = xs*0
+    #     for ix in range(xs.size):
+    #         for j in range(self.M+1):
+    #             if self.geometry['slab'] == True:
+    #                 temp[ix] += normPn(j, xs[ix:ix+1], a, b)[0] * self.fixed_source_coeffs[j] 
+    #             elif self.geometry['sphere'] == True:
+    #                 temp[ix] += normTn(j, xs[ix:ix+1], a, b)[0] * self.fixed_source_coeffs[j]
+    #     return temp 
     
+   
     def integrate_quad(self, t, a, b, j, func):
         a = 1
         # argument = (b-a)/2 * self.xs_quad + (a+b)/2

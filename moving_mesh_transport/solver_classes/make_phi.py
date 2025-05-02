@@ -29,7 +29,8 @@ data = [('N_ang', int64),
         ('e_out', float64[:]),
         ('exit_dist', float64[:,:,:]),
         ('geometry', nb.typeof(params_default)),
-        ('N_groups', int64)
+        ('N_groups', int64),
+
         ]
 @jitclass(data)
 class make_output:
@@ -46,12 +47,17 @@ class make_output:
         self.t = t
         self.geometry = geometry 
         self.N_groups = N_groups
-
+        
     def basis(self, i, x, a, b):
         if self.geometry['slab'] == True:
             return normPn(i, x, a, b)
         elif self.geometry['sphere'] == True:
             return normTn(i, x, a, b)
+
+
+
+
+
 
 
     def make_phi(self, uncollided_solution):

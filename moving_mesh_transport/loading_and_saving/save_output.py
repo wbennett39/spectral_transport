@@ -40,7 +40,7 @@ class save_output:
 
         source_name_list = ["plane_IC", "square_IC", "square_s", "gaussian_IC",
                              "MMS", "gaussian_s",'blank', 'blank', 'blank', 'blank',
-                             'blank', 'blank', 'blank', 'blank', 'blank', 'random_IC']
+                             'blank', 'blank', 'blank', 'blank', 'blank', 'random_IC', 'fixed_source']
         gaussian_sources = ["gaussian_IC", "gaussian_s"]
         index_of_source_name = np.argmin(np.abs(np.array(source_type)-1))
         self.source_name = source_name_list[index_of_source_name]  

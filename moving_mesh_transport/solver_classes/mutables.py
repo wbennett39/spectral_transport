@@ -33,11 +33,13 @@ data = [('N_ang', int64),
         ('mu', float64),
         ('geometry', nb.typeof(params_default)),
         ('thermal_couple', int64),
-        ('T4', float64[:])
+        ('T4', float64[:]),
+        ('randomstart', int64),
+
         ]
 @jitclass(data)
 class IC_func(object):
-    def __init__(self, source_type, uncollided, x0, source_strength, sigma, x1, geometry, thermal_couple, T4):
+    def __init__(self, source_type, uncollided, x0, source_strength, sigma, x1, geometry, thermal_couple, T4, randomstart):
         self.source_type = np.array(list(source_type), dtype = np.int64)
         self.uncollided = uncollided
         self.x0 = x0
@@ -47,7 +49,7 @@ class IC_func(object):
         self.geometry = geometry
         self.thermal_couple = thermal_couple
         self.T4 = T4
-        
+        self.randomstart = randomstart
 
 
     def function(self, x, mu, iarg = 0, earg = 0):
@@ -75,7 +77,7 @@ class IC_func(object):
                     return self.dipole(x)/abs(self.x1)
                 elif self.source_type[0] == 3:
                     return self.self_sim_plane(x)
-                elif self.source_type[15] == 1:
+                elif self.source_type[15] == 1 or self.randomstart == True:
                     return self.random_IC(x)
                 else:
                     return np.zeros(x.size)

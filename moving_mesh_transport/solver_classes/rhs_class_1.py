@@ -27,6 +27,7 @@ from numba import int64, float64, deferred_type, prange
 from numba import types, typed
 from .functions import mass_lumper
 
+
 build_type = deferred_type()
 build_type.define(build.class_type.instance_type)
 matrices_type = deferred_type()
@@ -47,6 +48,9 @@ cubic_class_type = deferred_type()
 cubic_class_type.define(cubic_spline.class_type.instance_type)
 make_phi_class_type = deferred_type()
 make_phi_class_type.define(make_output.class_type.instance_type)
+
+
+
 
 # kv_ty = (types.int64, types.unicode_type)
 params_default = nb.typed.Dict.empty(key_type=nb.typeof('par_1'),value_type=nb.typeof(1))
@@ -132,7 +136,10 @@ data = [('N_ang', int64),
         ('Y_plus_list', float64[:,:]),
         ('Y_iterator', int64),
         ('N_groups', int64),
-        ('VDMD', int64)
+        ('VDMD', int64),
+        ('chi', float64),
+        ('sigma_f', float64),
+        ('nu', float64)
 
         ]
 ##############################################################################
@@ -222,6 +229,9 @@ class rhs_class():
         self.Y_plus_list = np.zeros((1,(self.N_groups * self.N_ang) * self.N_space * (self.M+1)))
         self.VDMD = build.VDMD
         # self.VDMD = False
+        self.chi = build.chi
+        self.nu = build.nu
+        self.sigma_f = build.sigma_f
         
         
         
@@ -537,6 +547,7 @@ class rhs_class():
                     flux.make_P(V_old[:,space,:], space, xL, xR)
         
                 PV = flux.scalar_flux_term
+                fixed_source = flux.P_fixed[space, self.g]
                 source.make_source(t, xL, xR, uncollided_sol)
                 S = source.S
                 H = transfer_class.H
@@ -709,6 +720,7 @@ class rhs_class():
                         RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l
 
                         RHS += PV * self.c /self.sigma_t / self.l
+                        RHS += fixed_source * self.sigma_f * self.nu * self.chi / self.sigma_t
 
                         RHS -= VV / self.sigma_t / self.l
                         RHS -= np.dot(MPRIME, U)

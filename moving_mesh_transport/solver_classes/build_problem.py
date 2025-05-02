@@ -92,7 +92,11 @@ data = [('N_ang', int64),
         ('edges_init', float64[:]),
         ('N_groups', int64),
         ('VDMD', int64),
-        ('shift', float64)
+        ('shift', float64),
+        ('fixed_source_coeffs', float64[:,:,:]),
+        ('chi', float64),
+        ('nu', float64),
+        ('sigma_f', float64)
         ]
 ###############################################################################
 
@@ -102,7 +106,7 @@ class build(object):
     source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
     quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
-    fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD):
+    fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD, fixed_source_coeffs, chi, nu, sigma_f):
         self.N_ang = N_ang
         print(self.N_ang, 'angles')
         self.N_space = N_space
@@ -167,6 +171,13 @@ class build(object):
         self.e_init = e_initial
         self.T4 = np.zeros(self.xs_quad.size * self.N_space)
         self.shift = 0.0
+        if self.source_type[16] == 1:
+            self.fixed_source_coeffs = fixed_source_coeffs
+        else:
+            self.fixed_source_coeffs = np.zeros((self.N_ang, self.N_space, self.M+1))
+        self.chi = chi
+        self.nu = nu
+        self.sigma_f = sigma_f
 
         # self.e_initial = 1e-4
         
@@ -214,7 +225,7 @@ class build(object):
     def IC_e_func(self,x):
         return np.ones(x.size) * self.e_init
                 
-    def make_IC(self, edges):
+    def make_IC(self, edges, randomstart):
         # edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
         # self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
         # self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.geometry, self.sigma_func)
@@ -229,7 +240,7 @@ class build(object):
                     elif self.geometry['sphere'] == True:
                         self.integrate_e_sphere(edges_init[space], edges_init[space+1], space, j)
             
-            ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, True, self.T4)
+            ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, True, self.T4, randomstart)
             for g in range(self.N_groups):
                 for ang in range(self.N_ang):
                     for space in range(self.N_space):

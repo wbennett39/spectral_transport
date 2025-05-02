@@ -35,8 +35,15 @@ NEW TO DO:
 class main_class(parameter_load_class):
 
     pass
+    
+
+    def load_custom_source(self, coefficients, randomstart):
+        self.fixed_source_coeffs = coefficients
+        self.randomstart = randomstart
 
     def main(self, uncollided = True, moving = True):  
+        self.fixed_source_coeffs = np.zeros((self.N_angles[0] * self.N_groups, self.N_spaces[0], self.Ms[0]+1))
+        self.randomstart = False
 
         saving = save_output(self.tfinal, self.N_spaces, self.Ms, self.source_type, 
                              moving, uncollided, self.major, self.thermal_couple, 
@@ -123,12 +130,14 @@ class main_class(parameter_load_class):
                     choose_xs = False
                     specified_xs = 0.0
                 print(self.finite_domain, 'finite domain')
+                
                 xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol_object =  solve(
                     self.tfinal,N_space, N_ang, M, self.N_groups, x0_new, self.t0, self.sigma_t, self.sigma_s, self.t_nodes, self.source_type, uncollided, moving, self.move_type, self.thermal_couple,
                     self.temp_function, self.rt, self.at, self.e_initial, choose_xs, specified_xs, self.weights, self.sigma, self.particle_v, self.edge_v, self.cv0, self.estimate_wavespeed, 
                     self.find_wave_loc, self.thick, self.mxstp, self.wave_loc_array, self.find_edges_tol, self.source_strength, self.move_factor, self.integrator, self.l, self.save_wave_loc, self.pad, 
                     self.leader_pad, self.xs_quad, self.eval_times, self.eval_array,self.boundary_on, self.boundary_source_strength, self.boundary_source, self.sigma_func, self.Msigma, 
-                    self.finite_domain,self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry, self.lumping, self.cross_section_data, self.dense, self.shift, self.VDMD)
+                    self.finite_domain,self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry, self.lumping, self.cross_section_data, self.dense, self.shift, self.VDMD,
+                    self.fixed_source_coeffs, self.randomstart, self.chi, self.nu, self.sigma_f)
                 print(edges, 'final edges')
                 # print(edges, "edges")
                 # print(wave_tpnts, wave_xpnts, "wave points")

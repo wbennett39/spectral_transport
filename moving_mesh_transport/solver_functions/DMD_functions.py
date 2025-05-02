@@ -67,9 +67,9 @@ def DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncoll
             Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
             # print(Y_minus_psi[:, it], 'psi')
             Y_minus_flipped[:, it] = Y_minus[it,:]
-            # plt.ion()
-            # plt.plot(xs, phi)
-            # plt.show()
+            plt.ion()
+            plt.plot(xs, phi)
+            plt.show()
             # if integrator == 'BDF':
             Y_m_final[:, it] = Y_minus_psi[:, it]
             dt = (rhs.t_old_list_Y[it+1] - rhs.t_old_list_Y[it])/sigma_t # because the list is t old, use it+1 and it to calculate dt 
@@ -463,7 +463,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
 
 
 
-        if integrator == 'Euler':
+        if integrator == 'Euler' or integrator == 'BDF_VODE':
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, -5, np.log(100), sparse_time_points)
         else:
@@ -473,6 +473,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             # print(ts, 'sparse time array')
         Y_minus = Y_minus_sparse
         Y_plus = Y_plus_sparse
+        # print(Y_minus, 'Y-')
         if integrator == 'BDF':
             # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
             eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:], t[skip:]/sigma_t, theta = theta)))

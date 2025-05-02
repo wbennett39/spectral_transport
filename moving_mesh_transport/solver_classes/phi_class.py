@@ -45,7 +45,10 @@ data = [("P", float64[:]),
         ('geometry', nb.typeof(params_default)),
         ('lumping', int64),
         ('N_groups', int64),
-        ('g', int64)
+        ('N_space', int64),
+        ('g', int64),
+        ('P_fixed', float64[:, :, :]),
+        ('fixed_source_coeffs', float64[:, :, :])
         ]
 ###############################################################################
 @jitclass(data)
@@ -64,7 +67,10 @@ class scalar_flux(object):
         self.geometry = build.geometry
         self.lumping = build.lumping
         self.N_groups = build.N_groups
+        self.N_space = build.N_space
         self.g = 0
+        self.P_fixed = np.zeros((build.N_space, build.N_groups,  build.M+1))
+        self.fixed_source_coeffs = build.fixed_source_coeffs
         
 
     # def make_P(self, u):
@@ -75,6 +81,18 @@ class scalar_flux(object):
     #     for i in range(0, self.M+1):
     #         self.P[i]  = np.sum(np.multiply(vec[:,i],self.ws)) 
     #     return self.P
+
+    def make_fixed_phi(self, edges):
+        # as of now, sigma_f must be constant
+        for k in range(self.N_space):
+            xL = edges[k]
+            xR = edges[k+1]
+            for ig in range(self.N_groups):
+                u = self.fixed_source_coeffs[ig:(ig+1)*self.N_ang, k,:]
+                for i in range(self.M+1):
+                    for j in range(self.M+1):
+                        for l in range(self.N_ang):
+                            self.P_fixed[k, ig, i] +=  u[l, j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
 
     def make_P(self, u, space, xL, xR):
         # if self.sigma_func['constant'] == True: # if the opacity is constant

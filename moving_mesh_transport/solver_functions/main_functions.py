@@ -25,6 +25,7 @@ from ..solver_classes.uncollided_solutions import uncollided_solution
 from ..solver_classes.phi_class import scalar_flux
 from ..solver_classes.mesh import mesh_class
 from ..solver_classes.rhs_class_1 import rhs_class
+from ..solver_classes.cubic_spline import cubic_spline
 from ..solver_classes.functions import quadrature
 from ..solver_classes.functions import converging_time_function, converging_r
 # from ..solver_classes.rhs_class import rhs_class
@@ -41,6 +42,7 @@ import scipy
 # from .test_bessel import *
 import tqdm
 from .Euler import backward_euler, backward_euler_krylov
+from .DMD_functions import DMD_func
 # from diffeqpy import ode
 # from .jl_integrator import integrator as jl_integrator_func
 # from diffeqpy import de
@@ -109,7 +111,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           weights, sigma, particle_v, edge_v, cv0, estimate_wavespeed, find_wave_loc, thick, mxstp, wave_loc_array, 
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, dense, shift, VDMD):
+          finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
+          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -172,7 +175,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        thermal_couple, temp_function, e_initial, sigma, particle_v, edge_v, cv0, thick, 
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
                         quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD)
+                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD, fixed_source_coeffs, chi, nu, sigma_f)
 
 
 
@@ -220,10 +223,16 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     print(mesh.edges, 'edges')
     print(mesh.Dedges_const, 'dedges const')
 
+
     if thermal_couple['none'] != 1:
         mesh.move(0)
         initialize.make_T4_IC(transfer, mesh.edges)
-    initialize.make_IC(mesh.edges)
+    initialize.make_IC(mesh.edges, randomstart)
+    if source_type[16] == 1:
+        flux.make_fixed_phi(mesh.edges)
+        if randomstart == False:
+            initialize.IC = fixed_source_coeffs
+
     IC = initialize.IC
 
     xs = find_nodes(mesh.edges, M, geometry)
@@ -426,13 +435,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         
     elif choose_xs == True:
         xs = specified_xs
-    # if VDMD == True:
-
-    #     # eigen_vals = DMD_func(rhs, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t)
-    #     eigen_vals = DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncollided, geometry, ws, integrator, sigma_t)
-    # else:
-    #     eigen_vals = rhs.t_old_list_Y * 0
-    
+    if VDMD == True:
+        for it in range(ts.size):
+            output = make_output(ts[it], N_ang, ws, xs, sol.y[:, it].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+            phi = output.make_phi(uncollided_sol)
+            plt.ion()
+            plt.plot(xs, phi)
+            plt.show()
     
 
     # print(xs, 'xs')

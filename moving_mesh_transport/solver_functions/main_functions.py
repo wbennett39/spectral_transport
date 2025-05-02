@@ -325,11 +325,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     # sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
     if integrator == 'BDF_VODE':
-        ts = np.logspace(-5,math.log10(tfinal), 50 + 1)
+        ts = np.logspace(-5,math.log10(tfinal), 22 + 1)
         ode15s = scipy.integrate.ode(RHS_wrap)
         ode15s.set_integrator('lsoda', method='bdf', atol = at, rtol = rt)
         ode15s.set_initial_value(reshaped_IC, 0.0)
-        ode15s.max_order_s = 2
+        ode15s.max_order_s = 1
 
         sol = sol_class_ode_solver(np.zeros((reshaped_IC.size, ts.size)), np.array(ts), np.array(ts))
 
@@ -341,13 +341,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             ode15s.integrate(tf)
             sol.y[:,it] = ode15s.y
             sol.t[it] = ode15s.t
-        # ode15s.set_initial_value(ode15s.y, tf)
+            ode15s.set_initial_value(ode15s.y, tf)
         
 
     
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 500)
-        ts = np.logspace(-5,math.log10(tfinal), 50 + 1)
+        ts = np.logspace(-5,math.log10(tfinal), 22 + 1)
         Y = backward_euler(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)

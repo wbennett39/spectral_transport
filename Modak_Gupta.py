@@ -60,9 +60,20 @@ def sparsify_estimator(Y):
     return it
 
 
-
-def sparsify_data_mat(ts, Y_minus, t1, t2, npnts):
-     ts2= np.logspace(t1, t2, npnts)
+def sparsify_data_mat(ts, Y_minus, t1, t2, npnts, type = 'log'):
+     if type == 'log':
+        ts2= np.logspace(t1, t2, npnts)
+     elif type == 'const':
+         ts2 = []
+         itt = 1
+         index = int(ts.size/npnts)
+         for it2 in range(ts.size):
+             if itt == index:
+                 ts2.append(ts[it2])
+                 itt = 0
+             itt += 1
+     npnts = np.array(ts2).size
+     print(ts2, 'ts2')
      indices = []
      for it in range(npnts):
         indices.append(np.argmin(np.abs(ts-ts2[it])))
@@ -75,6 +86,10 @@ def sparsify_data_mat(ts, Y_minus, t1, t2, npnts):
           ts_out[it] = ts[indices[it]]
      return ts_out, Y_minus_out
 
+
+
+
+
 def theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip, theta, benchmark):
     itt = 0
     converged = False
@@ -83,7 +98,7 @@ def theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip, theta, benchmark):
     direction = -1
     speed = 0.1
     converge_count = 0
-    while itt < 1500:
+    while itt < 200:
         # if converge_count <=50:
             # theta_new = theta + speed * np.random.rand() * (np.random.rand()*2 - 1)
         # else:
@@ -97,7 +112,7 @@ def theta_optimizer(Y_minus, ts,  integrator, sigma_t, skip, theta, benchmark):
             theta_new = 1
             direction *= -1
         eigen = np.flip(DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta_new))[0:4]
-        RMS_NEW =  RMS(eigen, benchmark)
+        RMS_NEW =  RMS(eigen[0], benchmark[0])
         
         if RMS_NEW < RMS_old:
             theta = theta_new
@@ -136,6 +151,7 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
         f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
         f.close()
         # prime solver
+        run.parameters['all']['integrator'] = 'BDF_VODE'
         run.parameters['all']['N_spaces'] = [5]
         run.parameters['all']['Ms'] = [0]
         run.parameters['random_IC']['N_angles'] = [2]
@@ -147,12 +163,18 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
             run.load('modak_gupta', 'mesh_parameters_modak_gupta')
             run.mesh_parameters['modak_gupta0'] = False
             sigma_name == 'modak_gupta0'
+            # run.parameters['all']['integrator'] = 'BDF_VODE'
             if sigma_name == 'modak_gupta0':
                 run.parameters['all']['sigma_s'] = 9.5
             run.random_IC(0,0)
             Yminus = run.sol_ob.y
+            plt.ion()
+            for itt in range(run.sol_ob.y[0, :]):
+                plt.plot(run.xs, run.sol_ob.y[:,itt])
+            plt.show()
             print('saving results')
             integrator = run.parameters['all']['integrator']
+            # run.parameters['all']['integrator'] = 'BDF'
             f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
             if f.__contains__(sigma_name):
                 del f[sigma_name]
@@ -172,17 +194,23 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
     for iterator in range(5):
             sigma_name = problem_list[iterator]
             benchmark_eigen = benchmark_vals[grain_sizes[iterator]] 
-            # integrator = run.parameters['all']['integrator']
-            integrator = 'BDF_VODE'
+            integrator = run.parameters['all']['integrator']
+            print(integrator, 'integrator')
+            # integrator = 'BDF_VODE'
             f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
             # f = h5py.File(f'modak_gupta_results.h5', 'r+')
             Y_minus = f[sigma_name]['Y_minus'][:,:]
             ts = f[sigma_name]['t'][:]
             # sparse_time_points = int(sparsify_estimator(Y_minus) * 1)
             print('number of snapshots', sparse_time_points)
-            ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
+            if integrator == 'Euler':
+                ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
+            else:
+                ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
             ts = ts_sparse
+            # print(ts, 'sparse time array')
             Y_minus = Y_minus_sparse
+
             f.close()
             sigma_t = run.parameters['all']['sigma_t']
             if iterate_theta == True and (integrator =='BDF' or integrator == 'BDF_VODE'):

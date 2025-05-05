@@ -243,6 +243,7 @@ class build(object):
                         self.integrate_e_sphere(edges_init[space], edges_init[space+1], space, j)
             
             ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, True, self.T4, randomstart)
+
             for g in range(self.N_groups):
                 for ang in range(self.N_ang):
                     for space in range(self.N_space):
@@ -286,7 +287,7 @@ class build(object):
                 ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, x1, self.geometry, False, self.T4, False)
             
             else:
-                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, False, self.T4, False)
+                ic = IC_func(self.source_type, self.uncollided, self.x0, self.source_strength, self.sigma, 0.0, self.geometry, False, self.T4, randomstart)
 
             for g in range(self.N_groups):
                 for ang in range(self.N_ang):

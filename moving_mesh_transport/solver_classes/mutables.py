@@ -52,6 +52,7 @@ class IC_func(object):
         self.randomstart = randomstart
 
 
+
     def function(self, x, mu, iarg = 0, earg = 0):
         if self.geometry['slab'] == True:
             if self.thermal_couple == True:
@@ -77,7 +78,7 @@ class IC_func(object):
                     return self.dipole(x)/abs(self.x1)
                 elif self.source_type[0] == 3:
                     return self.self_sim_plane(x)
-                elif self.source_type[15] == 1 :
+                elif self.source_type[15] == 1 or self.randomstart == True:
                     return self.random_IC(x)
                 else:
                     return np.zeros(x.size)
@@ -94,7 +95,7 @@ class IC_func(object):
                     elif self.source_type[1] == 1:
                         return self.shell_IC(x)
                     elif self.source_type[15] == 1 or self.randomstart == True:
-
+                        assert 0
                         return self.random_IC(x)
                     # This elif below added by Stephen
                     # The problem that was causing the code not to run seems to have been here (19-06-24)

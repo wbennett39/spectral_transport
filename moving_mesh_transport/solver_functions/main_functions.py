@@ -232,12 +232,14 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         mesh.move(0)
         initialize.make_T4_IC(transfer, mesh.edges)
     initialize.make_IC(mesh.edges, randomstart)
+    print(randomstart, 'rand start')
     if source_type[16] == 1:
-        flux.make_fixed_phi(mesh.edges)
         if randomstart == False:
             initialize.IC = fixed_source_coeffs
+            flux.make_fixed_phi(mesh.edges)
 
     IC = initialize.IC
+    print(IC, 'ic')
     reshaped_IC = IC.reshape(deg_freedom)
 
     xs = find_nodes(mesh.edges, M, geometry)
@@ -340,7 +342,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
     if integrator == 'BDF_VODE':
         it2 = 0
-        ts = np.logspace(-5,math.log10(tfinal), 300 + 1)
+        ts = np.logspace(-5,math.log10(tfinal), 1500 + 1)
         # ts = np.linspace(0, tfinal , 100)
         if eval_times == True:
             ts = np.append(eval_times, eval_array)
@@ -363,13 +365,14 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 dt = ts[it] - ts[it-1]
             else:
                 dt = ts[it]
-            # ode15s.set_integrator('vode', method='bdf', atol = at, rtol = rt, order = 1, first_step = dt, min_step = dt, nsteps = 1)
+            ode15s.set_integrator('vode', method='bdf', atol = at, rtol = rt, order = 1, first_step = dt, min_step = dt, nsteps = 1)
             tf = ts[it]
             
             # print(ts[it] - ts[it-1], 'dt in wrapper')
 
             # print(tf, 'next integration target time')
             # with stdout_redirected():
+
             ode15s.integrate(tf)
             if eval_times == False:
                 sol.y[:,it] = ode15s.y
@@ -380,6 +383,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                         sol.y[:,it2] = ode15s.y
                         sol.t[it2] = ode15s.t
                         it2 += 1
+            
             # ode15s.set_initial_value(ode15s.y, tf)
         print(sol.y, 'Y')
         

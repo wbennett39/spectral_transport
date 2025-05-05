@@ -404,7 +404,8 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters)
         # if randomstart == True:
         #     sol_coeffs = 2*np.random.random((solver.N_ang * solver.N_groups, solver.N_spaces, solver.M+1)) -1
-        solver.load_custom_source(sol_coeffs, randomstart) 
+        if randomstart == True:
+            solver.load_custom_source(sol_coeffs, randomstart) 
         if All == True:
             solver.main(True, True)
             solver.main(False, True)

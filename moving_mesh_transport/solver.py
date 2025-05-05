@@ -43,7 +43,7 @@ class main_class(parameter_load_class):
 
     def main(self, uncollided = True, moving = True):  
         self.fixed_source_coeffs = np.zeros((self.N_angles[0] * self.N_groups, self.N_spaces[0], self.Ms[0]+1))
-        self.randomstart = False
+        self.randomstart = True
 
         saving = save_output(self.tfinal, self.N_spaces, self.Ms, self.source_type, 
                              moving, uncollided, self.major, self.thermal_couple, 

@@ -41,6 +41,7 @@ from moving_mesh_transport.solver_classes.functions import test_s2_sol
 from moving_mesh_transport.loading_and_saving.load_solution import load_sol as load
 from moving_mesh_transport.solver_functions.run_functions import run
 from moving_mesh_transport.solver_functions.DMD_functions import DMD_func3
+# from diffeqpy import de
 
 def RMS(l1, l2):
     return np.sqrt(np.mean((l1-l2)**2))
@@ -138,7 +139,7 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
             if sigma_name == 'modak_gupta0':
                 run.parameters['all']['sigma_s'] = 9.5
             run.random_IC(0,0)
-            Yminus = run.sol_ob.y
+            Yminus = run.sol_ob.Y_minus_psi
             # plt.ion()
             # for itt in range(run.sol_ob.y[0, :].size):
             #     plt.plot(run.xs, run.sol_ob.y[:,itt])
@@ -171,6 +172,7 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
             f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
             # f = h5py.File(f'modak_gupta_results.h5', 'r+')
             Y_minus = f[sigma_name]['Y_minus'][:,:]
+            
             ts = f[sigma_name]['t'][:]
             # sparse_time_points = int(sparsify_estimator(Y_minus) * 1)
             print('number of snapshots', sparse_time_points)

@@ -35,6 +35,7 @@ from ..solver_classes.opacity import sigma_integrator
 from timeit import default_timer as timer
 from .wavespeed_estimator import wavespeed_estimator
 from .wave_loc_estimator import find_wave
+# from diffeqpy import de
 # import chaospy
 from .theta_DMD import theta_DMD
 import random
@@ -43,6 +44,9 @@ import scipy
 import tqdm
 from .Euler import backward_euler, backward_euler_krylov
 from .DMD_functions import DMD_func
+# from julia.api import Julia
+# jl = Julia(compiled_modules=False)
+# from diffeqpy import de
 # from diffeqpy import ode
 # from .jl_integrator import integrator as jl_integrator_func
 # from diffeqpy import de
@@ -135,7 +139,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     mus = mus_new
     ws = ws_new
     print('integrator method:', integrator)
-    N_ang += 2
+    N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
     #     print("mus =", mus)
 
     # xs_quad = quadpy.c1.gauss_legendre(2*M+1).points
@@ -234,6 +238,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             initialize.IC = fixed_source_coeffs
 
     IC = initialize.IC
+    reshaped_IC = IC.reshape(deg_freedom)
 
     xs = find_nodes(mesh.edges, M, geometry)
     # phi_IC = make_output(0.0, N_ang, ws, xs, IC, M, mesh.edges, uncollided, geometry, N_groups)
@@ -295,7 +300,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         return VV_new.reshape((N_ang * N_groups + extra_deg) * N_space *(M+1))
 
     start = timer()
-    reshaped_IC = IC.reshape(deg_freedom)
+
 
     # if estimate_wavespeed == False:
     #     tpnts = [tfinal]
@@ -334,25 +339,49 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     # sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
     if integrator == 'BDF_VODE':
-        ts = np.logspace(-5,math.log10(tfinal), 100 + 1)
+        it2 = 0
+        ts = np.logspace(-5,math.log10(tfinal), 300 + 1)
+        # ts = np.linspace(0, tfinal , 100)
+        if eval_times == True:
+            ts = np.append(eval_times, eval_array)
         ode15s = scipy.integrate.ode(RHS_wrap)
-        ode15s.set_integrator('vode', method='bdf', atol = at, rtol = rt)
+        ode15s.set_integrator('vode', method='bdf', atol = at, rtol = rt, order = 1)
         ode15s.set_initial_value(reshaped_IC, 0.0)
-        ode15s.max_order_s = 1
-        ode15s.order = 1
+        # ode15s.max_order_s = 1
+        # ode15s.order = 1
 
         sol = sol_class_ode_solver(np.zeros((reshaped_IC.size, ts.size)), np.array(ts), np.array(ts))
+        
+        # def solout(t, y):
+                # sol.y = np.append(sol.y[:,:], y )
+                # sol.t = np.append(sol.t, t)
+        # if eval_times == False:
+        #     ode15s.set_solout(solout)
 
         for it in range(len(ts)):
             if it > 0:
-                ode15s.min_step = ts[it] - ts[it-1]
+                dt = ts[it] - ts[it-1]
+            else:
+                dt = ts[it]
+            # ode15s.set_integrator('vode', method='bdf', atol = at, rtol = rt, order = 1, first_step = dt, min_step = dt, nsteps = 1)
             tf = ts[it]
+            
+            # print(ts[it] - ts[it-1], 'dt in wrapper')
+
             # print(tf, 'next integration target time')
             # with stdout_redirected():
             ode15s.integrate(tf)
-            sol.y[:,it] = ode15s.y
-            sol.t[it] = ode15s.t
-            ode15s.set_initial_value(ode15s.y, tf)
+            if eval_times == False:
+                sol.y[:,it] = ode15s.y
+                sol.t[it] = ode15s.t
+            else:
+                if it2 < eval_array.size:
+                    if ((ode15s.t - eval_array[it2]) < 1e-12):
+                        sol.y[:,it2] = ode15s.y
+                        sol.t[it2] = ode15s.t
+                        it2 += 1
+            # ode15s.set_initial_value(ode15s.y, tf)
+        print(sol.y, 'Y')
         
 
     
@@ -369,6 +398,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         print(at, 'at')
         print('starting solve')
         sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, dense_output = dense, min_step = 1e-3)
+        ts = sol.t
 
     # sol = ode15s.y
 
@@ -421,8 +451,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         extra_deg_freedom = 1
         sol_last = sol.y[:,-1].reshape((N_ang * N_groups+1, N_space, M+1))
         # print(sol_last[-1,:,:])
-        if eval_times == True:
-            sol_array = sol.y.reshape((eval_array.size, N_ang * N_groups+1, N_space, M+1)) 
+        # if eval_times == True:
+        #     sol_array = sol.y.reshape((eval_array.size, N_ang * N_groups+1, N_space, M+1)) 
 
 
     
@@ -438,12 +468,17 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     elif choose_xs == True:
         xs = specified_xs
     if VDMD == True:
+        Y_minus_psi = np.zeros((N_ang * N_groups * xs.size, sol.t.size))
         for it in range(ts.size):
             output = make_output(ts[it], N_ang, ws, xs, sol.y[:, it].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+            # output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+            phi = output.make_phi(uncollided_sol)
+            Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
             phi = output.make_phi(uncollided_sol)
             plt.ion()
             plt.plot(xs, phi)
             plt.show()
+        sol.Y_minus_psi = Y_minus_psi
     
 
     # print(xs, 'xs')
@@ -485,9 +520,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             elif choose_xs == True:
                 xs = specified_xs
             output = make_output(tt, N_ang, ws, xs, sol.y[:,it].reshape((N_ang+extra_deg_freedom,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
-            phi[it,:] = output.make_phi(uncollided_sol)
-            psi[it, :, :] = output.psi_out # this is the collided psi
-            exit_dist[it], exit_phi[it] = output.get_exit_dist(uncollided_sol)
+            phi[it,:] = output.make_phi(uncollided_sol)[:, 0] # only 1 group is allowed at this point
+            psi[it, :, :] = output.psi_out[:, :, 0] # this is the collided psi
+            exit_output =  output.get_exit_dist(uncollided_sol)
+            exit_dist[it] = exit_output[0][:, :,0]
+            exit_phi[it] = exit_output[1][0]
             xs_ret[it] = xs
             if thermal_couple['none'] == False:
                 e[it,:] = output.make_e()

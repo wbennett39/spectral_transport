@@ -63,10 +63,15 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     k_old = kguess
     converged = False
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
-    phi_interpolated = interp1d(run.xs, run.phi)
+    print(run.xs.shape)
+    print(run.phi.shape)
+    coeffs = run.sol_ob.y[:,-1]
+
+    phi_interpolated = interp1d(run.xs, run.phi[:,0])
     while converged == False:
-        run.custom_source(randomstart = False, sol_coeffs = run.sol_ob.y[:,-1], uncollided = 0, moving = 0)
-        phi_interpolated_new = interp1d(run.xs, run.phi)
+        run.load_custom_source(coeffs, randomstart = False)
+        run.custom_source(randomstart = True, sol_coeffs = run.sol_ob.y[:,-1], uncollided = 0, moving = 0)
+        phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x: k_old * phi_interpolated_new(x) / phi_interpolated(x) # because nu and sigma_t are constant right now, I don't need them in the integrand
         xs = run.xs
         k_new = integrate.quad(integrand, xs[0], xs[-1])
@@ -77,6 +82,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             converged = True
         else:
             k_old = k_new
+            coeffs = coeffs = run.sol_ob.y[:,-1]
 
 power_iterate()
 

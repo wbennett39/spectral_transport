@@ -178,6 +178,8 @@ class build(object):
         self.chi = chi
         self.nu = nu
         self.sigma_f = sigma_f
+        # print(self.randomstart)
+        # assert 0
 
         # self.e_initial = 1e-4
         

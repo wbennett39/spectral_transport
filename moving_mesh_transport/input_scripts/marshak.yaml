@@ -27,9 +27,14 @@
     'cv_const': 0.03
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'BDF'
+    'integrator': 'BDF_VODE'
     'geometry': {slab: False, sphere: True}
     'lumping': False
+    'chi': 1.0
+    'sigma_f': 0.0
+    'nu': 2.2
+    'N_groups': 1
+    'VDMD': False
     
 # plane pulse source
 'plane_IC':
@@ -94,7 +99,7 @@
 'boundary_source':
     'x0': [10.0]  # Here x0 is half the domain width
     'source_strength': 1.0
-    'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     'N_angles': [16]
     'move_type': [0,1]              # moving mesh function selector
     'bench_type': 'full'          # 'S2' or 'full'

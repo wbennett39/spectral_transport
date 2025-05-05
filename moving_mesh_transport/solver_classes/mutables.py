@@ -77,7 +77,7 @@ class IC_func(object):
                     return self.dipole(x)/abs(self.x1)
                 elif self.source_type[0] == 3:
                     return self.self_sim_plane(x)
-                elif self.source_type[15] == 1 or self.randomstart == True:
+                elif self.source_type[15] == 1 :
                     return self.random_IC(x)
                 else:
                     return np.zeros(x.size)
@@ -93,7 +93,7 @@ class IC_func(object):
                         return self.point_pulse(x)/(self.x0**3)
                     elif self.source_type[1] == 1:
                         return self.shell_IC(x)
-                    elif self.source_type[15] == 1:
+                    elif self.source_type[15] == 1 or self.randomstart == True:
 
                         return self.random_IC(x)
                     # This elif below added by Stephen

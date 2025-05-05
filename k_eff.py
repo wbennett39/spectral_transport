@@ -59,7 +59,7 @@ run.parameters['random_IC']['N_angles'] = [2]
 run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
 def power_iterate(kguess = 1.0, tol = 1e-4):
-    
+    run.load('k_eff', 'mesh_parameters_keff')
     k_old = kguess
     converged = False
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
@@ -72,6 +72,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     print('phi')
 
     while converged == False:
+        run.parameters['all']['simga_f'] = run.parameters['all']['simga_f'] / k_old
         run.custom_source(randomstart = False, sol_coeffs = run.sol_ob.y[:,-1], uncollided = 0, moving = 0)
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x: k_old * phi_interpolated_new(x) / (phi_interpolated(x) + 1e-12) # because nu and sigma_t are constant right now, I don't need them in the integrand
@@ -84,7 +85,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             converged = True
         else:
             k_old = k_new
-            phi = phi_interpolated_new
+            phi_interpolated = phi_interpolated_new
 
 
 power_iterate()

@@ -232,14 +232,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         mesh.move(0)
         initialize.make_T4_IC(transfer, mesh.edges)
     initialize.make_IC(mesh.edges, randomstart)
-    print(randomstart, 'rand start')
+
     if source_type[16] == 1:
         if randomstart == False:
             initialize.IC = fixed_source_coeffs
             flux.make_fixed_phi(mesh.edges)
+            print(flux.P_fixed, 'fixed source')
 
     IC = initialize.IC
-    print(IC, 'ic')
+
     reshaped_IC = IC.reshape(deg_freedom)
 
     xs = find_nodes(mesh.edges, M, geometry)

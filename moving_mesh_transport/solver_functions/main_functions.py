@@ -44,20 +44,20 @@ import scipy
 import tqdm
 from .Euler import backward_euler, backward_euler_krylov
 from .DMD_functions import DMD_func
-try:
-    import os
-    os.environ["JULIA_PYTHONCALL_EXE"] = "/usr/local/bin/julia"
-    from julia.api import Julia
-    jl = Julia(compiled_modules=False)
-    from diffeqpy import de
-    # from diffeqpy import ode
-    # from .jl_integrator import integrator as jl_integrator_func
-except:
-    print('Julia not loaded')
-    julia_working = False
-else:
-    print('julia ode solver loaded')
-    julia_working = True
+# try:
+#     import os
+#     os.environ["JULIA_PYTHONCALL_EXE"] = "/usr/local/bin/julia"
+#     from julia.api import Julia
+#     jl = Julia(compiled_modules=True)
+#     from diffeqpy import de
+#     # from diffeqpy import ode
+#     # from .jl_integrator import integrator as jl_integrator_func
+# except:
+#     print('Julia not loaded')
+#     julia_working = False
+# else:
+#     print('julia ode solver loaded')
+#     julia_working = True
 
 
 

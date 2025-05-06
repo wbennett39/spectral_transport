@@ -75,8 +75,11 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     print(phi_interpolated(run.xs))
     print('phi')
     normalized_integrand = lambda x: phi_interpolated(x) * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
-    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]
-    while converged == False: 
+    xs = run.xs
+    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]*(xs[-1]-xs[0])
+    n_iters = 0
+    while converged == False and n_iters > 10: 
+        #do curvilinear corrections come into the normalization?
         run.load('k_eff', 'mesh_parameters_keff')
         sigma_f = run.parameters['all']['sigma_f']
         run.parameters['all']['sigma_f'] = sigma_f / k_old
@@ -99,9 +102,10 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             converged = True
         else:
             k_old = k_new
+            n_iters +=1
             phi_interpolated = phi_interpolated_new
             normalized_integrand = lambda x: phi_interpolated(x) * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
-            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]
+            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]*(xs[-1]-xs[0])
 
 
 power_iterate()

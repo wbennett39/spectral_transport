@@ -44,12 +44,21 @@ import scipy
 import tqdm
 from .Euler import backward_euler, backward_euler_krylov
 from .DMD_functions import DMD_func
-# from julia.api import Julia
-# jl = Julia(compiled_modules=False)
-# from diffeqpy import de
-# from diffeqpy import ode
-# from .jl_integrator import integrator as jl_integrator_func
-# from diffeqpy import de
+try:
+    import os
+    os.environ["JULIA_PYTHONCALL_EXE"] = "/usr/local/bin/julia"
+    from julia.api import Julia
+    jl = Julia(compiled_modules=False)
+    from diffeqpy import de
+    # from diffeqpy import ode
+    # from .jl_integrator import integrator as jl_integrator_func
+except:
+    print('Julia not loaded')
+    julia_working = False
+else:
+    print('julia ode solver loaded')
+    julia_working = True
+
 
 
 """
@@ -178,8 +187,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        ws_quad, sigma_t, sigma_s, source_type, uncollided, moving, move_type, t_quad, t_ws,
                        thermal_couple, temp_function, e_initial, sigma, particle_v, edge_v, cv0, thick, 
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
-                        quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
-                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD, fixed_source_coeffs, chi, nu, sigma_f)
+                       quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
+                       finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
+                       fixed_source_coeffs, chi, nu, sigma_f)
 
 
 
@@ -238,6 +248,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             initialize.IC = fixed_source_coeffs
             flux.make_fixed_phi(mesh.edges)
             print(flux.P_fixed, 'fixed source')
+        else:
+            flux.fixed_source_coeffs = initialize.IC
+            flux.make_fixed_phi(mesh.edges)
+
 
     IC = initialize.IC
 
@@ -343,7 +357,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
     if integrator == 'BDF_VODE':
         it2 = 0
-        ts = np.logspace(-5,math.log10(tfinal), 1500 + 1)
+        ts = np.logspace(-5,math.log10(tfinal), 100 + 1)
         # ts = np.linspace(0, tfinal , 100)
         if eval_times == True:
             ts = np.append(eval_times, eval_array)

@@ -81,10 +81,10 @@ class parameter_load_class:
         self.N_angles = np.array(parameters[source_name]['N_angles'])
         
         self.source_type = (np.array(parameters[source_name]['source_type']))
-        if self.source_type[2] == 1 or self.source_type[15] ==1:
-            self.shift = float(parameters[source_name]['shift'])
-        else:
-            self.shift = 0.0
+        # if self.source_type[2] == 1 or self.source_type[15] ==1:
+        self.shift = float(parameters[source_name]['shift'])
+        # else:
+            # self.shift = 0.0
         
         for iele, ele, in enumerate(self.source_type):
             self.source_type[iele] = np.int64(self.source_type[iele])

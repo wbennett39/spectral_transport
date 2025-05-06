@@ -9,6 +9,9 @@ import warnings
 warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPerformanceWarning)
+
+# from julia.api import Julia
+# jl = Julia(compiled_modules=False)
                       
 # from benchmarks import integrate_greens as intg
 from moving_mesh_transport.plots import plotting_script as plotter
@@ -17,6 +20,7 @@ import matplotlib.pyplot as plt
 import h5py 
 
 from moving_mesh_transport.solver_classes.functions import *
+from moving_mesh_transport.solver_classes.make_phi import make_output
 
 # from moving_mesh_transport.plots.plot_square_s_times import main as plot_square_s_times
 # from moving_mesh_transport.solution_plotter import plot_thin_nonlinear_problems as plot_thin
@@ -70,15 +74,25 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     print(run.phi, 'run.phi')
     print(phi_interpolated(run.xs))
     print('phi')
-
-    while converged == False:
-        run.parameters['all']['simga_f'] = run.parameters['all']['simga_f'] / k_old
-        run.custom_source(randomstart = False, sol_coeffs = run.sol_ob.y[:,-1], uncollided = 0, moving = 0)
+    normalized_integrand = lambda x: phi_interpolated(x) * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
+    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]
+    while converged == False: 
+        run.load('k_eff', 'mesh_parameters_keff')
+        sigma_f = run.parameters['all']['sigma_f']
+        run.parameters['all']['sigma_f'] = sigma_f / k_old
+        normalized_source = run.sol_ob.y[:,-1] / normalization
+        # output_ob = 
+        run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x: k_old * phi_interpolated_new(x) / (phi_interpolated(x) + 1e-12) # because nu and sigma_t are constant right now, I don't need them in the integrand
         xs = run.xs
-        k_new = integrate.quad(integrand, xs[0], xs[-1])[0]
+        plt.figure(201)
+        plt.plot(xs, integrand(xs))
+        plt.show()
+        # converged = True
+        k_new = integrate.quad(integrand, xs[0], xs[-1])[0]/(xs[-1]-xs[0])
         print(k_new, 'k')
+        # converged = True
         if abs(k_new - k_old ) <=tol:
             print('power iteration complete')
             print(k_new, 'k effective')
@@ -86,6 +100,8 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         else:
             k_old = k_new
             phi_interpolated = phi_interpolated_new
+            normalized_integrand = lambda x: phi_interpolated(x) * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
+            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]
 
 
 power_iterate()

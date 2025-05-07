@@ -1,13 +1,13 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'transport'
-    'tfinal': 150000
+    'tfinal': 5000
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
     'sigma_t': 10.0
     'sigma_s': 9.0
-    'sigma_f': 1.0
+    'sigma_f': 0.0
     'chi': 1.0
     'nu': 2.2
     't0': 5.0                       # time the source is turned off
@@ -15,9 +15,9 @@
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
     'Ms': [1]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
-    'rt': 5e-12                         # rel tolerance for ODE integrator
-    'at': 1e-10                         # abs tolerance for ODE integrator
-    'mxstp': 1.0
+    'rt': 5e-11                         # rel tolerance for ODE integrator
+    'at': 1e-9                         # abs tolerance for ODE integrator
+    'mxstp': 10000.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
     'radiative_transfer': {none: True}             # material temperature feedback. 1-True, 0 - False
     'temperature_dependence': [1,0,0,0] # first slot is Su-Olson problem

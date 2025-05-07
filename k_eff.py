@@ -18,6 +18,7 @@ from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
 import h5py 
+from time import time
 
 from moving_mesh_transport.solver_classes.functions import *
 from moving_mesh_transport.solver_classes.make_phi import make_output
@@ -66,7 +67,7 @@ def check_normalization(output_ob, uncollided_ob, xs):
     plt.plot(xs, test_normalization_integrand(xs), 'k')
     plt.show()
     
-    normalization_test = integrate.quad(test_normalization_integrand, xs[0], xs[-1])[0] /( 4/3 * math.pi * (xs[-1]**3-xs[0]**3))
+    normalization_test = integrate.quad(test_normalization_integrand, xs[0], xs[-1])[0] *( 4/3 * math.pi * (xs[-1]**3-xs[0]**3))
     print('--- --- --- --- --- --- ---')
     print(normalization_test, 'should be 1')
 
@@ -109,7 +110,9 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     klist = []
     k_old = kguess
     converged = False
+    
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+
     sigma_f = run.parameters['all']['sigma_f']
     nu = run.parameters['all']['nu']
     chi = run.parameters['all']['chi']
@@ -137,6 +140,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
     n_iters = 0
     normalization_list = []
+    calc_time_list = []
     normalization_list.append(normalization)
     normalization_old = normalization
     while converged == False and n_iters < 15: 
@@ -149,8 +153,11 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         # testing normalization
         output_ob  = make_output(tt, N_ang, ws, xs, normalized_source, M, edges, uncollided, geometry, N_groups)
         check_normalization(output_ob, uncollided_ob, xs)
-        # run solver
+        # run solver    
+        t1 = time.time()
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
+        t_calc = time.time - t1
+        calc_time_list.append(t_calc)
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x: k_old * phi_interpolated_new(x) * x**2 * 4 * math.pi # because nu and sigma_t are constant right now, I don't need them in the integrand
         integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi
@@ -183,7 +190,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             normalization_list.append(normalization)
             print(normalization2, 'norm analytic')
             print(normalization, 'norm interpolated')
-        plt.figure(74)
+        plt.figure(72)
         plt.plot(np.linspace(0, n_iters, n_iters+1)[1:], klist, '-o')
         plt.savefig('k_eff_converge.pdf')
         plt.show()
@@ -194,6 +201,16 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         plt.savefig('normalize_converge.pdf')
         plt.show()
         plt.close()
+          
+          
+        plt.figure(71)
+        plt.plot(np.linspace(0, n_iters, n_iters+1)[1:], calc_time_list, '-o')
+        plt.savefig('calculation_time_keff.pdf')
+        plt.show()
+        plt.close()
+
+
+
 
 power_iterate()
 

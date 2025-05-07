@@ -220,7 +220,7 @@ from scipy.optimize import newton_krylov
 
 def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer,
                           sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, jac=None,
-                          tol=1e-7, maxiter=10, use_gmres = False):
+                          tol=1e-7, maxiter=50, use_gmres = False):
     """
     Backward Euler solver using sparse matrix operations.
     """
@@ -265,26 +265,27 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
                 return csr_matrix((J_data, (J_rows, J_cols)), shape=(n, n))
 
         z = y.copy()
-        for _ in range(maxiter):
-            res = G(z)
-            if np.linalg.norm(res) < tol:
-                break
-            Jz = J(z)
-            lhs = identity(len(y)) - dt * Jz
-            # dz = spsolve(lhs, -res)
-            if use_gmres == True:
+        if use_gmres == True:
+            for _ in range(maxiter):
+                res = G(z)
+                if np.linalg.norm(res) < tol:
+                    break
+                Jz = J(z)
+                lhs = identity(len(y)) - dt * Jz
+                # dz = spsolve(lhs, -res)
+            
 
 
-                M = spilu(lhs)  # Create an ILU preconditioner
+                M = spilu(lhs)  # Create an ILU preconditioner (Seems to break numba)
                 M_x = lambda x: M.solve(x)
                 M_op = LinearOperator(lhs.shape, M_x)
                 dz, info = gmres(lhs, -res, M= M_op)
                 z += dz
                 
-            else:
-                # dz = spsolve(lhs, -res)
-                z = newton_krylov(G, y, f_tol=tol, maxiter=maxiter, verbose=0)
+        else:
+            # dz = spsolve(lhs, -res)
+            zsol = newton_krylov(G, y, f_tol=tol, maxiter=maxiter, verbose=0)
             
-        y = z
+        y = zsol
         Y[:, i] = y
     return Y

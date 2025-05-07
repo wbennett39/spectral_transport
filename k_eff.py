@@ -66,7 +66,7 @@ def check_normalization(output_ob, uncollided_ob, xs):
     plt.plot(xs, test_normalization_integrand(xs), 'k')
     plt.show()
     
-    normalization_test = integrate.quad(test_normalization_integrand, xs[0], xs[-1])[0]
+    normalization_test = integrate.quad(test_normalization_integrand, xs[0], xs[-1])[0] /( 4/3 * math.pi * (xs[-1]**3-xs[0]**3))
     print('--- --- --- --- --- --- ---')
     print(normalization_test, 'should be 1')
 
@@ -133,7 +133,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     # print('phi')
     normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi #* run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
     xs = run.xs
-    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]#do I need to normalize in each cell?
+    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] * 4/3 * math.pi * (xs[-1]**3-xs[0]**3)#do I need to normalize in each cell?
     normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
     n_iters = 0
     normalization_list = []
@@ -176,9 +176,9 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             klist.append(k_new)
             n_iters +=1
             phi_interpolated = phi_interpolated_new
-            normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi
+            normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi 
             normalization_old = normalization
-            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]
+            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] * 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
             normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
             normalization_list.append(normalization)
             print(normalization2, 'norm analytic')

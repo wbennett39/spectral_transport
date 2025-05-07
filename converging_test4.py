@@ -104,7 +104,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 2):
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
-        run.parameters['integrator'] = 'BDF'
+        run.parameters['integrator'] = 'Euler'
         print(run.parameters['integrator'], 'integrator methods')
 
         # menis_times = 

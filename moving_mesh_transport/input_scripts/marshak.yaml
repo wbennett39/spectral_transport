@@ -105,7 +105,7 @@
     'bench_type': 'full'          # 'S2' or 'full'
     'benchmarking': False
     'l': 1.0
-    
+    'shift': 0.0
 
 'dipole':
     'x0': [0.25]
@@ -118,6 +118,7 @@
 
 'self_sim_plane':
     'x0': [0.1]
+
     'l': 1.0
     'source_strength': 1.0                   # source initial width/2
     'source_type': [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0]

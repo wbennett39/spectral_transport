@@ -437,6 +437,7 @@ class run:
         self.eval_times = solver.eval_times
         self.edges = solver.edges
         self.sol_ob = solver.sol_object
+        self.uncollided_ob = solver.uncollided_ob
         
     def run_all(self):
         # self.plane_IC(True, True)

@@ -49,7 +49,7 @@ from .DMD_functions import DMD_func
 #     os.environ["JULIA_PYTHONCALL_EXE"] = "/usr/local/bin/julia"
 #     from julia.api import Julia
 #     jl = Julia(compiled_modules=True)
-#     from diffeqpy import de
+#     # from diffeqpy import de
 #     # from diffeqpy import ode
 #     # from .jl_integrator import integrator as jl_integrator_func
 # except:
@@ -552,7 +552,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 e = phi*0
     computation_time = end-start
     
-    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol
+    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol, uncollided_sol
 
 
 

@@ -131,7 +131,7 @@ class main_class(parameter_load_class):
                     specified_xs = 0.0
                 print(self.finite_domain, 'finite domain')
                 
-                xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol_object =  solve(
+                xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol_object, uncollided_ob =  solve(
                     self.tfinal,N_space, N_ang, M, self.N_groups, x0_new, self.t0, self.sigma_t, self.sigma_s, self.t_nodes, self.source_type, uncollided, moving, self.move_type, self.thermal_couple,
                     self.temp_function, self.rt, self.at, self.e_initial, choose_xs, specified_xs, self.weights, self.sigma, self.particle_v, self.edge_v, self.cv0, self.estimate_wavespeed, 
                     self.find_wave_loc, self.thick, self.mxstp, self.wave_loc_array, self.find_edges_tol, self.source_strength, self.move_factor, self.integrator, self.l, self.save_wave_loc, self.pad, 
@@ -232,6 +232,8 @@ class main_class(parameter_load_class):
                     self.exit_phi = exit_phi
                     self.edges = edges
                     self.sol_object = sol_object
+                    self.ws = ws
+                    self.uncollided_ob = uncollided_ob
                     # for it, t in enumerate(self.eval_array):
                     #     self.exit_phi[it, 0] = np.sum(np.multiply(self.ws, self.exit_dist[it, :, 0])) 
                     #     self.exit_phi[it, 1] = np.sum(np.multiply(self.ws, self.exit_dist[it, :, 1])) 

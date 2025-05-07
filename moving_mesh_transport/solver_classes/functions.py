@@ -520,6 +520,18 @@ def normTn(n,x,a=0,b=1.0):
         tmp[count] = norm * eval_Tn(n, z)
     return tmp 
 
+def normTn_intcell(j, a,b):
+    if j ==0:
+        return (math.sqrt(1/(-a + b))*(-a**3 + b**3))/(3.*math.sqrt(math.pi))
+    elif j == 1:
+        return ((a - b)**2*(a + b)*math.sqrt(-(1/(2*a*math.pi - 2*b*math.pi))))/3.
+    elif j == 2:
+        return (math.sqrt(2)*(a - b)*(a**2 + 3*a*b + b**2)*math.sqrt(-(1/(a*math.pi - b*math.pi))))/15.
+    elif j == 3:
+        return -0.2*((a - b)**2*(a + b)*math.sqrt(-(1/(2*a*math.pi - 2*b*math.pi))))
+    elif j == 4:
+        return (math.sqrt(2)*(a - b)*(5*a**2 - 3*a*b + 5*b**2)*math.sqrt(-(1/(a*math.pi - b*math.pi))))/105.
+
 
 
 @njit('float64[:](float64[:], float64, float64)')

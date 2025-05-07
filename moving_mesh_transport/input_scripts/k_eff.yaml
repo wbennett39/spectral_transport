@@ -1,7 +1,7 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'transport'
-    'tfinal': 100
+    'tfinal': 1500
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
@@ -11,9 +11,9 @@
     'chi': 1.0
     'nu': 2.2
     't0': 5.0                       # time the source is turned off
-    'N_spaces': [20]                   # number of cells
+    'N_spaces': [30]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [0]                         # number of basis functions -1
+    'Ms': [1]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-12                         # rel tolerance for ODE integrator
     'at': 1e-10                         # abs tolerance for ODE integrator
@@ -33,7 +33,7 @@
     'geometry': {slab: False, sphere: True}
     'N_groups': 1
     'lumping': False
-    'VDMD': True
+    'VDMD': False
     
 # plane pulse source
 'plane_IC':
@@ -137,9 +137,9 @@
 'fixed_source':
     'x0': [5.0]
     'l': 1.0
-    'shift': 50.0
+    'shift': 100.0
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [8]    # corresponds to N_spaces
+    'N_angles': [2]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

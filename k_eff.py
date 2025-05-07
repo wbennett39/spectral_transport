@@ -50,6 +50,40 @@ import scipy.integrate as integrate
 
 
 
+        # output_ob  = make_output(tt, N_ang, ws, xs, (run.sol_ob.y[:,-1] / normalization).reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
+        # phi = output_ob.make_phi(uncollided_sol)
+        # phi_interp_test = interp1d(xs, phi)
+        # test_normalization_integrand = lambda x: phi_interp_test(x)  * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
+        # normalization_test = integrate.quad(test_normalization_integrand, run.xs[0], run.xs[-1])[0]/(xs[-1]-xs[0])
+
+        # print(normalization_test, 'should be 1')
+def check_normalization(output_ob, uncollided_ob, xs):
+    phi = output_ob.make_phi(uncollided_ob)
+    phi_interp_test = interp1d(xs, phi)
+    test_normalization_integrand = lambda x: phi_interp_test(x)
+    normalization_test = integrate.quad(test_normalization_integrand, run.xs[0], run.xs[-1])[0]
+    print('--- --- --- --- --- --- ---')
+    print(normalization_test, 'should be 1')
+    print('--- --- --- --- --- --- ---')
+
+
+    
+def integrate_phi_cell(cs, ws, a, b, M, N_ang):
+    cell_volume = 4 * math.pi * (b**3 - a**3)
+    res = 0.0
+    for l in range(N_ang):
+        for j in range(M+1):
+            res += ws[l] * cs[l, j] * normTn_intcell(j, a, b)
+    return 4 * math.pi * res #* cell_volume
+
+
+def normalize_phi(VV, edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi):
+    norm_phi = np.zeros(N_space)
+    for ig in range(N_groups):
+        for ix in range(N_space):
+            norm_phi[ix] += integrate_phi_cell(VV[ig * N_ang: (ig+1) * N_ang, ix, :], ws, edges[ix], edges[ix+1], M, N_ang)
+    return norm_phi # * sigma_f * nu * chi
+
 
 run = run()
 # run.load('transport', 'mesh_parameters_modak_gupta')
@@ -64,33 +98,59 @@ run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
 def power_iterate(kguess = 1.0, tol = 1e-4):
     run.load('k_eff', 'mesh_parameters_keff')
+    klist = []
     k_old = kguess
     converged = False
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
-
+    sigma_f = run.parameters['all']['sigma_f']
+    nu = run.parameters['all']['nu']
+    chi = run.parameters['all']['chi']
     coeffs = run.sol_ob.y[:,-1]
+    N_ang = run.parameters['fixed_source']['N_angles'][0]
+    N_ang += 2
+    ws = run.ws
+    N_groups = run.parameters['all']['N_groups']
+    M = run.parameters['all']['Ms'][0]
+    N_space = run.parameters['all']['N_spaces'][0]
+    tt = run.parameters['all']['tfinal']
+    uncollided = False
+    geometry = run.parameters['all']['geometry']
+    uncollided_ob = run.uncollided_ib
+    edges = run.edges
 
     phi_interpolated = interp1d(run.xs, run.phi[:,0])
-    print(run.phi, 'run.phi')
-    print(phi_interpolated(run.xs))
-    print('phi')
-    normalized_integrand = lambda x: phi_interpolated(x) * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
+    # print(run.phi, 'run.phi')
+    # print(phi_interpolated(run.xs))
+    # print('phi')
+    # normalized_integrand = lambda x: phi_interpolated(x) * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
     xs = run.xs
-    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]*(xs[-1]-xs[0])
+    # normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]*(xs[-1]-xs[0]) #do I need to normalize in each cell?
+    normalization = normalize_phi(run.sol_ob.y[:, -1], edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
     n_iters = 0
-    while converged == False and n_iters > 10: 
+    normalization_list = []
+    normalization_list.append(normalization)
+    normalization_old = normalization
+    while converged == False and n_iters < 50: 
         #do curvilinear corrections come into the normalization?
         run.load('k_eff', 'mesh_parameters_keff')
-        sigma_f = run.parameters['all']['sigma_f']
+       
         run.parameters['all']['sigma_f'] = sigma_f / k_old
-        normalized_source = run.sol_ob.y[:,-1] / normalization
-        # output_ob = 
+        # normalize fission source
+        normalized_source = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups,N_space,M+1)))
+        for ix in range(N_space):
+            normalized_source *= 1 / normalization[ix]
+
+        # testing normalization
+        output_ob  = make_output(tt, N_ang, ws, xs, normalized_source, M, edges, uncollided, geometry, N_groups)
+        check_normalization(output_ob, uncollided_ob, xs)
+        # run solver
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x: k_old * phi_interpolated_new(x) / (phi_interpolated(x) + 1e-12) # because nu and sigma_t are constant right now, I don't need them in the integrand
         xs = run.xs
         plt.figure(201)
-        plt.plot(xs, integrand(xs))
+        plt.plot(xs, phi_interpolated(xs), label = f'iteration {n_iters}')
+        plt.legend()
         plt.show()
         # converged = True
         k_new = integrate.quad(integrand, xs[0], xs[-1])[0]/(xs[-1]-xs[0])
@@ -102,11 +162,25 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             converged = True
         else:
             k_old = k_new
+            klist.append(k_new)
             n_iters +=1
             phi_interpolated = phi_interpolated_new
             normalized_integrand = lambda x: phi_interpolated(x) * run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
-            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]*(xs[-1]-xs[0])
+            normalization_old = normalization
+            # normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0]*(xs[-1]-xs[0])
+            normalization = normalize_phi(run.sol_ob.y[:, -1], edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
+            # normalization_list.append(normalization)
+        plt.figure(74)
+        plt.plot(np.linspace(0, n_iters, n_iters+1)[1:], klist, '-o')
+        plt.savefig('k_eff_converge.pdf')
+        plt.show()
+        plt.close()
 
+        # plt.figure(74)
+        # plt.plot(np.linspace(0, n_iters, n_iters+1), normalization_list, '-o')
+        # plt.savefig('normalize_converge.pdf')
+        # plt.show()
+        # plt.close()
 
 power_iterate()
 

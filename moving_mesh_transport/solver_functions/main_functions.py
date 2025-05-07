@@ -42,7 +42,7 @@ import random
 import scipy
 # from .test_bessel import *
 import tqdm
-from .Euler import backward_euler, backward_euler_krylov
+from .Euler import backward_euler, backward_euler_krylov, backward_euler_sparse
 from .DMD_functions import DMD_func
 # try:
 #     import os
@@ -407,7 +407,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 500)
         ts = np.logspace(-5,math.log10(tfinal), 22 + 1)
-        Y = backward_euler(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+        Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)
 
@@ -463,7 +463,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if thermal_couple['none'] == 1:
         extra_deg_freedom = 0
        
-        sol_last = sol.y[:,-1].reshape((N_ang * N_groups,N_space,M+1))
+        sol_last = sol.y[:,-1].reshape((N_ang * N_groups, N_space, M+1))
         if eval_times ==True and sol.status != -1:
             sol_array = sol.y.reshape((eval_array.size, N_ang * N_groups, N_space, M+1)) 
     elif thermal_couple['none'] != 1:

@@ -211,3 +211,80 @@ if __name__ == '__main__':
     plt.plot(ts, np.exp(-ts), '-', label='exact')
     plt.legend()
     plt.show()
+
+import numpy as np
+from scipy.sparse import csr_matrix, identity
+from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import gmres, LinearOperator, spilu
+from scipy.optimize import newton_krylov
+
+def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer,
+                          sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, jac=None,
+                          tol=1e-7, maxiter=10, use_gmres = False):
+    """
+    Backward Euler solver using sparse matrix operations.
+    """
+    
+    m = y0.size
+    y = y0.copy()
+    Y  = np.zeros((m, len(ts)))
+    Y =  np.ascontiguousarray(Y)
+    Y[:,0] = y0
+
+    for i in range(1, len(ts)):
+        t_prev, t = ts[i-1], ts[i]
+        dt = t - t_prev
+
+        def G(z):
+            return z - y - dt * f(t, z, mesh, matrices, num_flux, source, uncollided_sol, flux,
+                                  transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+
+        def J(z):
+            if jac is not None:
+                return jac(t, z)
+            else:
+                # Finite difference Jacobian approximation (sparse)
+                n = len(z)
+                eps = 1e-8
+                J_data = []
+                J_rows = []
+                J_cols = []
+                f0 = f(t, z, mesh, matrices, num_flux, source, uncollided_sol, flux,
+                       transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+                for j in range(n):
+                    dz = np.zeros(n)
+                    dz[j] = eps
+                    f1 = f(t, z + dz, mesh, matrices, num_flux, source, uncollided_sol, flux,
+                           transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+                    df = (f1 - f0) / eps
+                    for i_ in range(n):
+                        if df[i_] != 0:
+                            J_rows.append(i_)
+                            J_cols.append(j)
+                            J_data.append(df[i_])
+                return csr_matrix((J_data, (J_rows, J_cols)), shape=(n, n))
+
+        z = y.copy()
+        for _ in range(maxiter):
+            res = G(z)
+            if np.linalg.norm(res) < tol:
+                break
+            Jz = J(z)
+            lhs = identity(len(y)) - dt * Jz
+            # dz = spsolve(lhs, -res)
+            if use_gmres == True:
+
+
+                M = spilu(lhs)  # Create an ILU preconditioner
+                M_x = lambda x: M.solve(x)
+                M_op = LinearOperator(lhs.shape, M_x)
+                dz, info = gmres(lhs, -res, M= M_op)
+                z += dz
+                
+            else:
+                # dz = spsolve(lhs, -res)
+                z = newton_krylov(G, y, f_tol=tol, maxiter=maxiter, verbose=0)
+            
+        y = z
+        Y[:, i] = y
+    return Y

@@ -114,7 +114,8 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     N_space = run.parameters['all']['N_spaces'][0]
     tt = run.parameters['all']['tfinal']
     uncollided = False
-    geometry = run.parameters['all']['geometry']
+    # geometry = run.parameters['all']['geometry']
+    geometry = run.geometry
     uncollided_ob = run.uncollided_ob
     edges = run.edges
 

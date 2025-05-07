@@ -18,7 +18,7 @@ from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
 import h5py 
-from time import time
+import time
 
 from moving_mesh_transport.solver_classes.functions import *
 from moving_mesh_transport.solver_classes.make_phi import make_output
@@ -137,7 +137,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi #* run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
     xs = run.xs
     normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] * 4/3 * math.pi * (xs[-1]**3-xs[0]**3)#do I need to normalize in each cell?
-    normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
+    normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
     n_iters = 0
     normalization_list = []
     calc_time_list = []
@@ -186,7 +186,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi 
             normalization_old = normalization
             normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] * 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
-            normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
+            normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
             normalization_list.append(normalization)
             print(normalization2, 'norm analytic')
             print(normalization, 'norm interpolated')

@@ -725,6 +725,7 @@ class rhs_class():
 
                         RHS += PV * self.c /self.sigma_t / self.l
                         RHS += fixed_source * self.sigma_f * self.nu * self.chi / self.sigma_t
+                 
 
                         RHS -= VV / self.sigma_t / self.l
                         RHS -= np.dot(MPRIME, U)

@@ -398,6 +398,7 @@ class sigma_integrator():
                         res[ix] =  self.sigma_t * 0.9 
                     else:
                         res[ix] = self.sigma_t * 1.0
+            print(res, 'sigma')
             return res
         elif self.sigma_func['modak_gupta1'] == 1:
             grain_size = 0.1

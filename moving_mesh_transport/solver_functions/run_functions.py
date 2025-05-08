@@ -68,6 +68,8 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -90,6 +92,8 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -111,6 +115,8 @@ class run:
         print("running square IC")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -139,6 +145,8 @@ class run:
         print("running square source")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -176,6 +184,8 @@ class run:
         print("running Gaussian IC")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -197,6 +207,8 @@ class run:
         print("running Gaussian source")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -218,6 +230,8 @@ class run:
         print("running MMS problem")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -240,6 +254,8 @@ class run:
         print("running boundary source problem")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -351,6 +367,8 @@ class run:
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         solver.randomstart = False
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -372,6 +390,8 @@ class run:
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         solver.randomstart = False
+        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -393,6 +413,8 @@ class run:
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         solver.randomstart = True
+        sol_coeffs = np.random.random(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        solver.fixed_source_coeffs = sol_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -415,6 +437,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters)
         if randomstart == True:
             sol_coeffs = np.random.random(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+            solver.fixed_source_coeffs = sol_coeffs
         else:
             solver.load_custom_source(sol_coeffs, randomstart) 
         if All == True:

@@ -119,6 +119,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     coeffs = run.sol_ob.y[:,-1]
     N_ang = run.parameters['fixed_source']['N_angles'][0]
     N_ang += 2
+    print(N_ang, 'N_ang in keff script')
     ws = run.ws
     N_groups = run.parameters['all']['N_groups']
     M = run.parameters['all']['Ms'][0]
@@ -148,7 +149,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         # scale sigma_f
         run.parameters['all']['sigma_f'] = sigma_f / k_old
         # normalize fission source
-        normalized_source = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups,N_space,M+1)))
+        normalized_source = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         normalized_source *= 1 / normalization
         # testing normalization
         output_ob  = make_output(tt, N_ang, ws, xs, normalized_source, M, edges, uncollided, geometry, N_groups)

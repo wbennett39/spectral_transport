@@ -190,7 +190,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
                        fixed_source_coeffs, chi, nu, sigma_f)
-
+    initialize.shift = shift
 
 
     if sigma_func['converging'] == 1:
@@ -233,7 +233,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     source.shift = shift
     mesh.shift = shift
     mesh.initialize_mesh()
-    build.shift = shift
+    
     print(mesh.edges, 'edges')
     print(mesh.Dedges_const, 'dedges const')
 
@@ -245,6 +245,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     if source_type[16] == 1:
         if randomstart == False:
+            print(fixed_source_coeffs, 'source coeffs')
+            print(fixed_source_coeffs.shape)
             initialize.IC = fixed_source_coeffs
             flux.make_fixed_phi(mesh.edges)
             print(flux.P_fixed, 'fixed source')

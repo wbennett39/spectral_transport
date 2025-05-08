@@ -68,6 +68,7 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -89,6 +90,7 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -109,6 +111,7 @@ class run:
         print("running square IC")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -136,6 +139,7 @@ class run:
         print("running square source")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -172,6 +176,7 @@ class run:
         print("running Gaussian IC")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -192,6 +197,7 @@ class run:
         print("running Gaussian source")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -212,6 +218,7 @@ class run:
         print("running MMS problem")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -233,6 +240,7 @@ class run:
         print("running boundary source problem")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -342,6 +350,7 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -362,6 +371,7 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = False
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -382,6 +392,7 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
+        solver.randomstart = True
         if All == True:
             solver.main(True, True)
             solver.main(False, True)

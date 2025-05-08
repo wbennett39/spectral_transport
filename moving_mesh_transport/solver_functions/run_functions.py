@@ -438,7 +438,9 @@ class run:
         if randomstart == True:
             sol_coeffs = np.random.random(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
             solver.fixed_source_coeffs = sol_coeffs
+            solver.randomstart = True
         else:
+            solver.randomstart = False
             solver.load_custom_source(sol_coeffs, randomstart) 
         if All == True:
             solver.main(True, True)

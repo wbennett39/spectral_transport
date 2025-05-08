@@ -67,7 +67,7 @@ def check_normalization(output_ob, uncollided_ob, xs):
     plt.plot(xs, test_normalization_integrand(xs), 'k')
     plt.show()
     
-    normalization_test = integrate.quad(test_normalization_integrand, xs[0], xs[-1])[0] *( 4/3 * math.pi * (xs[-1]**3-xs[0]**3))
+    normalization_test = integrate.quad(test_normalization_integrand, xs[0], xs[-1])[0]# *( 4/3 * math.pi * (xs[-1]**3-xs[0]**3))
     print('--- --- --- --- --- --- ---')
     print(normalization_test, 'should be 1')
 
@@ -112,6 +112,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     converged = False
     
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+    coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
 
     sigma_f = run.parameters['all']['sigma_f']
     nu = run.parameters['all']['nu']
@@ -137,7 +138,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
     # print('phi')
     normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi #* run.parameters['all']['nu'] * run.parameters['all']['sigma_t'] * run.parameters['all']['chi']
     xs = run.xs
-    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] * 4/3 * math.pi * (xs[-1]**3-xs[0]**3)#do I need to normalize in each cell?
+    normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] #* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)#do I need to normalize in each cell?
     normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
     n_iters = 0
     normalization_list = []
@@ -149,8 +150,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         # scale sigma_f
         run.parameters['all']['sigma_f'] = sigma_f / k_old
         # normalize fission source
-        normalized_source = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
-        print(normalized_source.shape, 'norm source shape')
+        normalized_source = coeffs_old
         normalized_source *= 1 / normalization
         # testing normalization
         output_ob  = make_output(tt, N_ang, ws, xs, normalized_source, M, edges, uncollided, geometry, N_groups)
@@ -158,6 +158,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         # run solver    
         t1 = time.time()
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
+        coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         t_calc = time.time() - t1
         calc_time_list.append(t_calc)
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
@@ -187,8 +188,8 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             phi_interpolated = phi_interpolated_new
             normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi 
             normalization_old = normalization
-            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] * 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
-            normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
+            normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] #* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
+            normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)#* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
             normalization_list.append(normalization)
             print(normalization2, 'norm analytic')
             print(normalization, 'norm interpolated')

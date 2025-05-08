@@ -415,7 +415,9 @@ class sigma_integrator():
                     z = (x[ix] - self.shift)/5.0
                     z0 = self.x0/5
                     intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size], [-z0 + 4*grain_size, -z0 + 5*grain_size],
-                                          [-z0 + 6*grain_size, -z0 + 7*grain_size], [-z0 + 8*grain_size, -z0 + 9*grain_size]])
+                                          [-z0 + 6*grain_size, -z0 + 7*grain_size], [-z0 + 8*grain_size, -z0 + 9*grain_size], [-z0 + 10*grain_size, -z0 + 11*grain_size], 
+                                          [-z0 + 12*grain_size, -z0 + 13*grain_size], [-z0 + 14*grain_size, -z0 + 15*grain_size], [-z0 + 16*grain_size, -z0 + 17*grain_size], 
+                                          [-z0 + 18*grain_size, -z0 + 19*grain_size]])
                     # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
                     for itt in range(5):
                         if intervals[itt,0] < z < intervals[itt, 1]:
@@ -434,7 +436,8 @@ class sigma_integrator():
                 for ix in range(x.size):
                     z = (x[ix] - self.shift)/5.0
                     z0 = self.x0/5
-                    intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size]])
+                    intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size], [-z0 + 4*grain_size, -z0 + 5*grain_size],
+                                          [-z0 + 6*grain_size, -z0 + 7*grain_size]])
                     # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
                     for itt in range(2):
                         if intervals[itt,0] < z < intervals[itt, 1]:

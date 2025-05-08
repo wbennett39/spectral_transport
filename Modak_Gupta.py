@@ -109,12 +109,12 @@ loader = load()
 benchmark_vals = {'0.0': np.array([-.763507, -1.57201, -2.98348, -5.10866]), '0.05': np.array([-.758893, -1.56062, -2.97899, -5.21764]),
                    '0.1': np.array([-.749672, -1.56062, -2.96323, -5.18772]), '0.25': np.array([-.703578, -1.45315, -3.07282, -5.26925]),
                    '0.5': np.array([-.551429, -1.71149, -2.94399, -5.28234])}
-# grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
-grain_sizes = ['0.05', '0.1', '0.25', '0.5']
+grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
 
 
-# problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
-problem_list = ['modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
+
+problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
+
 
 
 def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, sparse_time_points = 10):

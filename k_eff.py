@@ -105,27 +105,26 @@ run.parameters['all']['Ms'] = [0]
 run.parameters['random_IC']['N_angles'] = [2]
 run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
-def power_iterate(kguess = 1.0, tol = 1e-4):
+def power_iterate(kguess = 0.5, tol = 1e-5):
     run.load('k_eff', 'mesh_parameters_keff')
     klist = []
+    klist.append(kguess)
     k_old = kguess
     converged = False
-    
-    run.custom_source(randomstart = True, uncollided = 0, moving = 0)
-    coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
-
     sigma_f = run.parameters['all']['sigma_f']
     nu = run.parameters['all']['nu']
     chi = run.parameters['all']['chi']
     coeffs = run.sol_ob.y[:,-1]
     N_ang = run.parameters['fixed_source']['N_angles'][0]
     N_ang += 2
-
     ws = run.ws
     N_groups = run.parameters['all']['N_groups']
     M = run.parameters['all']['Ms'][0]
     N_space = run.parameters['all']['N_spaces'][0]
     tt = run.parameters['all']['tfinal']
+    run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+    coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
+
     uncollided = False
     # geometry = run.parameters['all']['geometry']
     geometry = run.geometry
@@ -151,7 +150,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         run.parameters['all']['sigma_f'] = sigma_f / k_old
         # normalize fission source
         normalized_source = coeffs_old
-        normalized_source *= 1 / normalization
+        # normalized_source *= 1 / normalization
         # testing normalization
         output_ob  = make_output(tt, N_ang, ws, xs, normalized_source, M, edges, uncollided, geometry, N_groups)
         check_normalization(output_ob, uncollided_ob, xs)
@@ -160,9 +159,11 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         t_calc = time.time() - t1
-        calc_time_list.append(t_calc)
+        
+        
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
-        integrand = lambda x: k_old * phi_interpolated_new(x) * x**2 * 4 * math.pi # because nu and sigma_t are constant right now, I don't need them in the integrand
+
+        integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi # because nu and sigma_t are constant right now, I don't need them in the integrand
         integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi
         xs = run.xs
         plt.figure(201)
@@ -171,7 +172,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         plt.show()
         plt.savefig('phi_sol_iterations.pdf')
         # update k
-        k_new = integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
+        k_new = k_old * integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         if k_new <0:
             raise ValueError('negative k_eff')
         # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
@@ -191,11 +192,16 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
             normalization = integrate.quad(normalized_integrand, run.xs[0], run.xs[-1])[0] #* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
             normalization2 = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)#* 4/3 * math.pi * (xs[-1]**3-xs[0]**3)
             normalization_list.append(normalization)
+            calc_time_list.append(t_calc)
             print(normalization2, 'norm analytic')
             print(normalization, 'norm interpolated')
         plt.figure(72)
-        plt.plot(np.linspace(0, n_iters, n_iters+1)[1:], klist, '-o')
+        plt.plot(np.linspace(0, n_iters, n_iters+1), klist, '-o')
+        # plt.ylim(0, np.max(klist) *1.1)
+        plt.xlabel('iteration', fontsize = 16)
+        plt.ylabel(r'$k_\mathrm{eff}$', fontsize = 16)
         plt.savefig('k_eff_converge.pdf')
+        
         plt.show()
         plt.close()
 

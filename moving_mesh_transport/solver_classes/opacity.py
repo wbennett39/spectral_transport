@@ -395,10 +395,12 @@ class sigma_integrator():
                         if intervals[itt,0] < z < intervals[itt, 1]:
                             grain1 = True
                     if grain1 == True:
+                        assert 0
                         res[ix] =  self.sigma_t * 0.9 
                     else:
                         res[ix] = self.sigma_t * 1.0
-            print(res, 'sigma')
+                print(res, 'sigma')
+                print(x, 'x')
             return res
         elif self.sigma_func['modak_gupta1'] == 1:
             grain_size = 0.1

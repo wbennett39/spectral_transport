@@ -244,10 +244,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     initialize.make_IC(mesh.edges, randomstart)
 
     if source_type[16] == 1:
+        print(1)
+        print(randomstart)
         if randomstart == False:
             initialize.IC = fixed_source_coeffs
             flux.make_fixed_phi(mesh.edges)
             print(flux.P_fixed, 'fixed source')
+            assert 0
         else:
             flux.fixed_source_coeffs = initialize.IC
             flux.make_fixed_phi(mesh.edges)

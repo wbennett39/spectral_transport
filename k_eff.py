@@ -156,7 +156,7 @@ def power_iterate(kguess = 1.0, tol = 1e-4):
         # run solver    
         t1 = time.time()
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
-        t_calc = time.time - t1
+        t_calc = time.time() - t1
         calc_time_list.append(t_calc)
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x: k_old * phi_interpolated_new(x) * x**2 * 4 * math.pi # because nu and sigma_t are constant right now, I don't need them in the integrand

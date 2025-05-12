@@ -241,6 +241,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if thermal_couple['none'] != 1:
         mesh.move(0)
         initialize.make_T4_IC(transfer, mesh.edges)
+
     initialize.make_IC(mesh.edges, randomstart)
 
     if source_type[16] == 1:
@@ -256,6 +257,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
 
     IC = initialize.IC
+    print(IC, 'IC')
 
     reshaped_IC = IC.reshape(deg_freedom)
 

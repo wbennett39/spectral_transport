@@ -394,8 +394,8 @@ class sigma_integrator():
                                           [-z0 + 30*grain_size, -z0 + 31*grain_size], [-z0 + 32*grain_size, -z0 + 33*grain_size], [-z0 + 34*grain_size, -z0 + 35*grain_size],
                                           [-z0 + 36*grain_size, -z0 + 37*grain_size], [-z0 + 38*grain_size, -z0 + 39*grain_size]])
                     # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
-                    for itt in range(10):
-
+                    for itt in range(intervals[:,0].size):
+                        print(itt)
                         if intervals[itt,0] < z < intervals[itt, 1]:
                             grain1 = True
                     if grain1 == True:
@@ -405,7 +405,7 @@ class sigma_integrator():
             if np.all(res != res[0]):
                 print('cells not aligned to grain')
                 print(res)
-
+        
             return res
         elif self.sigma_func['modak_gupta1'] == 1:
             grain_size = 0.1
@@ -422,7 +422,7 @@ class sigma_integrator():
                                           [-z0 + 12*grain_size, -z0 + 13*grain_size], [-z0 + 14*grain_size, -z0 + 15*grain_size], [-z0 + 16*grain_size, -z0 + 17*grain_size], 
                                           [-z0 + 18*grain_size, -z0 + 19*grain_size]])
                     # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
-                    for itt in range(5):
+                    for itt in range(intervals[:,0].size):
                         if intervals[itt,0] < z < intervals[itt, 1]:
                             grain1 = True
                     if grain1 == True:
@@ -445,7 +445,7 @@ class sigma_integrator():
                     intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size], [-z0 + 4*grain_size, -z0 + 5*grain_size],
                                           [-z0 + 6*grain_size, -z0 + 7*grain_size]])
                     # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
-                    for itt in range(2):
+                    for itt in range(intervals[:,0].size):
                         if intervals[itt,0] < z < intervals[itt, 1]:
                             grain1 = True
                     if grain1 == True:

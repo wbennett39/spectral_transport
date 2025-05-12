@@ -11,12 +11,12 @@
     'chi': 1.0
     'nu': 2.2
     't0': 5.0                       # time the source is turned off
-    'N_spaces': [80]                   # number of cells
+    'N_spaces': [160]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [3]                         # number of basis functions -1
+    'Ms': [4]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
-    'rt': 1e0                         # rel tolerance for ODE integrator
-    'at': 1e0                         # abs tolerance for ODE integrator
+    'rt': 1e-10                         # rel tolerance for ODE integrator
+    'at': 1e-11                       # abs tolerance for ODE integrator
     'mxstp': 1.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
     'radiative_transfer': {none: True}             # material temperature feedback. 1-True, 0 - False
@@ -131,6 +131,6 @@
     'shift': 500.0
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
-    'N_angles': [96]    # corresponds to N_spaces
+    'N_angles': [512]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

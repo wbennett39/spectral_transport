@@ -470,7 +470,6 @@ class rhs_class():
         #     V_old[ang,:,:] = new_energy_vec
         
         
-        
         self.time_step_counter(t, mesh, V_old)
         
         # move mesh to time t 
@@ -608,8 +607,6 @@ class rhs_class():
                     # if (H <0).any():
                     #     print(H)
                     #     assert 0 
-
-                    
                 
                     #T_old saves the temperature at the zeros of the interpolating polynomial
                     # print(H)
@@ -669,7 +666,7 @@ class rhs_class():
                     # calculate numerical flux
                     refl_index = 0
                     if space == 0:
-                        if abs(xL) <= 1e-10:
+                        if abs(xL) <= 1e-8:
                             if angle >= (self.N_ang)/2:
                                 assert(self.mus[angle] > 0)
                                 refl_index = self.N_ang-angle-1
@@ -709,8 +706,6 @@ class rhs_class():
 
 
                     if self.geometry['sphere'] == True:  
-                        a = xL
-                        b = xR
                         RHS = V_old[angle, space, :]*0
                         RHS -=  LU
                         RHS +=  mul*np.dot(L,U)

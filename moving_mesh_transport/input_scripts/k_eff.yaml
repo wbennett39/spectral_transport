@@ -7,7 +7,7 @@
     'epsilon': 1.0
     'sigma_t': 10.0
     'sigma_s': 9.0
-    'sigma_f': .39
+    'sigma_f': .1
     'chi': 1.0
     'nu': 2.2
     't0': 5.0                       # time the source is turned off
@@ -137,9 +137,9 @@
 'fixed_source':
     'x0': [5.0]
     'l': 1.0
-    'shift': 50.0
+    'shift': 5.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [4]    # corresponds to N_spaces
+    'N_angles': [64]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

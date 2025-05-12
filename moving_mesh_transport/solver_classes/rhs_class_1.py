@@ -670,7 +670,7 @@ class rhs_class():
                             if angle >= (self.N_ang)/2:
                                 assert(self.mus[angle] > 0)
                                 refl_index = self.N_ang-angle-1
-                                assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10)
+                                assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10) 
                         # print(self.mus[])
                         
                     num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
@@ -745,7 +745,7 @@ class rhs_class():
 
 
                         #     V_new[angle,space,:] = RHS * 0
-                        if angle == 0:
+                        if angle == 0 or space == 0:
                             # psionehalf = V_old[0, space, :]
                             psionehalf = u_old
                             # psionehalf, self.psi_onehalf_old = psi_onehalf_function(self.psi_onehalf_old)÷

@@ -1620,7 +1620,11 @@ class mesh_class(object):
                         self.shell_source()
                     else:
                         self.edges = np.zeros(self.N_space+1)
-                        self.edges[1:] = np.linspace(self.x0, self.x0 + self.tfinal, self.N_space)
+                        # self.edges[1:] = np.linspace(self.x0, self.x0 + self.tfinal, self.N_space)
+                        self.edges = np.linspace(0, self.x0 + self.tfinal)
+                        close_edge = np.argmin(np.abs(self.x0- self.edges))
+                        self.edges[close_edge] = self.x0
+                        self.edges = np.sort(self.edges)
                         self.Dedges = self.edges * 0
                         self.Dedges_const = self.Dedges
                         self.edges0 = self.edges

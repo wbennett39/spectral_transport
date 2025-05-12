@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import math
 from .VDMD import VDMD2 as VDMD_func
 from pathlib import Path
-from ..solver_classes.functions import find_nodes
+from ..solver_classes.functions import find_nodes, normalize_phi
 from ..solver_classes.functions import Pn, normTn
 from .Chebyshev_matrix_reader import file_reader
 from ..solver_classes.build_problem import build
@@ -245,14 +245,25 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     initialize.make_IC(mesh.edges, randomstart)
 
     if source_type[16] == 1:
+        print('normalizing source')
+        normalization = normalize_phi(fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups)
+        normalization = 1
+        print(normalization, 'normalization factor')
+        
+        fixed_source_coeffs_norm = fixed_source_coeffs/normalization
+        print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
+        initialize.fixed_source_coeffs = fixed_source_coeffs_norm
+        flux.fixed_source_coeffs = fixed_source_coeffs_norm
         if randomstart == False:
-            print(fixed_source_coeffs, 'source coeffs')
-            print(fixed_source_coeffs.shape)
             initialize.IC = fixed_source_coeffs
             flux.make_fixed_phi(mesh.edges)
-            print(flux.P_fixed, 'fixed source')
         else:
             flux.fixed_source_coeffs = initialize.IC
+            normalization = normalize_phi(flux.fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups)
+            normalization = 1
+            flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
+            initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
+            initialize.IC = initialize.IC #/ normalization
             flux.make_fixed_phi(mesh.edges)
 
 

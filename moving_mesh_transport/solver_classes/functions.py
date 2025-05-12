@@ -519,7 +519,7 @@ def normTn(n,x,a=0,b=1.0):
 
         tmp[count] = norm * eval_Tn(n, z)
     return tmp 
-
+@njit
 def normTn_intcell(j, a,b):
     if j ==0:
         return (math.sqrt(1/(-a + b))*(-a**3 + b**3))/(3.*math.sqrt(math.pi))
@@ -998,4 +998,21 @@ def mass_lumper(Mass, a, b, invert = True):
                 return mass_lumped, mass_lumped_inv
             else:
                 return mass_lumped, mass_lumped_inv
-    
+@njit
+def integrate_phi_cell(cs, ws, a, b, M, N_ang):
+    # cell_volume = 4 * math.pi * (b**3 - a**3)
+    psi = np.zeros(N_ang)
+    for l in range(N_ang):
+        for j in range(M+1):
+            psi[l] += cs[l, j] * normTn_intcell(j, a, b)
+    res = np.sum(np.multiply(psi,ws))
+    return 4 * math.pi * res #* cell_volume
+
+
+@njit
+def normalize_phi(VV, edges, ws, N_ang, M, N_space, N_groups):
+    norm_phi = np.zeros(N_space)
+    for ig in range(N_groups):
+        for ix in range(N_space):
+            norm_phi[ix] += integrate_phi_cell(VV[ig * N_ang: (ig+1) * N_ang, ix, :], ws, edges[ix], edges[ix+1], M, N_ang)
+    return np.sum(norm_phi) # * sigma_f * nu * chi

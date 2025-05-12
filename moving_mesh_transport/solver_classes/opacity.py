@@ -395,7 +395,6 @@ class sigma_integrator():
                                           [-z0 + 36*grain_size, -z0 + 37*grain_size], [-z0 + 38*grain_size, -z0 + 39*grain_size]])
                     # if (-z0 <= z <= -z0 + grain_size) or  ( -z0 + 2*grain_size <= z <= -z0 + 3*grain_size) or  ( -z0 + 4*grain_size <= z <= -z0 + 5 * grain_size) or  ( -z0 + 6*grain_size <= z <= -z0 + 7 *grain_size) or  ( -z0 + 8*grain_size <= z <= -z0 + 9 *grain_size) or  ( -z0 + 10*grain_size<= z <= -z0+ 11* grain_size) or  (-z0 + 12 * grain_size <= z <= -z0 + 13 *grain_size) or  (-z0+ 14 * grain_size <= z <= -z0 + 15* grain_size) or  (-z0 + 16 * grain_size <= z <= -z0 + 17 *grain_size) or  (-z0 + 18* grain_size<= z <= -z0 + 19 *grain_size):
                     for itt in range(intervals[:,0].size):
-                        print(itt)
                         if intervals[itt,0] < z < intervals[itt, 1]:
                             grain1 = True
                     if grain1 == True:
@@ -440,7 +439,7 @@ class sigma_integrator():
             else:
                 res = self.sigma_t + x*0
                 for ix in range(x.size):
-                    z = (x[ix] - self.shift)/5.0
+                    z = (x[ix] - self.shift)/self.x0
                     z0 = self.x0/5
                     intervals = np.array([[-z0, -z0 + grain_size], [-z0 + 2*grain_size, -z0 + 3*grain_size], [-z0 + 4*grain_size, -z0 + 5*grain_size],
                                           [-z0 + 6*grain_size, -z0 + 7*grain_size]])
@@ -463,7 +462,7 @@ class sigma_integrator():
             else:
                 res = self.sigma_t + x*0
                 for ix in range(x.size):
-                    z = (x[ix] - self.shift)/5.0
+                    z = (x[ix] - self.shift)/self.x0
                     z0 = self.x0/5
                     if z < 0:
                         res[ix] =  self.sigma_t * 0.9 

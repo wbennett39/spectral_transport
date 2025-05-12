@@ -112,9 +112,8 @@ benchmark_vals = {'0.0': np.array([-.763507, -1.57201, -2.98348, -5.10866]), '0.
 grain_sizes = ['0.0', '0.05', '0.1', '0.25', '0.5']
 
 
-
-# problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
-problem_list = ['modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
+problem_list = ['modak_gupta0', 'modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
+# problem_list = ['modak_gupta05', 'modak_gupta1', 'modak_gupta25', 'modak_gupta5']
 
 
 

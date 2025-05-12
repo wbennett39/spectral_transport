@@ -64,7 +64,8 @@ run.parameters['all']['N_spaces'] = [5]
 run.parameters['all']['Ms'] = [0]
 run.parameters['square_IC']['N_angles'] = [2]
 run.square_IC(0,0)
-
+def RMSE(l1, l2):
+    return np.sqrt(np.mean((l1-l2)**2))
 time_list = [0.1, 0.5, 1.0, 5.0, 10.0]
 
 N_space_list = [5, 10, 20, 40, 80]
@@ -73,7 +74,7 @@ def get_bench(xs, t):
     return ob[1] + ob[2]
 
 def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256):
-    if run_results == True:
+    if run_results == True: #re-run calculations
         f = h5py.File('shell_source.h5', 'r+')
         f.close()
         for it, tt in enumerate(time_list):
@@ -84,12 +85,34 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 run.parameters['all']['tfinal'] = tt
                 run.square_IC(uncollided, moving_mesh)
                 f = h5py.File('shell_source.h5', 'r+')
-                save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}'
+                save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}'
                 if f.__contains__(save_string):
                     del f[save_string]
                 f.create_dataset(save_string, data = np.array([run.xs, run.phi]))
                 f.close()
-        
+    # plot benchmark results
+
+    for it, tt in enumerate(time_list):
+        err_list = np.array(N_space_list) * 0
+        for k, space in enumerate(N_space_list):
+            f = h5py.File('shell_source.h5', 'r+')
+            save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}'
+            res = f[save_string][:,:]
+            xs = res[0]
+            phi = res[1]
+            bench = get_bench(xs, tt)
+            err_list[k] = RMSE(phi, bench)
+
+        plt.plot(N_space_list, err_list / get_bench(np.array([0]), tt)[0], '-o', mfc = 'none')
+        plt.xlabel('spatial cells', fontsize = 16)
+        plt.ylabel('scaled RMSE')
+        plt.title(f'{N_ang} angles, M={M}') 
+        plt.savefig(f'shell_source_RMSE_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf')
+        plt.close()
+
+
+
+square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[10, 20], N_ang = 4)
     
 
 

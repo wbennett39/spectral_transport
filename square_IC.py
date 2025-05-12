@@ -88,7 +88,10 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}'
                 if f.__contains__(save_string):
                     del f[save_string]
-                f.create_dataset(save_string, data = np.array([run.xs, run.phi]))
+                dat = np.zeros((2, run.xs.size))
+                dat[0] = run.xs
+                dat[1] = run.phi.transpose()
+                f.create_dataset(save_string, data = dat)
                 f.close()
     # plot benchmark results
 
@@ -103,11 +106,16 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             bench = get_bench(xs, tt)
             err_list[k] = RMSE(phi, bench)
 
-        plt.plot(N_space_list, err_list / get_bench(np.array([0]), tt)[0], '-o', mfc = 'none')
+        plt.plot(N_space_list, err_list / bench[0], '-o', mfc = 'none')
         plt.xlabel('spatial cells', fontsize = 16)
         plt.ylabel('scaled RMSE')
         plt.title(f'{N_ang} angles, M={M}') 
         plt.savefig(f'shell_source_RMSE_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf')
+        plt.close()
+
+        plt.plot(run.xs, run.phi, 'o', mfc = 'none')
+        plt.plot(run.xs, bench, 'k-')
+        plt.savefig(f'shell_source_solution_t={tt}.pdf')
         plt.close()
 
 

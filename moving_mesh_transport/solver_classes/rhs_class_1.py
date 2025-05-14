@@ -19,7 +19,7 @@ from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
 from .functions import finite_diff_uneven_diamond, alpha_difference
-from .functions import converging_time_function, converging_r, make_u_old
+from .functions import converging_time_function, converging_r, make_u_old, legendre_difference
 import numba as nb
 from numba import prange
 from numba.experimental import jitclass
@@ -184,8 +184,8 @@ class rhs_class():
         self.c_a = build.sigma_a / build.sigma_t
         
         self.mean_free_time = 1/build.sigma_t
-        self.division = 5000
-        self.counter = 5000
+        self.division = 2000
+        self.counter = 2000
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])
@@ -195,11 +195,12 @@ class rhs_class():
         self.save_derivative = build.save_wave_loc
         self.sigma_func = build.sigma_func
         self.deg_freedom = shaper(self.N_ang, self.N_space, self.M + 1, self.thermal_couple)
-        self.alphams = np.zeros(self.N_ang + 1)
+        self.alphams = np.zeros(self.N_ang -1)
         self.x0 = build.x0
         timepoints = 2048
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
+        # self.alphas = np.zeros(self.N_ang-1)
         self.alphas = np.zeros(self.N_ang-1)
         # print(self.mus, 'mus')
         # print(self.ws, 'ws')
@@ -232,6 +233,7 @@ class rhs_class():
         self.chi = build.chi
         self.nu = build.nu
         self.sigma_f = build.sigma_f
+        print(np.sum(self.ws), 'sum ws')
         
         
         
@@ -312,10 +314,15 @@ class rhs_class():
         """
         This function uses a recursion relation to calculate the alpha coefficients for the diamond difference angular derivative. 
         """
+        # middle = int((self.N_ang)/2)
         self.alphas[0] = 0
-        for ia in range(1,self.N_ang-1):
+        # for ia in range(1,self.N_ang):
+        for ia in range(1, self.alphas.size):
             self.alphas[ia] = self.alphas[ia-1] - self.mus[ia] * self.ws[ia] * 2
-        # print(self.alphas)
+        # print(self.alphas[:middle])
+        # print(self.alphas[middle:])
+        # self.alphas[:middle] = np.flip(self.alphas[middle:])
+        print(self.alphas, 'alphas')
 
 
 
@@ -462,59 +469,28 @@ class rhs_class():
             # V_new = V.copy().reshape((self.deg_freedom[0], self.deg_freedom[1], self.deg_freedom[2]))
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
-        # if self.VDMD == True:
-        #     self.VDMD_func(t, V_old)
-
-        # for ang in range(self.N_ang+1):
+        # for ang in range(self.N_ang+1): #attempt at positivizing T
         #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
         #     V_old[ang,:,:] = new_energy_vec
-        
-        
         self.time_step_counter(t, mesh, V_old)
-        
-        # move mesh to time t 
-
-        # V_new = self.V_new_floor_func(V_new)
         self.time_marching_func(t, mesh.told)
         if mesh.told <= t:
             self.edges_old = mesh.edges
         else:
             mesh.move(np.max((self.t_old_list < t)))
             self.edges_old = mesh.edges
-
-            # print(t,np.max((self.t_old_list < t)), 't, told' )
-
-
         mesh.move(t)
         if self.slope_limiter == True and self.M>0:
             V_old_new = self.slope_scale(V_old, mesh.edges)
             V_old = V_old_new
-            # V_old = self.slope_scale(V_old, mesh.edges, stop = True)
-
-        # represent opacity as a polynomial expansion
-        # self.T_old[:,0] = 1.0
-        # time_loc = np.argmin(np.abs(self.time_points - t))
-        # print(self.T_old[time_loc])
-        # if self.T_old[time_loc, 0,0] == np.zeros(self.xs_quad.size):
-        #     time_loc -= 1
         if self.radiative_transfer['none'] == 0:
             self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
-
-        # print(self.T_eval_points, 'T eval')
-        # for ix in range(self.N_space):
-        #     for j in range(self.xs_quad.size):
-        #         if self.T_old[ix, j] <0.0:
-        #             assert(0)
-
         sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class)
         # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
         update = True
-
         # iterate over all cells
         for space in range(self.N_space): 
-
-             
             # get mesh edges and derivatives          
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]
@@ -528,47 +504,38 @@ class rhs_class():
                     update = False
                 else:
                     update = True
-   
-            # rfront = 0.01 * (-menis_t) ** 0.679502 
-            # matrices.matrix_test(True)
+            # matrices.matrix_test(True) # tests matrices against analytic functions
             if update == False:
                 V_new[:, space, :] = V_old[:, space, :] * 0
+                assert 0 
             
             elif update == True:
-                u_old = make_u_old(V_old[0, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M)
-
-        
+                # u_old = make_u_old(V_old[0, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
+                u_old = V_old[0, space, :]
                 matrices.make_all_matrices(xL, xR, dxL, dxR)
-
                 L = matrices.L
                 G = matrices.G
                 MPRIME = matrices.MPRIME
-
                 if self.radiative_transfer['none'] == False:
                     flux.make_P(V_old[:-1,space,:], space, xL, xR)
                 else:
                     flux.make_P(V_old[:,space,:], space, xL, xR)
-        
                 PV = flux.scalar_flux_term
                 fixed_source = flux.P_fixed[space, self.g, :]
                 source.make_source(t, xL, xR, uncollided_sol)
                 S = source.S
                 H = transfer_class.H
                 if self.geometry['sphere'] == True:
-
                     Mass = matrices.Mass
                     J = matrices.J
                     if (self.lumping == True) and (self.M >0):
                         # Mass, Minv = self.mass_lumper(Mass, True) 
                         Mass, Minv = mass_lumper(Mass, xL, xR)
                         # L, Linv = mass_lumper(L, xL, xR, invert = False)
-
-                        # print(Minv)
                         # L = self.mass_lumper(L)
                         # G = self.mass_lumper(G)
                         # J = self.mass_lumper(J)
                         # MPRIME = self.mass_lumper(MPRIME)
-                        
                     else:
                         Minv = np.linalg.inv(Mass)
 
@@ -577,77 +544,30 @@ class rhs_class():
                 
                 # integrate the source
                 # source.make_source(t, xL, xR, uncollided_sol)
-                #print(source.make_source(t, xL, xR, uncollided_sol))
-
-
-                
-                #if ( (S[0]!=0.0) or (S[1]!=0.0) ):
-                    #print("Nonzero source.S in rhs_class: ", S)
-
                 # radiative transfer term
-                
-                # def testsoln(a, b):
-                #     """ Calculates the value of the analytic solution for H when a simple function is used,
-                #     to test whether the temperature function is being integrated properly."""
-                #     test = np.sqrt(1/(np.pi*(b-a)) ) * ((a**2 - 2)*np.cos(a) - 2*a*np.sin(a) - (b**2 - 2)*np.cos(b) + 2*b*np.sin(b))
-                #     return test
-
                 if self.radiative_transfer['none'] == False:
-
-                    # print(V_old[self.N_ang, space, :], 'v old')
                     if self.g ==0:
                         transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
-
                     H = transfer_class.H
-
-                    # if self.lumping == True:
+                    # if self.lumping == True: #attempts at lumping transfer matrix
                     #     H = mass_lumper(H, xL, xR)[0]
-                    # if self.lumping == True:
-                    #     H = self.mass_lumper(H)
-                    # if (H <0).any():
-                    #     print(H)
-                    #     assert 0 
-                
                     #T_old saves the temperature at the zeros of the interpolating polynomial
-                    # print(H)
                     # time_loc = np.argmin(np.abs(self.time_points - t))
                     # self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
-                    # print(self.T_old[space], 'T old')
-
                     ######### solve thermal couple ############
                     U = V_old[-1,space,:]
-
                     num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :], True)
                     RU = num_flux.LU 
                     RHS_transfer = np.copy(V_old[-1, space, :]*0)
-
                     if self.uncollided == True:
                         RHS_transfer += self.c_a *source.S * 2 
-
-                        #RHS_transfer += source.S * 2
-                    #print("source.S = ", source.S)
                     RHS_transfer -= RU
- 
-                    # if space == self.N_space -1:
-                    #     print(RU)
-
                     RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
-
                     RHS_transfer += self.c_a * PV*2 /self.sigma_t 
-
-                    # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)>=1e-10).any():
-                    #     print(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t, 'transfer change')
-                    # if np.max(np.abs(2*PV-H)) <= 1e-6:
-                    #     print('equilibrium', space)
-                    # else:
-                    #     print(2*PV, '2PV')
-                    #     print(H,'H')
-                    # print(np.sign(self.c_a *H /self.sigma_t), 'sign H')
                     RHS_transfer = np.dot(RHS_transfer, Minv)
                     if self.l != 1.0:
                         RHS_transfer = RHS_transfer / self.l
                     V_new[-1,space,:] = RHS_transfer 
-
                     # not changing cell if in equilibrium
                     # print(RHS_transfer, 'rhs transfer')
                     # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)<=1e-8).all():
@@ -655,113 +575,66 @@ class rhs_class():
                     if np.isnan(V_new[-1, space, :]).any():
                         print('rhstransfer is nan')
                         assert(0)
-                    # print(RHS_transfer, 'rhs transfer')
                 ########## Starting direction #########
-                psionehalf = V_old[0, space, :] 
-
+                # psionehalf = V_old[0, space, :] # should this be make_u_old_func?
+                psionehalf = u_old
                 ########## Loop over angle ############
                 for angle in range(self.N_ang):
-                    
+                    # psin = make_u_old(V_old[angle, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
+                    psin = V_old[angle, space, :]
                     mul = self.mus[angle]
                     # calculate numerical flux
                     refl_index = 0
                     if space == 0:
                         if abs(xL) <= 1e-8:
-                            if angle >= (self.N_ang)/2:
-                                assert(self.mus[angle] > 0)
+                            if self.mus[angle] > 0:
                                 refl_index = self.N_ang-angle-1
                                 assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10) 
-                        # print(self.mus[])
-                        
                     num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
-
-                    # new r=0 BC
+                    # new r=0 BC # not sure what the reasoning was behind this
                     # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)
-
-                    
-                        # print(self.mus[self.N_ang-angle-1], -self.mus[angle])
-                        
-                    LU = num_flux.LU
+                    LU = num_flux.LU 
                     # Get absorption term
                     # sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
                     sigma_class.make_vectors(mesh.edges, V_old[angle,space,:], space)
                     VV = sigma_class.VV
                     # Initialize solution vector, RHS
                     U = np.zeros(self.M+1).transpose()
-
-
                     U[:] = V_old[angle,space,:]
-
-
-                    dterm = U*0
-                    if angle > 0 and angle != self.N_ang-1:
-                        for j in range(self.M+1):
-                            # vec = (1-self.mus**2) * V_old[:, space, j]
-                            # if angle != 0 and angle != self.N_ang-1:
-                                
-                            # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
-                            # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
-                            dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], V_old[angle, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False )
-
-
+                    dterm = U.copy()*0
+                    mu_derivative = legendre_difference(self.ws, self.N_ang, self.N_ang-2, V_old[:, space, :], J, self.M, self.mus, self.mus[angle] )
+                    # if angle > 0 and angle != self.N_ang-1:
+                    #     for j in range(self.M+1):
+                    #         # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
+                    #         # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
+                    #         dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
 
                     if self.geometry['sphere'] == True:  
+                    
                         RHS = V_old[angle, space, :]*0
-                        RHS -=  LU
-                        RHS +=  mul*np.dot(L,U)
-                        mu_derivative =  np.dot(J, dterm)
-                        RHS -= mu_derivative
-                        RHS += np.dot(G, U)
-                        
-                        RHS += 0.5 * S /self.sigma_t / self.l
-                
-
-                        RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l
-
-                        RHS += PV * self.c /self.sigma_t / self.l
-                        RHS += fixed_source * self.sigma_f * self.nu * self.chi / self.sigma_t
-                 
-
-                        RHS -= VV / self.sigma_t / self.l
-                        RHS -= np.dot(MPRIME, U)
-                        RHS = np.dot(Minv, RHS)
-                        # if (np.abs(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l)>=1e-10).any():
-                        #     print(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l, 'radiation change')
-                        #     print(self.c_a * H * 0.5 / self.sigma_t / self.l, 'H term')
-                        #     print(VV / self.sigma_t / self.l, 'VV')
-
-                
+                        RHS -=  LU # numerical flux 
+                        RHS +=  mul*np.dot(L,U) #gradient
+                        # mu_derivative =  np.dot(J, dterm) 
+                        RHS -= mu_derivative # angular derivative
+                        RHS += np.dot(G, U) # moving mesh time derivative correction
+                        RHS += 0.5 * S /self.sigma_t / self.l # source
+                        RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l # radiative transfer coupling
+                        RHS += PV * self.c /self.sigma_t / self.l # scattering
+                        RHS += fixed_source * self.sigma_f * self.nu * self.chi / self.sigma_t # fixed fission source
+                        RHS -= VV / self.sigma_t / self.l # absorption
+                        RHS -= np.dot(MPRIME, U) # time derivative of mass matrix
+                        RHS = np.dot(Minv, RHS) # mass matrix 
                         V_new[angle,space,:] = RHS
-                        # print(RHS, 'rhs')
-                        # if (np.abs(self.c_a * H * 0.5 / self.sigma_t / self.l- VV / self.sigma_t / self.l)<=1e-8).all():
-                        #     print(space, 'space')
-                        #     print(LU, 'LU')
-                        #     print(PV * self.c /self.sigma_t / self.l, 'PV')
-                        #     print(mu_derivative, 'J term')
-                        #     print(mul*np.dot(L,U), 'LU')
-                        #     print(0.5 * S /self.sigma_t / self.l, 'S')
-                        #     print(np.dot(G, U), 'GU')
 
-
-
-                        #     V_new[angle,space,:] = RHS * 0
-                        if angle == 0 or space == 0:
-                            # psionehalf = V_old[0, space, :]
-                            psionehalf = u_old
-                            # psionehalf, self.psi_onehalf_old = psi_onehalf_function(self.psi_onehalf_old)÷
+                        if angle == 0:
+                            psionehalf = u_old 
                         else:  
-                            psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
+                            # psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
+                            psionehalf_new = 2 * psin - psionehalf
                             psionehalf = psionehalf_new
-
-            # print(V_new.shape)
-
         if self.radiative_transfer['none'] == False:
-            # V_new = self.V_new_floor_func(V_new)
+            # V_new = self.V_new_floor_func(V_new) # This was an attempt at enforcing positivity
             res = V_new.reshape((self.N_ang + 1) * self.N_space * (self.M+1))
-
-            # else:
-                # self.save_Ys = False
-
             return res
         
 
@@ -769,29 +642,6 @@ class rhs_class():
 
             return V_new.reshape((self.N_ang) * self.N_space * (self.M+1))
         
-    
-            # # a += 1e-12
-            # # MI[0,0] = 0.5 * (1/a**2 + 1/b**2)
-            # # MI[0,1] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
-            # # MI[1,0] = (-a**(-2) + b**(-2))/(2.*math.sqrt(2))
-            # # MI[1,1] = (a**(-2) + b**(-2))/4.
-
-            # # Using Simpsons
-            # MI[0,0] = (6*(a**2 + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
-            # MI[0,1] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
-            # MI[1,0] = (3*math.sqrt(2)*(a**2 - b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
-            # MI[1,1] = (6*(a**2 + a*b + b**2))/(a**4 + 2*a**3*b + 6*a**2*b**2 + 2*a*b**3 + b**4)
-
-            # mass_lumped_inv = MI * math.pi
-            # # mass_lumped_inv = np.linalg.inv(Mass)
-
-            # return mass_lumped_inv
-
-
-
-
-
-
 
     def V_new_floor_func(self, V_new):
         floor = 1e-16

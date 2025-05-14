@@ -147,7 +147,7 @@ def power_iterate(kguess = 0.5, tol = 1e-5):
     while converged == False and n_iters < 15: 
         run.load('k_eff', 'mesh_parameters_keff')
         # scale sigma_f
-        run.parameters['all']['sigma_f'] = sigma_f / k_old
+        # run.parameters['all']['sigma_f'] = sigma_f / k_old
         # normalize fission source
         normalized_source = coeffs_old
         # normalized_source *= 1 / normalization
@@ -165,10 +165,12 @@ def power_iterate(kguess = 0.5, tol = 1e-5):
 
         integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi # because nu and sigma_t are constant right now, I don't need them in the integrand
         integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi
+        
         xs = run.xs
         plt.figure(201)
-        plt.plot(xs, phi_interpolated(xs), label = f'iteration {n_iters}')
-        plt.legend()
+        plt.plot(xs, phi_interpolated(xs),'k-', label = f'iteration {n_iters}')
+        plt.plot(xs, phi_interpolated_new(xs),'r-' )
+        # plt.legend()
         plt.show()
         plt.savefig('phi_sol_iterations.pdf')
         # update k

@@ -118,9 +118,9 @@ class scalar_flux(object):
                             elif self.geometry['sphere'] == True:
                                 if self.lumping == True: # this is a very inefficient implementation 
                                     if k ==0:
-                                        for ii in range(self.M+1):
-                                            for jj in range(self.M+1):
-                                                VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
+                                        # for ii in range(self.M+1):
+                                            # for jj in range(self.M+1):
+                                        VV[i,j] = VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
                                         VV_lumped = mass_lumper(VV, xL, xR)[0]
                                     # self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VVmatLUMPED(i, j,k, xL, xR) / (math.pi**1.5)
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]

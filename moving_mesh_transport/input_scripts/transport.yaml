@@ -31,7 +31,6 @@
     'thick': False            # optically thick or thin
     'integrator': 'DOP853'
     'geometry': {slab: False, sphere: True}
-    'N_groups': 2
     'lumping': False
     'N_groups': 1
     'VDMD': False

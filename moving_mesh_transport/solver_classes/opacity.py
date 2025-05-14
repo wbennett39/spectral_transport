@@ -120,7 +120,7 @@ class sigma_integrator():
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
         self.csP[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacityP * 2.0 * normTn(j, argument, a, b)) 
-
+        print(self.cs)
     # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
     #     self.cs[k, j] = 0.5 * (b-a) 
@@ -135,18 +135,9 @@ class sigma_integrator():
 
 
         self.cs[k, j] =  0.5 * (b-a) * (left + right) 
-        
-        
-
-        
+                
         # self.cs[k, j] = 0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, self.xs_quad, a, b))
-        
-
-
-                      
-
-        
-        
+    
         # assert(abs(self.cs[j,k]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5)
         
     def check_sigma_coeffs(self, T_eval_points, edges, T_old):

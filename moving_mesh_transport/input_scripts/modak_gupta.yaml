@@ -11,9 +11,9 @@
     'chi': 1.0
     'nu': 2.2
     't0': 5.0                       # time the source is turned off
-    'N_spaces': [160]                   # number of cells
+    'N_spaces': [80]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [3]                         # number of basis functions -1
+    'Ms': [2]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 1e-10                         # rel tolerance for ODE integrator
     'at': 1e-11                       # abs tolerance for ODE integrator

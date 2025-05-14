@@ -147,6 +147,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     ws_new[1:-1] = ws
     mus = mus_new
     ws = ws_new
+    print(np.sum(ws), 'ws sum')
     print('integrator method:', integrator)
     N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
     #     print("mus =", mus)
@@ -267,8 +268,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             flux.make_fixed_phi(mesh.edges)
 
 
-    IC = initialize.IC
-    print(IC, 'IC')
+    IC = initialize.IC *0
 
     reshaped_IC = IC.reshape(deg_freedom)
 

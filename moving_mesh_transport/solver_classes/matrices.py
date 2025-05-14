@@ -230,6 +230,7 @@ class G_L:
 
             self.J = np.multiply(self.J, 1/self.J_denom[0:self.M+1, 0:self.M+1])
             if self.testing == True:
+
                 assert(abs(self.J[0,0] - 0.5 * (rR+rL) /  pi)<=1e-10)
                 
                 if self.M >0:

@@ -19,7 +19,7 @@ from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
 from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven
-from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre
+from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre, calculate_psi_moments
 import numba as nb
 from numba import prange
 from numba.experimental import jitclass
@@ -481,8 +481,8 @@ class rhs_class():
                 assert(abs(self.mus[refl_index] - -self.mus[tangle])<=1e-10) 
                 V_old[tangle, 0, :] = V_old[refl_index, 0, :]
         # check Pn moments
-        for k in range(self.N_space):
-            check_current_legendre(2 * self.ws, self.mus, V_old[:, 0, k], self.N_ang, int(2*self.N_ang-1))
+        for j in range(self.M+1):
+            check_current_legendre(2 * self.ws, self.mus, V_old[:, 0, j], self.N_ang, int(2*self.N_ang-1))
             
         # V_old[0, :, 0] = V_old[1,:,0]
         # for j in range(1, self.M+1):
@@ -599,6 +599,9 @@ class rhs_class():
                 # psionehalf = V_old[0, space, :] # should this be make_u_old_func?
                 psionehalf = u_old
                 ########## Loop over angle ############
+                psi_moments = calculate_psi_moments(int(2*self.N_ang-1), V_old[:, space, :], self.ws, self.M, self.N_ang, self.mus)
+                if space == 0:
+                    print(psi_moments[1], 'should be 0')
                 for angle in range(self.N_ang):
                     # psin = make_u_old(V_old[angle, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
                     psin = V_old[angle, space, :]
@@ -622,11 +625,12 @@ class rhs_class():
                     # Initialize solution vector, RHS
                     U = np.zeros(self.M+1).transpose()
                     U[:] = V_old[angle,space,:]
-                    # assert((np.abs(U-VV/self.sigma_t) < 1e-6).all())
+                    if not ((np.abs(np.dot(Minv,U)-VV/self.sigma_t) < 1e-6).all()):
+                        print(np.dot(Minv,U)-VV/self.sigma_t)
                     dterm = U.copy()*0
                     mu_derivative = U*0
                     # if angle > 0 and angle != self.N_ang-1:
-                    mu_derivative = legendre_difference(self.ws, self.N_ang, int(2*self.N_ang-1), V_old[:, space, :], J, self.M, self.mus, self.mus[angle])
+                    mu_derivative = legendre_difference(self.ws, self.N_ang, int(2*self.N_ang-1), psi_moments, J, self.M, self.mus, self.mus[angle])
                     #     for j in range(self.M+1):
                     # #         # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
                     # #         # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)

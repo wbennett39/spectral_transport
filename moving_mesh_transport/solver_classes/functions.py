@@ -639,7 +639,15 @@ def finite_diff_uneven_diamond(x, ix, psi, left = False, right = False, origin =
             res = (-(1-mum**2) * psim ) / deltamu
         return res
 
-
+@njit
+def calculate_psi_moments(N_mom, V, ws, M, N_ang, mus):
+    moments = np.zeros((N_mom, M+1))
+    ws *= 2
+    for n in range(N_mom):
+        for j in range(M+1):
+            for l in range(N_ang):
+                moments[n, j] += ws[l] * V[l, j] * Pn_scalar(n, mus[l]) 
+    return moments
 @njit 
 def alpha_difference(alphasp1, alphasm1, w, psionehalf, V_old):
     # what happened to the factor of 2? Did it get normalized out of the weights?
@@ -655,14 +663,15 @@ def check_current_legendre(ws, mus, u, N_ang, N_mom):
     if abs(res) > tol:
         print(res, 'nonzero current')
 @njit 
-def legendre_difference(ws, N_ang, N_mom, u, J, M, mus, mu):
+def legendre_difference(ws, N_ang, N_mom, psi_moments, J, M, mus, mu):
     ws = 2 * ws #un-normalize weights
     res = np.zeros(M+1)
     for i in range(M+1):
         for l in range(N_ang):
             for n in range(N_mom):
                 for j in range(M+1):
-                    res[i] += (2 * n+1) * 0.5 * ws[l] * Pn_scalar(n, mus[l], -1, 1 ) * ((n-1) * mu * Pn_scalar(n, mu, -1,1) - (1+n) * Pn_scalar(n+1, mu, -1,1)) * J[i, j] * u[l, j]
+                    # res[i] += (2 * n+1) * 0.5 * ws[l] * Pn_scalar(n, mus[l], -1, 1 ) * ((n-1) * mu * Pn_scalar(n, mu, -1,1) - (1+n) * Pn_scalar(n+1, mu, -1,1)) * J[i, j] * u[l, j]
+                    res[i] += (2 * n+1) * 0.5  * ((n-1) * mu * Pn_scalar(n, mu, -1,1) - (1+n) * Pn_scalar(n+1, mu, -1,1)) * J[i, j] * psi_moments[n, j]
     return res
 @njit
 def finite_diff_uneven_diamond_2(x, ix, psi, alphams, ws, left = False, right = False):

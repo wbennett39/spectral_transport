@@ -126,7 +126,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
 
 
 
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 2, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 4, run_results = True)
 square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
 square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     

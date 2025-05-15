@@ -562,7 +562,24 @@ def angular_deriv(N_ang, angle, mus, V_old, space):
 
     return dterm
 
-
+@njit
+def finite_diff_uneven(x, ix, u, left = False, right = False):
+    if left == False and right == False:
+        h = (x[ix+1] - x[ix]) / (x[ix] - x[ix-1])
+        res = (u[ix + 1] - h**2 * u[ix-1] - (1-h**2) * u[ix]) / (x[ix+1]- x[ix]) / (1+h)
+    
+    elif left == True:
+        h = x[ix+1] - x[ix]
+        right = u[ix+1]
+        middle = u[ix]
+        res = (right - middle) / h
+    
+    elif right == True:
+        h = x[ix] - x[ix-1]
+        right = u[ix]
+        middle = u[ix-1]
+        res = (right - middle) / h
+    return res
 @njit
 def finite_diff_uneven_2(x, ix, u, left = False, right = False):
 
@@ -628,10 +645,18 @@ def alpha_difference(alphasp1, alphasm1, w, psionehalf, V_old):
     # what happened to the factor of 2? Did it get normalized out of the weights?
     res = 1/w * (2 * alphasp1 * V_old - (alphasp1 + alphasm1) * psionehalf)
     return res 
-
+@njit 
+def check_current_legendre(ws, mus, u, N_ang, N_mom):
+    res  = 0.0
+    tol = 1e-8
+    for n in range(N_mom):
+        for l in range(N_ang):
+            res += 0.5 * (2 * n + 1) * ws[l] * Pn_scalar(n, mus[l], -1, 1) * mus[l] * u[l]
+    if abs(res) > tol:
+        print(res, 'nonzero current')
 @njit 
 def legendre_difference(ws, N_ang, N_mom, u, J, M, mus, mu):
-    ws = 2 * ws
+    ws = 2 * ws #un-normalize weights
     res = np.zeros(M+1)
     for i in range(M+1):
         for l in range(N_ang):

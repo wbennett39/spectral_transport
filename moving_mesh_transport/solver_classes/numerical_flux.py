@@ -247,8 +247,11 @@ class LU_surf(object):
                     assert 0
                     self.v0 += self.integrate_quad(t, self.xL_minus, self.edges[space], j, "l") * self.B_LR_func(j, self.h)[1] 
                 
-                elif space == 0 and self.geometry['sphere'] == True and abs(self.edges[0]) <=  1e-8: #reflecing BC for sphere
-                    self.v0 += self.B_LR_func(j, self.h)[0]*(u_refl[j])
+                elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
+                    if  abs(self.edges[0]) <=  1e-8:
+                        self.v0 += self.B_LR_func(j, self.h)[0]*(u_refl[j])
+                    # else:
+                    #     assert 0
 
 
                     

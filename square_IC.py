@@ -60,14 +60,11 @@ run = run()
 run.load('transport', 'mesh_parameters')
 loader = load()
 
-run.parameters['all']['N_spaces'] = [5]
-run.parameters['all']['Ms'] = [0]
-run.parameters['square_IC']['N_angles'] = [2]
-run.square_IC(0,0)
+
 def RMSE(l1, l2):
     return np.sqrt(np.mean((l1-l2)**2))
-# time_list = [0.1, 0.5, 1.0, 5.0, 10.0]
-time_list = [1.0, 5.0]
+time_list = [0.1, 0.5, 1.0, 5.0, 10.0]
+# time_list = [1.0, 5.0]
 
 N_space_list = [5, 10, 20, 40, 80]
 def get_bench(xs, t):
@@ -75,10 +72,15 @@ def get_bench(xs, t):
     return ob[1] + ob[2]
 
 def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256):
-    run.load('transport', 'mesh_parameters')
+   
     if run_results == True: #re-run calculations
         f = h5py.File('shell_source.h5', 'r+')
         f.close()
+        run.parameters['all']['N_spaces'] = [5]
+        run.parameters['all']['Ms'] = [0]
+        run.parameters['square_IC']['N_angles'] = [2]
+        run.square_IC(0,0)
+        run.load('transport', 'mesh_parameters')
         for it, tt in enumerate(time_list):
             for space in N_space_list:    
                 run.parameters['all']['Ms'] =  [M] 
@@ -105,9 +107,10 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             res = f[save_string][:,:]
             xs = res[0]
             phi = res[1]
-            bench = get_bench(xs, tt)
+            # bench = get_bench(xs, tt)
+            bench = xs*0
             err_list[k] = RMSE(phi, bench)
-            plt.plot(xs, phi, 'o', mfc = 'none')
+            plt.plot(xs, phi, '-o', mfc = 'none')
             plt.plot(xs, bench, 'k-')
             plt.savefig(f'shell_source_solution_t={tt}.pdf')
             plt.close()
@@ -123,7 +126,9 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
 
 
 
-square_IC_converge(moving_mesh=False, uncollided=False, M=1, N_space_list=[24], N_ang = 2)
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 2, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     
 
 

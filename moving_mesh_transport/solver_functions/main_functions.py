@@ -145,11 +145,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     mus_new[-1] = 1
     mus_new[1:-1] = mus
     ws_new[1:-1] = ws
-    mus = mus_new
-    ws = ws_new
+    # mus = mus_new
+    # ws = ws_new
     print(np.sum(ws), 'ws sum')
     print('integrator method:', integrator)
-    N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
+    # N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
     #     print("mus =", mus)
 
     # xs_quad = quadpy.c1.gauss_legendre(2*M+1).points
@@ -268,7 +268,14 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             flux.make_fixed_phi(mesh.edges)
 
 
-    IC = initialize.IC *0
+    IC = initialize.IC  
+    for tangle in range(int(N_ang/2), N_ang):
+                refl_index = N_ang-tangle-1
+                            # print(self.mus[angle], self.mus[refl_index])
+                # assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10) 
+                IC[tangle, 0, :] = IC[refl_index, 0, :]
+    # for j in range(M+1):
+    #       IC[0, :, j] = (-1)**j * IC[1,:,j]
 
     reshaped_IC = IC.reshape(deg_freedom)
 
@@ -319,7 +326,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             res = RHS(t, VV3, ig)
             res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
             if extra_deg != 0:
-                
                 VV_new[-1, :,:] = res2[-1,:,:]
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
             else:

@@ -10,7 +10,7 @@
     'sigma_f': 0.0
     'chi': 0.0
     'nu': 0.0
-    't0': 5.0                       # time the source is turned off
+    't0': 1.0                       # time the source is turned off
     'N_spaces': [45]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
     'Ms': [1]                         # number of basis functions -1
@@ -51,7 +51,7 @@
     'x0': [0.5]
     'source_strength': 1.0
     'source_type': [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    'N_angles': [8]
+    'N_angles': [2]
     'move_type': [1,0]              # moving mesh function selector
     'benchmarking': False
     'shift': 0.0

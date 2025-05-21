@@ -18,8 +18,8 @@ from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
-from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven
-from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre
+from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments
+from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre, legendre_difference3
 import numba as nb
 from numba import prange
 from numba.experimental import jitclass
@@ -139,7 +139,8 @@ data = [('N_ang', int64),
         ('VDMD', int64),
         ('chi', float64),
         ('sigma_f', float64),
-        ('nu', float64)
+        ('nu', float64),
+        ('legendre_moments', int64)
 
         ]
 ##############################################################################
@@ -182,7 +183,7 @@ class rhs_class():
         self.radiative_transfer = build.thermal_couple
        
         self.c_a = build.sigma_a / build.sigma_t
-        
+        self.legendre_moments = build.legendre_moments
         self.mean_free_time = 1/build.sigma_t
         self.division = 1000
         self.counter = 1000
@@ -467,6 +468,9 @@ class rhs_class():
             # print(heat_wave_loc, 'wave x')
         
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
+        if np.isnan(V).any():
+                print('nan solution vector')
+                assert(0)
         if self.radiative_transfer['none'] == False :  
             V_new = V.copy().reshape((self.N_ang + 1, self.N_space, self.M+1))
             V_old = V_new.copy()
@@ -474,15 +478,17 @@ class rhs_class():
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
 
+
+
         # enforce zero flux in origin cell
-        for tangle in range(int(self.N_ang/2), self.N_ang):
-                refl_index = self.N_ang-tangle-1
-                            # print(self.mus[angle], self.mus[refl_index])
-                assert(abs(self.mus[refl_index] - -self.mus[tangle])<=1e-10) 
-                V_old[tangle, 0, :] = V_old[refl_index, 0, :]
+        # for tangle in range(0, int(self.N_ang/2)):
+        #         refl_index = self.N_ang-tangle-1
+        #                     # print(self.mus[angle], self.mus[refl_index])
+        #         assert(abs(self.mus[refl_index] - -self.mus[tangle])<=1e-10) 
+        #         V_old[refl_index, 0, :] = V_old[tangle, 0, :]
         # check Pn moments
-        for k in range(self.N_space):
-            check_current_legendre(2 * self.ws, self.mus, V_old[:, 0, k], self.N_ang, int(2*self.N_ang-1))
+        # for j in range(self.M+1):
+        #     check_current_legendre(2 * self.ws, self.mus, V_old[:, 0, j], self.N_ang, int(2*self.N_ang-1))
             
         # V_old[0, :, 0] = V_old[1,:,0]
         # for j in range(1, self.M+1):
@@ -499,6 +505,18 @@ class rhs_class():
             self.edges_old = mesh.edges
         mesh.move(t)
 
+        # h = mesh.edges[1] - mesh.edges[0]
+        # for tangle in range(0, int(self.N_ang/2)):
+        #         refl_index = self.N_ang-tangle-1
+        #                     # print(self.mus[angle], self.mus[refl_index])
+        #         assert(abs(self.mus[refl_index] - -self.mus[tangle])<=1e-10) 
+
+        #         for j in range(self.M+1):
+        #             Bs = num_flux.B_LR_func(j, h)
+        #             V_old[refl_index, 0, j] = V_old[tangle, 0, j] * Bs[1] / Bs[0]
+            
+
+
         # if self.slope_limiter == True and self.M>0: # positivity fix
         #     V_old_new = self.slope_scale(V_old, mesh.edges)
         #     V_old = V_old_new
@@ -510,6 +528,7 @@ class rhs_class():
         update = True
         # iterate over all cells
         for space in range(self.N_space): 
+            psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
             # get mesh edges and edge derivatives          
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]
@@ -624,25 +643,28 @@ class rhs_class():
                     U[:] = V_old[angle,space,:]
                     # assert((np.abs(U-VV/self.sigma_t) < 1e-6).all())
                     dterm = U.copy()*0
+                    dterm2 = U.copy()*0
                     mu_derivative = U*0
                     # if angle > 0 and angle != self.N_ang-1:
-                    mu_derivative = legendre_difference(self.ws, self.N_ang, int(2*self.N_ang-1), V_old[:, space, :], J, self.M, self.mus, self.mus[angle])
-                    #     for j in range(self.M+1):
-                    # #         # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
-                    # #         # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:-1, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
-                    #         dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
+                    # mu_derivative = legendre_difference2(self.ws, self.N_ang, int(2*self.N_ang-1), V_old[:, space, :], J, self.M, self.mus, self.mus[angle])
+                    # mu_derivative = legendre_difference(2*self.N_ang-1, psi_moments, J, self.M, self.mus[angle])
+                    dterm  = legendre_difference3(self.legendre_moments, psi_moments, self.M, self.mus[angle])
                     # for j in range(self.M+1):
-                    #     vec = (1-self.mus**2) * V_old[:, space, j]
-                    #     dterm[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
+                    # # #         # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
+                    #     dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
+                    #         dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
+                    for j in range(self.M+1):
+                        vec = (1-self.mus**2) * V_old[:, space, j]
+                        dterm2[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
                     if self.geometry['sphere'] == True:  
-                    
+                        # print(dterm, dterm2)
                         RHS = V_old[angle, space, :]*0
                         RHS -=  LU # numerical flux 
                         RHS +=  mul*np.dot(L,U) #gradient
-                        # mu_derivative =  np.dot(J, dterm) 
+                        mu_derivative =  np.dot(J, dterm) 
                         RHS -= mu_derivative # angular derivative
                         RHS += np.dot(G, U) # moving mesh time derivative correction
-                        RHS += 0.5 * S /self.sigma_t / self.l # source
+                        # RHS += 0.5 * S /self.sigma_t / self.l # source
                         RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l # radiative transfer coupling
                         RHS += PV * self.c /self.sigma_t / self.l # scattering
                         RHS += fixed_source * self.sigma_f * self.nu * self.chi / self.sigma_t # fixed fission source
@@ -650,7 +672,9 @@ class rhs_class():
                         RHS -= np.dot(MPRIME, U) # time derivative of mass matrix
                         RHS = np.dot(Minv, RHS) # mass matrix 
                         V_new[angle,space,:] = RHS
-
+           
+        
+                        # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))
                         if angle == 0:
                             psionehalf = u_old 
                         else:  

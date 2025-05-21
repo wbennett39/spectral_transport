@@ -240,33 +240,32 @@ class LU_surf(object):
 
     def make_sol(self, space, u, t, u_refl):
         for j in range(self.M+1):
-                if space != 0:
-                    self.v0 += self.B_LR_func(j, self.hm)[1]*(u[space-1,j])
-                    
-                elif space == 0 and self.is_boundary_source_on(space, t): # special MMS case
-                    assert 0
-                    self.v0 += self.integrate_quad(t, self.xL_minus, self.edges[space], j, "l") * self.B_LR_func(j, self.h)[1] 
+            if space != 0:
+                self.v0 += self.B_LR_func(j, self.hm)[1]*(u[space-1,j])
                 
-                elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
-                    if  abs(self.edges[0]) <=  1e-8:
-                        self.v0 += self.B_LR_func(j, self.h)[0]*(u_refl[j])
-                    # else:
-                    #     assert 0
+            elif space == 0 and self.is_boundary_source_on(space, t): # special MMS case
+                self.v0 += self.integrate_quad(t, self.xL_minus, self.edges[space], j, "l") * self.B_LR_func(j, self.h)[1] 
+            
+            # elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
+            #     if  abs(self.edges[0]) <=  1e-8:
+            #         self.v0 += 0.5 * (self.B_LR_func(j, self.h)[1]*(u_refl[j]) + self.B_LR_func(j, self.h)[0]*(u[space, j]))
+                # else:
+                #     assert 0
 
-
-                    
-                self.v1 += self.B_LR_func(j, self.h)[0]*(u[space, j])
-                self.v2 += self.B_LR_func(j, self.h)[1]*(u[space, j])
 
                 
-                if space != self.N_space - 1:
-                    self.v3 += self.B_LR_func(j, self.hp)[0]*(u[space+1,j])
-                    
-                elif space == self.N_space - 1 and self.is_boundary_source_on(space, t):
-                    if self.geometry['slab'] == True:
-                        self.v3 += self.integrate_quad(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0] 
-                    elif self.geometry['sphere'] == True:
-                            self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.hp)[0]
+            self.v1 += self.B_LR_func(j, self.h)[0]*(u[space, j])
+            self.v2 += self.B_LR_func(j, self.h)[1]*(u[space, j])
+
+            
+            if space != self.N_space - 1:
+                self.v3 += self.B_LR_func(j, self.hp)[0]*(u[space+1,j])
+                
+            elif space == self.N_space - 1 and self.is_boundary_source_on(space, t):
+                if self.geometry['slab'] == True:
+                    self.v3 += self.integrate_quad(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.h)[0] 
+                elif self.geometry['sphere'] == True:
+                        self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.hp)[0]
 
             
     
@@ -293,8 +292,6 @@ class LU_surf(object):
         psi_plus = 0.0
         if leftspeed > 0: 
             psi_minus = self.v0
-            # if space == 0:
-            #     assert (psi_minus == 1 / self.h / math.sqrt(math.pi) * u[space, 0]) 
         elif leftspeed < 0: 
             psi_minus = self.v1
         if rightspeed > 0: 
@@ -313,7 +310,9 @@ class LU_surf(object):
                 # if rt == True:
                 #     if space == self.N_space -1:
                 #         print(psi_plus)
-                self.LU[i] = (xR**2*B_right*rightspeed*psi_plus - xL**2*B_left*leftspeed*psi_minus)
+
+                    self.LU[i] = (xR**2*B_right*rightspeed*psi_plus - xL**2*B_left*leftspeed*psi_minus)
+               
 
                 # if space == 0:
                 #     if self.geometry['sphere'] == True:

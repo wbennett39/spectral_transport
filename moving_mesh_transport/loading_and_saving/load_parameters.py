@@ -63,6 +63,7 @@ class parameter_load_class:
             self.l = float(parameters[source_name]['l'])
 
         self.mxstp = float(parameters['all']['mxstp'])
+        self.legendre_moments = int(parameters['all']['legendre_moments'])
 
 
         if self.edge_v == 'one':
@@ -143,6 +144,7 @@ class parameter_load_class:
         dictionary_loader(mesh_parameters['sigma_func'], self.sigma_func)
         print(self.sigma_func['constant'])            
         self.Msigma = int(mesh_parameters['Msigma'])
+        # self.Msigma = self.Ms[0] 
         self.finite_domain = int(mesh_parameters['finite'])
         self.domain_width = -1
         self.fake_sedov_v0 = float(mesh_parameters['fake_sedov_v0'])

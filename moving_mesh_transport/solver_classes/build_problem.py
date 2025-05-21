@@ -96,7 +96,8 @@ data = [('N_ang', int64),
         ('fixed_source_coeffs', float64[:,:,:]),
         ('chi', float64),
         ('nu', float64),
-        ('sigma_f', float64)
+        ('sigma_f', float64),
+        ('legendre_moments', int64)
         ]
 ###############################################################################
 
@@ -106,7 +107,7 @@ class build(object):
     source_type, uncollided, moving, move_type, t_quad, t_ws, thermal_couple, temp_function, e_initial, sigma, particle_v, 
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
     quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
-    fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD, fixed_source_coeffs, chi, nu, sigma_f):
+    fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD, fixed_source_coeffs, chi, nu, sigma_f, legendre_moments):
         self.N_ang = N_ang
         print(self.N_ang, 'angles')
         self.N_space = N_space
@@ -124,6 +125,7 @@ class build(object):
         self.xs_quad = xs_quad
         self.ws_quad = ws_quad
         self.x0 = x0
+        self.legendre_moments = legendre_moments
         self.source_type = np.array(list(source_type), dtype = np.int64)
         self.uncollided = uncollided 
         self.moving = moving

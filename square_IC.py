@@ -107,8 +107,8 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             res = f[save_string][:,:]
             xs = res[0]
             phi = res[1]
-            # bench = get_bench(xs, tt)
-            bench = xs*0
+            bench = get_bench(xs, tt)
+            # bench = xs*0
             err_list[k] = RMSE(phi, bench)
             plt.plot(xs, phi, '-o', mfc = 'none')
             plt.plot(xs, bench, 'k-')
@@ -126,9 +126,9 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
 
 
 
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 2, run_results = True)
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[25], N_ang = 32, run_results = True)
+# square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
+# square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     
 
 

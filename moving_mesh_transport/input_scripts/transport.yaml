@@ -34,6 +34,7 @@
     'lumping': False
     'N_groups': 1
     'VDMD': False
+    'legendre_moments': 8
     
 # plane pulse source
 'plane_IC':

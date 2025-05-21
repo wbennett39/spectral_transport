@@ -125,7 +125,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
-          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f):
+          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f, legendre_moments):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -190,7 +190,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
                        quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
-                       fixed_source_coeffs, chi, nu, sigma_f)
+                       fixed_source_coeffs, chi, nu, sigma_f, legendre_moments)
     initialize.shift = shift
 
 
@@ -269,13 +269,18 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
 
     IC = initialize.IC  
-    for tangle in range(int(N_ang/2), N_ang):
-                refl_index = N_ang-tangle-1
-                            # print(self.mus[angle], self.mus[refl_index])
-                # assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10) 
-                IC[tangle, 0, :] = IC[refl_index, 0, :]
-    # for j in range(M+1):
-    #       IC[0, :, j] = (-1)**j * IC[1,:,j]
+    # for tangle in range(int(N_ang/2), N_ang):
+    #             refl_index = N_ang-tangle-1
+    #                         # print(self.mus[angle], self.mus[refl_index])
+    #             # assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10) 
+    #             IC[tangle, 0, :] = IC[refl_index, 0, :]
+    # # for j in range(M+1):
+    # #       IC[0, :, j] = (-1)**j * IC[1,:,j]
+    # for tangle in range(int(N_ang/2), N_ang):
+    #             refl_index = N_ang-tangle-1
+    #                         # print(self.mus[angle], self.mus[refl_index])
+    #             assert(abs(mus[refl_index] - -mus[tangle])<=1e-10) 
+    #             IC[tangle, 0, :] = IC[refl_index, 0, :]
 
     reshaped_IC = IC.reshape(deg_freedom)
 

@@ -238,7 +238,7 @@ class LU_surf(object):
         return returnval
 
 
-    def make_sol(self, space, u, t, u_refl):
+    def make_sol(self, space, u, t):
         for j in range(self.M+1):
             if space != 0:
                 self.v0 += self.B_LR_func(j, self.hm)[1]*(u[space-1,j])

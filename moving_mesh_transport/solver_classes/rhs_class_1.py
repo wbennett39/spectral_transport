@@ -623,19 +623,12 @@ class rhs_class():
                 ########## Loop over angle ############
                 for angle in range(self.N_ang):
                     # psin = make_u_old(V_old[angle, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
-                    psin = V_old[angle, space, :]
+                    if self.angular_derivative['diamond'] == True:
+                        psin = V_old[angle, space, :]
                     mul = self.mus[angle]
                     # calculate numerical flux
-                    refl_index = 0
-                    if space == 0:
-                        # if abs(xL) <= 1e-8:
-                            if self.mus[angle] > 0:
-                                refl_index = self.N_ang-angle-1
-                                # print(self.mus[angle], self.mus[refl_index])
-                                assert(abs(self.mus[refl_index] - -self.mus[angle])<=1e-10) 
-                    num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[refl_index, 0, :])
-                    # new r=0 BC # not sure what the reasoning was behind this
-                    # num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, psionehalf)
+                    
+                    num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul)
                     LU = num_flux.LU 
                     # Get absorption term
                     # sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
@@ -655,7 +648,8 @@ class rhs_class():
                         dterm  = legendre_difference3(self.legendre_moments, psi_moments, self.M, self.mus[angle])
                     elif self.angular_derivative['diamond'] == True:
                         for j in range(self.M+1):
-                            dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
+                            if angle != 0 and angle != self.N_ang -1: # derivative is identically zero at endpoints
+                                dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
                     elif self.angular_derivative['finite_differences'] == True:
                         for j in range(self.M+1):
                             vec = (1-self.mus**2) * V_old[:, space, j]

@@ -183,6 +183,7 @@ class build(object):
 
         self.sigma_f =np.ones(self.N_space) * sigma_f
         self.nu = np.ones(self.N_space) * sigma_f
+        
         # print(self.randomstart)
         # assert 0
 
@@ -239,8 +240,8 @@ class build(object):
             edges2 = edges - self.shift
             print(edges2, 'edges2')
             for space in range(self.N_space -1):
-                if edges2[space+1]  <=  -3.5 or edges2[space] >= 3.5:
-                    self.sigma_f[space] = 0.3
+                if not edges2[space+1]  <=  -3.5 or not edges2[space] >= 3.5:
+                    self.sigma_f[space] = 0.0
                     self.nu[space] = 1
             print(self.sigma_f)
             # assert 0

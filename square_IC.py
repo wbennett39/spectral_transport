@@ -71,7 +71,7 @@ def get_bench(xs, t):
     ob = intg.shell_source(t, 100, choose_xs = True, xpnts = xs)
     return ob[1] + ob[2]
 
-def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256, ang_method = 'Legendre'):
+def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256, ang_method = 'diamond'):
    
     if run_results == True: #re-run calculations
         f = h5py.File('shell_source.h5', 'r+')
@@ -161,7 +161,7 @@ def calculate_benchmarks():
 # square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[50], N_ang = 96, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[12, 25, 50, 75, 100], N_ang = 64, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[30], N_ang = 256, run_results = False)
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[30], N_ang = 256, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     

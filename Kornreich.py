@@ -54,7 +54,7 @@ def RMS(l1, l2):
 run = run()
 # run.load('transport', 'mesh_parameters_modak_gupta')
 # run.plane_IC(0,0)
-run.load('k_eff', 'mesh_parameters_keff')
+run.load('Kornreich', 'mesh_parameters_Kornreich')
 loader = load()
 
 run.parameters['all']['N_spaces'] = [5]

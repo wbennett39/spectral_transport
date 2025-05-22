@@ -95,8 +95,8 @@ data = [('N_ang', int64),
         ('shift', float64),
         ('fixed_source_coeffs', float64[:,:,:]),
         ('chi', float64),
-        ('nu', float64),
-        ('sigma_f', float64),
+        ('nu', float64[:]),
+        ('sigma_f', float64[:]),
         ('legendre_moments', int64),
         ('angular_derivative', nb.typeof(params_default) )
         ]

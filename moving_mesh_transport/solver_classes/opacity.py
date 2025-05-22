@@ -355,7 +355,7 @@ class sigma_integrator():
             res = x* 0
         
             for ix, xx in enumerate(x):
-                z = x - self.shift
+                z = xx - self.shift
                 fuel = False
                 moderator = False
                 absorber = False

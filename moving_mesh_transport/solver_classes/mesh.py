@@ -1466,10 +1466,10 @@ class mesh_class(object):
         pos2 = np.argmin(np.abs(self.edges - self.shift - -2.5))
         pos3 = np.argmin(np.abs(self.edges - self.shift - 2.5))
         pos4 = np.argmin(np.abs(self.edges - self.shift  - 3.5))
-        self.edges[pos1] = -3.5
-        self.edges[pos2] = -2.5 
-        self.edges[pos3] = 2.5
-        self.edges[pos4] = 3.5
+        self.edges[pos1] = -3.5 + self.shift
+        self.edges[pos2] = -2.5 + self.shift
+        self.edges[pos3] = 2.5+ self.shift
+        self.edges[pos4] = 3.5+ self.shift
         self.edges = np.sort(self.edges) 
         self.edges0 = self.edges.copy()
         self.Dedges = self.Dedges * 0

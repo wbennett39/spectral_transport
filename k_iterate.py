@@ -4,6 +4,9 @@ from IRAM import iram
 from moving_mesh_transport.solver_classes.functions import *
 from moving_mesh_transport.solver_classes.make_phi import make_output
 import time
+from scipy.interpolate import interp1d as interp1d
+from scipy import integrate as integrate
+
 def integrate_phi_cell(cs, ws, a, b, M, N_ang):
     cell_volume = 4 * math.pi * (b**3 - a**3)
     psi = np.zeros(N_ang)
@@ -55,29 +58,47 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     geometry = run.geometry
     uncollided_ob = run.uncollided_ob
     edges = run.edges
+    phi_interpolated = interp1d(run.xs, run.phi[:,0])
 
+            # self.sigma_f = np.zeros(self.N_space)
+            # self.nu = np.zeros(self.N_space)
+    edges2 = edges - run.parameters['fixed_source']['shift']
+    sigma_f_array = np.ones(run.xs.size) *sigma_f
+    for k in range(run.xs.size):
+        if -3.5 < run.xs[k] < 3.5:
+            sigma_f_array[k] = 0.0 
+    sigma_interp = interp1d(run.xs, sigma_f_array)
+    integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp  # because nu and sigma_t are constant right now, I don't need them in the integrand
+    # normalization = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
     normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
     n_iters = 0
     normalization_list = []
     calc_time_list = []
     normalization_list.append(normalization)
+
     while converged == False and n_iters < 15: 
         run.load(transport_parameters, mesh_parameters)
         # scale sigma_f
-        run.parameters['all']['sigma_f'] = sigma_f / k_old
+        # run.parameters['all']['sigma_f'] = sigma_f / k_old
         # normalize fission source
-        normalized_source = coeffs_old
+        normalized_source = coeffs_old / normalization
         # run solver    
         t1 = time.time()
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         t_calc = time.time() - t1
         # update k
-        k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) / normalization
+        xs = run.xs
+        phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
+        integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi * sigma_interp
+        integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi *sigma_interp
+        k_new = k_old * integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
+        k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) / normalization
         if k_new <0:
             raise ValueError('negative k_eff')
         # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
         print(k_new, 'k')
+        print(k_new2, 'k2')
         # converged = True
         if abs(k_new - k_old ) <=tol:
             print('power iteration complete')
@@ -85,10 +106,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             converged = True
         else:
             k_old = k_new
+            phi_interpolated = phi_interpolated_new
             klist.append(k_new)
             n_iters +=1
             normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
             normalization_list.append(normalization)
             calc_time_list.append(t_calc)
     
-    return klist, calc_time_list
+    return klist, calc_time_list, normalization_list

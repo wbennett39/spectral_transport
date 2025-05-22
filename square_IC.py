@@ -71,7 +71,7 @@ def get_bench(xs, t):
     ob = intg.shell_source(t, 100, choose_xs = True, xpnts = xs)
     return ob[1] + ob[2]
 
-def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256, ang_method = 'diamond'):
+def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256, ang_method = 'Legendre'):
    
     if run_results == True: #re-run calculations
         f = h5py.File('shell_source.h5', 'r+')

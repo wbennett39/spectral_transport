@@ -238,12 +238,13 @@ class build(object):
             # self.sigma_f = np.zeros(self.N_space)
             # self.nu = np.zeros(self.N_space)
             edges2 = edges - self.shift
-            print(edges2, 'edges2')
-            for space in range(1, self.N_space -1):
-                if edges2[space]  >  -3.5 or  edges2[space+1] < 3.5:
-                    self.sigma_f[space] = 0.0
-                    self.nu[space] = 0
-            print(self.sigma_f, 'sigma_f')
+ 
+            for space in range( self.N_space):
+                left_edge = edges2[space]
+                right_edge = edges2[space+1]
+                if -3.5 < left_edge < 3.5:
+                    self.sigma_f[space] = 0.0  
+
             # assert 0
 
 

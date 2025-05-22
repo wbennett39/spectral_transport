@@ -177,7 +177,7 @@ def power_iterate(kguess = 0.5, tol = 1e-5):
         k_new = k_old * integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         if k_new <0:
             raise ValueError('negative k_eff')
-        # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
+        # k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
         print(k_new, 'k')
         # converged = True
         if abs(k_new - k_old ) <=tol:

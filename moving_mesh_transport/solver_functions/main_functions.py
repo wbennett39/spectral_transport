@@ -248,22 +248,28 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     initialize.make_IC(mesh.edges, randomstart)
 
     if source_type[16] == 1:
-        print('normalizing source')
-        # normalization = normalize_phi(fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups)
-        normalization = 1
+        # print('normalizing source')
+        norm_integrand = fixed_source_coeffs.copy()
+        for space in range(N_space):
+            norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
+        normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups)
+        # normalization = 1
         # print(normalization, 'normalization factor')
         
         fixed_source_coeffs_norm = fixed_source_coeffs/normalization
         # print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
         initialize.fixed_source_coeffs = fixed_source_coeffs_norm
         flux.fixed_source_coeffs = fixed_source_coeffs_norm
+        print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
         if randomstart == False:
             initialize.IC = fixed_source_coeffs
             flux.make_fixed_phi(mesh.edges)
         else:
             flux.fixed_source_coeffs = initialize.IC
-            # normalization = normalize_phi(flux.fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups)
-            normalization = 1
+            normalization = normalize_phi(flux.fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups)
+            # normalization = 1
+            # check normalize
+            print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
             flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
             initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
             initialize.IC = initialize.IC #/ normalization

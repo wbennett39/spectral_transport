@@ -179,8 +179,10 @@ class build(object):
         else:
             self.fixed_source_coeffs = np.zeros((self.N_ang, self.N_space, self.M+1))
         self.chi = chi
-        self.nu = nu
-        self.sigma_f = sigma_f
+        
+
+        self.sigma_f =np.ones(self.N_space) * sigma_f
+        self.nu = np.ones(self.N_space) * sigma_f
         # print(self.randomstart)
         # assert 0
 
@@ -231,6 +233,15 @@ class build(object):
         return np.ones(x.size) * self.e_init
                 
     def make_IC(self, edges, randomstart):
+        if self.sigma_func['Kornreich'] == True:
+            self.sigma_f = np.zeros(self.N_space)
+            self.nu = np.zeros(self.N_space)
+            for space in range(1, self.N_space):
+                if edges[space] <  -3.5 and edges[space-1] > -4.5 or edges[space-1] > 3.5:
+                    self.sigma_f[space] = 0.3
+                    self.nu[space] = 1
+
+
         # edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 
         # self.edge_v, self.thick, self.move_factor, self.wave_loc_array, self.pad,  self.leader_pad, self.quad_thick_source, 
         # self.quad_thick_edge, self.finite_domain, self.domain_width, self.fake_sedov_v0, self.boundary_on, self.t0, self.geometry, self.sigma_func)

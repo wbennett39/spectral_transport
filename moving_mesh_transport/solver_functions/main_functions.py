@@ -314,6 +314,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         extra_deg = int(thermal_couple['none'] == False)
         # print(extra_deg, 'extra degree of freedom')
         V_new = V.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
+         # enforce zero flux in origin cell
+        # for tangle in range(0, int(N_ang/2)):
+        #         refl_index = N_ang-tangle-1
+        #                     # print(self.mus[angle], self.mus[refl_index])
+        #         assert(abs(mus[refl_index] + mus[tangle])<=1e-10) 
+        #         for j in range(1, M+1):
+        #             V_new[refl_index, 0, j] = V_new[tangle, 0, j] * (-1) **(j+1)
         # print(V_new)
         VV_new = V_new.copy()*0
         for ig in range(N_groups):

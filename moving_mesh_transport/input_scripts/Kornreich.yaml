@@ -34,7 +34,7 @@
     'lumping': False
     'N_groups': 1
     'VDMD': False
-    'legendre_moments': 32
+    'legendre_moments': 16
     'angular_derivative': {finite_differences: False, diamond: True, Legendre: False}
     
 # plane pulse source
@@ -139,7 +139,7 @@
 'fixed_source':
     'x0': [5.0]
     'l': 1.0
-    'shift': 5.000000
+    'shift': 500.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
     'N_angles': [8]    # corresponds to N_spaces

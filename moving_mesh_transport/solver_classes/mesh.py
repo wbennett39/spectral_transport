@@ -1460,8 +1460,22 @@ class mesh_class(object):
         self.Dedges = self.Dedges * 0
         self.Dedges_const = self.Dedges
 
+    def Kornreich(self):
+        self.edges = self.edges = np.linspace(-self.x0 + self.shift, self.x0 + self.shift, self.N_space + 1)
+        pos1 = np.argmin(np.abs(self.edges - self.shift - -3.5))
+        pos2 = np.argmin(np.abs(self.edges - self.shift - -2.5))
+        pos3 = np.argmin(np.abs(self.edges - self.shift - 2.5))
+        pos4 = np.argmin(np.abs(self.edges - self.shift  - 3.5))
+        self.edges[pos1] = -3.5
+        self.edges[pos2] = -2.5 
+        self.edges[pos3] = 2.5
+        self.edges[pos4] = 3.5
+        self.edges = np.sort(self.edges) 
+        self.edges0 = self.edges.copy()
+        self.Dedges = self.Dedges * 0
+        self.Dedges_const = self.Dedges
 
-        
+
     def converging_move2(self, t):
         if self.moving == True:
         # self.Dedges_const = self.Dedges_const
@@ -1642,7 +1656,10 @@ class mesh_class(object):
                     # self.Dedges = self.edges * 0
                     self.shell_source()    
             elif self.source_type[15] == 1 or self.source_type[16] ==1:
-                self.modak_gupta()
+                if self.sigma_func['Kornreich'] == True:
+                    self.Kornreich()
+                else:
+                    self.modak_gupta()
             elif np.all(self.source_type == 0):
                 if self.geometry['sphere'] == True:
                     if self.moving == False:

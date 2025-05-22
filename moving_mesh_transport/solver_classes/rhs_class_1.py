@@ -138,8 +138,8 @@ data = [('N_ang', int64),
         ('N_groups', int64),
         ('VDMD', int64),
         ('chi', float64),
-        ('sigma_f', float64),
-        ('nu', float64),
+        ('sigma_f', float64[:]),
+        ('nu', float64[:]),
         ('legendre_moments', int64),
         ('angular_derivative',nb.typeof(params_default) )
 
@@ -493,8 +493,8 @@ class rhs_class():
         #     check_current_legendre(2 * self.ws, self.mus, V_old[:, 0, j], self.N_ang, int(2*self.N_ang-1))
             
         # V_old[0, :, 0] = V_old[1,:,0]
-        # for j in range(1, self.M+1):
-            # V_old[0, :, j] = (-1)**j * V_old[1,:,j]
+        # for j in range(1, self.M+1): # ghost cell
+            # V_old[:, 0, j] = (-1)**j * V_old[:,1,j]
         # for ang in range(self.N_ang+1): #attempt at positivizing T
         #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
         #     V_old[ang,:,:] = new_energy_vec
@@ -530,7 +530,8 @@ class rhs_class():
         update = True
         # iterate over all cells
         for space in range(self.N_space): 
-            psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
+            if self.angular_derivative['Legendre'] == True:
+                psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
             # get mesh edges and edge derivatives          
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]
@@ -551,7 +552,8 @@ class rhs_class():
             
             elif update == True:
                 # u_old = make_u_old(V_old[0, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
-                u_old = V_old[0, space, :]
+                if self.angular_derivative['diamond'] == True:
+                    u_old = V_old[0, space, :]
                 matrices.make_all_matrices(xL, xR, dxL, dxR)
                 L = matrices.L # gradient matrix
                 G = matrices.G # time derivative correction for moving mesh
@@ -649,7 +651,10 @@ class rhs_class():
                     elif self.angular_derivative['diamond'] == True:
                         for j in range(self.M+1):
                             if angle != 0 and angle != self.N_ang -1: # derivative is identically zero at endpoints
-                                dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
+                                # if space != 0:
+                                    dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
+                                # else:
+                                    # dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psionehalf[j])
                     elif self.angular_derivative['finite_differences'] == True:
                         for j in range(self.M+1):
                             vec = (1-self.mus**2) * V_old[:, space, j]
@@ -672,7 +677,7 @@ class rhs_class():
                         # RHS += 0.5 * S /self.sigma_t / self.l # source
                         RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l # radiative transfer coupling
                         RHS += PV * self.c /self.sigma_t / self.l # scattering
-                        RHS += fixed_source * self.sigma_f * self.nu * self.chi / self.sigma_t # fixed fission source
+                        RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t # fixed fission source
                         RHS -= VV / self.sigma_t / self.l # absorption
                         RHS -= np.dot(MPRIME, U) # time derivative of mass matrix
                         RHS = np.dot(Minv, RHS) # mass matrix 
@@ -681,15 +686,15 @@ class rhs_class():
         
                         # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))
                         if self.angular_derivative['diamond'] == True:
-                            if space != 0:
+                            # if space != 0:
                                 if angle == 0:
                                     psionehalf = u_old 
                                 else:  
                                     # psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
                                     psionehalf_new = 2 * psin - psionehalf
                                     psionehalf = psionehalf_new
-                            else:
-                                psionehalf = psionehalf
+                            # else:
+                            #     psionehalf = psionehalf
         # V_new = self.V_new_refl_enforce(V_new)
         if self.radiative_transfer['none'] == False:
             # V_new = self.V_new_floor_func(V_new) # This was an attempt at enforcing positivity

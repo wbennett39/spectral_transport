@@ -71,7 +71,7 @@ def get_bench(xs, t):
     ob = intg.shell_source(t, 100, choose_xs = True, xpnts = xs)
     return ob[1] + ob[2]
 
-def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256):
+def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256, ang_method = 'Legendre'):
    
     if run_results == True: #re-run calculations
         f = h5py.File('shell_source.h5', 'r+')
@@ -87,10 +87,16 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 run.parameters['square_IC']['N_angles'] =  [N_ang]
                 run.parameters['all']['N_spaces'] = [space]
                 run.parameters['all']['tfinal'] = tt
+                if ang_method == 'diamond':
+                    run.parameters['all']['angular_derivative'] = {'finite_differences': False, 'diamond': True, 'Legendre': False}
+                elif ang_method == 'finite_difference':
+                     run.parameters['all']['angular_derivative'] = {'finite_differences': True, 'diamond': False, 'Legendre': False}
+                elif ang_method == 'Legendre':
+                     run.parameters['all']['angular_derivative'] = {'finite_differences': False, 'diamond': False, 'Legendre': True}
                 run.mesh_parameters['Msigma'] = M
                 run.square_IC(uncollided, moving_mesh)
                 f = h5py.File('shell_source.h5', 'r+')
-                save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}'
+                save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}_ang_method={ang_method}'
                 if f.__contains__(save_string):
                     del f[save_string]
                 if f.__contains__(save_string + 'angular_flux'):
@@ -107,7 +113,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
         err_list = []
         for k, space in enumerate(N_space_list):
             f = h5py.File('shell_source.h5', 'r+')
-            save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}'
+            save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}_ang_method={ang_method}'
             res = f[save_string][:,:]
             f.close()
             xs = res[0]

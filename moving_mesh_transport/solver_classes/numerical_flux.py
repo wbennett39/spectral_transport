@@ -269,7 +269,7 @@ class LU_surf(object):
 
             
     
-    def make_LU(self, t, mesh_class, u, space, mul, u_refl, rt = False):
+    def make_LU(self, t, mesh_class, u, space, mul, rt = False):
         self.v0 = 0 
         self.v1 = 0
         self.v2 = 0
@@ -285,7 +285,7 @@ class LU_surf(object):
         
         self.make_h(space)
         self.extend_mesh(space)
-        self.make_sol(space, u, t, u_refl)
+        self.make_sol(space, u, t)
 
 
         psi_minus = 0.0

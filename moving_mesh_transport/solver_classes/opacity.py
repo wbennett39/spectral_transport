@@ -351,6 +351,32 @@ class sigma_integrator():
             
             # res = 1 * 10**(2) + x*0
             return res
+        elif self.sigma_func['Kornreich'] == 1:
+            res = x* 0
+        
+            for ix, xx in enumerate(x):
+                z = x - self.shift
+                fuel = False
+                moderator = False
+                absorber = False
+                if -4.5 <= z < -3.5 or 3.5 < z <= 5.5:
+                    fuel = True
+                elif -3.5 <= z < 2.5 or 2.5 <= z <= 3.5:
+                    moderator = True
+                else:
+                    absorber = True
+                
+                if fuel == True and scattering == True:
+                    res[ix] = self.sigma_t * 0.8
+                elif absorber == True and scattering == True:
+                    res[ix] = self.sigma_t * 0.1
+                elif moderator == True and scattering == True:
+                    res[ix] = self.sigma_t * 0.8
+
+                else:
+                    res[ix] = self.sigma_t
+            return res
+
         elif self.sigma_func['picket_fence'] == 1:
                 # w1 = 2/11
                 # w2 = 20/11

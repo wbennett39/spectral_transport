@@ -64,6 +64,8 @@ class parameter_load_class:
 
         self.mxstp = float(parameters['all']['mxstp'])
         self.legendre_moments = int(parameters['all']['legendre_moments'])
+        self.angular_derivative = nb.typed.Dict.empty(key_type=nb.typeof('par_1'), value_type=nb.typeof(1))
+        dictionary_loader(parameters['all']['angular_derivative'], self.angular_derivative) 
 
 
         if self.edge_v == 'one':

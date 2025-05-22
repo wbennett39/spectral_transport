@@ -125,7 +125,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
-          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f, legendre_moments):
+          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -145,8 +145,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     mus_new[-1] = 1
     mus_new[1:-1] = mus
     ws_new[1:-1] = ws
-    # mus = mus_new
-    # ws = ws_new
+    if angular_derivative['diamond'] == True: # Add starting angle(s)
+        mus = mus_new
+        ws = ws_new
+        N_ang += 2
     print(np.sum(ws), 'ws sum')
     print('integrator method:', integrator)
     # N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
@@ -190,7 +192,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
                        quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
-                       fixed_source_coeffs, chi, nu, sigma_f, legendre_moments)
+                       fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative)
     initialize.shift = shift
 
 

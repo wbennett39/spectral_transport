@@ -65,8 +65,13 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list = power_iterate(0.5, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-12)
+        k_list, time_list = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-12)
         print(k_list, 'k_list')
+        # run.parameters['all']['N_spaces'] = [150]
+        # run.parameters['all']['Ms'] = [2]
+        # run.parameters['random_IC']['N_angles'] = [512]
+        # run.parameters['fixed_source']['N_angles'] = [512]
+        # k_list, time_list = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-12)
 
     # Estimate alpha modes with VDMD
     # Y_minus_residual = Y_minus.copy() 

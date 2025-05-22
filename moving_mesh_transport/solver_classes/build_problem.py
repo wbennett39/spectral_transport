@@ -235,15 +235,15 @@ class build(object):
                 
     def make_IC(self, edges, randomstart):
         if self.sigma_func['Kornreich'] == True:
-            self.sigma_f = np.zeros(self.N_space)
-            self.nu = np.zeros(self.N_space)
+            # self.sigma_f = np.zeros(self.N_space)
+            # self.nu = np.zeros(self.N_space)
             edges2 = edges - self.shift
             print(edges2, 'edges2')
-            for space in range(self.N_space -1):
-                if not edges2[space+1]  <=  -3.5 or not edges2[space] >= 3.5:
+            for space in range(1, self.N_space -1):
+                if edges2[space]  >  -3.5 or  edges2[space+1] < 3.5:
                     self.sigma_f[space] = 0.0
-                    self.nu[space] = 1
-            print(self.sigma_f)
+                    self.nu[space] = 0
+            print(self.sigma_f, 'sigma_f')
             # assert 0
 
 

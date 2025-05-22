@@ -87,35 +87,51 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 run.parameters['square_IC']['N_angles'] =  [N_ang]
                 run.parameters['all']['N_spaces'] = [space]
                 run.parameters['all']['tfinal'] = tt
+                run.mesh_parameters['Msigma'] = M
                 run.square_IC(uncollided, moving_mesh)
                 f = h5py.File('shell_source.h5', 'r+')
                 save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}'
                 if f.__contains__(save_string):
                     del f[save_string]
+                if f.__contains__(save_string + 'angular_flux'):
+                    del f[save_string + 'angular_flux']
                 dat = np.zeros((2, run.xs.size))
                 dat[0] = run.xs
                 dat[1] = run.phi.transpose()
                 f.create_dataset(save_string, data = dat)
+                f.create_dataset(save_string + 'angular_flux', data = run.psi)
                 f.close()
     # plot benchmark results
 
     for it, tt in enumerate(time_list):
-        err_list = np.array(N_space_list) * 0
+        err_list = []
         for k, space in enumerate(N_space_list):
             f = h5py.File('shell_source.h5', 'r+')
             save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}'
             res = f[save_string][:,:]
+            f.close()
             xs = res[0]
             phi = res[1]
-            bench = get_bench(xs, tt)
+            # bench = get_bench(xs, tt)
+            f2 = h5py.File('shell_IC_benchmarks.h5', 'r+')
+            res2 = f2[f't={tt}']
+            xsb = res2[0]
+            phib = res2[1]
+            f2.close
+            bench_interp = interp1d(xsb, phib)
+            bench = bench_interp(xs)
             # bench = xs*0
-            err_list[k] = RMSE(phi, bench)
+            err_list.append(RMSE(phi, bench))
+            print(err_list, 'RMSE LIST')
+            print(RMSE(phi, bench), 'RMSE')
             plt.plot(xs, phi, '-o', mfc = 'none')
             plt.plot(xs, bench, 'k-')
             plt.savefig(f'shell_source_solution_t={tt}.pdf')
             plt.close()
+            
 
-        plt.plot(N_space_list, err_list / bench[0], '-o', mfc = 'none')
+        print(err_list, 'err list')
+        plt.loglog(N_space_list, err_list / bench[0], '-o', mfc = 'none')
         plt.xlabel('spatial cells', fontsize = 16)
         plt.ylabel('scaled RMSE')
         plt.title(f'{N_ang} angles, M={M}') 
@@ -123,10 +139,23 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
         plt.close()
 
        
+def calculate_benchmarks():
+    for it, tt in enumerate(time_list):
+        xs = np.linspace(0.00000000001, 0.5 + tt, 500)
+        bench = get_bench(xs, tt)
+        f = h5py.File('shell_IC_benchmarks.h5', 'r+')
+        if f.__contains__(f't={tt}'):
+                    del f[f't={tt}']
+        f.create_dataset(f't={tt}', data = np.array([xs, bench]))
+        f.close()
 
 
 
-square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[25], N_ang = 32, run_results = True)
+
+# square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[50], N_ang = 96, run_results = False)
+# square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[12, 25, 50, 75, 100], N_ang = 64, run_results = False)
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25], N_ang = 256, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     

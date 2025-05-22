@@ -643,7 +643,7 @@ class rhs_class():
                     U[:] = V_old[angle,space,:]
                     # assert((np.abs(U-VV/self.sigma_t) < 1e-6).all())
                     dterm = U.copy()*0
-                    dterm2 = U.copy()*0
+                    # dt erm2 = U.copy()*0
                     mu_derivative = U*0
                     # if angle > 0 and angle != self.N_ang-1:
                     # mu_derivative = legendre_difference2(self.ws, self.N_ang, int(2*self.N_ang-1), V_old[:, space, :], J, self.M, self.mus, self.mus[angle])
@@ -653,9 +653,9 @@ class rhs_class():
                     # # #         # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
                     #     dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
                     #         dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
-                    for j in range(self.M+1):
-                        vec = (1-self.mus**2) * V_old[:, space, j]
-                        dterm2[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
+                    # for j in range(self.M+1):
+                    #     vec = (1-self.mus**2) * V_old[:, space, j]
+                    #     dterm2[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
                     if self.geometry['sphere'] == True:  
                         # print(dterm, dterm2)
                         RHS = V_old[angle, space, :]*0

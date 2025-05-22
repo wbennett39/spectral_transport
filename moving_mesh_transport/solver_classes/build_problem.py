@@ -236,10 +236,14 @@ class build(object):
         if self.sigma_func['Kornreich'] == True:
             self.sigma_f = np.zeros(self.N_space)
             self.nu = np.zeros(self.N_space)
+            edges2 = edges - self.shift
+            print(edges2, 'edges2')
             for space in range(1, self.N_space):
-                if edges[space] <  -3.5 and edges[space-1] > -4.5 or edges[space-1] > 3.5:
+                if edges2[space]  <  -3.5 and edges2[space-1] > -4.5 or edges2[space-1] > 3.5:
                     self.sigma_f[space] = 0.3
                     self.nu[space] = 1
+            print(self.sigma_f)
+            assert 0
 
 
         # edges = mesh_class(self.N_space, self.x0, self.tfinal, self.moving, self.move_type, self.source_type, 

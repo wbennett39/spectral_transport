@@ -161,7 +161,7 @@ def calculate_benchmarks():
 # square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[50], N_ang = 96, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[12, 25, 50, 75, 100], N_ang = 64, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[30], N_ang = 16, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[30], N_ang = 256, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     

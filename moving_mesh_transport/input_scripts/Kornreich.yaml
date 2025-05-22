@@ -6,8 +6,8 @@
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
     'sigma_t': 1.1
-    'sigma_s': 1.0
-    'sigma_f': 0.0
+    'sigma_s': .8
+    'sigma_f': .3
     'chi': 0.0
     'nu': 0.0
     't0': 1.0                       # time the source is turned off

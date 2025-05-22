@@ -55,7 +55,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     geometry = run.geometry
     uncollided_ob = run.uncollided_ob
     edges = run.edges
-    normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
+
+    normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
     n_iters = 0
     normalization_list = []
     calc_time_list = []
@@ -72,7 +73,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         t_calc = time.time() - t1
         # update k
-        k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
+        k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) / normalization
         if k_new <0:
             raise ValueError('negative k_eff')
         # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
@@ -86,7 +87,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             k_old = k_new
             klist.append(k_new)
             n_iters +=1
-            normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi)
+            normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
             normalization_list.append(normalization)
             calc_time_list.append(t_calc)
     

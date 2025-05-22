@@ -470,6 +470,7 @@ class rhs_class():
             # print(heat_wave_loc, 'wave x')
         
     def call(self, t, V, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer_class, sigma_class):
+        print(self.sigma_f)
         if np.isnan(V).any():
                 print('nan solution vector')
                 assert(0)

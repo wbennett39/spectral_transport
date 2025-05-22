@@ -56,17 +56,27 @@ run = run()
 # run.plane_IC(0,0)
 run.load('Kornreich', 'mesh_parameters_Kornreich')
 loader = load()
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True):
+    if prime == True:
+        run.parameters['all']['N_spaces'] = [5]
+        run.parameters['all']['Ms'] = [0]
+        run.parameters['random_IC']['N_angles'] = [2]
+        run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
-run.parameters['all']['N_spaces'] = [5]
-run.parameters['all']['Ms'] = [0]
-run.parameters['random_IC']['N_angles'] = [2]
-run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
+    # First, find k_eff
+    if get_k == True:
+        k_list, time_list = power_iterate(0.5, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-12)
+        print(k_list, 'k_list')
 
-# First, find k_eff
-k_list, time_list = power_iterate(0.5, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-12)
-print(k_list, 'k_list')
+    # Estimate alpha modes with VDMD
+    # Y_minus_residual = Y_minus.copy() 
+    # for it in range(1, time_list.size):
+    #     dt = time_list[it] - time_list[it-1]
+    #     Y_minus_residual -= dt * source
+    # eigen_vals = DMD_func3(Y_minus_residual, time_list, 'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
 
-# Estimate alpha modes with VDMD
+
+    # Power iterate on alpha modes
 
 
-# Power iterate on alpha modes
+Kornreich_benchmark()

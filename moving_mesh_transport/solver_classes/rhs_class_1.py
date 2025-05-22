@@ -597,7 +597,7 @@ class rhs_class():
                     # self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
                     ######### solve thermal couple ############
                     U = V_old[-1,space,:]
-                    num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1, 0, :], True)
+                    num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, True)
                     RU = num_flux.LU 
                     RHS_transfer = np.copy(V_old[-1, space, :]*0)
                     if self.uncollided == True:

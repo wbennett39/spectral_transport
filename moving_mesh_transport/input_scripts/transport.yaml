@@ -34,7 +34,7 @@
     'lumping': False
     'N_groups': 1
     'VDMD': False
-    'legendre_moments': 256
+    'legendre_moments': 2
     'angular_derivative': {finite_differences: False, diamond: True, Legendre: False}
     
 # plane pulse source

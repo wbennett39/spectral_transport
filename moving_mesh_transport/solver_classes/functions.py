@@ -690,7 +690,7 @@ def psi_derivative(psi_moments, N_mom, M, mu):
     res = np.zeros(M+1)
     for i in range(M+1):
         for n in range(N_mom):
-            res[i] += 0.5 * (2*n + 1) * psi_moments[n, i] *  (-(n+1) * mu * Pn_scalar(n, mu, -1,1) - Pn_scalar(n+1, mu, -1, 1)) / (mu**2-1)
+            res[i] += 0.5 * (2*n + 1) * psi_moments[n, i] *  -(n+1)*( mu * Pn_scalar(n, mu, -1,1) - Pn_scalar(n+1, mu, -1, 1)) / (mu**2-1)
     return res
 
 

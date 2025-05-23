@@ -18,7 +18,7 @@ from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
-from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments
+from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments, psi_derivative
 from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre, legendre_difference3
 import numba as nb
 from numba import prange
@@ -331,7 +331,7 @@ class rhs_class():
         # print(self.alphas[:middle])
         # print(self.alphas[middle:])
         # self.alphas[:middle] = np.flip(self.alphas[middle:])
-        print(self.alphas, 'alphas')
+        # print(self.alphas, 'alphas')
 
 
 
@@ -532,6 +532,11 @@ class rhs_class():
         for space in range(self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
+                for iang in range(self.N_ang):
+                    mu = self.mus[iang]
+                    test = psi_derivative(psi_moments, self.legendre_moments, self.M, mu)
+                    if (np.abs(test) > 1e-8).any():
+                        print(test) 
             # get mesh edges and edge derivatives          
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]
@@ -646,6 +651,7 @@ class rhs_class():
                     # if angle > 0 and angle != self.N_ang-1:
                     # mu_derivative = legendre_difference2(self.ws, self.N_ang, int(2*self.N_ang-1), V_old[:, space, :], J, self.M, self.mus, self.mus[angle])
                     # mu_derivative = legendre_difference(2*self.N_ang-1, psi_moments, J, self.M, self.mus[angle])
+
                     if self.angular_derivative['Legendre'] == True:
                         dterm  = legendre_difference3(self.legendre_moments, psi_moments, self.M, self.mus[angle])
                     elif self.angular_derivative['diamond'] == True:

@@ -260,16 +260,19 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
         initialize.fixed_source_coeffs = fixed_source_coeffs_norm
         flux.fixed_source_coeffs = fixed_source_coeffs_norm
-        print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
+        assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
             initialize.IC = fixed_source_coeffs
             flux.make_fixed_phi(mesh.edges)
         else:
             flux.fixed_source_coeffs = initialize.IC
-            normalization = normalize_phi(flux.fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups)
+            norm_integrand = initialize.IC.copy()
+            for space in range(N_space):
+                norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
+            normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups)
             # normalization = 1
             # check normalize
-            print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
+            # print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
             flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
             initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
             initialize.IC = initialize.IC #/ normalization
@@ -321,12 +324,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(extra_deg, 'extra degree of freedom')
         V_new = V.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
          # enforce zero flux in origin cell
-        # for tangle in range(0, int(N_ang/2)):
-        #         refl_index = N_ang-tangle-1
-        #                     # print(self.mus[angle], self.mus[refl_index])
-        #         assert(abs(mus[refl_index] + mus[tangle])<=1e-10) 
-        #         for j in range(1, M+1):
-        #             V_new[refl_index, 0, j] = V_new[tangle, 0, j] * (-1) **(j+1)
+        for tangle in range(0, int(N_ang/2)):
+                refl_index = N_ang-tangle-1
+                            # print(self.mus[angle], self.mus[refl_index])
+                assert(abs(mus[refl_index] + mus[tangle])<=1e-10) 
+                for j in range(1, M+1):
+                    V_new[refl_index, 0, j] = V_new[tangle, 0, j] * (-1) **(j+1)
         # print(V_new)
         VV_new = V_new.copy()*0
         for ig in range(N_groups):

@@ -11,9 +11,9 @@
     'chi': 1.0
     'nu': 0.0
     't0': 1.0                       # time the source is turned off
-    'N_spaces': [45]                   # number of cells
+    'N_spaces': [75]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [2]                         # number of basis functions -1
+    'Ms': [1]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-11                          # rel tolerance for ODE integrator
     'at': 1e-10                         # abs tolerance for ODE integrator
@@ -129,7 +129,7 @@
 'random_IC':
     'x0': [5.0]
     'l': 1.0
-    'shift': 500.0
+    'shift': 100.0
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
     'N_angles': [32]    # corresponds to N_spaces
@@ -139,7 +139,7 @@
 'fixed_source':
     'x0': [4.5]
     'l': 1.0
-    'shift': 500.000000
+    'shift': 100.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
     'N_angles': [32]    # corresponds to N_spaces

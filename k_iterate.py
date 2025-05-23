@@ -77,7 +77,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     calc_time_list = []
     normalization_list.append(normalization)
 
-    while converged == False and n_iters < 15: 
+    while converged == False and n_iters < 25: 
         run.load(transport_parameters, mesh_parameters)
         # scale sigma_f
         # run.parameters['all']['sigma_f'] = sigma_f / k_old

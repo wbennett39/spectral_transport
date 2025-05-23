@@ -532,11 +532,10 @@ class rhs_class():
         for space in range(self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
-                for iang in range(self.N_ang):
-                    mu = self.mus[iang]
-                    test = psi_derivative(psi_moments, self.legendre_moments, self.M, mu)
-                    if (np.abs(test) > 1e-8).any():
-                        print(test) 
+            #     if space == 0:
+            #         if (np.abs(psi_moments[1, :]) > 1e-6).any():
+            #             print(psi_moments)
+                 
             # get mesh edges and edge derivatives          
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]
@@ -637,6 +636,9 @@ class rhs_class():
                     
                     num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul)
                     LU = num_flux.LU 
+                    # if space == 0:
+                    #     print(-LU, 'flux')
+                    #     print(self.mus[angle], 'angle')
                     # Get absorption term
                     # sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
                     sigma_class.make_vectors(mesh.edges, V_old[angle,space,:], space)
@@ -672,7 +674,9 @@ class rhs_class():
                     # for j in range(self.M+1):
                     #     vec = (1-self.mus**2) * V_old[:, space, j]
                     #     dterm2[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
-                    if self.geometry['sphere'] == True:  
+                    if self.geometry['sphere'] == True:
+                        const_crosssection = False  
+                        
                         # print(dterm, dterm2)
                         RHS = V_old[angle, space, :]*0
                         RHS -=  LU # numerical flux 
@@ -682,12 +686,28 @@ class rhs_class():
                         RHS += np.dot(G, U) # moving mesh time derivative correction
                         # RHS += 0.5 * S /self.sigma_t / self.l # source
                         RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l # radiative transfer coupling
-                        RHS += PV * self.c /self.sigma_t / self.l # scattering
+                        RHS -= np.dot(MPRIME, U)
+                        if const_crosssection ==True:
+                            RHS = np.dot(Minv, RHS) # mass matrix 
+                        if const_crosssection == False:
+                            RHS += PV * self.c /self.sigma_t / self.l # scattering
+                        if const_crosssection ==True:
+                            PV2 = PV.copy()
+                            for ii in range(self.M+1):
+                                PV2[ii] = np.sum(np.multiply(V_old[:,space,ii],self.ws)) #* (self.c) 
+                            RHS += PV2 * self.c
+                            # print(np.dot(Minv, PV * self.c /self.sigma_t) - PV2, 'pv')
                         RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t # fixed fission source
-                        RHS -= VV / self.sigma_t / self.l # absorption
-                        RHS -= np.dot(MPRIME, U) # time derivative of mass matrix
-                        RHS = np.dot(Minv, RHS) # mass matrix 
+                        if const_crosssection ==False:
+                            RHS -= VV / self.sigma_t / self.l # absorption
+                        if const_crosssection ==True:
+                            RHS -= U
+                         # time derivative of mass matrix
+                        if const_crosssection == False:
+                            RHS = np.dot(Minv, RHS) # mass matrix 
                         V_new[angle,space,:] = RHS
+                        # print(np.dot(Minv, VV/self.sigma_t) - U, 'u')
+                        
            
         
                         # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))

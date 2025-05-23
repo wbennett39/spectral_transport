@@ -56,7 +56,7 @@ run = run()
 # run.plane_IC(0,0)
 run.load('Kornreich', 'mesh_parameters_Kornreich')
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = 0.42):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = 0.9):
     if prime == True:
         run.parameters['all']['N_spaces'] = [5]
         run.parameters['all']['Ms'] = [0]
@@ -67,6 +67,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
     if get_k == True:
         k_list, time_list, normalization_list = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-12)
         print(k_list, 'k_list')
+        print(k_list[-1], 'k effective')
         # run.parameters['all']['N_spaces'] = [150]
         # run.parameters['all']['Ms'] = [2]
         # run.parameters['random_IC']['N_angles'] = [512]

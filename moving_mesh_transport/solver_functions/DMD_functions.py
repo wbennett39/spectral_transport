@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import tqdm
 from .theta_DMD import theta_DMD
 from .VDMD import VDMD2 as VDMD_func
+from .weak_VDMD import weak_VDMD
 import random
 
 def sparsify_data_mat(ts, Y_minus, t1, t2, npnts, type = 'log'):
@@ -482,7 +483,10 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             # print(Y_plus, 'yp')
         else:
             raise ValueError('Integration method not implemented')
-
+        
+        weak_Yminus, weak_Yplus = weak_VDMD(Y_minus, ts)
+        eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip)))
+        print(eigen_vals_DMD_weak, 'weak eigen values')
         # eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:]+1e-18, t[skip:], theta = 1)))
         
        

@@ -90,6 +90,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 if ang_method == 'diamond':
                     run.parameters['all']['angular_derivative'] = {'finite_differences': False, 'diamond': True, 'Legendre': False}
                 elif ang_method == 'finite_difference':
+                     run.parameters['all']['weights'] = 'gauss_lobatto'
                      run.parameters['all']['angular_derivative'] = {'finite_differences': True, 'diamond': False, 'Legendre': False}
                 elif ang_method == 'Legendre':
                      run.parameters['all']['angular_derivative'] = {'finite_differences': False, 'diamond': False, 'Legendre': True}
@@ -116,6 +117,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             f = h5py.File('shell_source.h5', 'r+')
             save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}_ang_method={ang_method}'
             res = f[save_string][:,:]
+            
             f.close()
             xs = res[0]
             phi = res[1]
@@ -162,7 +164,7 @@ def calculate_benchmarks():
 # square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[50], N_ang = 96, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[12, 25, 50, 75, 100], N_ang = 64, run_results = False)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[10, 20, 40, 80], N_ang = 2, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[35], N_ang =16, run_results = True, ang_method='finite_differences')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     

@@ -37,7 +37,7 @@
               gaussian: False, f_sedov: False, converging: False, test1: False, 
               test2: False, test3: False, test4: False, picket_fence: False,
               modak_gupta0: True, modak_gupta05: False, modak_gupta1: False, 
-              modak_gupta25: False, modak_gupta5: False} 
+              modak_gupta25: False, modak_gupta5: False, Kornreich: False} 
 'Msigma': 0
 'fake_sedov_v0': 0.005
 

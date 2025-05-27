@@ -463,10 +463,13 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             #         Y_plus[:, it] =  1.5 * (Y_minus[:, it] - 4 * Y_minus[:, it-1]/3 + Y_minus[:, it-2]/3) / dt 
 
 
+        weak_Yminus, weak_Yplus = weak_VDMD(Y_minus, Y_plus, ts)
 
         if integrator == 'Euler' or integrator == 'BDF_VODE':
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, -5, np.log(100), sparse_time_points)
+                ts_sparse, weak_Yminus_sparse = sparsify_data_mat(ts, weak_Yminus, -5, np.log(100), sparse_time_points)
+                ts_sparse, weak_Yplus_sparse = sparsify_data_mat(ts, weak_Yplus, -5, np.log(100), sparse_time_points)
         else:
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, 0, 100, sparse_time_points, 'const')
@@ -474,6 +477,8 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             # print(ts, 'sparse time array')
         Y_minus = Y_minus_sparse
         Y_plus = Y_plus_sparse
+        weak_Yminus = weak_Yminus_sparse
+        weak_Yplus = weak_Yplus_sparse
         # print(Y_minus, 'Y-')
         if integrator == 'BDF':
             # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
@@ -484,9 +489,9 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         else:
             raise ValueError('Integration method not implemented')
         
-        weak_Yminus, weak_Yplus = weak_VDMD(Y_minus, ts)
+        
         eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip)))
-        print(eigen_vals_DMD_weak, 'weak eigen values')
+        print(np.flip(eigen_vals_DMD_weak[:4]), 'weak eigen values')
         # eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:]+1e-18, t[skip:], theta = 1)))
         
        

@@ -65,9 +65,10 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list, normalization_list = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-12)
+        k_list, time_list, normalization_list = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-6)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
+        print(time_list, 'computation time required per iterate')
         # run.parameters['all']['N_spaces'] = [150]
         # run.parameters['all']['Ms'] = [2]
         # run.parameters['random_IC']['N_angles'] = [512]

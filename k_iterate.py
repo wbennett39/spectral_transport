@@ -16,6 +16,21 @@ def integrate_phi_cell(cs, ws, a, b, M, N_ang):
     res = np.sum(np.multiply(psi,ws))
     return 4 * math.pi * res #* cell_volume
 
+def wynn_epsilon(S):
+        n = S.size
+        width = n-1
+        # print(width)
+        tableau = np.zeros((n + 1, width + 2))
+        tableau[:,0] = 0
+        tableau[1:,1] = S.copy() 
+        for w in range(2,width + 2):
+            for r in range(w,n+1):
+                #print(r,w)
+                # if abs(tableau[r,w-1] - tableau[r-1,w-1]) <= 1e-15:
+                #     print('potential working precision issue')
+                tableau[r,w] = tableau[r-1,w-2] + 1/(tableau[r,w-1] - tableau[r-1,w-1])
+        return tableau
+
 def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
@@ -77,7 +92,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     calc_time_list = []
     normalization_list.append(normalization)
 
-    while converged == False and n_iters < 25: 
+    while converged == False and n_iters < 2500: 
         run.load(transport_parameters, mesh_parameters)
         # scale sigma_f
         # run.parameters['all']['sigma_f'] = sigma_f / k_old
@@ -95,6 +110,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi *sigma_interp(x)
         k_new = k_old * integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) / normalization
+        
         if k_new <0:
             raise ValueError('negative k_eff')
         # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
@@ -106,9 +122,17 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             print(k_new, 'k effective')
             converged = True
         else:
+            print(k_old-k_new, 'k difference')
             k_old = k_new
             phi_interpolated = phi_interpolated_new
             klist.append(k_new)
+            k_wynn_epsilon = wynn_epsilon(np.array(klist))
+            if n_iters % 2 == 0:
+                iw = n_iters - 1
+            else:
+                iw = n_iters
+            print(k_wynn_epsilon[iw:,iw])
+
             n_iters +=1
             normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
             normalization_list.append(normalization)

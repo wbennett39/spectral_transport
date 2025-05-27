@@ -7,6 +7,18 @@ from .VDMD import VDMD2 as VDMD_func
 from .weak_VDMD import weak_VDMD
 import random
 
+def sparsify_data_mat2(Y_minus, skip):
+    res = Y_minus[0, :].copy
+    it2 = -1
+    for it in range(Y_minus[:, 0].size):
+        if it2 == skip:
+            res = np.append(res, Y_minus[it,:])
+            it2 = -1
+        it2 += 1
+    print(res)
+    return res
+
+
 def sparsify_data_mat(ts, Y_minus, t1, t2, npnts, type = 'log'):
      if type == 'log':
         ts2= np.logspace(t1, t2, npnts)
@@ -447,6 +459,19 @@ def DMD_func2(sol, N_ang, N_groups, N_space, M, xs, uncollided_sol, edges, uncol
 
 
 
+def sparsify_weak_dmd(ts, ts_sparse, Y_minus, Y_plus, associated_time_vector):
+    Y_plus_out = Y_plus[:, 0].copy()
+    Y_minus_out = Y_minus[:, 0].copy()
+
+    for it in range(ts_sparse.size):
+        for j0 in range(Y_minus[:, 0].size):
+            if associated_time_vector[0, j0] <= ts_sparse[it] <= associated_time_vector[1, j0]:
+                Y_plus_out = np.array([Y_plus_out, Y_plus[:, j0]])
+                Y_minus_out = np.array([Y_minus_out, Y_plus[:,j0]])
+    return Y_minus_out, Y_plus_out
+
+
+
 
 
 def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10):
@@ -463,13 +488,14 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             #         Y_plus[:, it] =  1.5 * (Y_minus[:, it] - 4 * Y_minus[:, it-1]/3 + Y_minus[:, it-2]/3) / dt 
 
 
-        weak_Yminus, weak_Yplus = weak_VDMD(Y_minus, Y_plus, ts)
+        weak_Yminus, weak_Yplus, associated_time_vector = weak_VDMD(Y_minus, Y_plus, ts)
 
+        
         if integrator == 'Euler' or integrator == 'BDF_VODE':
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, -5, np.log(100), sparse_time_points)
-                ts_sparse, weak_Yminus_sparse = sparsify_data_mat(ts, weak_Yminus, -5, np.log(100), sparse_time_points)
-                ts_sparse, weak_Yplus_sparse = sparsify_data_mat(ts, weak_Yplus, -5, np.log(100), sparse_time_points)
+                # weak_Yminus_sparse = sparsify_data_mat2( weak_Yminus, 4)
+                # weak_Yplus_sparse = sparsify_data_mat2(weak_Yplus, 4)
         else:
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, 0, 100, sparse_time_points, 'const')
@@ -477,8 +503,8 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             # print(ts, 'sparse time array')
         Y_minus = Y_minus_sparse
         Y_plus = Y_plus_sparse
-        weak_Yminus = weak_Yminus_sparse
-        weak_Yplus = weak_Yplus_sparse
+        # weak_Yminus = weak_Yminus_sparse
+        # weak_Yplus = weak_Yplus_sparse
         # print(Y_minus, 'Y-')
         if integrator == 'BDF':
             # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
@@ -490,7 +516,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             raise ValueError('Integration method not implemented')
         
         
-        eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip)))
+        eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip = 0)))
         print(np.flip(eigen_vals_DMD_weak[:4]), 'weak eigen values')
         # eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:]+1e-18, t[skip:], theta = 1)))
         

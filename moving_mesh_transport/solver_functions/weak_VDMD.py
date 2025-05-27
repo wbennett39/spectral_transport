@@ -85,6 +85,9 @@ def my_midpoint(t1, t2, t3, Ys):
     delta1 = t2- t1
     delta2 = t3 - t1
 
+
+
+
 @njit
 def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
     # Form V-, Vplus
@@ -94,10 +97,11 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
     J2 = max(ts.size -6, 0)  # basis functions covering 7 time points
     J3 = max(ts.size -8, 0)# basis functions covering 9 time points
     J4 = max(ts.size - 10, 0) # etc
+    J5 = max(ts.size - 20, 0) # etc
 
-
-    Vminus = np.zeros((J0 + J1  + J2  + J3 + J4, I))
-    Vplus = np.zeros((J0 + J1 + J2 + J3 + J4, I))
+    associated_time_vector = np.zeros((2, J0 + J1 + J2 + J3 + J4 + J5))
+    Vminus = np.zeros((I, J0 + J1  + J2  + J3 + J4 + J5))
+    Vplus = np.zeros((I, J0 + J1 + J2 + J3 + J4 + J5))
     # form J0 part of matrix
     for j0 in range(J0 + J1 + J2 + J3 + J4):
         # form integrand vector
@@ -144,9 +148,9 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
                 a = ts[-9]
                 b = ts[-1]
                 c = ts[-5]
-        elif j0 >= J3 + J2 + J1 + J0:
+        elif j0 >= J3 + J2 + J1 + J0 and j0 < J4 + J3 + J2 + J1 + J0:
             
-            jp = j0 - J2 -J1 - J0
+            jp = j0 - J2 -J1 - J0 -J3
             if jp < ts.size -10:
                 a = ts[jp]
                 b = ts[jp+10]
@@ -155,6 +159,20 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
                 a = ts[-11]
                 b = ts[-1]
                 c = ts[-5]
+        elif j0 >=J4 + J3 + J2 + J1 + J0:
+            jp = j0 - J2 -J1 - J0 -J3 - J4
+            if jp < ts.size -10:
+                a = ts[jp]
+                b = ts[jp+20]
+                c = ts[jp+10]
+            else:
+                a = ts[-21]
+                b = ts[-1]
+                c = ts[-10] # I think all of the c's are wrong. I only need them for the triangle basis though
+        associated_time_vector[0, j0] = a
+        associated_time_vector[1, j0] = b 
+
+
 
         for it in range(ts.size):
             if basis == 'quadratic':
@@ -163,15 +181,16 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
         # form integrands
         # plt.ioff()
         # plt.plot(ts, basis_vec2)
-        print(basis_vec2)
+        # print(jp)
+        # print(basis_vec2)
         integrand_vec = np.zeros((ts.size, I))
         integrand_vec2 = np.zeros((ts.size, I))
         for it3 in range(ts.size):
             for ii in range(I):
                 integrand_vec[it3, ii] = Y_minus[ii, it3] * basis_vec1[it3]
                 integrand_vec2[it3, ii] = Y_minus[ii, it3] * basis_vec2[it3]
-        Vplus[j0, :]= -trapz_nonuniform(ts, integrand_vec )
-        Vminus[j0, :] = trapz_nonuniform(ts, integrand_vec2 )
+        Vplus[:, j0]= -trapz_nonuniform(ts, integrand_vec )
+        Vminus[:, j0] = trapz_nonuniform(ts, integrand_vec2 )
         # print(Vplus[j0, :], 'V+')
         # print(Vminus[j0, :], 'V-')
 
@@ -226,7 +245,7 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
         # assert(abs(basis_vec2[0])) < 1e-6
         # assert(abs(basis_vec2[-1])) < 1e-6
     # print(Vminus, Vplus)
-    return Vminus[J0:,:], Vplus[J0:,:]
+    return Vminus[:,:], Vplus[:,:], associated_time_vector
 
 
 

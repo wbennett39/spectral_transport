@@ -56,7 +56,7 @@ run = run()
 # run.plane_IC(0,0)
 run.load('Kornreich', 'mesh_parameters_Kornreich')
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = 0.9):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = 0.5):
     if prime == True:
         run.parameters['all']['N_spaces'] = [5]
         run.parameters['all']['Ms'] = [0]
@@ -82,7 +82,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
     # eigen_vals = DMD_func3(Y_minus_residual, time_list, 'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
 
 
-    # Power iterate on alpha modes
+    # IRAM to get alpha modes
 
 
 Kornreich_benchmark()

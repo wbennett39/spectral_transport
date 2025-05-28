@@ -101,7 +101,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         skip = 4
         theta = 0
         eigen_vals = DMD_func3(Y_minus_shifted.reshape((N_ang * xs.size, ts.size)), ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
-        print(eigen_vals, 'alpha eigen values VDMD')
+        print(np.flip(eigen_vals), 'alpha eigen values VDMD')
         print(-0.3196537,-0.3229855, 'benchmark first two alpha eigen values' )
     # Y_minus_residual = Y_minus.copy() 
     # for it in range(1, time_list.size):

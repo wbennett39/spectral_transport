@@ -75,7 +75,8 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         f.create_dataset('scalar_flux', data = run_ob.phi)
         f.create_dataset('xs', data = run_ob.xs)
         f.create_dataset('psi', data = run_ob.psi)
-        f.create_dataset('Y_minus', data = run_ob.Y_minus_psi)
+        Yminus = run_ob.sol_ob.Y_minus_psi
+        f.create_dataset('Y_minus', data = run_ob.Yminus)
         f.create_dataset('t', data = run_ob.sol_ob.t)
         f.create_dataset('k_list', data = k_list)
         f.close()

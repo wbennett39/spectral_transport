@@ -88,10 +88,10 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         f = h5py.File('Kornreich_keff.h5', 'r+')
         ts = f['t']
         fission_source = f['fission_source']
-        Y_minus = f['Y_minus']
+        Y_minus = f['Y_minus'][:,:]
         N_ang = run.parameters['fixed_source']['N_angles'][0]
         xs = run_ob.xs
-        Y_minus_shifted = Y_minus.copy().reshape(N_ang, xs.size, ts.size)
+        Y_minus_shifted = np.array(Y_minus).copy().reshape(N_ang, xs.size, ts.size)
         # adjust Y- to remove source influence
         for it in range(1, ts.size):
             for ij in range(N_ang):

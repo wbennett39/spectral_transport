@@ -85,7 +85,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             sigma_f_array[k] = 0.0 
             nu_array[k] = 0.
     print(sigma_f_array, 'sigmaf')
-    sigma_interp = interp1d(run.xs, sigma_f_array)
+    sigma_interp = interp1d(run.xs, sigma_f_array * nu_array)
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x)  # because nu and sigma_t are constant right now, I don't need them in the integrand
     # normalization = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
     normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
@@ -108,7 +108,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # update k
         xs = run.xs
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
-        integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi * sigma_interp(x)
+        integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi * sigma_interp(x) 
         integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi *sigma_interp(x)
         k_new = k_old * integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) / normalization

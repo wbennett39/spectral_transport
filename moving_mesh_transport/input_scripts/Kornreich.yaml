@@ -5,11 +5,11 @@
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
-    'sigma_t': 1.1
+    'sigma_t': 1.0
     'sigma_s': .8
-    'sigma_f': .3
+    'sigma_f': .2
     'chi': 1.0
-    'nu': 1.0
+    'nu': 1.5
     't0': 1.0                       # time the source is turned off
     'N_spaces': [50]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
@@ -29,7 +29,7 @@
     'cv_const': 0.0
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'BDF'
+    'integrator': 'Euler'
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'N_groups': 1
@@ -127,12 +127,12 @@
     'move_type': [0,0,1]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE
 'random_IC':
-    'x0': [5.0]
+    'x0': [4.5]
     'l': 1.0
     'shift': 200.0
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [32]    # corresponds to N_spaces
+    'N_angles': [8]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE
 

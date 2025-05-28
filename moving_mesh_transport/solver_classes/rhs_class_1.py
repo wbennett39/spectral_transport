@@ -690,7 +690,7 @@ class rhs_class():
                         if const_crosssection ==True:
                             RHS = np.dot(Minv, RHS) # mass matrix 
                         if const_crosssection == False:
-                            RHS += PV * self.c /self.sigma_t / self.l # scattering
+                            RHS += PV  /self.sigma_t / self.l # scattering
                         if const_crosssection ==True:
                             PV2 = PV.copy()
                             for ii in range(self.M+1):

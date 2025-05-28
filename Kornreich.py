@@ -67,7 +67,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list, normalization_list, run_ob = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-5)
+        k_list, time_list, normalization_list, run_ob = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-7)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
         print(time_list, 'computation time required per iterate')
@@ -75,6 +75,8 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         f.create_dataset('scalar_flux', data = run_ob.phi)
         f.create_dataset('xs', data = run_ob.xs)
         f.create_dataset('psi', data = run_ob.psi)
+        f.create_dataset('Y_minus', data = run_ob.sol_ob.Y_minus_psi)
+        f.create_dataset('t', data = run_ob.sol_ob.t)
         f.close()
         # run.parameters['all']['N_spaces'] = [150]
         # run.parameters['all']['Ms'] = [2]

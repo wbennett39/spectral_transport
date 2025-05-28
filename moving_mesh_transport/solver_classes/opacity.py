@@ -369,11 +369,11 @@ class sigma_integrator():
                     absorber = True
                 
                 if fuel == True and scattering == True:
-                    res[ix] = self.sigma_t * 0.8
+                    res[ix] =  0.8 * self.sigma_t
                 elif absorber == True and scattering == True:
-                    res[ix] = self.sigma_t * 0.1
+                    res[ix] =  0.1 * self.sigma_t
                 elif moderator == True and scattering == True:
-                    res[ix] = self.sigma_t * 0.8
+                    res[ix] = 0.8 * self.sigma_t
 
                 else:
                     res[ix] = self.sigma_t

@@ -79,9 +79,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             # self.nu = np.zeros(self.N_space)
     shift = run.parameters['fixed_source']['shift']
     sigma_f_array = np.ones(run.xs.size) * sigma_f
+    nu_array = np.ones(run.xs.size) * nu
     for k in range(run.xs.size):
-        if -3.5 < run.xs[k]-shift < 3.5:
+        if -3.5 <= run.xs[k]-shift <= 3.5:
             sigma_f_array[k] = 0.0 
+            nu_array[k] = 0.
     print(sigma_f_array, 'sigmaf')
     sigma_interp = interp1d(run.xs, sigma_f_array)
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x)  # because nu and sigma_t are constant right now, I don't need them in the integrand

@@ -244,6 +244,7 @@ class build(object):
                 right_edge = edges2[space+1]
                 if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
                     self.sigma_f[space] = 0.0   
+                    self.nu[space] = 0.0
             print(self.sigma_f, 'sigma_f')
             print(edges, 'edges')
 

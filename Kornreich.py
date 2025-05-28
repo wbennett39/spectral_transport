@@ -70,6 +70,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-5)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
+        print(0.4243163, 'benchmark k effective')
         print(time_list, 'computation time required per iterate')
         f = h5py.File('Kornreich_keff.h5', 'w')
         f.create_dataset('scalar_flux', data = run_ob.phi)
@@ -84,21 +85,24 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
 
     # Estimate alpha modes with VDMD
     if VDMD_estimate == True:
-        f = h5py.File('Kornreich_keff.h5', 'w')
-        ts = f['ts']
+        f = h5py.File('Kornreich_keff.h5', 'r+')
+        ts = f['t']
         fission_source = f['fission_source']
         Y_minus = f['Y_minus']
-        Y_minus_shifted = Y_minus.copy()
+        N_ang = run.parameters['fixed_source']['N_angles'][0]
+        xs = run_ob.xs
+        Y_minus_shifted = Y_minus.copy().reshape(N_ang, xs.size, ts.size)
         # adjust Y- to remove source influence
-        for it in range(1, Y_minus[0,:].size):
-            for ij in range(Y_minus[:,0].size):
-                Y_minus_shifted[ij, it] = Y_minus[ij, it] - fission_source * (ts[it] - ts[it-1])
+        for it in range(1, ts.size):
+            for ij in range(N_ang):
+                Y_minus_shifted[ij, :, it] = Y_minus[ij,:, it].reshape(N_ang, xs.size, ts.size) - fission_source * (ts[it] - ts[it-1])
         integrator = run.parameters['all']['integrator']
         sigma_t = run.parameters['all']['sigma_t']
         skip = 4
         theta = 0
         eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
-        print(eigen_vals, 'eigen values VDMD')
+        print(eigen_vals, 'alpha eigen values VDMD')
+        print(-0.3196537,-0.3229855, 'benchmark first two alpha eigen values' )
     # Y_minus_residual = Y_minus.copy() 
     # for it in range(1, time_list.size):
     #     dt = time_list[it] - time_list[it-1]

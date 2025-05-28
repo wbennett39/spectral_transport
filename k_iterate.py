@@ -31,7 +31,7 @@ def wynn_epsilon(S):
                 tableau[r,w] = tableau[r-1,w-2] + 1/(tableau[r,w-1] - tableau[r-1,w-1])
         return tableau
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -120,6 +120,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         if abs(k_new - k_old ) <=tol:
             print('power iteration complete')
             print(k_new, 'k effective')
+            print(n_iters, 'total iterations required')
             converged = True
         else:
             print(k_old-k_new, 'k difference')
@@ -132,10 +133,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             else:
                 iw = n_iters
             print(k_wynn_epsilon[iw:,iw])
+            if use_we_accel == True:
+                k_old = k_wynn_epsilon[iw:, iw][-1]
 
             n_iters +=1
             normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
             normalization_list.append(normalization)
             calc_time_list.append(t_calc)
     
-    return klist, calc_time_list, normalization_list
+    return klist, calc_time_list, normalization_list, run

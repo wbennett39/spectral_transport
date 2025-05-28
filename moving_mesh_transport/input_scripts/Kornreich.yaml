@@ -9,7 +9,7 @@
     'sigma_s': .8
     'sigma_f': .3
     'chi': 1.0
-    'nu': 0.0
+    'nu': 1.0
     't0': 1.0                       # time the source is turned off
     'N_spaces': [50]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
@@ -129,7 +129,7 @@
 'random_IC':
     'x0': [5.0]
     'l': 1.0
-    'shift': 100.0
+    'shift': 200.0
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
     'N_angles': [32]    # corresponds to N_spaces
@@ -139,7 +139,7 @@
 'fixed_source':
     'x0': [4.5]
     'l': 1.0
-    'shift': 100.000000
+    'shift': 200.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
     'N_angles': [8]    # corresponds to N_spaces

@@ -356,10 +356,12 @@ class sigma_integrator():
         
             for ix, xx in enumerate(x):
                 z = xx - self.shift
+
+                
                 fuel = False
                 moderator = False
                 absorber = False
-                if -4.5 <= z < -3.5 or 3.5 < z <= 5.5:
+                if -4.5 <= z < -3.5 or 3.5 < z <= 4.5:
                     fuel = True
                 elif -3.5 <= z < 2.5 or 2.5 <= z <= 3.5:
                     moderator = True

@@ -42,6 +42,7 @@ from moving_mesh_transport.solver_classes.functions import test_s2_sol
 from moving_mesh_transport.loading_and_saving.load_solution import load_sol as load
 from moving_mesh_transport.solver_functions.run_functions import run
 from moving_mesh_transport.solver_functions.DMD_functions import DMD_func3
+import h5py
 
 # from diffeqpy import de
 
@@ -56,19 +57,25 @@ run = run()
 # run.plane_IC(0,0)
 run.load('Kornreich', 'mesh_parameters_Kornreich')
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = 0.5):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = np.random.rand()):
     if prime == True:
-        run.parameters['all']['N_spaces'] = [5]
+        run.parameters['all']['N_spaces'] = [10]
         run.parameters['all']['Ms'] = [0]
         run.parameters['random_IC']['N_angles'] = [2]
+        run.parameters['all']['sigma_f'] = 1.0
         run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list, normalization_list = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-6)
+        k_list, time_list, normalization_list, run_ob = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-5)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
         print(time_list, 'computation time required per iterate')
+        f = h5py.File('Kornreich_keff.h5', 'w')
+        f.create_dataset('scalar_flux', data = run_ob.phi)
+        f.create_dataset('xs', data = run_ob.xs)
+        f.create_dataset('psi', data = run_ob.psi)
+        f.close()
         # run.parameters['all']['N_spaces'] = [150]
         # run.parameters['all']['Ms'] = [2]
         # run.parameters['random_IC']['N_angles'] = [512]

@@ -161,6 +161,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         xs_quad, ws_quad = quadrature(2*M+1, 'gauss_legendre')
     elif geometry['sphere'] == True:
         xs_quad, ws_quad = quadrature(max(3*M+1, 3*Msigma+1), 'chebyshev')
+        # xs_quad, ws_quad = quadrature(16,'chebyshev')
 
     # t_quad = quadpy.c1.gauss_legendre(t_nodes).points
     t_quad, t_ws = quadrature(t_nodes, 'gauss_legendre')
@@ -258,8 +259,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         
         fixed_source_coeffs_norm = fixed_source_coeffs/normalization
         # print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
-        initialize.fixed_source_coeffs = fixed_source_coeffs_norm
-        flux.fixed_source_coeffs = fixed_source_coeffs_norm
+        if normalization > 0:
+            initialize.fixed_source_coeffs = fixed_source_coeffs_norm
+            flux.fixed_source_coeffs = fixed_source_coeffs_norm
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
             initialize.IC = fixed_source_coeffs
@@ -273,10 +275,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # normalization = 1
             # check normalize
             # print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
-            flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
-            initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
-            initialize.IC = initialize.IC #/ normalization
-            flux.make_fixed_phi(mesh.edges)
+            if normalization > 0:
+                flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
+                initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
+                initialize.IC = initialize.IC #/ normalization
+                flux.make_fixed_phi(mesh.edges)
 
 
     IC = initialize.IC  

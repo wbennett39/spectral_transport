@@ -1356,7 +1356,7 @@ class mesh_class(object):
                 inside_wave_edges = np.linspace(self.x0-dx, self.x0, third)
                 # inside_wave_edges = np.
 
-                outside_wave_edges2 =  np.abs((np.flip((np.logspace(0,1,rest+1)-10)/-9) * (self.x0-dx2-dx))[:-1])
+                outside_wave_edges2 =  np.abs((np.flip((np.linspace(0,1,rest+1)-10)/-9) * (self.x0-dx2-dx))[:-1])
                 outside_wave_edges = (np.linspace(self.x0-dx2-dx, self.x0-dx, third + 1)[:-1])
                 print('#')
                 print(inside_wave_edges)

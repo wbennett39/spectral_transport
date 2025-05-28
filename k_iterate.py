@@ -143,4 +143,4 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             normalization_list.append(normalization)
             calc_time_list.append(t_calc)
     
-    return klist, calc_time_list, normalization_list, run
+    return klist, calc_time_list, normalization_list, run, sigma_f_array, nu_array, run.phi[:,0]

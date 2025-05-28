@@ -57,7 +57,7 @@ run = run()
 # run.plane_IC(0,0)
 run.load('Kornreich', 'mesh_parameters_Kornreich')
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = np.random.rand()):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = np.random.rand(), sparse_time_points = 12):
     if prime == True:
         run.parameters['all']['N_spaces'] = [10]
         run.parameters['all']['Ms'] = [0]
@@ -67,7 +67,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list, normalization_list, run_ob = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-5)
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-5)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
         print(time_list, 'computation time required per iterate')
@@ -76,12 +76,29 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         f.create_dataset('xs', data = run_ob.xs)
         f.create_dataset('psi', data = run_ob.psi)
         Yminus = run_ob.sol_ob.Y_minus_psi
-        f.create_dataset('Y_minus', data = run_ob.Yminus)
+        f.create_dataset('Y_minus', data = Yminus)
         f.create_dataset('t', data = run_ob.sol_ob.t)
         f.create_dataset('k_list', data = k_list)
+        f.create_dataset('fission_source', data = sigma_f_vec * nu_vec * phi  )
         f.close()
 
     # Estimate alpha modes with VDMD
+    if VDMD_estimate == True:
+        f = h5py.File('Kornreich_keff.h5', 'w')
+        ts = f['ts']
+        fission_source = f['fission_source']
+        Y_minus = f['Y_minus']
+        Y_minus_shifted = Y_minus.copy()
+        # adjust Y- to remove source influence
+        for it in range(1, Y_minus[0,:].size):
+            for ij in range(Y_minus[:,0].size):
+                Y_minus_shifted[ij, it] = Y_minus[ij, it] - fission_source * (ts[it] - ts[it-1])
+        integrator = run.parameters['all']['integrator']
+        sigma_t = run.parameters['all']['sigma_t']
+        skip = 4
+        theta = 0
+        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
+        print(eigen_vals, 'eigen values VDMD')
     # Y_minus_residual = Y_minus.copy() 
     # for it in range(1, time_list.size):
     #     dt = time_list[it] - time_list[it-1]

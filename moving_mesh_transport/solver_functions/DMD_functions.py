@@ -474,7 +474,7 @@ def sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector):
 
 
 
-def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10):
+def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10, try_WDMD = False):
         ts =t
         Y_plus = np.zeros((Y_minus[:,0].size, t.size))
         # populate Y+ assuming Backward Euler 
@@ -487,8 +487,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             #     if it > 1:
             #         Y_plus[:, it] =  1.5 * (Y_minus[:, it] - 4 * Y_minus[:, it-1]/3 + Y_minus[:, it-2]/3) / dt 
 
-
-        weak_Yminus, weak_Yplus, associated_time_vector = weak_VDMD(Y_minus, Y_plus, ts)
+        
 
         
         if integrator == 'Euler' or integrator == 'BDF_VODE':
@@ -500,14 +499,19 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, 0, 100, sparse_time_points, 'const')
         ts = ts_sparse
+        if try_WDMD == True:
+            weak_Yminus, weak_Yplus, associated_time_vector = weak_VDMD(Y_minus, Y_plus, ts)
+            weak_Yminus_sparse, weak_Yplus_sparse = sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector)
+            weak_Yminus = weak_Yminus_sparse
+            weak_Yplus = weak_Yplus_sparse
+            eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip = 0)))
+            print(np.flip(eigen_vals_DMD_weak[:4]), 'weak eigen values')
             # print(ts, 'sparse time array')
-        weak_Yminus_sparse, weak_Yplus_sparse = sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector)
+        
         Y_minus = Y_minus_sparse
         Y_plus = Y_plus_sparse
-        weak_Yminus = weak_Yminus_sparse
-        weak_Yplus = weak_Yplus_sparse
-        print(weak_Yminus, 'Y- WEAK')
-        print(weak_Yplus, 'Y+ WEAK')
+
+
 
         # print(Y_minus, 'Y-')
         if integrator == 'BDF':
@@ -520,8 +524,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             raise ValueError('Integration method not implemented')
         
         
-        eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip = 0)))
-        print(np.flip(eigen_vals_DMD_weak[:4]), 'weak eigen values')
+
         # eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:]+1e-18, t[skip:], theta = 1)))
         
        

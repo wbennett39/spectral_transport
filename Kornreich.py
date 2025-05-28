@@ -95,7 +95,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         # adjust Y- to remove source influence
         for it in range(1, ts.size):
             for ij in range(N_ang):
-                Y_minus_shifted[ij, :, it] = Y_minus[ij,:, it].reshape(N_ang, xs.size, ts.size) - fission_source * (ts[it] - ts[it-1])
+                Y_minus_shifted[ij, :, it] = Y_minus.reshape(N_ang, xs.size, ts.size)[ij,:, it] - fission_source * (ts[it] - ts[it-1])
         integrator = run.parameters['all']['integrator']
         sigma_t = run.parameters['all']['sigma_t']
         skip = 4

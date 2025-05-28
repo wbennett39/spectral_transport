@@ -1251,8 +1251,8 @@ class mesh_class(object):
         
         min_space = self.x0/150
         dx = min_space * half
-        inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )*dx     
-        outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (self.x0-dx))[:-1]
+        inside_edges = self.x0 - (np.abs((np.linspace(0,1,half)-10)/-9) )*dx     
+        outside_edges =  (np.flip((np.abs((np.linspace(0,1,rest+1)-10)/-9) )) * (self.x0-dx))[:-1]
         self.edges = np.concatenate((outside_edges, inside_edges))
         self.edges0 = self.edges
         print(self.edges0, 'initial edges')
@@ -1264,8 +1264,8 @@ class mesh_class(object):
 
         menis_t = converging_time_function(self.tfinal/2, self.sigma_func)
         rfront1 = converging_r(menis_t, self.sigma_func) - pad
-        inside_edges_mid = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront1)    
-        outside_edges_mid =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (rfront1))[:-1]
+        inside_edges_mid = self.x0 - (np.abs((np.linspace(0,1,half)-10)/-9) )* (self.x0-rfront1)    
+        outside_edges_mid =  (np.flip((np.abs((np.linspace(0,1,rest+1)-10)/-9) )) * (rfront1))[:-1]
 
 
         menis_t = converging_time_function(self.tfinal, self.sigma_func)
@@ -1276,8 +1276,8 @@ class mesh_class(object):
         rfront2 = rfront22
 
 
-        inside_edges = self.x0 - (np.abs((np.logspace(0,1,half)-10)/-9) )* (self.x0-rfront2)    
-        outside_edges =  (np.flip((np.abs((np.logspace(0,1,rest+1)-10)/-9) )) * (rfront2))[:-1]
+        inside_edges = self.x0 - (np.abs((np.linspace(0,1,half)-10)/-9) )* (self.x0-rfront2)    
+        outside_edges =  (np.flip((np.abs((np.linspace(0,1,rest+1)-10)/-9) )) * (rfront2))[:-1]
 
         print(inside_edges, 'inside finial ')
         print(outside_edges, 'outside final')
@@ -1407,7 +1407,7 @@ class mesh_class(object):
 
                 # print(1)
                 # self.Dedges_const[:rest] = np.linspace(0,1, rest) * v
-                final_rest_edges  =  (np.flip((np.logspace(0,1,rest+1)-10)/-9) * (rfront*self.l - dx -dx2))[:-1]
+                final_rest_edges  =  (np.flip((np.linspace(0,1,rest+1)-10)/-9) * (rfront*self.l - dx -dx2))[:-1]
                 self.Dedges_const[:rest] = (final_rest_edges - self.edges[:rest]) / self.tfinal
 
                 # self.Dedges_const[1:rest] = np.ones(rest-1) * v

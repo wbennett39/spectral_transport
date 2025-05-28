@@ -15,7 +15,7 @@ warnings.simplefilter('ignore', category=NumbaPerformanceWarning)
 import sys
 sys.path.append('/Users/wbennett/Documents/Github/transport_benchmarks/')
 print(sys.path)
-from benchmarks import integrate_greens as intg
+# from benchmarks import integrate_greens as intg
 from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt

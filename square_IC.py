@@ -117,7 +117,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 f2.close()
                 bench_interp = interp1d(xsb, phib)
                 bench = bench_interp(xs)
-                plt.plot(xs, bench, 'k-')
+                plt.plot(run.xs, bench, 'k-')
                 plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
                 plt.close()
     # plot benchmark results

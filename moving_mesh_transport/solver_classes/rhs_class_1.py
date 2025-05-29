@@ -481,8 +481,8 @@ class rhs_class():
         else:
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
-        if abs(mesh.edges[0]) <= 1e-10:
-            V_old = self.conservative_parity_enforce(V_old, mesh.edges)
+        # if abs(mesh.edges[0]) <= 1e-10:
+        #     V_old = self.conservative_parity_enforce(V_old, mesh.edges)
             # print('enforcing reflecting BC')
 
 

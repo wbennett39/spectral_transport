@@ -109,6 +109,17 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 f.create_dataset(save_string, data = dat)
                 f.create_dataset(save_string + 'angular_flux', data = run.psi)
                 f.close()
+                plt.plot(run.xs, run.phi, '-o', mfc = 'none')
+                f2 = h5py.File('shell_IC_benchmarks.h5', 'r+')
+                res2 = f2[f't={tt}']
+                xsb = res2[0]
+                phib = res2[1]
+                f2.close()
+                bench_interp = interp1d(xsb, phib)
+                bench = bench_interp(xs)
+                plt.plot(xs, bench, 'k-')
+                plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
+                plt.close()
     # plot benchmark results
 
     for it, tt in enumerate(time_list):

@@ -481,7 +481,9 @@ class rhs_class():
         else:
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
-        self.conservative_parity_enforce(V_old, mesh.edges)
+        if abs(mesh.edges[0]) <= 1e-10:
+            V_old = self.conservative_parity_enforce(V_old, mesh.edges)
+            # print('enforcing reflecting BC')
 
 
 
@@ -530,6 +532,7 @@ class rhs_class():
         if self.recalculate_sigma_coeffs == True:
             sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class) # pass scattering cross section expansion coefficients to scalar flux class
+
         # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
         update = True
         # iterate over all cells
@@ -551,7 +554,7 @@ class rhs_class():
             if self.sigma_func['test4']== True: # special converging Marshak case
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
-                if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0)   :
+                if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0) :
                     update = False
                 else:
                     update = True
@@ -646,7 +649,6 @@ class rhs_class():
                     #     print(-LU, 'flux')
                     #     print(self.mus[angle], 'angle')
                     # Get absorption term
-                    # sigma_class.sigma_moments(mesh.edges, t, self.T_old, V_old[-1, :, :])
                     sigma_class.make_vectors(mesh.edges, V_old[angle,space,:], space)
                     VV = sigma_class.VV
                     # Initialize solution vector, RHS
@@ -684,7 +686,6 @@ class rhs_class():
                     #     dterm2[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
                     if self.geometry['sphere'] == True:
                         const_crosssection = False  
-                        
                         # print(dterm, dterm2)
                         RHS = V_old[angle, space, :]*0
                         RHS -=  LU # numerical flux 
@@ -704,7 +705,6 @@ class rhs_class():
                             for ii in range(self.M+1):
                                 PV2[ii] = np.sum(np.multiply(V_old[:,space,ii],self.ws)) #* (self.c) 
                             RHS += PV2 * self.c
-                            # print(np.dot(Minv, PV * self.c /self.sigma_t) - PV2, 'pv')
                         RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi #/ self.sigma_t # fixed fission source
                         if const_crosssection ==False:
                             RHS -= VV / self.sigma_t / self.l # absorption
@@ -835,19 +835,29 @@ class rhs_class():
                 return V_old
             else:
                 res = V_old.copy()
-                if self.M % 2 ==0:
-                    last_odd = self.M-1
-                else:
-                    last_odd = self.M
-                sums = np.zeros(self.N_ang)
+                C1 = np.zeros(self.N_ang)
+                C1new = np.zeros(self.N_ang)
                 for j in range(self.M+1):
-                    if j != last_odd:
+                    C1 += normTn_intcell(j, 0.00, edges[1]) * V_old[:, 0, j]
+                sums = np.zeros(self.N_ang)
+                for j in range(self.M):
                         sums += - V_old[:,0, j] * DnormTn(j, 0.0, 0.0, edges[1])
-                sums = sums / DnormTn(last_odd, 0.0, 0.0, edges[1])
-                res[:, 0, last_odd] = sums
+                sums = sums / DnormTn(self.M, 0.0, 0.0, edges[1])
+                res[:, 0, self.M] = sums
                 # rebalance cell integral
-                res[:, 0, 0] = (V_old[:, 0, 0] * normTn_intcell(0, 0.0, edges[1]) - sums * normTn_intcell(0, last_odd, 0.0) + V_old[:, 0, last_odd] * normTn_intcell(0, last_odd, 0.0)) / normTn_intcell(0, 0.0, edges[1])
+                res[:, 0, 0] = (V_old[:, 0, 0] * normTn_intcell(0, 0.0, edges[1]) - sums * normTn_intcell(self.M, 0.0, edges[1]) + V_old[:, 0, self.M] * normTn_intcell(self.M, 0.0, edges[1])) / normTn_intcell(0, 0.0, edges[1])
                 
+                test = np.zeros(self.N_ang)
+                for j in range(self.M+1):
+                        test += res[:, 0, j] * DnormTn(j, 0.0, 0.0, edges[1])
+                assert np.max(np.abs(test)) <1e-10
+                for j in range(self.M+1):
+                    C1new += normTn_intcell(j, 0.00, edges[1]) * res[:, 0, j]
+                assert np.max(np.abs(C1-C1new)) <=1E-10
+
+
+
+
                 return res
         
         elif enf_type == 'make_current_zero':

@@ -225,7 +225,10 @@ class sigma_integrator():
     def sigma_function(self, x, t, T_old, scattering = False):
 
         if self.sigma_func['constant'] == 1:
-            return x * 0 + 1.0
+            if scattering == False:
+                return x * 0 + self.sigma_t
+            else:
+                return x * 0 + self.sigma_s
         
         elif self.sigma_func['converging'] == 1 or self.sigma_func['test1'] == 1 or self.sigma_func['test2'] == 1 or self.sigma_func['test3'] == 1 or self.sigma_func['test4'] == 1:
             # self.get_temp(x, a, b, RT)

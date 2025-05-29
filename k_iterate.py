@@ -6,6 +6,7 @@ from moving_mesh_transport.solver_classes.make_phi import make_output
 import time
 from scipy.interpolate import interp1d as interp1d
 from scipy import integrate as integrate
+import matplotlib.pyplot as plt
 
 def integrate_phi_cell(cs, ws, a, b, M, N_ang):
     cell_volume = 4 * math.pi * (b**3 - a**3)
@@ -93,6 +94,9 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     normalization_list = []
     calc_time_list = []
     normalization_list.append(normalization)
+    plt.close()
+    plt.close()
+    plt.close()
 
     while converged == False and n_iters < 2500: 
         run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file

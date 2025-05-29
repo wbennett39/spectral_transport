@@ -160,8 +160,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if geometry['slab'] == True:
         xs_quad, ws_quad = quadrature(2*M+1, 'gauss_legendre')
     elif geometry['sphere'] == True:
-        xs_quad, ws_quad = quadrature(max(3*M+1, 3*Msigma+1), 'chebyshev')
-        # xs_quad, ws_quad = quadrature(16,'chebyshev')
+        # xs_quad, ws_quad = quadrature(max(3*M+1, 3*Msigma+1), 'chebyshev')
+        xs_quad, ws_quad = quadrature(16,'chebyshev')
 
     # t_quad = quadpy.c1.gauss_legendre(t_nodes).points
     t_quad, t_ws = quadrature(t_nodes, 'gauss_legendre')

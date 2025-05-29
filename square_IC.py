@@ -165,12 +165,12 @@ def calculate_benchmarks():
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[12, 25, 50, 75, 100], N_ang = 64, run_results = False)
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =32, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =64, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =512, run_results = True, ang_method='Legendre')
-# square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
+square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[25], N_ang =32, run_results = True, ang_method='diamond')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =64, run_results = True, ang_method='Legendre')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = True, ang_method='Legendre')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = True, ang_method='Legendre')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =512, run_results = True, ang_method='Legendre')
+# # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     
 

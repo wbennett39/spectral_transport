@@ -186,6 +186,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # ob = matrix_builder()
 
 
+    recalculate_sigma_coeffs = True
+    if moving == False:
+        if sigma_func['constant'] == True or sigma_func['Kornreich'] == True or sigma_func['modak_gupta0'] == True or sigma_func['modak_gupta05'] == True or sigma_func['modak_gupta1'] == True or sigma_func['modak_gupta25'] == True or sigma_func['modak_gupta5'] == True:
+            recalculate_sigma_coeffs = False
+
 
     initialize = build(N_ang, N_space, M, N_groups, tfinal, x0, t0, mus, ws, xs_quad,
                        ws_quad, sigma_t, sigma_s, source_type, uncollided, moving, move_type, t_quad, t_ws,
@@ -193,7 +198,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
                        quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
-                       fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative)
+                       fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative, recalculate_sigma_coeffs)
     initialize.shift = shift
 
 
@@ -232,6 +237,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     transfer = T_function(initialize)
     sigma_class = sigma_integrator(initialize, cross_section_data)
     flux.load_AAA(sigma_class.AAA)
+    fake_T_old = np.zeros((N_space, M+1))
+    fake_T_eval_points = np.zeros(5)
+    sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points) # calculate moments of cross sections
 
     # shift to simulate a slab problem
     source.shift = shift

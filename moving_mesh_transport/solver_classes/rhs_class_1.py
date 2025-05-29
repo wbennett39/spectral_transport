@@ -141,7 +141,8 @@ data = [('N_ang', int64),
         ('sigma_f', float64[:]),
         ('nu', float64[:]),
         ('legendre_moments', int64),
-        ('angular_derivative',nb.typeof(params_default) )
+        ('angular_derivative',nb.typeof(params_default) ),
+        ('recalculate_sigma_coeffs', int64)
 
         ]
 ##############################################################################
@@ -237,6 +238,7 @@ class rhs_class():
         self.nu = build.nu
         self.sigma_f = build.sigma_f
         print(np.sum(self.ws), 'sum ws')
+        self.recalculate_sigma_coeffs = build.recalculate_sigma_coeffs
         
         
         
@@ -524,7 +526,8 @@ class rhs_class():
         #     V_old = V_old_new
         if self.radiative_transfer['none'] == 0: # make temperature solution for T dependent cross sections
             self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
-        sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
+        if self.recalculate_sigma_coeffs == True:
+            sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class) # pass scattering cross section expansion coefficients to scalar flux class
         # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
         update = True
@@ -532,6 +535,8 @@ class rhs_class():
         for space in range(self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
+                # if space == 0:
+                #     psi_moments[1, :] = 0.0
             #     if space == 0:
             #         if (np.abs(psi_moments[1, :]) > 1e-6).any():
             #             print(psi_moments)
@@ -657,16 +662,18 @@ class rhs_class():
                     if self.angular_derivative['Legendre'] == True:
                         dterm  = legendre_difference3(self.legendre_moments, psi_moments, self.M, self.mus[angle])
                     elif self.angular_derivative['diamond'] == True:
-                        for j in range(self.M+1):
-                            if angle != 0 and angle != self.N_ang -1: # derivative is identically zero at endpoints
-                                # if space != 0:
-                                    dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
-                                # else:
-                                    # dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psionehalf[j])
+                        if angle != 0 and angle != self.N_ang -1: # derivative is identically zero at endpoints
+                            for j in range(self.M+1):
+                                    # if space != 0:
+                                        dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
+                                    # else:
+                                        # dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psionehalf[j])
                     elif self.angular_derivative['finite_differences'] == True:
-                        for j in range(self.M+1):
-                            vec = (1-self.mus**2) * V_old[:, space, j]
-                            dterm[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
+                        if angle != 0 and angle != self.N_ang -1:
+                            for j in range(self.M+1):
+                                
+                                vec = (1-self.mus**2) * V_old[:, space, j]
+                                dterm[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
 
                     # #         # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
                         # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
@@ -713,7 +720,7 @@ class rhs_class():
                         # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))
                         if self.angular_derivative['diamond'] == True:
                             # if space != 0:
-                                if angle == 0:
+                                if angle == 0 or space ==0:
                                     psionehalf = u_old 
                                 else:  
                                     # psionehalf_new = 2 * V_old[angle, space,:] - psionehalf

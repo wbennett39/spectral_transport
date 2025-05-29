@@ -501,6 +501,7 @@ def eval_Tn(n,x):
     else:
         raise ValueError('j must be a positive integer')
 
+
 @njit('float64(int64)')
 def kronecker(i):
     if i == 0:
@@ -519,6 +520,20 @@ def normTn(n,x,a=0,b=1.0):
 
         tmp[count] = norm * eval_Tn(n, z)
     return tmp 
+@njit
+def DnormTn(n, r, a, b):
+    if n ==0:
+        return 0.0
+    elif n == 1:
+        return 2*math.sqrt(2/math.pi)*(1/(-a + b))**1.5
+    elif n ==2:
+        return 8*math.sqrt(2/math.pi)*(1/(-a + b))**1.5*((2*r)/(-a + b) - (a + b)/(-a + b))
+    elif n == 3:
+        return math.sqrt(2/math.pi)*math.sqrt(1/(-a + b))*(-6/(-a + b) + (24*((2*r)/(-a + b) - (a + b)/(-a + b))**2)/(-a + b))
+    else:
+        raise ValueError('Not implemented up to this order')
+
+
 @njit
 def normTn_intcell(j, a,b):
     if j ==0:
@@ -641,8 +656,9 @@ def finite_diff_uneven_diamond(x, ix, psi, left = False, right = False, origin =
 
 
 @njit 
-def alpha_difference(alphasp1, alphasm1, w, psionehalf, V_old):
+def alpha_difference(alphasp1, alphasm1, w, psionehalf, V_old, mu):
     # what happened to the factor of 2? Did it get normalized out of the weights?
+    assert alphasp1 == alphasm1 - w * mu * 2 
     res = 1/w * (2 * alphasp1 * V_old - (alphasp1 + alphasm1) * psionehalf)
     return res 
 @njit 

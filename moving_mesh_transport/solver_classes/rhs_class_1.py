@@ -18,7 +18,7 @@ from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
-from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments, psi_derivative
+from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments, psi_derivative, DnormTn
 from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre, legendre_difference3
 import numba as nb
 from numba import prange
@@ -481,6 +481,7 @@ class rhs_class():
         else:
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
+        self.conservative_parity_enforce(V_old, mesh.edges)
 
 
 
@@ -665,7 +666,7 @@ class rhs_class():
                         if angle != 0 and angle != self.N_ang -1: # derivative is identically zero at endpoints
                             for j in range(self.M+1):
                                     # if space != 0:
-                                        dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j])
+                                        dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j], self.mus[angle])
                                     # else:
                                         # dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psionehalf[j])
                     elif self.angular_derivative['finite_differences'] == True:
@@ -720,7 +721,7 @@ class rhs_class():
                         # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))
                         if self.angular_derivative['diamond'] == True:
                             # if space != 0:
-                                if angle == 0 or space ==0:
+                                if angle == 0:
                                     psionehalf = u_old 
                                 else:  
                                     # psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
@@ -809,5 +810,50 @@ class rhs_class():
                 temp[0:self.time_save_points-1] = self.t_old_list[1:]
                 temp[-1] = t
                 self.t_old_list = temp
+
+    def conservative_parity_enforce(self, V_old, edges):
+        # enf_type = 'change_only_odd_coeff'
+        enf_type = 'make_derivative_zero' # r derivative is identically zero
+        # enf_type = 'make_current_zero'
+        
+        if enf_type == 'change_only_odd_coeff':
+            if self.M ==0:
+                return V_old
+            else:
+                res = V_old.copy()
+                for tangle in range(0, int(self.N_ang/2)):
+                    refl_index = self.N_ang-tangle-1
+            #                     # print(self.mus[angle], self.mus[refl_index])
+            #         assert(abs(mus[refl_index] + mus[tangle])<=1e-10) 
+                    for j in range(0, self.M+1):
+                        if j %2 != 0: #only change odd cells because they have no contribution to cell integral
+                            res[refl_index,0,  j] = res[tangle, 0,  j]
+                return res
+        
+        elif enf_type == 'make_derivative_zero':
+            if self.M == 0:
+                return V_old
+            else:
+                if self.M % 2 ==0:
+                    last_odd = self.M-1
+                else:
+                    last_odd = self.M
+                sums = np.zeros(self.N_ang)
+                for j in range(self.M+1):
+                    if j != last_odd:
+                        sums += - V_old[:,0, j] * DnormTn(j, 0.0, 0.0, edges[1])
+                sums = sums / DnormTn(last_odd, 0.0, 0.0, edges[1])
+                V_old[:, 0, last_odd] = sums
+                return V_old
+        
+        elif enf_type == 'make_current_zero':
+            if self.M ==0:
+                return V_old
+            # else:
+
+        else:
+            return V_old
+
+
 
 

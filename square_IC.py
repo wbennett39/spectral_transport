@@ -116,7 +116,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 phib = res2[1]
                 f2.close()
                 bench_interp = interp1d(xsb, phib)
-                bench = bench_interp(xs)
+                bench = bench_interp(run.xs)
                 plt.plot(run.xs, bench, 'k-')
                 plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
                 plt.close()

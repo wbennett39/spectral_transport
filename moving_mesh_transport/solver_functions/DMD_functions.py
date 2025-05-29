@@ -474,7 +474,7 @@ def sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector):
 
 
 
-def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10, try_WDMD = False):
+def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10, try_WDMD = False, source = False, sourcevec = np.zeros(10), N_ang = 0, xs = np.zeros(1)):
         ts =t
         Y_plus = np.zeros((Y_minus[:,0].size, t.size))
         # populate Y+ assuming Backward Euler 
@@ -482,8 +482,15 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             tt = t[it]
             dt = (t[it] - t[it-1])/sigma_t 
             if integrator == 'Euler' or integrator == 'BDF_VODE':
-                Y_plus[:, it] = (Y_minus[:, it] - Y_minus[:, it-1])/dt
-            # elif integrator == 'BDF_VODE':
+                Y_plus[:, it] = (Y_minus[:, it] - Y_minus[:, it-1])/dt 
+        if source == True:
+            for it in range(1, ts.size):
+                Y_plus_shifted = np.array(Y_plus).copy().reshape(N_ang, xs.size, ts.size)
+                for ij in range(N_ang):
+                        # assert 0
+                        Y_plus_shifted[ij, :, it] = Y_plus.reshape(N_ang, xs.size, ts.size)[ij,:, it] - sourcevec #* (ts[it] - ts[it-1])
+        Y_plus = Y_plus_shifted.reshape(N_ang * xs.size, ts.size)
+                # elif integrator == 'BDF_VODE':
             #     if it > 1:
             #         Y_plus[:, it] =  1.5 * (Y_minus[:, it] - 4 * Y_minus[:, it-1]/3 + Y_minus[:, it-2]/3) / dt 
 

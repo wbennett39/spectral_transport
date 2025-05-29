@@ -18,7 +18,7 @@ from .numerical_flux import LU_surf
 from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
-from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments, psi_derivative, DnormTn
+from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments, psi_derivative, DnormTn, normTn_intcell
 from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre, legendre_difference3
 import numba as nb
 from numba import prange
@@ -834,6 +834,7 @@ class rhs_class():
             if self.M == 0:
                 return V_old
             else:
+                res = V_old.copy()
                 if self.M % 2 ==0:
                     last_odd = self.M-1
                 else:
@@ -843,8 +844,11 @@ class rhs_class():
                     if j != last_odd:
                         sums += - V_old[:,0, j] * DnormTn(j, 0.0, 0.0, edges[1])
                 sums = sums / DnormTn(last_odd, 0.0, 0.0, edges[1])
-                V_old[:, 0, last_odd] = sums
-                return V_old
+                res[:, 0, last_odd] = sums
+                # rebalance cell integral
+                res[:, 0, 0] = (V_old[:, 0, 0] * normTn_intcell(0, 0.0, edges[1]) - sums * normTn_intcell(0, last_odd, 0.0) + V_old[:, 0, last_odd] * normTn_intcell(0, last_odd, 0.0)) / normTn_intcell(0, 0.0, edges[1])
+                
+                return res
         
         elif enf_type == 'make_current_zero':
             if self.M ==0:

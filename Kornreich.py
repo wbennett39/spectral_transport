@@ -57,7 +57,7 @@ run = run()
 # run.plane_IC(0,0)
 run.load('Kornreich', 'mesh_parameters_Kornreich')
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = np.random.rand(), sparse_time_points = 12):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = np.random.rand(), sparse_time_points = 12, skip =4):
     if prime == True:
         run.parameters['all']['N_spaces'] = [10]
         run.parameters['all']['Ms'] = [0]
@@ -78,6 +78,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         f.create_dataset('psi', data = run_ob.psi)
         Yminus = run_ob.sol_ob.Y_minus_psi
         f.create_dataset('Y_minus', data = Yminus)
+        f.create_dataset('N_angles', data = np.array([run.parameters['fixed_source']['N_angles'][0]]))
         f.create_dataset('t', data = run_ob.sol_ob.t)
         f.create_dataset('k_list', data = k_list)
         f.create_dataset('fission_source', data = sigma_f_vec * nu_vec * phi  )
@@ -87,20 +88,18 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
     if VDMD_estimate == True:
         f = h5py.File('Kornreich_keff.h5', 'r+')
         ts = f['t']
-        fission_source = f['fission_source']
+        fission_source = f['fission_source'][:]
         Y_minus = f['Y_minus'][:,:]
-        N_ang = run.parameters['fixed_source']['N_angles'][0]
-        xs = run_ob.xs
-        Y_minus_shifted = np.array(Y_minus).copy().reshape(N_ang, xs.size, ts.size)
+        N_ang = f['N_angles'][:][0]
+        xs = f['xs']
+        # Y_minus_shifted = np.array(Y_minus).copy().reshape(N_ang, xs.size, ts.size)
         # adjust Y- to remove source influence
-        for it in range(1, ts.size):
-            for ij in range(N_ang):
-                Y_minus_shifted[ij, :, it] = Y_minus.reshape(N_ang, xs.size, ts.size)[ij,:, it] - fission_source * (ts[it] - ts[it-1])
+      
         integrator = run.parameters['all']['integrator']
         sigma_t = run.parameters['all']['sigma_t']
-        skip = 4
+        # skip = 4
         theta = 0
-        eigen_vals = DMD_func3(Y_minus_shifted.reshape((N_ang * xs.size, ts.size)), ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
+        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source, N_ang = N_ang, xs = xs)
         print(np.flip(eigen_vals), 'alpha eigen values VDMD')
         print(-0.3196537,-0.3229855, 'benchmark first two alpha eigen values' )
     # Y_minus_residual = Y_minus.copy() 

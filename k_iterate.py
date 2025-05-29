@@ -124,6 +124,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             converged = True
         else:
             print(k_old-k_new, 'k difference')
+            print('iteration count: ', n_iters)
             k_old = k_new
             phi_interpolated = phi_interpolated_new
             klist.append(k_new)

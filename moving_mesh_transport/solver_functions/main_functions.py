@@ -237,15 +237,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     transfer = T_function(initialize)
     sigma_class = sigma_integrator(initialize, cross_section_data)
     flux.load_AAA(sigma_class.AAA)
-    fake_T_old = np.zeros((N_space, M+1))
-    fake_T_eval_points = np.zeros(5)
-    sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points) # calculate moments of cross sections
+
 
     # shift to simulate a slab problem
     source.shift = shift
     mesh.shift = shift
     mesh.initialize_mesh()
-    
+    fake_T_old = np.zeros((N_space, M+1))
+    fake_T_eval_points = np.zeros(5)
+    sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points) # calculate moments of cross sections
     print(mesh.edges, 'edges')
     print(mesh.Dedges_const, 'dedges const')
 
@@ -272,9 +272,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             flux.fixed_source_coeffs = fixed_source_coeffs_norm
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
-            initialize.IC = fixed_source_coeffs
+            initialize.IC = fixed_source_coeffs_norm
             flux.make_fixed_phi(mesh.edges)
         else:
+            print('initializing with random IC')
             flux.fixed_source_coeffs = initialize.IC
             norm_integrand = initialize.IC.copy()
             for space in range(N_space):

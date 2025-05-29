@@ -29,7 +29,7 @@
     'cv_const': 0.0
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'DOP853'
+    'integrator': 'RK45'
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'N_groups': 1

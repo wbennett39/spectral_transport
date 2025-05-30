@@ -89,11 +89,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     sigma_interp = interp1d(run.xs, sigma_f_array * nu_array) # interpolated fission rate 
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
     # normalization = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
-    normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) # this is broken. I would need to multiply by sigma nu
+    # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) # this is broken. I would need to multiply by sigma nu
     n_iters = 0
     normalization_list = []
     calc_time_list = []
-    normalization_list.append(normalization)
+    # normalization_list.append(normalization)
     plt.close()
     plt.close()
     plt.close()
@@ -142,8 +142,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 k_old = k_wynn_epsilon[iw:, iw][-1]
 
             n_iters +=1
-            normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
-            normalization_list.append(normalization)
+            # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
+            # normalization_list.append(normalization)
             calc_time_list.append(t_calc)
     
     return klist, calc_time_list, normalization_list, run, sigma_f_array, nu_array, run.phi[:,0]

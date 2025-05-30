@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 2):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
@@ -104,7 +104,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 2):
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
-        run.parameters['integrator'] = 'Euler'
+        run.parameters['all']['integrator'] = 'BDF'
         print(run.parameters['integrator'], 'integrator methods')
 
         # menis_times = 
@@ -122,7 +122,9 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 2):
         run.mesh_parameters['eval_times'] = True
         print(run.mesh_parameters['eval_array'], 'evaluation times')
         run.parameters['all']['tfinal'] = (dimensional_times * 29.98)[-1]
-        run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': False, 'test2': False, 'test3': False, 'test4': True}
+        run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': False, 'test2': False, 'test3': False, 'test4': True,  'picket_fence': False,
+              'modak_gupta0': False, 'modak_gupta05': False, 'modak_gupta1': False, 
+              'modak_gupta25': False, 'modak_gupta5': False, 'Kornreich': False}
 
 
         # run.parameters['all']['tfinal'] = 10.0

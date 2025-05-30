@@ -245,7 +245,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     mesh.initialize_mesh()
     fake_T_old = np.zeros((N_space, M+1))
     fake_T_eval_points = np.zeros(5)
-    sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points) # calculate moments of cross sections
+    if recalculate_sigma_coeffs == False:
+        sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points) # calculate moments of cross sections
     print(mesh.edges, 'edges')
     print(mesh.Dedges_const, 'dedges const')
 

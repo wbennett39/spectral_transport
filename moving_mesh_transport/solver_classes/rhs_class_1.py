@@ -555,7 +555,7 @@ class rhs_class():
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
                 if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0) :
-                    update = False
+                    update = True
                 else:
                     update = True
             # matrices.matrix_test(True) # tests matrices against analytic functions

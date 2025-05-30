@@ -38,6 +38,7 @@ data = [("P", float64[:]),
         ('N_ang', int64),
         ('Msigma', int64),
         ('cs', float64[:,:]),
+        ('csRT', float64[:,:]),
         ('edges', float64),
         ('PV', float64[:]),
         ('sigma_func', nb.typeof(params_default)),
@@ -48,7 +49,8 @@ data = [("P", float64[:]),
         ('N_space', int64),
         ('g', int64),
         ('P_fixed', float64[:, :, :]),
-        ('fixed_source_coeffs', float64[:, :, :])
+        ('fixed_source_coeffs', float64[:, :, :]),
+        ('PV_RT', float64[:])
         ]
 ###############################################################################
 @jitclass(data)
@@ -56,6 +58,7 @@ class scalar_flux(object):
     def __init__(self, build):
         self.P = np.zeros(build.M+1).transpose()
         self.PV = np.zeros(build.M+1).transpose()
+        self.PV_RT = np.zeros(build.M+1).transpose()
         self.M = build.M
         self.ws = build.ws
         self.thermal_couple = build.thermal_couple
@@ -106,6 +109,7 @@ class scalar_flux(object):
         # else:
             # if self.g == 0: #resets PV sum at the next step. Otherwise, adds over groups
             self.PV = self.PV*0
+            self.PV_RT = self.PV_RT*0
             VV = np.zeros((self.M+1, self.M+1))
 
             # for g in range(self.N_groups):
@@ -126,6 +130,8 @@ class scalar_flux(object):
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
                                 elif self.lumping == False:
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                    self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                    # self.PV_RT[i] += u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
                                     # print(self.PV, 'PV')
                                     # print(self.cs, 'cs')
                                     # print(u, 'u')
@@ -136,6 +142,7 @@ class scalar_flux(object):
                 self.scalar_flux_term = self.PV / math.sqrt(xR-xL)
             elif self.geometry['sphere'] == True:
                 self.scalar_flux_term = self.PV
+
                 # a = xL
                 # b = xR
                 # assert((abs(self.cs[0,space]- math.sqrt(math.pi) * math.sqrt(b-a))<=1e-5))
@@ -156,6 +163,7 @@ class scalar_flux(object):
 
     def get_coeffs(self, opacity_class):
         self.cs = opacity_class.csP
+        self.csRT = opacity_class.csRT
 
 
     

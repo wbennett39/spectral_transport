@@ -53,7 +53,8 @@ data = [('N_ang', int64),
         ('loud', int64),
         ('cross_section_data', float64[:,:]),
         ('g', int64),
-        ('shift', float64)
+        ('shift', float64),
+        ('csRT', float64[:, :])
 
         ]
 
@@ -78,6 +79,7 @@ class sigma_integrator():
         self.edges = np.zeros(self.N_space + 1)
         self.cs = np.zeros((self.N_space, self.Msigma+ 1))
         self.csP = np.zeros((self.N_space, self.Msigma+ 1))
+        self.csRT = np.zeros((self.N_space, self.Msigma+ 1))
         self.VV = np.zeros(self.M+1)
         self.VP = np.zeros(self.M+1)
         self.AAA = np.zeros((self.M+1, self.M + 1, self.Msigma + 1))
@@ -116,10 +118,12 @@ class sigma_integrator():
         #     assert(0)
         opacity = self.sigma_function(argument, t, T_old)
         opacityP = self.sigma_function(argument, t, T_old, True)
+        opacityrt = self.sigma_function(argument, t, T_old, False, True)
         # opacity = self.sigma_function(self.xs_quad, t, T_old)
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
         self.csP[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacityP * 2.0 * normTn(j, argument, a, b)) 
+        self.csRT[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacityrt * 2.0 * normTn(j, argument, a, b)) 
     # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
     #     self.cs[k, j] = 0.5 * (b-a) 
@@ -222,7 +226,7 @@ class sigma_integrator():
                 return_array[ix] = 0.0
         return return_array
 
-    def sigma_function(self, x, t, T_old, scattering = False):
+    def sigma_function(self, x, t, T_old, scattering = False, RT = False):
 
         if self.sigma_func['constant'] == 1:
             if scattering == False:
@@ -285,39 +289,43 @@ class sigma_integrator():
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
+                if scattering == True:
+                    return x * 0 + self.sigma_t
+                else:
+                    
                 # floor = 5e-3
                 # resmax = 6e3
-                a = np.min(x)
-                b = np.max(x)
-                # resmax = 300 / (b-a)
-                # resmax = 10400
-                resmax = 18e3
-                if self.loud == True:
-                    print('###   ###   ###   ###   ###   ###   ###   ###')
-                    print(resmax, 'max sigma')
-                    print('###   ###   ###   ###   ###   ###   ###   ###')
-                    self.loud = False
-                # resmax = 1e5
-                # resmax = 950
-                # resmax = 15e3
-                # resmax = 500
-                # if(T_old<0).any():
-                #     assert 0
-                result = np.where(T_old<0.0, 0.0, T_old)
-                rho = np.mean(x )
-                if (x<0).any():
-                    assert(0)
-                res = (result+1e-10) ** -3.5 * rho ** 2
-                if (res<0).any():
-                    assert 0
-                if (res > resmax).any():
-                    for ix, xx in enumerate(res):
-                        if res[ix] > resmax:
-                            res[ix] = resmax
-                        # if res[ix] <floor:
-                        #     res[ix] = floor
-                # if (res!=15e3).any():
-                #     print(res, x)
+                    a = np.min(x)
+                    b = np.max(x)
+                    # resmax = 300 / (b-a)
+                    # resmax = 10400
+                    resmax = 18e3
+                    if self.loud == True:
+                        print('###   ###   ###   ###   ###   ###   ###   ###')
+                        print(resmax, 'max sigma')
+                        print('###   ###   ###   ###   ###   ###   ###   ###')
+                        self.loud = False
+                    # resmax = 1e5
+                    # resmax = 950
+                    # resmax = 15e3
+                    # resmax = 500
+                    # if(T_old<0).any():
+                    #     assert 0
+                    result = np.where(T_old<0.0, 0.0, T_old)
+                    rho = np.mean(x )
+                    if (x<0).any():
+                        assert(0)
+                    res = (result+1e-10) ** -3.5 * rho ** 2
+                    if (res<0).any():
+                        assert 0
+                    if (res > resmax).any():
+                        for ix, xx in enumerate(res):
+                            if res[ix] > resmax:
+                                res[ix] = resmax
+                            # if res[ix] <floor:
+                            #     res[ix] = floor
+                    # if (res!=15e3).any():
+                    #     print(res, x)
           
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax

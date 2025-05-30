@@ -83,11 +83,12 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
     run.parameters['all']['Ms'] = [0]
     run.parameters['all']['N_spaces'] = [4]
     run.parameters['all']['tfinal'] = 0.0000000000000001
-    run.parameters['integrator'] = 'BDF_VODE'
+    run.parameters['all']['integrator'] = 'BDF_VODE'
     run.mesh_parameters['eval_times'] = False
     run.mesh_parameters['Msigma'] = 0
     run.parameters['boundary_source']['N_angles'] = [2]
     run.boundary_source(0,0)
+    plt.plot(run.xs, run.phi)
 
     run.load('marshak', 'mesh_parameters_converging')
     for it, N_space in enumerate(N_spaces_list):
@@ -104,7 +105,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
-        run.parameters['all']['integrator'] = 'Euler'
+        run.parameters['all']['integrator'] = 'BDF'
         print(run.parameters['all']['integrator'], 'integrator methods')
 
         # menis_times = 
@@ -131,6 +132,10 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
         # run.mesh_parameters['eval_times'] = False
 
         run.boundary_source(0,0)
+        plt.figure(29)
+        plt.plot(run.xs, run.phi)
+        plt.show()
+        print(run.xs, run.phi)
         f = h5py.File('converging_heat/results_test4_1211.h5','r+')
         M = run.parameters['all']['Ms'] 
         spaces = run.parameters['all']['N_spaces']

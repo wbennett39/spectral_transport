@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 50
+spaces = 20
 M = 1
 #####
 #####
@@ -165,9 +165,9 @@ plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
 
 
 
-plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
-plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
-plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
+# plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
+# plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
+# plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
 plt.plot(edges2, edges2*0, 'k|', markersize = 40)
 
 
@@ -175,7 +175,7 @@ T4[0,:] = (np.abs(phi_dim[0,:])/a/c)**.25*np.sign(phi_dim[0,:])
 T4[1,:] = (np.abs(phi_dim[1,:])/a/c)**.25*np.sign(phi_dim[1,:])
 T4[2,:] = (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:])
 
-plt.plot(xs[0,:], mat_T[0,:], 'k--', label = 'radiation temp')
+plt.plot(xs[0,:], mat_T[0,:], 'k--', label = 'material temp')
 plt.plot(xs[1,:], mat_T[1,:], 'k--')
 plt.plot(xs[2,:], mat_T[2,:], 'k--')
 #plt.plot(edges, edges*0, 'k|', markersize = 40)

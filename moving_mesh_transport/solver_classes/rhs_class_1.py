@@ -186,6 +186,7 @@ class rhs_class():
         self.radiative_transfer = build.thermal_couple
        
         self.c_a = build.sigma_a / build.sigma_t
+        print(self.c_a, 'c_a')
         self.legendre_moments = build.legendre_moments
         self.mean_free_time = 1/build.sigma_t
         self.division = 1000
@@ -481,8 +482,8 @@ class rhs_class():
         else:
             V_new = V.copy().reshape((self.N_ang, self.N_space, self.M+1))
             V_old = V_new.copy()
-        # if abs(mesh.edges[0]) <= 1e-10:
-        #     V_old = self.conservative_parity_enforce(V_old, mesh.edges)
+        if abs(mesh.edges[0]) <= 1e-10:
+            V_old = self.conservative_parity_enforce(V_old, mesh.edges)
             # print('enforcing reflecting BC')
 
 
@@ -529,6 +530,8 @@ class rhs_class():
         #     V_old = V_old_new
         if self.radiative_transfer['none'] == 0: # make temperature solution for T dependent cross sections
             self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
+
+            # print(self.T_old, 'T')
         if self.recalculate_sigma_coeffs == True:
             sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
         flux.get_coeffs(sigma_class) # pass scattering cross section expansion coefficients to scalar flux class
@@ -575,6 +578,9 @@ class rhs_class():
                     flux.make_P(V_old[:-1,space,:], space, xL, xR)
                 else:
                     flux.make_P(V_old[:,space,:], space, xL, xR)
+                # PV_RT = np.zeros(self.M+1)
+                # for j in range(self.M+1): 
+                #     PV_RT = np.sum(np.multiply(self.ws, V_old[:-1, space, :]))
                 PV = flux.scalar_flux_term
                 fixed_source = flux.P_fixed[space, self.g, :]
                 source.make_source(t, xL, xR, uncollided_sol)
@@ -602,6 +608,7 @@ class rhs_class():
                 # source.make_source(t, xL, xR, uncollided_sol)
                 # radiative transfer term
                 if self.radiative_transfer['none'] == False:
+                    PV_RT = flux.PV_RT
                     if self.g ==0:
                         transfer_class.make_H(xL, xR, V_old[-1, space, :], sigma_class, space)
                     H = transfer_class.H
@@ -619,11 +626,14 @@ class rhs_class():
                         RHS_transfer += self.c_a *source.S * 2 
                     RHS_transfer -= RU
                     RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
-                    RHS_transfer += self.c_a * PV*2 /self.sigma_t 
+                    RHS_transfer += self.c_a * PV_RT*2 /self.sigma_t 
+                    # if space == self.N_space-1:
+                    #     print(PV, 'PV in RT')
                     RHS_transfer = np.dot(RHS_transfer, Minv)
                     if self.l != 1.0:
                         RHS_transfer = RHS_transfer / self.l
                     V_new[-1,space,:] = RHS_transfer 
+       
                     # not changing cell if in equilibrium
                     # print(RHS_transfer, 'rhs transfer')
                     # if (np.abs(self.c_a * PV*2 /self.sigma_t - self.c_a *H /self.sigma_t)<=1e-8).all():
@@ -813,8 +823,10 @@ class rhs_class():
 
     def conservative_parity_enforce(self, V_old, edges):
         # enf_type = 'change_only_odd_coeff'
-        enf_type = 'make_derivative_zero' # r derivative is identically zero
+        # enf_type = 'make_derivative_zero' # r derivative is identically zero
         # enf_type = 'make_current_zero'
+        # enf_type = 'current_average'
+        enf_type = 'none'
         
         if enf_type == 'change_only_odd_coeff':
             if self.M ==0:
@@ -854,7 +866,19 @@ class rhs_class():
                 for j in range(self.M+1):
                     C1new += normTn_intcell(j, 0.00, edges[1]) * res[:, 0, j]
                 assert np.max(np.abs(C1-C1new)) <=1E-10
+        elif enf_type == 'current_average':
+                res = V_old.copy()
+                for tangle in range(0, int(self.N_ang/2)):
+                    refl_index = self.N_ang-tangle-1
+            #                     # print(self.mus[angle], self.mus[refl_index])
+                    assert(abs(self.mus[refl_index] + self.mus[tangle])<=1e-10) 
+                    for j in range(0, self.M+1):
+                        avg = 0.5*(V_old[refl_index,0,  j] + V_old[tangle, 0,  j])
+                        res[refl_index, 0, j] = avg
+                        res[tangle,0,j] = avg
+                return res                        
 
+                
 
 
 

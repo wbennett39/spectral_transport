@@ -474,6 +474,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)
 
+
   
     else:
         print(rt, 'rt')
@@ -561,6 +562,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             plt.plot(xs, phi)
             plt.show()
         sol.Y_minus_psi = Y_minus_psi
+        print(np.max(np.abs(sol.Y_minus_psi[:, -1] - sol.Y_minus_psi[:, -2] )), 'closeness to steady state')
     
 
     # print(xs, 'xs')

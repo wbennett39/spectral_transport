@@ -268,6 +268,7 @@ class LU_surf(object):
                 elif self.geometry['sphere'] == True:
                         self.v3 += self.integrate_quad_sphere(t, self.edges[space+1], self.xR_plus, j, "r") * self.B_LR_func(j, self.hp)[0]
 
+
             
     
     def make_LU(self, t, mesh_class, u, space, mul, rt = False):

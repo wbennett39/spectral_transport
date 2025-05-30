@@ -111,15 +111,18 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         xs = run.xs
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi * sigma_interp(x)  # new fission source 
+        plt.figure(2)
+        plt.plot(xs, sigma_interp(xs), '-')
+        plt.show()
         integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi * sigma_interp(x) # old fission source
         k_new = k_old * integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
-        k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) / normalization # currently broken
+        # k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
         
         if k_new <0:
             raise ValueError('negative k_eff')
         # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
         print(k_new, 'k')
-        print(k_new2, 'k2')
+        # print(k_new2, 'k2')
         # converged = True
         if abs(k_new - k_old ) <=tol:
             print('power iteration complete')

@@ -333,7 +333,7 @@ class rhs_class():
         # print(self.alphas[:middle])
         # print(self.alphas[middle:])
         # self.alphas[:middle] = np.flip(self.alphas[middle:])
-        # print(self.alphas, 'alphas')
+        print(self.alphas, 'alphas')
 
 
 

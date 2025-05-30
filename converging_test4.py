@@ -77,7 +77,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
     N_spaces_list = N_spaces
 
     run = run()
-    run.load()
+    run.load('marshak', 'mesh_parameters_converging')
 
     loader = load()
     run.parameters['all']['Ms'] = [0]
@@ -89,7 +89,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
     run.parameters['boundary_source']['N_angles'] = [2]
     run.boundary_source(0,0)
 
-    run.load('marshak')
+    run.load('marshak', 'mesh_parameters_converging')
     for it, N_space in enumerate(N_spaces_list):
         run.parameters['boundary_source']['x0'] = np.array([10.0])
         run.parameters['all']['N_spaces'] = [N_space]
@@ -104,8 +104,8 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
-        run.parameters['all']['integrator'] = 'BDF'
-        print(run.parameters['integrator'], 'integrator methods')
+        run.parameters['all']['integrator'] = 'Euler'
+        print(run.parameters['all']['integrator'], 'integrator methods')
 
         # menis_times = 
         # menis_times = np.array([-94.706889, -27.126998, -10])

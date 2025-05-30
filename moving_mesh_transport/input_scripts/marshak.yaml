@@ -28,6 +28,8 @@
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
     'integrator': 'BDF'
+    'Euler_dt_spacing': 'linear'
+    'Euler_dt_num': 100
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'chi': 1.0
@@ -37,6 +39,7 @@
     'VDMD': False
     'legendre_moments': 3
     'angular_derivative': {finite_differences: False, diamond: False, Legendre: True}
+
     
 # plane pulse source
 'plane_IC':

@@ -88,7 +88,8 @@ class parameter_load_class:
         self.shift = float(parameters[source_name]['shift'])
         # else:
             # self.shift = 0.0
-        
+        self.Euler_dt_spacing = str(parameters['all']['Euler_dt_spacing'])
+        self.Euler_dt_num = int(parameters['all']['Euler_dt_num'])
         for iele, ele, in enumerate(self.source_type):
             self.source_type[iele] = np.int64(self.source_type[iele])
         self.source_strength = float(parameters[source_name]['source_strength'])

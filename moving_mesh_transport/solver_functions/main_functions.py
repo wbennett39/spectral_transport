@@ -125,7 +125,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
-          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative):
+          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
+          Euler_dt_spacing, Euler_dt_num):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -139,16 +140,16 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     speed_of_light = 29.98 # cm/ns
     mus, ws = quadrature(N_ang, weights, testing = True)
 
-    mus_new = np.zeros(N_ang+2)
-    ws_new = np.zeros(N_ang+2)
+    mus_new = np.zeros(N_ang+1)
+    ws_new = np.zeros(N_ang+1)
     mus_new[0] = -1
-    mus_new[-1] = 1
-    mus_new[1:-1] = mus
-    ws_new[1:-1] = ws
+    # mus_new[-1] = 1
+    mus_new[1:] = mus
+    ws_new[1:] = ws
     if angular_derivative['diamond'] == True: # Add starting angle(s)
         mus = mus_new
         ws = ws_new
-        N_ang += 2
+        N_ang += 1
     print(np.sum(ws), 'ws sum')
     print('integrator method:', integrator)
     # N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
@@ -214,7 +215,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(boundary_time, 'boundary time array')
         initialize.grab_converging_boundary_data(boundary_temp, boundary_time)
         
-
+    print(angular_derivative)
 
     
 
@@ -465,7 +466,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     elif integrator == 'Euler':
         # ts = np.linspace(0.0, tfinal, 50)
-        ts = np.logspace(-5,math.log10(tfinal), 100 + 1)
+        if Euler_dt_spacing == 'log':
+            ts = np.logspace(-5,math.log10(tfinal), Euler_dt_num + 1)
+        elif Euler_dt_spacing == 'linear':
+            ts = np.linspace(0, tfinal, Euler_dt_num + 1)
         Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         sol = sol_class_ode_solver(Y, ts, ts)

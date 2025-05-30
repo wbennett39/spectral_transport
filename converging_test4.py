@@ -98,7 +98,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
         run.parameters['all']['at'] = 11e-4
         print('rtol', run.parameters['all']['rt'] )
         print('atol',run.parameters['all']['at'] )
-        run.parameters['all']['lumping'] = False
+        run.parameters['all']['lumping'] = True
         print("LUMPING"*run.parameters['all']['lumping'])
         # run.parameters['all']['at'] = 5e-1
         run.parameters['all']['e_initial'] = 5e-10

@@ -128,6 +128,7 @@ class scalar_flux(object):
                                         VV_lumped = mass_lumper(VV, xL, xR)[0]
                                     # self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VVmatLUMPED(i, j,k, xL, xR) / (math.pi**1.5)
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
+                                    self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
                                 elif self.lumping == False:
                                     self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
                                     self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)

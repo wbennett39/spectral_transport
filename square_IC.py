@@ -81,8 +81,9 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
         run.parameters['square_IC']['N_angles'] = [2]
         run.square_IC(0,0)
         run.load('transport', 'mesh_parameters')
-        for it, tt in enumerate(time_list):
-            for space in N_space_list:    
+        for space in N_space_list:  
+            for it, tt in enumerate(time_list):
+              
                 run.parameters['all']['Ms'] =  [M] 
                 run.parameters['square_IC']['N_angles'] =  [N_ang]
                 run.parameters['all']['N_spaces'] = [space]

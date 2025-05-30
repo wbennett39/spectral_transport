@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 20
+spaces = 100
 M = 1
 #####
 #####
@@ -31,7 +31,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = 50
+spaces2 = spaces
 
 #####
 sigma_sb = 5.670374419e-5
@@ -134,9 +134,13 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t2 =-14.2e-8
 # t3 =-14.0e-8
 
-t1 =  -14.0e-8
-t2 = -10.0e-8
-t3 = -9.4706889e-8
+
+t1 = -13.0e-8
+t2 = -12.5e-8
+t3 = -12e-8
+# t1 =  -14.0e-8
+# t2 = -10.0e-8
+# t3 = -9.4706889e-8
 # t3 = -2.7126998146008884e-08
 
 rho0 = 1.

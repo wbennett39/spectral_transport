@@ -542,6 +542,7 @@ class rhs_class():
         for space in range(self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
+                # print(psi_moments[-1], psi_moments[-2], 'last two moms')
                 # if space == 0:
                 #     psi_moments[1, :] = 0.0
             #     if space == 0:

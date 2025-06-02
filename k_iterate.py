@@ -54,6 +54,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     klist = []
     klist.append(kguess)
     k_old = kguess
+    k_old = 1
     converged = False
     sigma_f = run.parameters['all']['sigma_f']
     nu = run.parameters['all']['nu']
@@ -88,6 +89,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     print(sigma_f_array, 'sigmaf')
     sigma_interp = interp1d(run.xs, sigma_f_array * nu_array) # interpolated fission rate 
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
+
     # normalization = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
     # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) # this is broken. I would need to multiply by sigma nu
     n_iters = 0
@@ -104,6 +106,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         normalized_source = coeffs_old #/ normalization
         # run solver    
         t1 = time.time()
+        run.parameters['all']['kold'] = k_old
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         t_calc = time.time() - t1
@@ -111,11 +114,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         xs = run.xs
         phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
         integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi * sigma_interp(x)  # new fission source 
-        plt.figure(2)
-        plt.plot(xs, sigma_interp(xs), '-')
-        plt.show()
-        integrand_old = lambda x: (phi_interpolated(x)+ 1e-12) * x**2 * 4 * math.pi * sigma_interp(x) # old fission source
-        k_new = k_old * integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
+        # plt.figure(2)
+        # plt.plot(xs, sigma_interp(xs), '-')
+        # plt.show()
+        integrand_old = lambda x: (phi_interpolated(x)) * x**2 * 4 * math.pi * sigma_interp(x) # old fission source
+        k_new = k_old *  integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         # k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
         
         if k_new <0:
@@ -143,7 +146,6 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             print(k_wynn_epsilon[iw:,iw])
             if use_we_accel == True:
                 k_old = k_wynn_epsilon[iw:, iw][-1]
-
             n_iters +=1
             # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
             # normalization_list.append(normalization)

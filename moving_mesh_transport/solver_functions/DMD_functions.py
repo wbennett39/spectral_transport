@@ -519,16 +519,16 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         Y_plus = Y_plus_sparse
 
 
-
+        eigen_vals_DMD = np.zeros(1)
         # print(Y_minus, 'Y-')
-        if integrator == 'BDF':
-            # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
-            eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:], t[skip:]/sigma_t, theta = theta)))
-        elif integrator == 'Euler' or integrator == 'BDF_VODE':
+        # if integrator == 'BDF':
+        #     # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
+        #     eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:], t[skip:]/sigma_t, theta = theta)))
+        if integrator == 'Euler' or integrator == 'BDF_VODE':
             eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] , Y_plus[:, :], skip)) )
             # print(Y_plus, 'yp')
-        else:
-            raise ValueError('Integration method not implemented')
+        # else:
+            # raise ValueError('Integration method not implemented')
         
         
 

@@ -126,7 +126,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
           dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
-          Euler_dt_spacing, Euler_dt_num):
+          Euler_dt_spacing, Euler_dt_num, kold):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -263,9 +263,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         norm_integrand = fixed_source_coeffs.copy()
         for space in range(N_space):
             norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
-        normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups)#/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3 # so the flux is not tiny for huge radii
+        # normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups)#/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3 # so the flux is not tiny for huge radii
         # normalization = 1
         # print(normalization, 'normalization factor')
+        normalization = kold
         
         fixed_source_coeffs_norm = fixed_source_coeffs/normalization
         # print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
@@ -282,7 +283,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             norm_integrand = initialize.IC.copy()
             for space in range(N_space):
                 norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
-            normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
+            # normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
             # check normalize
             # print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')

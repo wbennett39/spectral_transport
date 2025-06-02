@@ -19,7 +19,7 @@ from .radiative_transfer import T_function
 from .opacity import sigma_integrator
 from .functions import shaper
 from .functions import finite_diff_uneven_diamond, alpha_difference, finite_diff_uneven, calculate_psi_moments, psi_derivative, DnormTn, normTn_intcell
-from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre, legendre_difference3
+from .functions import converging_time_function, converging_r, make_u_old, legendre_difference, check_current_legendre, legendre_difference3, legendre_moments_truncate
 import numba as nb
 from numba import prange
 from numba.experimental import jitclass
@@ -542,13 +542,15 @@ class rhs_class():
         for space in range(self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
+                self.legendre_moments = legendre_moments_truncate(psi_moments, self.N_ang)
+                psi_moments = psi_moments[self.legendre_moments:, :]
+                print(self.legendre_moments)
                 # print(psi_moments[-1], psi_moments[-2], 'last two moms')
                 # if space == 0:
                 #     psi_moments[1, :] = 0.0
             #     if space == 0:
             #         if (np.abs(psi_moments[1, :]) > 1e-6).any():
             #             print(psi_moments)
-                 
             # get mesh edges and edge derivatives          
             xR = mesh.edges[space+1]
             xL = mesh.edges[space]

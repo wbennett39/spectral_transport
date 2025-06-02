@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [250], N_ang = 6):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
@@ -98,7 +98,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 6):
         run.parameters['all']['at'] = 11e-4
         print('rtol', run.parameters['all']['rt'] )
         print('atol',run.parameters['all']['at'] )
-        run.parameters['all']['lumping'] = True
+        run.parameters['all']['lumping'] = False
         print("LUMPING"*run.parameters['all']['lumping'])
         # run.parameters['all']['at'] = 5e-1
         run.parameters['all']['e_initial'] = 5e-10

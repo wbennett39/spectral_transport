@@ -76,6 +76,7 @@ class parameter_load_class:
             self.particle_v = 1.0 
         elif self.particle_v == 'sqrt_3':
             self.particle_v = 1.0/math.sqrt(3)
+        self.kold = float(parameters['all']['kold'])
 
         
 

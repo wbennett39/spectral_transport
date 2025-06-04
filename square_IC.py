@@ -119,7 +119,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 bench_interp = interp1d(xsb, phib)
                 bench = bench_interp(np.abs(run.xs))
                 plt.plot(run.xs, bench, 'k-')
-                plt.ylim(0, bench[0] * 1.1)
+                # plt.ylim(0, bench[0] * 1.1)
                 plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
                 plt.close()
 
@@ -144,14 +144,14 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             
             f2.close
             bench_interp = interp1d(xsb, phib)
-            bench = bench_interp(xs)
+            bench = bench_interp(np.abs(xs))
             # bench = xs*0
             err_list.append(RMSE(phi, bench))
             print(err_list, 'RMSE LIST')
             print(RMSE(phi, bench), 'RMSE')
             plt.plot(xs, phi, '-o', mfc = 'none')
             plt.plot(xs, bench, 'k-')
-            plt.ylim(0, bench[0] * 1.1)
+            # plt.ylim(0, bench[0] * 1.1)
             plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
             plt.close()
 
@@ -198,7 +198,7 @@ def calculate_benchmarks():
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[25], N_ang =16, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=1, N_space_list=[30], N_ang =16, run_results = True, ang_method='Legendre')
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[15], N_ang =16, run_results = True, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = False, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = False, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =512, run_results = False, ang_method='Legendre')

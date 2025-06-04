@@ -498,9 +498,10 @@ class rhs_class():
         # for j in range(self.M+1):
         #     check_current_legendre(2 * self.ws, self.mus, V_old[:, 0, j], self.N_ang, int(2*self.N_ang-1))
             
-        # V_old[0, :, 0] = V_old[1,:,0]
-        for j in range(1, self.M+1): # ghost cell
-            V_old[:, 0, j] = (-1)**j * V_old[:,1,j]
+        for j in range(0, self.M+1): 
+            V_old[:, 0, j] = (-1)**j * np.flip(V_old[:,1,j]) # ghost cell
+            # if j > 0:
+                # V_old[:, 0, j] = 0.0
         # for ang in range(self.N_ang+1): #attempt at positivizing T
         #     new_energy_vec = transfer_class.positivize_temperature_vector(V_old[ang,:,:], mesh.edges)
         #     V_old[ang,:,:] = new_energy_vec
@@ -541,8 +542,9 @@ class rhs_class():
         # iterate over all cells
         for space in range(1, self.N_space): 
             if self.angular_derivative['Legendre'] == True:
-                psi_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
-                legendre_moments = legendre_moments_truncate(psi_moments, self.N_ang)
+                psi_moments, legendre_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
+                # PRINT(legendre_moments)
+                # legendre_moments = legendre_moments_truncate(psi_moments, self.N_ang)
                 # if space ==0:
                 #     print(psi_moments)
 
@@ -670,7 +672,6 @@ class rhs_class():
                             psin = V_old[angle, space, :]
                         mul = self.mus[angle]
                         # calculate numerical flux
-                        
                         num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul)
                         LU = num_flux.LU 
                         # if space == 0:
@@ -681,12 +682,11 @@ class rhs_class():
                         VV = sigma_class.VV
                         # Initialize solution vector, RHS
                         # U = np.zeros(self.M+1).transpose()
-                        U[:] = V_old[angle,space,:]
+                        U = V_old[angle,space,:].copy().transpose()
                         # assert((np.abs(U-VV/self.sigma_t) < 1e-6).all())
                         dterm = U.copy()*0
-
                         if self.angular_derivative['Legendre'] == True:
-                            dterm  = legendre_difference3(self.legendre_moments, psi_moments, self.M, self.mus[angle])
+                            dterm  = legendre_difference3(legendre_moments, psi_moments[:legendre_moments, :], self.M, self.mus[angle])
                         elif self.angular_derivative['diamond'] == True:
                             if angle != 0 and angle != self.N_ang -1: # derivative is identically zero at endpoints
                                 for j in range(self.M+1):
@@ -707,7 +707,7 @@ class rhs_class():
                         #     dterm2[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
                         if self.geometry['sphere'] == True:
                             const_crosssection   = False
-                            RHS = V_old[angle, space, :]*0
+                            RHS = V_old[angle, space, :].copy()*0
                             RHS -=  LU # numerical flux 
                             RHS +=  mul*np.dot(L,U) #gradient
                             mu_derivative =  np.dot(J, dterm) 
@@ -750,8 +750,10 @@ class rhs_class():
                             else:
                                 V_new[angle,space,:] = RHS.copy()
                             
-                            # for j in range(1, self.M+1): # ghost cell
-                            #     V_new[:, 0, j] = (-1)**j * V_new[:,1,j]
+        for j in range(0, self.M+1): # ghost cell
+            V_new[:, 0, j] = (-1)**j * np.flip(V_new[:,1,j])
+            # if j > 0:
+                # V_new[:, 0, j] = 0.0
                                 # else:
                             #     psionehalf = psionehalf
         if self.radiative_transfer['none'] == False:

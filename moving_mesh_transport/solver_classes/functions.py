@@ -699,7 +699,16 @@ def calculate_psi_moments(N_mom, V, ws, M, N_ang, mus):
                 moments[n, j] += 2 * ws[l] * V[l, j] * Pn_scalar(n, mus[l], -1, 1) 
     # print(moments, 'moments')
     # print(V,'solution vector in moments')
-    return moments
+    # go backwards and delete moments that are basically zero
+    N_mom_needed = N_mom
+    tol = 1e-10
+    for n in range(N_mom-1):
+        if np.max(np.abs(moments[n, :])) <= tol:
+           if np.max(np.abs(moments[n+1, :])) <= tol:
+               N_mom_needed = n
+               break
+    # N_mom_needed = N_mom
+    return moments, N_mom_needed
 @njit 
 def legendre_difference2(ws, N_ang, N_mom, u, J, M, mus, mu):
     ws = 2 * ws #un-normalize weights

@@ -90,12 +90,12 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 run.parameters['all']['tfinal'] = tt
                 if ang_method == 'diamond':
                     run.parameters['all']['angular_derivative'] = {'finite_differences': False, 'diamond': True, 'Legendre': False}
-                elif ang_method == 'finite_difference':
-                     run.parameters['all']['weights'] = 'gauss_lobatto'
+                elif ang_method == 'finite_differences':
+                    #  run.parameters['all']['weights'] = 'gauss_lobatto'
                      run.parameters['all']['angular_derivative'] = {'finite_differences': True, 'diamond': False, 'Legendre': False}
                 elif ang_method == 'Legendre':
                      run.parameters['all']['angular_derivative'] = {'finite_differences': False, 'diamond': False, 'Legendre': True}
-                run.mesh_parameters['Msigma'] = M
+                # run.mesh_parameters['Msigma'] = M
                 # run.parameters['all']['legendre_moments'] = N_ang
                 run.square_IC(uncollided, moving_mesh)
                 f = h5py.File('shell_source.h5', 'r+')
@@ -107,7 +107,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 dat = np.zeros((2, run.xs.size))
                 dat[0] = run.xs
                 dat[1] = run.phi.transpose()
-                f.create_dataset(save_string, data = dat)
+                f.create_dataset(save_string, data = dat)        
                 f.create_dataset(save_string + 'angular_flux', data = run.psi)
                 f.close()
                 plt.plot(run.xs, run.phi, '-o', mfc = 'none')
@@ -117,10 +117,13 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
                 phib = res2[1]
                 f2.close()
                 bench_interp = interp1d(xsb, phib)
-                bench = bench_interp(run.xs)
+                bench = bench_interp(np.abs(run.xs))
                 plt.plot(run.xs, bench, 'k-')
+                plt.ylim(0, bench[0] * 1.1)
                 plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
                 plt.close()
+
+
     # plot benchmark results
 
     for it, tt in enumerate(time_list):
@@ -129,7 +132,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             f = h5py.File('shell_source.h5', 'r+')
             save_string = f't={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}_N_space={space}_N_ang={N_ang}_M={M}_ang_method={ang_method}'
             res = f[save_string][:,:]
-            
+            psi = f[save_string + 'angular_flux'][:,:]
             f.close()
             xs = res[0]
             phi = res[1]
@@ -138,6 +141,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             res2 = f2[f't={tt}']
             xsb = res2[0]
             phib = res2[1]
+            
             f2.close
             bench_interp = interp1d(xsb, phib)
             bench = bench_interp(xs)
@@ -147,8 +151,24 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             print(RMSE(phi, bench), 'RMSE')
             plt.plot(xs, phi, '-o', mfc = 'none')
             plt.plot(xs, bench, 'k-')
+            plt.ylim(0, bench[0] * 1.1)
             plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
             plt.close()
+
+
+        mus, ws = quadrature(N_ang, 'gauss_legendre', testing = False)
+        if ang_method == 'diamond':
+             mus2 = np.zeros(N_ang+2)
+             mus2[1:-1] = mus
+             mus2[0] = -1
+             mus2[-1] = 1
+             mus = mus2
+        print(mus)
+        print(psi[:,0])
+        plt.plot(mus, psi[:, 0], '-o', mfc = 'none')
+        plt.xlabel(r'$\mu$', fontsize = 16)
+        plt.ylabel(r'$\psi$', fontsize = 16)
+        plt.savefig(f'shell_source_originflux_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf')
             
 
         print(err_list, 'err list')
@@ -163,7 +183,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
 def calculate_benchmarks():
     for it, tt in enumerate(time_list):
         xs = np.linspace(0.00000000001, 0.5 + tt, 500)
-        bench = get_bench(xs, tt)
+        bench = get_bench(np.abs(xs), tt)
         f = h5py.File('shell_IC_benchmarks.h5', 'r+')
         if f.__contains__(f't={tt}'):
                     del f[f't={tt}']
@@ -178,10 +198,10 @@ def calculate_benchmarks():
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[25], N_ang =16, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =32, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = False, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = False, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =512, run_results = False, ang_method='Legendre')
+square_IC_converge(moving_mesh=False, uncollided=False, M=1, N_space_list=[30], N_ang =16, run_results = True, ang_method='Legendre')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = False, ang_method='Legendre')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = False, ang_method='Legendre')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =512, run_results = False, ang_method='Legendre')
 # # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 8, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[20], N_ang = 16, run_results = True)
     

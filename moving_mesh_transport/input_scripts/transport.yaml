@@ -35,9 +35,10 @@
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'N_groups': 1
+    'kold': 1.0
     'VDMD': False
-    'legendre_moments': 56
-    'angular_derivative': {finite_differences: False, diamond: True, Legendre: False}
+    'legendre_moments': 12
+    'angular_derivative': {finite_differences: False, diamond: False, Legendre: True}
     
 # plane pulse source
 'plane_IC':

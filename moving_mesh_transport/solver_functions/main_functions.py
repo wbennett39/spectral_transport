@@ -264,9 +264,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         for space in range(N_space):
             norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
         # normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups)#/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3 # so the flux is not tiny for huge radii
-        # normalization = 1
+        normalization = 1
         # print(normalization, 'normalization factor')
-        normalization = kold
+        # normalization = kold
         
         fixed_source_coeffs_norm = fixed_source_coeffs/normalization
         # print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
@@ -285,6 +285,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
             # normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
+            normalization = kold
             # check normalize
             # print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
             if normalization > 0:
@@ -295,6 +296,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
 
     IC = initialize.IC  
+    # IC[:, 0, 1:] = 0.0
     # for tangle in range(int(N_ang/2), N_ang):
     #             refl_index = N_ang-tangle-1
     #                         # print(self.mus[angle], self.mus[refl_index])

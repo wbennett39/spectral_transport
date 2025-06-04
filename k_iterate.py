@@ -103,7 +103,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     while converged == False and n_iters < 2500: 
         run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
-        normalized_source = coeffs_old #/ normalization
+        normalized_source = coeffs_old/ k_old #/ normalization
         # run solver    
         t1 = time.time()
         run.parameters['all']['kold'] = k_old
@@ -112,13 +112,19 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         t_calc = time.time() - t1
         # update k
         xs = run.xs
-        phi_interpolated_new = interp1d(run.xs, run.phi[:,0])
-        integrand = lambda x:  phi_interpolated_new(x) * x**2 * 4 * math.pi * sigma_interp(x)  # new fission source 
+        phi_interpolated = interp1d(run.xs, run.phi[:,0])
+        integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x)  # new fission source 
         # plt.figure(2)
         # plt.plot(xs, sigma_interp(xs), '-')
         # plt.show()
+        # integrand_old = lambda x: (phi_interpolated(x)) * x**2 * 4 * math.pi * sigma_interp(x) # old fission source
+
+        # output_ob = make_output(500, N_ang, ws, xs, normalized_source, M, edges, uncollided, geometry, N_groups)
+        # phi_old = output_ob.make_phi_no_uncol()
+        # phi_interpolated = interp1d(xs, phi_old[:,0])
         integrand_old = lambda x: (phi_interpolated(x)) * x**2 * 4 * math.pi * sigma_interp(x) # old fission source
-        k_new = k_old *  integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
+        # k_new = k_old *  integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
+        k_new = integrate.quad(integrand, xs[0], xs[-1])[0] 
         # k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
         
         if k_new <0:
@@ -136,7 +142,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             print(k_old-k_new, 'k difference')
             print('iteration count: ', n_iters)
             k_old = k_new
-            phi_interpolated = phi_interpolated_new
+            # phi_interpolated = lambda x:  phi_interpolated_new(x)
             klist.append(k_new)
             k_wynn_epsilon = wynn_epsilon(np.array(klist))
             if n_iters % 2 == 0:

@@ -84,6 +84,15 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         f.create_dataset('fission_source', data = sigma_f_vec * nu_vec * phi  )
         f.close()
 
+        plt.figure('keff')
+        nits = len(k_list)
+        plt.plot(np.linspace(0, nits, nits), k_list, '-o', mfc = 'none')
+        plt.xlabel('iterations', fontsize = 16)
+        plt.ylabel(r'$k_\mathrm{eff}$', fontsize = 16)
+        plt.savefig('k_iterations_Kornreich.pdf')
+        plt.show()
+        plt.show()
+
     # Estimate alpha modes with VDMD
     if VDMD_estimate == True:
         f = h5py.File('Kornreich_keff.h5', 'r+')

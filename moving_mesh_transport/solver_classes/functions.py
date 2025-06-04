@@ -578,16 +578,16 @@ def angular_deriv(N_ang, angle, mus, V_old, space):
     return dterm
 @njit
 def legendre_moments_truncate(psi_moments, N_ang, tol = 1e-12):
-    n = psi_moments[:,0].size()
+    n = psi_moments[:,0].size
     returnval = n
-    J = psi_moments[0, :].size()
+    J = psi_moments[0, :].size
     # handle zero flux case
-    if max(np.abs(psi_moments[: ,:])) <=tol:
+    if np.max(np.abs(psi_moments[: ,:])) <=tol:
         returnval = n
     else:
         for inn in range(n-1):
-            if max(np.abs(psi_moments[inn, :])) <= tol:
-                if max(np.abs(psi_moments[inn+1, :])) <= tol: 
+            if np.max(np.abs(psi_moments[inn, :])) <= tol:
+                if np.max(np.abs(psi_moments[inn+1, :])) <= tol: 
                     returnval = inn
         # # if solution is not converging, add moments
         # if returnval == n: 

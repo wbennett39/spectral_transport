@@ -55,7 +55,33 @@ class make_output:
             return normTn(i, x, a, b)
 
 
+    def make_phi_no_uncol(self):
+        output = self.xs*0
+        psi = np.zeros((self.N_ang, self.xs.size, self.N_groups))
+        for g in range(self.N_groups):
+            for ang in range(self.N_ang):
+                for count in range(self.xs.size):
+                    idx = np.searchsorted(self.edges[:], self.xs[count])
+                    if (idx == 0):
+                        idx = 1
+                    if (idx >= self.edges.size):
+                        idx = self.edges.size - 1
+                    if self.edges[0] <= self.xs[count] <= self.edges[-1]:
+                        for i in range(self.M+1):
 
+                            # radiation = self.u[g * N_ang:(ig+1) * N_ang,:,:]
+                            # psi[ang, count] += self.u[ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+                            psi[ang, count, g] += self.u[g*self.N_ang +ang,idx-1,i] * self.basis(i,self.xs[count:count+1],float(self.edges[idx-1]),float(self.edges[idx]))[0]
+        
+        
+        output_phi = np.zeros((self.xs.size, self.N_groups))
+
+        for g in range(self.N_groups):
+            output_phi[:,g] = np.sum(np.multiply(psi[:, :, g].transpose(), self.ws), axis = 1)
+        self.psi_out = psi
+        self.phi_out = output_phi
+
+        return output_phi
 
 
 

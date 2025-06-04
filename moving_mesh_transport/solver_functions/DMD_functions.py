@@ -489,7 +489,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
                 for ij in range(N_ang):
                         # assert 0
                         Y_plus_shifted[ij, :, it] = Y_plus.reshape(N_ang, xs.size, ts.size)[ij,:, it] - sourcevec #* (ts[it] - ts[it-1])
-        Y_plus = Y_plus_shifted.reshape(N_ang * xs.size, ts.size)
+            Y_plus = Y_plus_shifted.reshape(N_ang * xs.size, ts.size)
                 # elif integrator == 'BDF_VODE':
             #     if it > 1:
             #         Y_plus[:, it] =  1.5 * (Y_minus[:, it] - 4 * Y_minus[:, it-1]/3 + Y_minus[:, it-2]/3) / dt 
@@ -500,12 +500,12 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         if integrator == 'Euler' or integrator == 'BDF_VODE':
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, -5, np.log(100), sparse_time_points)
-                # weak_Yminus_sparse = sparsify_data_mat2( weak_Yminus, 4)
-                # weak_Yplus_sparse = sparsify_data_mat2(weak_Yplus, 4)
+                # weak_Yminus_sparse = sparsify_data_mat2( weak_Yminus, sparse_time_points)
+                # weak_Yplus_sparse = sparsify_data_mat2(weak_Yplus, sparse_time_points)
         else:
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, 0, 100, sparse_time_points, 'const')
-        ts = ts_sparse
+        
         if try_WDMD == True:
             weak_Yminus, weak_Yplus, associated_time_vector = weak_VDMD(Y_minus, Y_plus, ts)
             weak_Yminus_sparse, weak_Yplus_sparse = sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector)
@@ -514,7 +514,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
             eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip = 0)))
             print(np.flip(eigen_vals_DMD_weak[:4]), 'weak eigen values')
             # print(ts, 'sparse time array')
-        
+        ts = ts_sparse
         Y_minus = Y_minus_sparse
         Y_plus = Y_plus_sparse
 

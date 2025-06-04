@@ -33,11 +33,12 @@
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'chi': 1.0
+    'kold': 1.0
     'sigma_f': 0.0
     'nu': 2.2
     'N_groups': 1
     'VDMD': False
-    'legendre_moments': 4
+    'legendre_moments': 8
     'angular_derivative': {finite_differences: False, diamond: False, Legendre: True}
 
     

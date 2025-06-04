@@ -1,7 +1,7 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'transport'
-    'tfinal': 750.0
+    'tfinal': 500.0
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
@@ -11,7 +11,7 @@
     'chi': 1.0
     'nu': 1.5
     't0': 1.0                       # time the source is turned off
-    'N_spaces': [40]                   # number of cells
+    'N_spaces': [80]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
     'Ms': [2]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
@@ -29,9 +29,9 @@
     'cv_const': 0.0
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'BDF'
+    'integrator': 'Euler'
     'Euler_dt_spacing': 'log'
-    'Euler_dt_num': 100
+    'Euler_dt_num': 12
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'N_groups': 1
@@ -142,9 +142,9 @@
 'fixed_source':
     'x0': [4.5]
     'l': 1.0
-    'shift': 100.000000
+    'shift': 200.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [8]    # corresponds to N_spaces
+    'N_angles': [128]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

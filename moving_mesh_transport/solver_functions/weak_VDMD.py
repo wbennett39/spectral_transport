@@ -91,6 +91,7 @@ def my_midpoint(t1, t2, t3, Ys):
 @njit
 def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
     # Form V-, Vplus
+    # print(ts, 'ts')
     I = len(Y_minus[:, 0])
     J0 = max(ts.size -2, 0) # basis functions covering 3 time points 
     J1 = max(ts.size -4, 0) # basis functions covering 5 time points
@@ -171,6 +172,7 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
                 c = ts[-10] # I think all of the c's are wrong. I only need them for the triangle basis though
         associated_time_vector[0, j0] = a
         associated_time_vector[1, j0] = b 
+        # print(a, b)
 
 
 
@@ -179,12 +181,22 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
                 basis_vec1[it] = basis_quadratic(ts[it], a, b)[1]
                 basis_vec2[it] = basis_quadratic(ts[it], a, b)[0]
         # form integrands
-        # plt.ioff()
-        # plt.plot(ts, basis_vec2)
+        dense_ts = np.linspace(a, b, 10)
+        dense_basis = dense_ts * 0
+        for itt in range(dense_ts.size):
+            dense_basis[itt] =  basis_quadratic(dense_ts[itt], a, b)[0]
+        # plt.ion()
+        # plt.plot(ts, basis_vec2, 'o', mfc = 'none')
+        # plt.plot(dense_ts, dense_basis)
+        # plt.plot(ts, ts*0, 'k|')
+        # plt.xlabel('t', fontsize=16)
+
         # print(jp)
         # print(basis_vec2)
         integrand_vec = np.zeros((ts.size, I))
         integrand_vec2 = np.zeros((ts.size, I))
+    # plt.savefig('quadratic_basis_WVDMD.pdf')
+    # plt.show()
         for it3 in range(ts.size):
             for ii in range(I):
                 integrand_vec[it3, ii] = Y_minus[ii, it3] * basis_vec1[it3]

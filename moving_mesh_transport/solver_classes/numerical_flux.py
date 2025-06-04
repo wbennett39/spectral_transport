@@ -314,6 +314,9 @@ class LU_surf(object):
                 #         print(psi_plus)
 
                     self.LU[i] = (xR**2*B_right*rightspeed*psi_plus - xL**2*B_left*leftspeed*psi_minus)
+                    # if space == 0:
+                    #     if rightspeed > 0:
+                    #         print(self.LU)
                
 
                 # if space == 0:

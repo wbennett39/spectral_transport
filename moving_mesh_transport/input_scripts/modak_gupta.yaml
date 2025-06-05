@@ -33,9 +33,12 @@
     'geometry': {slab: False, sphere: True}
     'N_groups': 1
     'lumping': False
+    'Euler_dt_spacing': 'linear'
+    'Euler_dt_num': 100
     'VDMD': True
     'legendre_moments': 2
     'angular_derivative': {finite_differences: False, diamond: True, Legendre: False}
+    'kold': 1.0
 
     
 # plane pulse source

@@ -496,7 +496,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
 
         
 
-        
+        # This needs to take tfinal as an input
         if integrator == 'Euler' or integrator == 'BDF_VODE':
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, -5, np.log(100), sparse_time_points)
@@ -508,7 +508,10 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         
         if try_WDMD == True:
             weak_Yminus, weak_Yplus, associated_time_vector = weak_VDMD(Y_minus, Y_plus, ts)
-            weak_Yminus_sparse, weak_Yplus_sparse = sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector)
+            # weak_Yminus_sparse, weak_Yplus_sparse = sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector)
+            ts_sparse, weak_Yminus_sparse = sparsify_data_mat(ts[1:-1], weak_Yminus, -5, np.log(100), sparse_time_points)
+            ts_sparse, weak_Yplus_sparse = sparsify_data_mat(ts[1:-1], weak_Yplus, -5, np.log(100), sparse_time_points)
+
             weak_Yminus = weak_Yminus_sparse
             weak_Yplus = weak_Yplus_sparse
             eigen_vals_DMD_weak = np.sort(np.real(VDMD_func(weak_Yminus, weak_Yplus, skip = 0)))

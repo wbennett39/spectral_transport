@@ -169,8 +169,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
         plt.xlabel(r'$\mu$', fontsize = 16)
         plt.ylabel(r'$\psi$', fontsize = 16)
         plt.savefig(f'shell_source_originflux_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf')
-            
-
+        plt.close()
         print(err_list, 'err list')
         plt.loglog(N_space_list, err_list / bench[0], '-o', mfc = 'none')
         plt.xlabel('spatial cells', fontsize = 16)
@@ -199,6 +198,7 @@ def calculate_benchmarks():
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[25], N_ang =16, run_results = True, ang_method='Legendre')
 square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[15], N_ang =16, run_results = True, ang_method='Legendre')
+
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = False, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = False, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =512, run_results = False, ang_method='Legendre')

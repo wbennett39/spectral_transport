@@ -93,14 +93,15 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
     # Form V-, Vplus
     # print(ts, 'ts')
     I = len(Y_minus[:, 0])
+    JM1 = ts.size
     J0 = max(ts.size -2, 0) # basis functions covering 3 time points 
-    J1 = max(ts.size -4, 0) # basis functions covering 5 time points
-    J2 = max(ts.size -6, 0)  # basis functions covering 7 time points
-    J3 = max(ts.size -8, 0)# basis functions covering 9 time points
-    J4 = max(ts.size - 10, 0) # etc
-    J5 = max(ts.size - 20, 0) # etc
+    J1 = 0*max(ts.size -4, 0) # basis functions covering 5 time points
+    J2 = 0*max(ts.size -6, 0)  # basis functions covering 7 time points
+    J3 = 0*max(ts.size -8, 0)# basis functions covering 9 time points
+    J4 = 0*max(ts.size - 10, 0) # etc
+    J5 = 0*max(ts.size - 20, 0) # etc
 
-    associated_time_vector = np.zeros((2, J0 + J1 + J2 + J3 + J4 + J5))
+    associated_time_vector = np.zeros((2,J0 + J1 + J2 + J3 + J4 + J5))
     Vminus = np.zeros((I, J0 + J1  + J2  + J3 + J4 + J5))
     Vplus = np.zeros((I, J0 + J1 + J2 + J3 + J4 + J5))
     # form J0 part of matrix
@@ -108,7 +109,8 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
         # form integrand vector
         basis_vec1 = ts.copy() # derivative of basis
         basis_vec2 = ts.copy() # basis
-   
+       
+
         if j0 < J0:
             jp = j0
             if j0 < ts.size -2:
@@ -119,57 +121,57 @@ def weak_VDMD(Y_minus, Y_plus, ts, basis = 'quadratic'):
                 a = ts[-3]
                 b = ts[-1]
                 c = ts[-2]
-        elif j0 >= J0 and j0 < J1 + J0:
-            jp = j0 - J0
-            if jp < ts.size -4:
-                a = ts[jp]
-                b = ts[jp+4]
-                c = ts[jp+2]
-            else:
-                a = ts[-5]
-                b = ts[-1]
-                c = ts[-3]
-        elif j0 >= J1 +J0 and j0 < J2 + J1 + J0:
-            jp = j0 - J1 - J0
-            if jp < ts.size -6:
-                a = ts[jp]
-                b = ts[jp+6]
-                c = ts[jp+3]
-            else:
-                a = ts[-7]
-                b = ts[-1]
-                c = ts[-4]
-        elif j0 >= J2 + J1 + J0  and j0 < J0 + J1 + J2 + J3:
-            jp = j0 - J2 -J1 - J0
-            if jp < ts.size -8:
-                a = ts[jp]
-                b = ts[jp+8]
-                c = ts[jp+4]
-            else:
-                a = ts[-9]
-                b = ts[-1]
-                c = ts[-5]
-        elif j0 >= J3 + J2 + J1 + J0 and j0 < J4 + J3 + J2 + J1 + J0:
+        # elif j0 >= J0 and j0 < J1 + J0:
+        #     jp = j0 - J0
+        #     if jp < ts.size -4:
+        #         a = ts[jp]
+        #         b = ts[jp+4]
+        #         c = ts[jp+2]
+        #     else:
+        #         a = ts[-5]
+        #         b = ts[-1]
+        #         c = ts[-3]
+        # elif j0 >= J1 +J0 and j0 < J2 + J1 + J0:
+        #     jp = j0 - J1 - J0
+        #     if jp < ts.size -6:
+        #         a = ts[jp]
+        #         b = ts[jp+6]
+        #         c = ts[jp+3]
+        #     else:
+        #         a = ts[-7]
+        #         b = ts[-1]
+        #         c = ts[-4]
+        # elif j0 >= J2 + J1 + J0  and j0 < J0 + J1 + J2 + J3:
+        #     jp = j0 - J2 -J1 - J0
+        #     if jp < ts.size -8:
+        #         a = ts[jp]
+        #         b = ts[jp+8]
+        #         c = ts[jp+4]
+        #     else:
+        #         a = ts[-9]
+        #         b = ts[-1]
+        #         c = ts[-5]
+        # elif j0 >= J3 + J2 + J1 + J0 and j0 < J4 + J3 + J2 + J1 + J0:
             
-            jp = j0 - J2 -J1 - J0 -J3
-            if jp < ts.size -10:
-                a = ts[jp]
-                b = ts[jp+10]
-                c = ts[jp+6]
-            else:
-                a = ts[-11]
-                b = ts[-1]
-                c = ts[-5]
-        elif j0 >=J4 + J3 + J2 + J1 + J0:
-            jp = j0 - J2 -J1 - J0 -J3 - J4
-            if jp < ts.size -10:
-                a = ts[jp]
-                b = ts[jp+20]
-                c = ts[jp+10]
-            else:
-                a = ts[-21]
-                b = ts[-1]
-                c = ts[-10] # I think all of the c's are wrong. I only need them for the triangle basis though
+        #     jp = j0 - J2 -J1 - J0 -J3
+        #     if jp < ts.size -10:
+        #         a = ts[jp]
+        #         b = ts[jp+10]
+        #         c = ts[jp+6]
+        #     else:
+        #         a = ts[-11]
+        #         b = ts[-1]
+        #         c = ts[-5]
+        # elif j0 >=J4 + J3 + J2 + J1 + J0:
+        #     jp = j0 - J2 -J1 - J0 -J3 - J4
+        #     if jp < ts.size -10:
+        #         a = ts[jp]
+        #         b = ts[jp+20]
+        #         c = ts[jp+10]
+        #     else:
+        #         a = ts[-21]
+        #         b = ts[-1]
+        #         c = ts[-10] # I think all of the c's are wrong. I only need them for the triangle basis though
         associated_time_vector[0, j0] = a
         associated_time_vector[1, j0] = b 
         # print(a, b)

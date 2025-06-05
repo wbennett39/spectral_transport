@@ -206,7 +206,7 @@ class rhs_class():
         self.time_points = np.linspace(0.0, build.tfinal, timepoints)
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
         # self.alphas = np.zeros(self.N_ang-1)
-        self.alphas = np.zeros(self.N_ang-1)
+        self.alphas = np.zeros(self.N_ang)
         # print(self.mus, 'mus')
         # print(self.ws, 'ws')
         self.make_alphas()
@@ -498,8 +498,8 @@ class rhs_class():
         # for j in range(self.M+1):
         #     check_current_legendre(2 * self.ws, self.mus, V_old[:, 0, j], self.N_ang, int(2*self.N_ang-1))
             
-        for j in range(0, self.M+1): 
-            V_old[:, 0, j] = (-1)**j * np.flip(V_old[:,1,j]) # ghost cell
+        # for j in range(0, self.M+1): 
+        #     V_old[:, 0, j] = (-1)**j * np.flip(V_old[:,1,j]) # ghost cell
             # if j > 0:
                 # V_old[:, 0, j] = 0.0
         # for ang in range(self.N_ang+1): #attempt at positivizing T
@@ -540,7 +540,7 @@ class rhs_class():
         # sigma_class.check_sigma_coeffs(self.T_eval_points, mesh.edges, self.T_old)
         update = True
         # iterate over all cells
-        for space in range(1, self.N_space): 
+        for space in range(0, self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments, legendre_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
                 # PRINT(legendre_moments)
@@ -638,7 +638,7 @@ class rhs_class():
                     # self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
                     ######### solve thermal couple ############
                     U = V_old[-1,space,:]
-                    num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, True)
+                    num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0,V_old[-1,0,:], True)
                     RU = num_flux.LU 
                     RHS_transfer = np.copy(V_old[-1, space, :]*0)
                     if self.uncollided == True:
@@ -666,14 +666,20 @@ class rhs_class():
                     psionehalf = u_old
                 ########## Loop over angle ############
                 for angle in range(self.N_ang):
-                    # else:
-                        # psin = make_u_old(V_old[angle, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
+                    # if space == 0 and self.mus[angle] > 0:
+                    #         V_new[angle, space, :] = V_new[self.N_ang-angle-1, space, :]
+                            # print(V_new[angle, space, :], 'V_new reflected', angle, t) 
+
+                    # else: 
+                # else:
+                    # psin = make_u_old(V_old[angle, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
                         if self.angular_derivative['diamond'] == True:
                             psin = V_old[angle, space, :]
                         mul = self.mus[angle]
                         # calculate numerical flux
-                        num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul)
+                        num_flux.make_LU(t, mesh, V_old[angle,:,:], space, mul, V_old[self.N_ang - angle -1,0,:])
                         LU = num_flux.LU 
+       
                         # if space == 0:
                         #     print(-LU, 'flux')
                         #     print(self.mus[angle], 'angle')
@@ -711,6 +717,13 @@ class rhs_class():
                             RHS -=  LU # numerical flux 
                             RHS +=  mul*np.dot(L,U) #gradient
                             mu_derivative =  np.dot(J, dterm) 
+                            # if space == 0:
+                            #     print(-mu_derivative, 'mu deriv')
+                            #     print(-LU, 'LU')
+                            #     print(-VV, 'VV')
+                            #     print(Minv, 'Minv')
+                            #     print(np.dot(Minv, mu_derivative), 'mu deriv dot')
+                            #     print(PV, 'PV')
                             RHS -= mu_derivative # angular derivative
                             RHS += np.dot(G, U) # moving mesh time derivative correction
                             # RHS += 0.5 * S /self.sigma_t / self.l # source
@@ -742,16 +755,16 @@ class rhs_class():
                                         # psionehalf_new = 2 * V_old[angle, space,:] - psionehalf
                                         psionehalf_new = 2 * psin - psionehalf
                                         psionehalf = psionehalf_new
-                            if space == 0:
-                                V_new[angle, space, :] = RHS.copy()
-                                # V_new[angle, space, 1:] = 0
+                        
+                            # V_new[angle, space, 1:] = 0
 
                         # #     # print(V_new[angle, space, :])
-                            else:
-                                V_new[angle,space,:] = RHS.copy()
-                            
-        for j in range(0, self.M+1): # ghost cell
-            V_new[:, 0, j] = (-1)**j * np.flip(V_new[:,1,j])
+
+                        V_new[angle,space,:] = RHS.copy()
+                        # if space ==0:
+                        #     print(V_new[angle, space, :], 'V_new update', angle, t)    
+        # for j in range(0, self.M+1): # ghost cell
+        #     V_new[:, 0, j] = (-1)**j * np.flip(V_new[:,1,j])
             # if j > 0:
                 # V_new[:, 0, j] = 0.0
                                 # else:

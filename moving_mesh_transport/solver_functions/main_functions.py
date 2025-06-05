@@ -296,8 +296,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
 
     IC = initialize.IC  
-    for j in range(0, M+1): 
-            IC[:, 0, j] = (-1)**j * np.flip(IC[:,1,j]) # ghost cell
+    # for j in range(0, M+1): 
+    #         IC[:, 0, j] = (-1)**j * np.flip(IC[:,1,j]) # ghost cell
             # if j > 0:
                 # IC[:, 0, j] = 0.0
     # IC[:, 0, 1:] = 0.0

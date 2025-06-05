@@ -238,26 +238,20 @@ class LU_surf(object):
         return returnval
 
 
-    def make_sol(self, space, u, t):
+    def make_sol(self, space, u, t, u_refl):
         for j in range(self.M+1):
             if space != 0:
                 self.v0 += self.B_LR_func(j, self.hm)[1]*(u[space-1,j])
                 
-            elif space == 0 and self.is_boundary_source_on(space, t): # special MMS case
+            if space == 0 and self.is_boundary_source_on(space, t): # special MMS case
                 assert 0
                 self.v0 += self.integrate_quad(t, self.xL_minus, self.edges[space], j, "l") * self.B_LR_func(j, self.h)[1] 
             
-            # elif space == 0 and self.geometry['sphere'] == True: #reflecing BC for sphere
-            #     if  abs(self.edges[0]) <=  1e-8:
-            #         self.v0 += 0.5 * (self.B_LR_func(j, self.h)[1]*(u_refl[j]) + self.B_LR_func(j, self.h)[0]*(u[space, j]))
+
+            self.v2 += self.B_LR_func(j, self.h)[1]*(u[space, j])
                 # else:
                 #     assert 0
-
-
-                
             self.v1 += self.B_LR_func(j, self.h)[0]*(u[space, j])
-            self.v2 += self.B_LR_func(j, self.h)[1]*(u[space, j])
-
             
             if space != self.N_space - 1:
                 self.v3 += self.B_LR_func(j, self.hp)[0]*(u[space+1,j])
@@ -271,7 +265,7 @@ class LU_surf(object):
 
             
     
-    def make_LU(self, t, mesh_class, u, space, mul, rt = False):
+    def make_LU(self, t, mesh_class, u, space, mul, u_refl, rt = False):
         self.v0 = 0 
         self.v1 = 0
         self.v2 = 0
@@ -287,7 +281,7 @@ class LU_surf(object):
         
         self.make_h(space)
         self.extend_mesh(space)
-        self.make_sol(space, u, t)
+        self.make_sol(space, u, t, u_refl)
 
 
         psi_minus = 0.0

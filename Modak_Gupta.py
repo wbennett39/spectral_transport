@@ -121,7 +121,7 @@ def results(theta = 0.55, run_results = False, skip = 3, iterate_theta = False, 
     if run_results == True:
         # ping save file
         integrator = run.parameters['all']['integrator']
-        f = h5py.File(f'modak_gupta_results_{integrator}.h5', 'r+')
+        f = h5py.File(f'modak_gupta_results_{integrator}_dt=const.h5', 'r+')
         f.close()
         # prime solver
         run.parameters['all']['integrator'] = 'BDF_VODE'

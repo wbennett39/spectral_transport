@@ -22,7 +22,7 @@
     'radiative_transfer': {none: True}             # material temperature feedback. 1-True, 0 - False
     'temperature_dependence': [1,0,0,0] # first slot is Su-Olson problem
     'e_initial': 0.0000000001
-    'weights': 'gauss_legendre'          # usually 'gauss_lobatto'. Set to 'gauss_legendre' for S2 calculations
+    'weights': 'gauss_lobatto'          # usually 'gauss_lobatto'. Set to 'gauss_legendre' for S2 calculations
     'save_solution': False
     'particle_v': 'one' #does this do anything?
     'edge_v': 'one'
@@ -37,7 +37,7 @@
     'N_groups': 1
     'kold': 1.0
     'VDMD': False
-    'legendre_moments': 16
+    'legendre_moments': 5
     'angular_derivative': {finite_differences: False, diamond: False, Legendre: True}
     
 # plane pulse source

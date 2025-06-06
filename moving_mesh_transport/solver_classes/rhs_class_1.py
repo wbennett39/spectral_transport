@@ -692,7 +692,7 @@ class rhs_class():
                         # assert((np.abs(U-VV/self.sigma_t) < 1e-6).all())
                         dterm = U.copy()*0
                         if self.angular_derivative['Legendre'] == True:
-                            dterm  = legendre_difference3(legendre_moments, psi_moments[:legendre_moments, :], self.M, self.mus[angle])
+                            dterm  = legendre_difference3(self.legendre_moments, psi_moments[:self.legendre_moments, :], self.M, self.mus[angle])
                         elif self.angular_derivative['diamond'] == True:
                             if angle != 0: # derivative is identically zero at starting angle
                                 for j in range(self.M+1):
@@ -718,7 +718,7 @@ class rhs_class():
                             RHS = V_old[angle, space, :].copy()*0
                             RHS -=  LU # numerical flux 
                             RHS +=  mul*np.dot(L,U) #gradient
-                            mu_derivative =  np.dot(J, dterm) 
+                            
                             # if space == 0:
                             #     print(-mu_derivative, 'mu deriv')
                             #     print(-LU, 'LU')
@@ -726,15 +726,18 @@ class rhs_class():
                             #     print(Minv, 'Minv')
                             #     print(np.dot(Minv, mu_derivative), 'mu deriv dot')
                             #     print(PV, 'PV')
-                            RHS -= mu_derivative # angular derivative
+                            
                             RHS += np.dot(G, U) # moving mesh time derivative correction
                             # RHS += 0.5 * S /self.sigma_t / self.l # source
                             RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l # radiative transfer coupling
                             RHS -= np.dot(MPRIME, U)
+                            mu_derivative =  np.dot(J, dterm) 
                             if self.angular_derivative['diamond'] == True and angle == 0:
                                 RHS -= 2 * np.dot(J, U)
-                            # elif self.angular_derivative['Legendre'] == True and (angle ==0 or angle == self.N_ang-1):
-                            #     RHS -= 2 * np.dot(J, U)
+                            elif self.angular_derivative['Legendre'] == True and (angle ==0 or angle == self.N_ang-1):
+                                RHS += 2 * np.dot(J, U) * mul
+                                mu_derivative = mu_derivative * 0
+                            RHS -= mu_derivative # angular derivative
                             if const_crosssection ==True:
                                 RHS = np.dot(Minv, RHS) # mass matrix 
                             if const_crosssection == False:

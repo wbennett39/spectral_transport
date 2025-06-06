@@ -79,6 +79,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
         run.parameters['all']['N_spaces'] = [5]
         run.parameters['all']['Ms'] = [0]
         run.parameters['square_IC']['N_angles'] = [2]
+        run.parameters['all']['weights'] = 'gauss_legendre'
         run.square_IC(0,0)
         run.load('transport', 'mesh_parameters')
         for space in N_space_list:  
@@ -158,7 +159,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             
 
 
-        mus, ws = quadrature(N_ang, 'gauss_legendre', testing = False)
+        mus, ws = quadrature(N_ang, run.parameters['all']['weights'], testing = False)
         if ang_method == 'diamond':
              mus2 = np.zeros(N_ang+1)
              mus2[1:] = mus

@@ -155,13 +155,15 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
             plt.savefig(f'shell_source_solution_t={tt}_method={ang_method}.pdf')
             plt.close()
 
+            
+
 
         mus, ws = quadrature(N_ang, 'gauss_legendre', testing = False)
         if ang_method == 'diamond':
-             mus2 = np.zeros(N_ang+2)
-             mus2[1:-1] = mus
+             mus2 = np.zeros(N_ang+1)
+             mus2[1:] = mus
              mus2[0] = -1
-             mus2[-1] = 1
+            #  mus2[-1] = 1
              mus = mus2
         print(mus)
         print(psi[:,0])
@@ -177,6 +179,14 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
         plt.title(f'{N_ang} angles, M={M}') 
         plt.savefig(f'shell_source_RMSE_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf')
         plt.close()
+
+        plt.plot(xs, psi[0, :], label = r'$\mu = $' + f'{mus[0]}')
+        plt.plot(xs, psi[1, :], label = r'$\mu = $' + f'{mus[1]}')
+        plt.plot(xs, psi[2, :], label = r'$\mu = $' + f'{mus[2]}')
+        plt.legend()
+        plt.savefig(f'shell_source_angularflux_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf')
+        plt.close()
+
 
        
 def calculate_benchmarks():
@@ -197,7 +207,7 @@ def calculate_benchmarks():
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[25], N_ang =16, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[15], N_ang =16, run_results = True, ang_method='Legendre')
+square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[15], N_ang =16, run_results = True, ang_method='Legendre')
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = False, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = False, ang_method='Legendre')

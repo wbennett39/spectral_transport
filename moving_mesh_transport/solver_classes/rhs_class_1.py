@@ -694,7 +694,7 @@ class rhs_class():
                         if self.angular_derivative['Legendre'] == True:
                             dterm  = legendre_difference3(legendre_moments, psi_moments[:legendre_moments, :], self.M, self.mus[angle])
                         elif self.angular_derivative['diamond'] == True:
-                            if angle != 0 and angle != self.N_ang -1: # derivative is identically zero at endpoints
+                            if angle != 0: # derivative is identically zero at starting angle
                                 for j in range(self.M+1):
                                         # if space != 0:
                                             dterm[j] = alpha_difference(self.alphas[angle], self.alphas[angle-1], self.ws[angle],  psionehalf[j], psin[j], self.mus[angle])
@@ -704,6 +704,8 @@ class rhs_class():
                                 for j in range(self.M+1):
                                     vec = (1-self.mus**2) * V_old[:, space, j]
                                     dterm[j] = finite_diff_uneven(self.mus, angle, vec, left = (angle==0), right = (angle == self.N_ang - 1))
+                                
+                                # print(dterm, 'angle = ', self.mus[angle])
 
                         # #         # dterm[j] = finite_diff_uneven_diamond_2(self.mus, angle, V_old[:, space, j], self.alphams, self.ws, left = (angle==0), right = (angle == self.N_ang-1))
                             # dterm[j] = finite_diff_uneven_diamond(self.mus, angle, V_old[:, space, j], left = (angle==0), right = (angle == self.N_ang-1), origin = False)
@@ -729,6 +731,10 @@ class rhs_class():
                             # RHS += 0.5 * S /self.sigma_t / self.l # source
                             RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l # radiative transfer coupling
                             RHS -= np.dot(MPRIME, U)
+                            if self.angular_derivative['diamond'] == True and angle == 0:
+                                RHS -= 2 * np.dot(J, U)
+                            # elif self.angular_derivative['Legendre'] == True and (angle ==0 or angle == self.N_ang-1):
+                            #     RHS -= 2 * np.dot(J, U)
                             if const_crosssection ==True:
                                 RHS = np.dot(Minv, RHS) # mass matrix 
                             if const_crosssection == False:
@@ -738,7 +744,7 @@ class rhs_class():
                                 for ii in range(self.M+1):
                                     PV2[ii] = np.sum(np.multiply(V_old[:,space,ii],self.ws)) #* (self.c) 
                                 RHS += PV2 * self.c
-                            RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi #/ self.sigma_t # fixed fission source
+                            RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi  #/ self.sigma_t # fixed fission source
                             if const_crosssection ==False:
                                 RHS -= VV / self.sigma_t / self.l # absorption
                             if const_crosssection ==True:

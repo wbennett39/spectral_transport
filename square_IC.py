@@ -71,7 +71,7 @@ def get_bench(xs, t):
     ob = intg.shell_source(t, 100, choose_xs = True, xpnts = xs)
     return ob[1] + ob[2]
 
-def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 256, ang_method = 'Legendre'):
+def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_results = True, uncollided = True, moving_mesh = True, M = 3, N_ang = 96, ang_method = 'Legendre'):
    
     if run_results == True: #re-run calculations
         f = h5py.File('shell_source.h5', 'r+')
@@ -160,6 +160,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
 
 
         mus, ws = quadrature(N_ang, run.parameters['all']['weights'], testing = False)
+        print(run.parameters['all']['weights'])
         if ang_method == 'diamond':
              mus2 = np.zeros(N_ang+1)
              mus2[1:] = mus
@@ -208,7 +209,10 @@ def calculate_benchmarks():
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[25], N_ang =16, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=0, N_space_list=[15], N_ang =16, run_results = True, ang_method='Legendre')
+square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =96, run_results = True, ang_method='diamond')
+square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =128, run_results = True, ang_method='diamond')
+square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =256, run_results = True, ang_method='diamond')
+square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =512, run_results = True, ang_method='diamond')
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = False, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = False, ang_method='Legendre')

@@ -39,7 +39,7 @@
     'N_groups': 1
     'VDMD': False
     'legendre_moments': 8
-    'angular_derivative': {finite_differences: False, diamond: False, Legendre: True}
+    'angular_derivative': {finite_differences: False, diamond: True, Legendre: False}
 
     
 # plane pulse source

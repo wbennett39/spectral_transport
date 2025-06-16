@@ -531,7 +531,6 @@ class rhs_class():
         #     V_old = V_old_new
         if self.radiative_transfer['none'] == 0: # make temperature solution for T dependent cross sections
             self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
-
             # print(self.T_old, 'T')
         if self.recalculate_sigma_coeffs == True:
             sigma_class.sigma_moments(mesh.edges, t, self.T_old, self.T_eval_points)
@@ -570,7 +569,7 @@ class rhs_class():
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
                 if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0) :
-                    update = False
+                    update = True
                 else:
                     update = True
             # matrices.matrix_test(True) # tests matrices against analytic functions
@@ -588,16 +587,20 @@ class rhs_class():
                 L = matrices.L # gradient matrix
                 G = matrices.G # time derivative correction for moving mesh
                 MPRIME = matrices.MPRIME # time derivative of mass matrix. Necessary because Mass is not orthonormal 
+
                 if self.radiative_transfer['none'] == False:
+
                     flux.make_P(V_old[:-1,space,:], space, xL, xR)
                 else:
-                    flux.make_P(V_old[:,space,:], space, xL, xR)
 
+                    flux.make_P(V_old[:,space,:], space, xL, xR)
+      
                 # PV_RT = np.zeros(self.M+1)
                 # for j in range(self.M+1): 
                 #     PV_RT = np.sum(np.multiply(self.ws, V_old[:-1, space, :]))
                 PV = flux.scalar_flux_term
                 fixed_source = flux.P_fixed[space, self.g, :]
+
                 source.make_source(t, xL, xR, uncollided_sol)
                 S = source.S
                 H = transfer_class.H
@@ -626,6 +629,7 @@ class rhs_class():
                 # integrate the source
                 # source.make_source(t, xL, xR, uncollided_sol)
                 # radiative transfer term
+
                 if self.radiative_transfer['none'] == False:
                     PV_RT = flux.PV_RT
                     if self.g ==0:

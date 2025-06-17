@@ -390,27 +390,27 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     #     tpnts = [tfinal]
     # elif estimate_wavespeed == True:
     #     tpnts = np.linspace(0, tfinal, 10000)
-    if eval_times == True:
-        tpnts = eval_array
-        print(tpnts, 'time points')
-        tpnts_dense = np.linspace(0.01, tpnts[-1], 100)
-        for it, tt in enumerate(tpnts_dense):
-            mesh.move(tt)
+    # if eval_times == True:
+    #     tpnts = eval_array
+    #     print(tpnts, 'time points')
+    #     tpnts_dense = np.linspace(0.01, tpnts[-1], 100)
+    #     for it, tt in enumerate(tpnts_dense):
+    #         mesh.move(tt)
             
-            # dimensional_t = tt/29.98
-            # menis_t = -29.6255 + dimensional_t
-            menis_t = converging_time_function(tt, sigma_func)
-            # rfront = 0.01 * (-menis_t) ** 0.679502 
-            rfront = converging_r(menis_t, sigma_func)
+    #         # dimensional_t = tt/29.98
+    #         # menis_t = -29.6255 + dimensional_t
+    #         menis_t = converging_time_function(tt, sigma_func)
+    #         # rfront = 0.01 * (-menis_t) ** 0.679502 
+    #         rfront = converging_r(menis_t, sigma_func)
 
-            plot_edges_converging(tt, mesh.edges, rfront, 23)
-        plt.draw()
-        plt.show()
-        plt.plot(np.linspace(0, x0),np.linspace(0, x0) * 0 + tpnts[-1]/2 , 'k--')
-        plt.plot(np.linspace(0, x0),np.linspace(0, x0) * 0 + 2*tpnts[-1]/3 , 'k--')
-        plt.savefig('edges_converging.pdf')
-    else:
-        tpnts = None
+    #         plot_edges_converging(tt, mesh.edges, rfront, 23)
+    #     plt.draw()
+    #     plt.show()
+    #     plt.plot(np.linspace(0, x0),np.linspace(0, x0) * 0 + tpnts[-1]/2 , 'k--')
+    #     plt.plot(np.linspace(0, x0),np.linspace(0, x0) * 0 + 2*tpnts[-1]/3 , 'k--')
+    #     plt.savefig('edges_converging.pdf')
+    # else:
+    tpnts = None
 
 
 
@@ -422,6 +422,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # sol_JL = jl_integrator_func(RHS, IC, (0, tfinal), tpnts)
 
     # sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
+    print('starting solve')
     if integrator == 'BDF_VODE':
         it2 = 0
         ts = np.logspace(-5,math.log10(tfinal), 100 + 1)
@@ -477,9 +478,19 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             ts = np.logspace(-5,math.log10(tfinal), Euler_dt_num + 1)
         elif Euler_dt_spacing == 'linear':
             ts = np.linspace(0, tfinal, Euler_dt_num + 1)
+        if eval_times == True:
+            ts = np.concatenate((ts, eval_array))
+            ts = np.unique(np.sort(ts))
+
         Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
-        sol = sol_class_ode_solver(Y, ts, ts)
+        if eval_times == True:
+            indices = []
+            for itt, tt in enumerate(eval_array):
+                indices.append(np.argmin(np.abs(ts-tt)))
+            sol = sol_class_ode_solver(Y[:, indices], eval_array, eval_array)
+        else:
+            sol = sol_class_ode_solver(Y, ts, ts)
 
 
   

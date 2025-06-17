@@ -66,11 +66,11 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [250], N_ang = 12):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [50], N_ang = 2, MM = 1):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
-    MM = 1
+    # MM = 0
 
     # N_spaces_list = [10, 15, 20, 25, 50, 75, 100, 150, 200, 500, 1000]
     # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -87,6 +87,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [250], N_ang = 12)
     run.mesh_parameters['eval_times'] = False
     run.mesh_parameters['Msigma'] = 0
     run.parameters['boundary_source']['N_angles'] = [2]
+    run.parameters['all']['lumping'] = False
     run.boundary_source(0,0)
     plt.plot(run.xs, run.phi)
 
@@ -98,14 +99,15 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [250], N_ang = 12)
         run.parameters['all']['at'] = 11e-4
         print('rtol', run.parameters['all']['rt'] )
         print('atol',run.parameters['all']['at'] )
-        run.parameters['all']['lumping'] = False
+        # if MM > 0:
+        #     run.parameters['all']['lumping'] = True
         print("LUMPING"*run.parameters['all']['lumping'])
         # run.parameters['all']['at'] = 5e-1
-        run.parameters['all']['e_initial'] = 5e-10
+        # run.parameters['all']['e_initial'] = 5e-4
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
-        run.parameters['all']['integrator'] = 'BDF'
+        # run.parameters['all']['integrator'] = 'Euler'
         print(run.parameters['all']['integrator'], 'integrator methods')
 
         # menis_times = 
@@ -132,9 +134,9 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [250], N_ang = 12)
         # run.mesh_parameters['eval_times'] = False
 
         run.boundary_source(0,0)
-        plt.figure(29)
-        plt.plot(run.xs, run.phi)
-        plt.show()
+        # plt.figure(29)
+        # plt.plot(run.xs, run.phi)
+        # plt.show()
         print(run.xs, run.phi)
         f = h5py.File('converging_heat/results_test4_1211.h5','r+')
         M = run.parameters['all']['Ms'] 

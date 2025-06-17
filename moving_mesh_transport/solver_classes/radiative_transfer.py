@@ -443,25 +443,25 @@ class T_function(object):
                     self.integrate_quad(xL, xR, j, sigma_class)
 
             elif self.geometry['sphere'] == True:
-                if self.lumping == False:
+                # if self.lumping == False:
                     for j in range(self.M+1):
                             self.integrate_quad_sphere(xL, xR, j, sigma_class)
-                else:
-                    self.H2 = self.H.copy()*0
-                    self.project_T4_to_basis(xL, xR, sigma_class)
+                # else:
+                #     self.H2 = self.H.copy()*0
+                #     self.project_T4_to_basis(xL, xR, sigma_class)
                     
-                    VV = np.zeros((self.M+1, self.M+1))
-                    for i in range(self.M + 1):
-                        for j in range(self.M + 1):
-                            for k in range(self.Msigma + 1):
-                                if self.geometry['sphere'] == True:
-                                        if k ==0:
-                                            for ii in range(self.M+1):
-                                                for jj in range(self.M+1):
-                                                    VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
-                                            VV_lumped = mass_lumper(VV, xL, xR)[0]
-                                        self.H2[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_lumped[i,j]
-                    self.H = self.H2.copy()
+                #     VV = np.zeros((self.M+1, self.M+1))
+                #     for i in range(self.M + 1):
+                #         for j in range(self.M + 1):
+                #             for k in range(self.Msigma + 1):
+                #                 if self.geometry['sphere'] == True:
+                #                         if k ==0:
+                #                             for ii in range(self.M+1):
+                #                                 for jj in range(self.M+1):
+                #                                     VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
+                #                             VV_lumped = mass_lumper(VV, xL, xR)[0]
+                #                         self.H2[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_lumped[i,j]
+                #     self.H = self.H2.copy()
         
 
 

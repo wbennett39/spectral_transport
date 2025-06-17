@@ -114,38 +114,40 @@ class scalar_flux(object):
 
 
             # for g in range(self.N_groups):
-            for k in range(self.Msigma + 1):
-                if self.lumping == True:
-                    for ii in range(self.M+1):
-                        for jj in range(self.M+1):
-                            VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
-                                # print(VV, 'VV')
+            
+               
                                 # print(xL, xR, 'a, b')
                
-                    VV_lumped = mass_lumper(VV, xL, xR)[0]
+                
             
-                for i in range(self.M+1):
+            for i in range(self.M+1):
                     for l in range(self.N_ang):
                         for j in range(self.M+1):
-                        
-                            if self.geometry['slab'] == True:
-                                self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
-                            elif self.geometry['sphere'] == True:
-                                if self.lumping == True: # this is a very inefficient implementation 
-                                    # if k ==0:
-                          
+                            for k in range(self.Msigma + 1):
+                                if self.geometry['slab'] == True:
+                                    self.PV[i] +=  self.cs[space, k] * u[l,j] * self.ws[l] * self.AAA[i, j, k] 
+                                elif self.geometry['sphere'] == True:
+                                    if self.lumping == True: # this is a very inefficient implementation 
+                                        # if k ==0: # why did I have this?
 
-                                    # self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VVmatLUMPED(i, j,k, xL, xR) / (math.pi**1.5)
-                                    self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
-                                    self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
-                                    # print(self.PV)
-                                    # print(self.PV_RT)
-                                elif self.lumping == False:
-                                    self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
-                                    self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
-                                    # self.PV_RT[i] += u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
-                                    # print(self.PV, 'PV')
-                                    # print(self.cs, 'cs')
+                                        for ii in range(self.M+1):
+                                            for jj in range(self.M+1):
+                                                VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
+                                        VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                    # print(VV, 'VV')
+                                
+
+                                        # self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VVmatLUMPED(i, j,k, xL, xR) / (math.pi**1.5)
+                                        self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
+                                        self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_lumped[i,j]
+                                        # print(self.PV)
+                                        # print(self.PV_RT)
+                                    elif self.lumping == False:
+                                        self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                        self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                        # self.PV_RT[i] += u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                        # print(self.PV, 'PV')
+                                        # print(self.cs, 'cs')
                                     # print(u, 'u')
                                 # else:
 

@@ -179,7 +179,7 @@ def square_IC_converge(time_list = time_list, N_space_list = N_space_list, run_r
         plt.xlabel('spatial cells', fontsize = 16)
         plt.ylabel('scaled RMSE')
         plt.title(f'{N_ang} angles, M={M}') 
-        plt.savefig(f'shell_source_RMSE_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf')
+        plt.savefig(f'shell_source_RMSE_t={tt}_uncollided={uncollided}_moving_mesh={moving_mesh}.pdf', bbox_inches = 'tight')
         plt.close()
 
         plt.plot(xs, psi[0, :], label = r'$\mu = $' + f'{mus[0]}')
@@ -209,10 +209,12 @@ def calculate_benchmarks():
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[50], N_ang = 64, run_results = True)
 # square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[25], N_ang =16, run_results = True, ang_method='Legendre')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =96, run_results = True, ang_method='diamond')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =128, run_results = True, ang_method='diamond')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =256, run_results = True, ang_method='diamond')
-square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =512, run_results = True, ang_method='diamond')
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[15, 30, 60, 120], N_ang =32, run_results = True, ang_method='diamond')
+square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[15, 30, 60], N_ang =96, run_results = True, ang_method='diamond')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=2, N_space_list=[15, 30, 60, 120], N_ang =96, run_results = True, ang_method='diamond')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =128, run_results = True, ang_method='diamond')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =256, run_results = True, ang_method='diamond')
+# square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[15, 30, 60, 120], N_ang =512, run_results = True, ang_method='diamond')
 
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =128, run_results = False, ang_method='Legendre')
 # square_IC_converge(moving_mesh=False, uncollided=False, M=3, N_space_list=[25, 50, 100, 200], N_ang =256, run_results = False, ang_method='Legendre')

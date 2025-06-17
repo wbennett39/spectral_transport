@@ -569,7 +569,7 @@ class rhs_class():
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
                 if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0) :
-                    update = True
+                    update = False
                 else:
                     update = True
             # matrices.matrix_test(True) # tests matrices against analytic functions
@@ -642,12 +642,13 @@ class rhs_class():
                     # self.T_old[time_loc, space] = transfer_class.make_T(argument, a, b) 
                     ######### solve thermal couple ############
                     U = V_old[-1,space,:]
-                    num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0,V_old[-1,0,:], True)
+                    num_flux.make_LU(t, mesh, V_old[-1,:,:], space, 0.0, V_old[-1,0,:], True)
                     RU = num_flux.LU 
                     RHS_transfer = np.copy(V_old[-1, space, :]*0)
                     if self.uncollided == True:
                         RHS_transfer += self.c_a *source.S * 2 
-                    RHS_transfer -= RU
+                    if mesh.moving == True:
+                        RHS_transfer -= RU
                     RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                     RHS_transfer += self.c_a * PV_RT*2 /self.sigma_t 
                     # if space == self.N_space-1:
@@ -738,7 +739,7 @@ class rhs_class():
                             mu_derivative =  np.dot(J, dterm) 
                             if self.angular_derivative['diamond'] == True and angle == 0:
                                 RHS -= 2 * np.dot(J, U)
-                            elif self.angular_derivative['Legendre'] == True and (angle ==0 or angle == self.N_ang-1):
+                            elif self.angular_derivative['Legendre'] == True and (abs(self.mus[angle]) -1 ==0):
                                 RHS += 2 * np.dot(J, U) * mul
                                 mu_derivative = mu_derivative * 0
                             RHS -= mu_derivative # angular derivative

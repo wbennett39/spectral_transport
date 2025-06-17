@@ -7,8 +7,8 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 50
-M = 0
+spaces = 200
+M = 1
 #####
 #####
 a = 0.0137225
@@ -134,10 +134,13 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t2 =-14.2e-8
 # t3 =-14.0e-8
 
+t1 = -14.5e-8
+t2 = -14.49e-8
+t3 = -14.48e-8
 
-t1 = -13.0e-8
-t2 = -12.5e-8
-t3 = -12e-8
+# t1 = -13.0e-8
+# t2 = -12.5e-8
+# t3 = -12e-8
 # t1 =  -14.0e-8
 # t2 = -10.0e-8
 # t3 = -9.4706889e-8

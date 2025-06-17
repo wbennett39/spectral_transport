@@ -561,8 +561,8 @@ class sigma_integrator():
     def make_vectors(self, edges, u, space):
         self.VV = u * 0
         # self.sigma_moments(edges) # take moments of the opacity
-        xL = edges[space]
         xR = edges[space+1]
+        xL = edges[space]
         dx = math.sqrt(xR-xL)
         # if self.sigma_func['constant'] == True:
         #     self.VV = u * self.sigma_t
@@ -575,11 +575,11 @@ class sigma_integrator():
                             self.VV[i] +=   self.cs[space, k] * u[j] * self.AAA[i, j, k] / dx
                         elif self.geometry['sphere'] == True:
                             if self.lumping == True:
-                                if k ==0:
-                                    for ii in range(self.M+1):
-                                        for jj in range(self.M+1):
-                                            VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
-                                    VV_lumped = mass_lumper(VV, xL, xR)[0]
+                                # if k ==0:
+                                for ii in range(self.M+1):
+                                    for jj in range(self.M+1):
+                                        VV[ii,jj] = VV_matrix(ii, jj,k, xL, xR) / (math.pi**1.5)
+                                VV_lumped = mass_lumper(VV, xL, xR)[0]
                                 
                                 self.VV[i] +=   self.cs[space, k] * u[j] * VV_lumped[i,j]
 

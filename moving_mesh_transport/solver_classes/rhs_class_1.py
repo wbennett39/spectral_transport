@@ -224,7 +224,7 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
-        self.slope_limiter = False 
+        self.slope_limiter = True 
         print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
@@ -450,6 +450,10 @@ class rhs_class():
                 #     V_new[angle, k, 0] = 0
                 #     V_new[angle, k, 1] = 0 
                     # print('negative c0')
+                    # conserve mass inside of a cell
+                    B0bar = normTn_intcell(0, edges[k], edges[k+1]) 
+                    B1bar = normTn_intcell(1, edges[k], edges[k+1]) 
+                    V_new[angle, k, 0] = (B1bar * (V[angle,k,1] - V_new[angle, k, 1]) + B0bar * V[angle, k, 0])/ B0bar
         return V_new 
 
 
@@ -526,9 +530,9 @@ class rhs_class():
             
 
 
-        # if self.slope_limiter == True and self.M>0: # positivity fix
-        #     V_old_new = self.slope_scale(V_old, mesh.edges)
-        #     V_old = V_old_new
+        if self.slope_limiter == True and self.M>0: # positivity fix
+            V_old_new = self.slope_scale(V_old, mesh.edges)
+            V_old = V_old_new
         if self.radiative_transfer['none'] == 0: # make temperature solution for T dependent cross sections
             self.T_old, self.T_eval_points = self.make_temp(V_old[-1,:,:], mesh, transfer_class)
             # print(self.T_old, 'T')

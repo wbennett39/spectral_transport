@@ -462,7 +462,7 @@ class T_function(object):
                 #                             VV_lumped = mass_lumper(VV, xL, xR)[0]
                 #                         self.H2[i] +=   self.cs[space, k] * self.cs_T4[j] * VV_lumped[i,j]
                 #     self.H = self.H2.copy()
-        
+        # self.H = self.H * 0
 
 
     def cell_average(self, a, b):

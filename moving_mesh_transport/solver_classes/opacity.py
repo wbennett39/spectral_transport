@@ -290,7 +290,7 @@ class sigma_integrator():
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 if scattering == True:
-                    return x * 0 + self.sigma_t
+                    return x * 0 + self.sigma_s
                 else:
                     
                 # floor = 5e-3

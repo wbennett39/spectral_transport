@@ -224,7 +224,7 @@ class rhs_class():
         self.edges_old = build.edges_init
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
-        self.slope_limiter = True 
+        self.slope_limiter = False 
         print('### ### ### ### ### ###')
         print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
@@ -653,11 +653,12 @@ class rhs_class():
                         RHS_transfer += self.c_a *source.S * 2 
                     if mesh.moving == True:
                         RHS_transfer -= RU
+   
                     RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                     RHS_transfer += self.c_a * PV_RT*2 /self.sigma_t 
                     # if space == self.N_space-1:
                     #     print(PV, 'PV in RT')
-                    RHS_transfer = np.dot(RHS_transfer, Minv)
+                    RHS_transfer = np.dot(RHS_transfer, Minv) 
                     if self.l != 1.0:
                         RHS_transfer = RHS_transfer / self.l
                     V_new[-1,space,:] = RHS_transfer 
@@ -751,6 +752,7 @@ class rhs_class():
                                 RHS = np.dot(Minv, RHS) # mass matrix 
                             if const_crosssection == False:
                                 RHS += PV  /self.sigma_t / self.l # scattering
+                        
                             if const_crosssection ==True:
                                 PV2 = PV.copy()
                                 for ii in range(self.M+1):

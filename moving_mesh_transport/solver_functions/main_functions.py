@@ -393,6 +393,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if eval_times == True:
         tpnts = eval_array
         print(tpnts, 'time points')
+    else:
+        tpnts = None
         # tpnts_dense = np.linspace(0.01, tpnts[-1], 100)
         # for it, tt in enumerate(tpnts_dense):
         #     mesh.move(tt)

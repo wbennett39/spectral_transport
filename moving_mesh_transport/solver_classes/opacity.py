@@ -290,7 +290,7 @@ class sigma_integrator():
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:
                 if scattering == True:
-                    return x * 0 + self.sigma_s
+                    return x * 0 
                 else:
                     
                 # floor = 5e-3
@@ -326,6 +326,8 @@ class sigma_integrator():
                             #     res[ix] = floor
                     # if (res!=15e3).any():
                     #     print(res, x)
+                
+                    return res
           
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax

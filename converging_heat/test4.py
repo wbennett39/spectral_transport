@@ -8,6 +8,7 @@ matplotlib.rcParams.update({
 })
 #####
 spaces = 100
+
 M = 1
 #####
 #####
@@ -40,7 +41,7 @@ arad = 4. * sigma_sb / clight
 ev_kelvin = 1.160451812e4
 hev_kelvin = 100. * ev_kelvin
 kev_kelvin = 1000. * ev_kelvin
-
+ 
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
 sn_transport2 = h5py.File('results_test4_1211.h5', 'r+')

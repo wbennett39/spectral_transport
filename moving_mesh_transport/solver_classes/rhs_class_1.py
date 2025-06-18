@@ -656,12 +656,15 @@ class rhs_class():
    
                     RHS_transfer += -np.dot(MPRIME, U) + np.dot(G,U) - self.c_a *H /self.sigma_t
                     RHS_transfer += self.c_a * PV_RT*2 /self.sigma_t 
+                    # print(PV_RT, 'PV_RT')
+                    # print(H, 'H')
                     # if space == self.N_space-1:
                     #     print(PV, 'PV in RT')
                     RHS_transfer = np.dot(RHS_transfer, Minv) 
                     if self.l != 1.0:
                         RHS_transfer = RHS_transfer / self.l
                     V_new[-1,space,:] = RHS_transfer 
+
        
                     # not changing cell if in equilibrium
                     # print(RHS_transfer, 'rhs transfer')

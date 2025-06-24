@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 300
+spaces = 250
 
 M = 1
 #####
@@ -24,7 +24,7 @@ kev_kelvin = 1000. * ev_kelvin
 
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
-sn_transport = h5py.File('results_test4_1211.h5', 'r+')
+sn_transport = h5py.File('results_test4_0624.h5', 'r+')
 print(sn_transport.keys())
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]    
@@ -119,9 +119,9 @@ Tbath = Ts * (1.+0.083391*(times/-1e-9)**(-0.537633)*Lambda)**0.25
 
 # ------- plot simulation profiles
 r_anal = np.linspace(R*1e-10, R, 1000)
-# t1 = -9.470688883217099e-08
-# t2 = -2.7126998146008884e-08
-# t3 = -1e-9
+t1 = -9.470688883217099e-08
+t2 = -2.7126998146008884e-08
+t3 = -1e-9
 
 
 # t1 = -14.5e-8
@@ -135,9 +135,9 @@ r_anal = np.linspace(R*1e-10, R, 1000)
 # t2 =-14.2e-8
 # t3 =-14.0e-8
 
-t1 = -14.5e-8
-t2 = -14.49e-8
-t3 = -14.48e-8
+# t1 = -14.5e-8
+# t2 = -14.49e-8
+# t3 = -14.48e-8
 
 # t1 = -13.0e-8
 # t2 = -12.5e-8

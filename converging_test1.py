@@ -42,11 +42,11 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [125, 200, 250, 300, 350, 400]
+N_spaces_list = [250]
 # N_spaces_list = [215]
 # N_spaces_list =. [300]
 MM = 1
-N_ang = 12
+N_ang = 8
 
 run = run()
 run.load()
@@ -91,12 +91,14 @@ for it, N_space in enumerate(N_spaces_list):
     print(run.mesh_parameters['eval_array'], 'evaluation times')
     run.parameters['all']['tfinal'] = (dimensional_times * 29.98)[-1]
     run.parameters['all']['N_spaces'] = [N_space]
-    run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': True, 'test2': False, 'test3': False, 'test4': False}
+    run.mesh_parameters['sigma_func']  = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': True, 'test2': False, 'test3': False, 'test4': False,  'picket_fence': False,
+              'modak_gupta0': False, 'modak_gupta05': False, 'modak_gupta1': False, 
+              'modak_gupta25': False, 'modak_gupta5': False, 'Kornreich': False}
     # run.parameters['all']['tfinal'] = 10.0
     # run.mesh_parameters['eval_times'] = False
 
     run.boundary_source(0,0)
-    f = h5py.File('converging_heat/results_test1_1031.h5','r+')
+    f = h5py.File('converging_heat/results_test1_0624.h5','r+')
     M = run.parameters['all']['Ms'] 
     spaces = run.parameters['all']['N_spaces']
     if f.__contains__(f'M={M}_{spaces}_cells'):

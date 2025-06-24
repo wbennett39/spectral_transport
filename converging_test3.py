@@ -71,6 +71,7 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['rt'] = 5e-3
     run.parameters['all']['at'] = 5e-5
     run.parameters['boundary_source']['N_angles'] = [N_ang]
+    run.mesh_parameters['eval_times'] = True
 
     menis_times = np.array([-6.5918976, -3.92645, -1])
     # menis_times = np.array([-7.5, -7, -6.5918976])

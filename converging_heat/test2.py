@@ -15,14 +15,14 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 150
-M = 1
+spaces = 25
+M = 0
 #####
 #####
 a = 0.0137225
 c = 29.98
 #####
-sn_transport = h5py.File('results_test2.h5', 'r+')
+sn_transport = h5py.File('results_test2_0624.h5', 'r+')
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]
 xs = tr['xs'][:]

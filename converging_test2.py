@@ -79,6 +79,7 @@ for it, N_space in enumerate(N_spaces_list):
 
     run.mesh_parameters['eval_array'] = dimensional_times * 29.98
     print(run.mesh_parameters['eval_array'], 'evaluation times')
+    run.mesh_parameters['eval_times'] = True
     run.parameters['all']['tfinal'] = (dimensional_times * 29.98)[-1]
     run.mesh_parameters['sigma_func'] = {'constant': False, 'linear': False, 'siewert1': False, 'siewert2': False, 'gaussian': False, 'f_sedov': False, 'converging': False, 'test1': False, 'test2': True, 'test3': False, 'test4': False,  'picket_fence': False,
               'modak_gupta0': False, 'modak_gupta05': False, 'modak_gupta1': False, 

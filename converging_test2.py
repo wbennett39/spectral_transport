@@ -44,8 +44,8 @@ import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
 
-N_spaces_list = [25]
-N_ang = 8
+N_spaces_list = [60]
+N_ang = 2
 # N_spaces_list = [215]
 
 run = run()
@@ -61,19 +61,22 @@ run.mesh_parameters['Msigma'] = 0
 
 run.boundary_source(0,0)
 
-run.load('marshak')
+run.load('marshak', 'mesh_parameters_converging')
 for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['N_spaces'] = [N_space]
     run.parameters['boundary_source']['x0'] = np.array([0.05])
     run.parameters['all']['rt'] = 5e-4
     run.parameters['all']['at'] = 5e-6
-    run.parameters['all']['e_initial'] = 0.000000000001
+    run.parameters['all']['e_initial'] = 0.0001
     run.parameters['boundary_source']['N_angles'] = [N_ang]
+    MM = run.parameters['all']['Ms'] 
+    run.parameters['all']['Ms'] = [MM]
+    run.mesh_parameters['Msigma'] = MM
 
 
-    menis_times = np.array([-58.251607, -19.068532, -1])
+    # menis_times = np.array([-58.251607, -19.068532, -1])
     # menis_times = np.array([-80,-75, -58.251607])
-    # menis_times = np.array([-85,-84.5, -84])
+    menis_times = np.array([-85,-84.5, -84])
 
     dimensional_times =  85.4678 + menis_times 
 

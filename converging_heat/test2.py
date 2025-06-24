@@ -15,8 +15,8 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 25
-M = 0
+spaces = 60
+M = 1
 #####
 #####
 a = 0.0137225

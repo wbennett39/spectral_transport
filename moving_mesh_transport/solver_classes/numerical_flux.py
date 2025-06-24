@@ -176,6 +176,7 @@ class LU_surf(object):
                 
             else:
                 temp = np.ones(xs.size) * self.boundary_source_strength
+
         return temp
     
     def make_h(self, space):

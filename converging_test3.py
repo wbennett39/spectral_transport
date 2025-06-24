@@ -43,7 +43,7 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [25]
+N_spaces_list = [60]
 # N_spaces_list = [10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 # N_spaces_list = [200, 225, 250, 275, 300, 325, 350, 375, 400]
 # N_spaces_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 225, 250, 275, 300, 325, 350, 375, 400]
@@ -64,7 +64,7 @@ run.mesh_parameters['Msigma'] = 0
 
 run.boundary_source(0,0)
 
-run.load('marshak')
+run.load('marshak', 'mesh_parameters_converging')
 for it, N_space in enumerate(N_spaces_list):
     run.parameters['boundary_source']['x0'] = np.array([1e-3])
     run.parameters['all']['N_spaces'] = [N_space]
@@ -72,10 +72,14 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['at'] = 5e-5
     run.parameters['boundary_source']['N_angles'] = [N_ang]
     run.mesh_parameters['eval_times'] = True
+    run.parameters['all']['e_initial'] = 0.001
+    MM = run.parameters['all']['Ms'] 
+    run.parameters['all']['Ms'] = [MM]
+    run.mesh_parameters['Msigma'] = MM
 
-    menis_times = np.array([-6.5918976, -3.92645, -1])
+    # menis_times = np.array([-6.5918976, -3.92645, -1])
     # menis_times = np.array([-7.5, -7, -6.5918976])
-    # menis_times = np.array([-7.5, -7.4, -7])
+    menis_times = np.array([-7.5, -7.4, -7])
     dimensional_times =  7.875084 + menis_times 
 
     run.mesh_parameters['eval_array'] = dimensional_times * 29.98

@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [25], N_ang = 8, MM = 1):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [200], N_ang = 8, MM = 1):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
@@ -103,7 +103,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [25], N_ang = 8, M
         #     run.parameters['all']['lumping'] = True
         print("LUMPING"*run.parameters['all']['lumping'])
         # run.parameters['all']['at'] = 5e-1
-        # run.parameters['all']['e_initial'] = 5e-4
+        run.parameters['all']['e_initial'] = 0.0000001
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
@@ -138,7 +138,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [25], N_ang = 8, M
         # plt.plot(run.xs, run.phi)
         # plt.show()
         print(run.xs, run.phi)
-        f = h5py.File('converging_heat/results_test4_1211.h5','r+')
+        f = h5py.File('converging_heat/results_test4_0624.h5','r+')
         M = run.parameters['all']['Ms'] 
         spaces = run.parameters['all']['N_spaces']
         if f.__contains__(f'M={M}_{spaces}_cells'):
@@ -163,4 +163,4 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [25], N_ang = 8, M
         # print(f['scalar_flux'][:],'loaded scalar flux')
         f.close()
 
-get_results()
+get_results(ts = [-140, -135, -130])

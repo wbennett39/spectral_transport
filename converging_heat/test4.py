@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 250
+spaces = 25
 
 M = 1
 #####
@@ -44,7 +44,7 @@ kev_kelvin = 1000. * ev_kelvin
  
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
-sn_transport2 = h5py.File('results_test4_1211.h5', 'r+')
+sn_transport2 = h5py.File('results_test4_0624.h5', 'r+')
 print(sn_transport2.keys())
 tr2 = sn_transport2[f'M=[{M}]_[{spaces2}]_cells']
 e2 = tr2['energy_density'][:]    

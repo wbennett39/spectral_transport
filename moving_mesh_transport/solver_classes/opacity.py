@@ -259,6 +259,7 @@ class sigma_integrator():
                     for ix, xx in enumerate(res):
                         if res[ix] > resmax:
                             res[ix] = resmax
+                return res
 
                 # print(np.max(res))
 
@@ -273,6 +274,7 @@ class sigma_integrator():
                     for ix, xx in enumerate(res):
                         if res[ix] > resmax:
                             res[ix] = resmax
+                return res
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
 
@@ -286,6 +288,7 @@ class sigma_integrator():
                     for ix, xx in enumerate(res):
                         if res[ix] > resmax:
                             res[ix] = resmax
+                return res
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:

@@ -163,4 +163,4 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [25], N_ang = 8, M
         # print(f['scalar_flux'][:],'loaded scalar flux')
         f.close()
 
-    get_results()
+get_results()

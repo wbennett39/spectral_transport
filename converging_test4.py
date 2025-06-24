@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [250], N_ang = 8, MM = 1):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [25], N_ang = 8, MM = 1):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
@@ -162,3 +162,5 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [250], N_ang = 8, 
         # print('###')
         # print(f['scalar_flux'][:],'loaded scalar flux')
         f.close()
+
+    get_results()

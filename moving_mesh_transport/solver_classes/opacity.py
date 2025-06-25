@@ -252,7 +252,7 @@ class sigma_integrator():
                 if scattering == True:
                     return x * 0 
                 else:
-                    resmax = 5e5
+                    resmax = 9e5
                     floor = 5e-3
                     result = np.where(T_old<0.0, 0.0, T_old)
                     # result = np.abs(T_old)
@@ -272,7 +272,7 @@ class sigma_integrator():
                     return x * 0 
                 else:
                     floor = 5e-2
-                    resmax = 5e4
+                    resmax = 7e4
                     # resmax = 1e3 
                     result = np.where(T_old<0.0, 0.0, T_old)
                     rho = (np.mean(x)+1e-8)**.5
@@ -290,7 +290,7 @@ class sigma_integrator():
                     return x * 0 
                 else:
                     floor = 5e-2
-                    resmax = 1e6 * (1)
+                    resmax = 3e6 * (1)
                     result = np.where(T_old<0, 0.0, T_old)
                     rho = (np.mean(x)) ** (-.45)
                     res = 10**3 * (result +1e-12) ** -3.5 * (0.1**3.5) * (rho) **1.4

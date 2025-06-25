@@ -42,11 +42,11 @@ import h5py
 import numpy as np
 from moving_mesh_transport.solver_functions.run_functions import run
 
-N_spaces_list = [80]
+N_spaces_list = [400]
 # N_spaces_list = [215]
 # N_spaces_list =. [300]
 MM = 1
-N_ang = 2
+N_ang = 8
 
 run = run()
 run.load()
@@ -75,17 +75,17 @@ for it, N_space in enumerate(N_spaces_list):
     run.parameters['all']['rt'] = 5e-3
     run.parameters['all']['at'] = 5e-4
     run.parameters['boundary_source']['N_angles'] = [N_ang]
-    run.parameters['all']['e_initial'] = 0.000000000000000000000001
+    run.parameters['all']['e_initial'] = 0.00001
 
 
     # menis_times = np.array([-22.122309, -9.4484244, -1])
-    # menis_times = np.array([-22.122309, -9.4484244, -1])
+    menis_times = np.array([-22.122309, -9.4484244, -1])
 
     # menis_times = np.array([-24, -22.122309, -9.4484244])
 
     # menis_times =  np.array([-25, -23, -22.122309])
     # menis_times = np.array([-29.625, -29.6, -29.5])
-    menis_times = np.array([-29.625647, -29.625646, -28.625645])
+    # menis_times = np.array([-29.625647, -29.625646, -28.625645])
     dimensional_times =  29.625647 + menis_times 
 
     run.mesh_parameters['eval_array'] = dimensional_times * 29.98

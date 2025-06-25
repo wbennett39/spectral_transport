@@ -272,7 +272,7 @@ class sigma_integrator():
                     return x * 0 
                 else:
                     floor = 5e-2
-                    resmax = 7e4
+                    resmax = 12e4
                     # resmax = 1e3 
                     result = np.where(T_old<0.0, 0.0, T_old)
                     rho = (np.mean(x)+1e-8)**.5

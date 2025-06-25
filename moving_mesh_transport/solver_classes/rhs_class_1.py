@@ -569,7 +569,7 @@ class rhs_class():
             dxR = mesh.Dedges[space+1]
             dxL = mesh.Dedges[space]
             update = True
-            if self.sigma_func['test4']== True or self.sigma_func['test1'] == True or self.sigma_func['test2'] == True or self.sigma_func['test3'] == True: # special converging Marshak case
+            if self.sigma_func['test4']== True: # or self.sigma_func['test1'] == True or self.sigma_func['test2'] == True or self.sigma_func['test3'] == True: # special converging Marshak case
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
                 if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0) :

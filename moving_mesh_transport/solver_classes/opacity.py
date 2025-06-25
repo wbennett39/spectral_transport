@@ -239,7 +239,7 @@ class sigma_integrator():
             if np.isnan(T_old).any() or np.isinf(T_old).any():
                 print(T_old, 'T')
                 print(x,'x')
-                assert(0)
+     
             # if (T_old<0).any():
             #     T_old = np.mean(T_old) + T_old*0
             # resmax = 134183.7512857635 / self.x0
@@ -249,46 +249,56 @@ class sigma_integrator():
             if self.sigma_func['test1'] == 1:
                 # resmax = 1e8
                 # resmax = 4e6
-                resmax = 5e5
-                floor = 5e-3
-                result = np.where(T_old<0.0, 0.0, T_old)
-                # result = np.abs(T_old)
-                rho = 19.3
-                res = 7200 *  (result+1e-8) ** (-1.5) * (0.1**1.5) * rho **1.2
-                if (res > resmax).any():
-                    for ix, xx in enumerate(res):
-                        if res[ix] > resmax:
-                            res[ix] = resmax
-                return res
+                if scattering == True:
+                    return x * 0 
+                else:
+                    resmax = 5e5
+                    floor = 5e-3
+                    result = np.where(T_old<0.0, 0.0, T_old)
+                    # result = np.abs(T_old)
+                    rho = 19.3
+                    res = 7200 *  (result+1e-8) ** (-1.5) * (0.1**1.5) * rho **1.2
+                    if (res > resmax).any():
+                        for ix, xx in enumerate(res):
+                            if res[ix] > resmax:
+                                res[ix] = resmax
+                
+                    return res
 
                 # print(np.max(res))
 
             elif self.sigma_func['test2'] == 1:
-                floor = 5e-2
-                resmax = 5e4
-                # resmax = 1e3 
-                result = np.where(T_old<0.0, 0.0, T_old)
-                rho = (np.mean(x)+1e-8)**.5
-                res = 1.5e4 * (result+1e-10) ** -3.0 * (0.1**3) * rho ** 1.4
-                if (res > resmax).any():
-                    for ix, xx in enumerate(res):
-                        if res[ix] > resmax:
-                            res[ix] = resmax
-                return res
+                if scattering == True:
+                    return x * 0 
+                else:
+                    floor = 5e-2
+                    resmax = 5e4
+                    # resmax = 1e3 
+                    result = np.where(T_old<0.0, 0.0, T_old)
+                    rho = (np.mean(x)+1e-8)**.5
+                    res = 1.5e4 * (result+1e-10) ** -3.0 * (0.1**3) * rho ** 1.4
+                    if (res > resmax).any():
+                        for ix, xx in enumerate(res):
+                            if res[ix] > resmax:
+                                res[ix] = resmax
+                    return res
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
 
             elif self.sigma_func['test3'] == 1:
-                floor = 5e-2
-                resmax = 1e6 * (1)
-                result = np.where(T_old<0, 0.0, T_old)
-                rho = (np.mean(x)) ** (-.45)
-                res = 10**3 * (result +1e-12) ** -3.5 * (0.1**3.5) * (rho) **1.4
-                if (res > resmax).any():
-                    for ix, xx in enumerate(res):
-                        if res[ix] > resmax:
-                            res[ix] = resmax
-                return res
+                if scattering == True:
+                    return x * 0 
+                else:
+                    floor = 5e-2
+                    resmax = 1e6 * (1)
+                    result = np.where(T_old<0, 0.0, T_old)
+                    rho = (np.mean(x)) ** (-.45)
+                    res = 10**3 * (result +1e-12) ** -3.5 * (0.1**3.5) * (rho) **1.4
+                    if (res > resmax).any():
+                        for ix, xx in enumerate(res):
+                            if res[ix] > resmax:
+                                res[ix] = resmax
+                    return res
                 # if res.any() > resmax:
                 #     res = np.zeros(result.size) + resmax
             elif self.sigma_func['test4'] == 1:

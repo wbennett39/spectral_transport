@@ -201,7 +201,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
                        fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative, recalculate_sigma_coeffs)
     initialize.shift = shift
-
+    print(sigma_func)
 
     if sigma_func['converging'] == 1:
         f = h5py.File('heat_wavepos.h5', 'r+')

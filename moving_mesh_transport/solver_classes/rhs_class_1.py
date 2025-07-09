@@ -573,7 +573,7 @@ class rhs_class():
                 menis_t = converging_time_function(t, self.sigma_func)
                 rfront = converging_r(menis_t, self.sigma_func)
                 if (xR < rfront - self.x0/4) and (rfront - self.x0/4 >0) :
-                    update = False
+                    update = True
                 else:
                     update = True
             # matrices.matrix_test(True) # tests matrices against analytic functions
@@ -742,7 +742,7 @@ class rhs_class():
                             
                             RHS += np.dot(G, U) # moving mesh time derivative correction
                             # RHS += 0.5 * S /self.sigma_t / self.l # source
-                            RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l # radiative transfer coupling
+                            RHS +=  self.c_a * H * 0.5 / self.sigma_t / self.l  # radiative transfer coupling
                             RHS -= np.dot(MPRIME, U)
                             mu_derivative =  np.dot(J, dterm) 
                             if self.angular_derivative['diamond'] == True and angle == 0:

@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [400], N_ang = 8, MM = 1):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [180], N_ang = 4, MM = 1):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
@@ -103,7 +103,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [400], N_ang = 8, 
         #     run.parameters['all']['lumping'] = True
         print("LUMPING"*run.parameters['all']['lumping'])
         # run.parameters['all']['at'] = 5e-1
-        run.parameters['all']['e_initial'] = 0.0000001
+        run.parameters['all']['e_initial'] = 0.0000000025
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
@@ -157,6 +157,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [400], N_ang = 8, 
         f[f'M={M}_{spaces}_cells'].create_dataset('energy_density', data = run.e)
         f[f'M={M}_{spaces}_cells'].create_dataset('xs', data = run.xs)
         f[f'M={M}_{spaces}_cells'].create_dataset('edges', data = run.edges)
+        plt.plot(run.xs[2,:], run.e[2,:])
         # print('###')
         # print(run.phi,'scalar flux')
         # print('###')

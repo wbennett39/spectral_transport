@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 25
+spaces = 120
 
 M = 1
 #####
@@ -32,7 +32,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = spaces
+spaces2 = 80
 
 #####
 sigma_sb = 5.670374419e-5
@@ -52,9 +52,7 @@ edges2 = tr2['edges'][:]
 #
 
 #
-#
-#
-#
+
 #
 xs = tr['xs'][:]
 phi = tr['scalar_flux'][:]
@@ -70,9 +68,13 @@ mat_T[1,:] = np.abs(ee2)**.25 * np.sign(ee2)
 
 ee3 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee3)
-
-print(xs, 'xs')
-print(edges, 'edges')
+#
+plt.figure(1)
+plt.plot(xs[2,:], e[2,:])
+plt.show()
+#
+# print(xs, 'xs')
+# print(edges, 'edges')
 
 xs2 = tr2['xs'][:]
 phi2 = tr2['scalar_flux'][:]
@@ -173,9 +175,9 @@ plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
 
 
 
-# plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
-# plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
-# plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
+plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
+plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
+plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
 plt.plot(edges2, edges2*0, 'k|', markersize = 40)
 
 
@@ -186,6 +188,7 @@ T4[2,:] = (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:])
 plt.plot(xs[0,:], mat_T[0,:], 'k--', label = 'material temp')
 plt.plot(xs[1,:], mat_T[1,:], 'k--')
 plt.plot(xs[2,:], mat_T[2,:], 'k--')
+print(mat_T[2,:])
 #plt.plot(edges, edges*0, 'k|', markersize = 40)
 
 plt.ylabel("$T \\ [\\mathrm{{KeV}}]$", fontsize=24)

@@ -2,6 +2,7 @@ import numpy as np
 from scipy.interpolate import interp1d as interp1d
 import matplotlib.pyplot as plt
 import math
+
 from numba import njit
 def basis_hat(t, a, b, c):
     """

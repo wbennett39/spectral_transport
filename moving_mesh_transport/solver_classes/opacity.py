@@ -272,10 +272,10 @@ class sigma_integrator():
                     return x * 0 
                 else:
                     floor = 5e-2
-                    resmax = 12e4
+                    resmax = 5e4
                     # resmax = 1e3 
                     result = np.where(T_old<0.0, 0.0, T_old)
-                    rho = (np.mean(x)+1e-8)**.5
+                    rho = (np.mean(x)+1e-10)**.5
                     res = 1.5e4 * (result+1e-10) ** -3.0 * (0.1**3) * rho ** 1.4
                     if (res > resmax).any():
                         for ix, xx in enumerate(res):
@@ -312,7 +312,8 @@ class sigma_integrator():
                     b = np.max(x)
                     # resmax = 300 / (b-a)
                     # resmax = 10400
-                    resmax = 18e3
+                    # resmax = 18e3  # this is the resmax I settled on last time
+                    resmax = 2e3
                     if self.loud == True:
                         print('###   ###   ###   ###   ###   ###   ###   ###')
                         print(resmax, 'max sigma')
@@ -325,10 +326,10 @@ class sigma_integrator():
                     # if(T_old<0).any():
                     #     assert 0
                     result = np.where(T_old<0.0, 0.0, T_old)
-                    rho = np.mean(x )
+                    rho = x + 1e-8
                     if (x<0).any():
                         assert(0)
-                    res = (result+1e-10) ** -3.5 * rho ** 2
+                    res = (result+1e-8) ** -3.5 * rho ** 2
                     if (res<0).any():
                         assert 0
                     if (res > resmax).any():

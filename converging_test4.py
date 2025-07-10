@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [180], N_ang = 4, MM = 1):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [180], N_ang = 6, MM = 1):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]

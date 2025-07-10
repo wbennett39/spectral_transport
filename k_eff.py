@@ -144,7 +144,7 @@ def power_iterate(kguess = 0.5, tol = 1e-5):
     calc_time_list = []
     normalization_list.append(normalization)
     normalization_old = normalization
-    while converged == False and n_iters < 15: 
+    while converged == False or n_iters < 1: 
         run.load('k_eff', 'mesh_parameters_keff')
         # scale sigma_f
         # run.parameters['all']['sigma_f'] = sigma_f / k_old
@@ -188,6 +188,7 @@ def power_iterate(kguess = 0.5, tol = 1e-5):
             k_old = k_new
             klist.append(k_new)
             n_iters +=1
+            print(n_iters, 'n_iters')
             phi_interpolated = phi_interpolated_new
             normalized_integrand = lambda x: phi_interpolated(x) * x**2 * 4 * math.pi 
             normalization_old = normalization

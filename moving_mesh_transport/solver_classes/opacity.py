@@ -313,7 +313,7 @@ class sigma_integrator():
                     # resmax = 300 / (b-a)
                     # resmax = 10400
                     # resmax = 18e3  # this is the resmax I settled on last time
-                    resmax = 2e3
+                    resmax = 4e3
                     if self.loud == True:
                         print('###   ###   ###   ###   ###   ###   ###   ###')
                         print(resmax, 'max sigma')

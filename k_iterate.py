@@ -52,9 +52,10 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     run.load(transport_parameters, mesh_parameters)
     klist = []
+    # klist.append(kguess)
+    # k_old = kguess
+    # k_old = kguess
     klist.append(kguess)
-    k_old = kguess
-    k_old = 1
     converged = False
     sigma_f = run.parameters['all']['sigma_f']
     nu = run.parameters['all']['nu']
@@ -89,10 +90,14 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     print(sigma_f_array, 'sigmaf')
     sigma_interp = interp1d(run.xs, sigma_f_array * nu_array) # interpolated fission rate 
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
+    k_new = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
+    klist.append(k_new)
+    k_old = k_new
+    n_iters = 1
 
     # normalization = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
     # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) # this is broken. I would need to multiply by sigma nu
-    n_iters = 0
+    # n_iters = 0
     normalization_list = []
     calc_time_list = []
     # normalization_list.append(normalization)
@@ -100,7 +105,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
 
-    while converged == False and n_iters < 2500: 
+    while converged == False and n_iters < 2: 
         run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
         normalized_source = coeffs_old/ k_old #/ normalization
@@ -153,6 +158,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             if use_we_accel == True:
                 k_old = k_wynn_epsilon[iw:, iw][-1]
             n_iters +=1
+
             # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
             # normalization_list.append(normalization)
             calc_time_list.append(t_calc)

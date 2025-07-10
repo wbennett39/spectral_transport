@@ -8,12 +8,12 @@
     'sigma_t': 1.0
     'sigma_s': .8
     'sigma_f': .2
-    'chi': 1.0
+    'chi': 1
     'nu': 1.5
     't0': 1.0                       # time the source is turned off
-    'N_spaces': [80]                   # number of cells
+    'N_spaces': [20]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
-    'Ms': [2]                         # number of basis functions -1
+    'Ms': [1]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
     'rt': 5e-11                          # rel tolerance for ODE integrator
     'at': 1e-10                         # abs tolerance for ODE integrator
@@ -38,7 +38,7 @@
     'kold': 1.0
     'VDMD': True
     'legendre_moments': 22
-    'angular_derivative': {finite_differences: True, diamond: False, Legendre: False}
+    'angular_derivative': {finite_differences: False, diamond: False, Legendre: True}
     
 # plane pulse source
 'plane_IC':
@@ -145,6 +145,6 @@
     'shift': 200.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [128]    # corresponds to N_spaces
+    'N_angles': [16]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

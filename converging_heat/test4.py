@@ -32,7 +32,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = 180
+spaces2 = 250
 
 #####
 sigma_sb = 5.670374419e-5
@@ -60,13 +60,13 @@ phi = tr['scalar_flux'][:]
 phi_dim = phi * a * c
 sn_transport.close()
 mat_T = phi_dim * 0
-ee1 = e[0,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
+ee1 = e[-3,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[0,:] = np.abs(ee1)**.25 * np.sign(ee1)
 
-ee2 = e[1,:] * a  / 10**-2  * 4 / 5 / 1.372017 * 5
+ee2 = e[-2,:] * a  / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[1,:] = np.abs(ee2)**.25 * np.sign(ee2)
 
-ee3 = e[2,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
+ee3 = e[-1,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[2,:] = np.abs(ee3)**.25 * np.sign(ee3)
 #
 plt.figure(1)
@@ -169,9 +169,9 @@ plt.plot(r_anal, Trt_fit(r_anal, t3)*0.1, c="r", ls="--", lw=2, label="Diffusion
 plt.plot(r_anal, Trt_fit(r_anal, t2)*0.1, c="r", ls="--", lw=2)
 plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
 
-plt.plot(xs[0,:], (np.abs(phi_dim[0,:])/a/c)**.25*np.sign(phi_dim[0,:]), 'b-x', label = 'radiation temp')
-plt.plot(xs[1,:], (np.abs(phi_dim[1,:])/a/c)**.25*np.sign(phi_dim[1,:]), 'b-x')
-plt.plot(xs[2,:], (np.abs(phi_dim[2,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
+plt.plot(xs[0,:], (np.abs(phi_dim[-3,:])/a/c)**.25*np.sign(phi_dim[0,:]), 'b-x', label = 'radiation temp')
+plt.plot(xs[1,:], (np.abs(phi_dim[-2,:])/a/c)**.25*np.sign(phi_dim[1,:]), 'b-x')
+plt.plot(xs[2,:], (np.abs(phi_dim[-1,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
 
 
 

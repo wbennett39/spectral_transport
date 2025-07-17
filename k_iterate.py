@@ -87,6 +87,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         if -3.5 <= run.xs[k]-shift <= 3.5:
             sigma_f_array[k] = 0.0 
             nu_array[k] = 0.
+    
     print(sigma_f_array, 'sigmaf')
     sigma_interp = interp1d(run.xs, sigma_f_array * nu_array) # interpolated fission rate 
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
@@ -105,7 +106,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
 
-    while converged == False and n_iters < 2: 
+    while converged == False and n_iters < 25: 
         run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
         normalized_source = coeffs_old/ k_old #/ normalization

@@ -67,7 +67,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-5)
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = 1e-6)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
         print(0.4243163, 'benchmark k effective')
@@ -88,7 +88,9 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM =
         nits = len(k_list)
         plt.plot(np.linspace(0, nits, nits), k_list, '-o', mfc = 'none')
         plt.xlabel('iterations', fontsize = 16)
+        plt.plot(np.linspace(0, nits, nits), np.ones(nits) * 0.4243163, 'k-', label = 'benchmark')
         plt.ylabel(r'$k_\mathrm{eff}$', fontsize = 16)
+        plt.legend()
         plt.savefig('k_iterations_Kornreich.pdf')
         plt.show()
         plt.show()

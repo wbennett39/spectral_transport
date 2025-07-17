@@ -326,7 +326,7 @@ class sigma_integrator():
                     # if(T_old<0).any():
                     #     assert 0
                     result = np.where(T_old<0.0, 0.0, T_old)
-                    rho = x + 1e-8
+                    rho = np.mean(x + 1e-10)
                     if (x<0).any():
                         assert(0)
                     res = (result+1e-8) ** -3.5 * rho ** 2
@@ -383,16 +383,20 @@ class sigma_integrator():
         
             for ix, xx in enumerate(x):
                 z = xx - self.shift
-
-                
                 fuel = False
                 moderator = False
                 absorber = False
                 if -4.5 <= z < -3.5 or 3.5 < z <= 4.5:
                     fuel = True
-                elif -3.5 <= z < 2.5 or 2.5 <= z <= 3.5:
+                    # print('in fuel')
+                    # print(z)
+                elif -3.5 <= z < -2.5 or 2.5 <= z <= 3.5:
                     moderator = True
+                    # print('in moderator')
+                    # print(z)
                 else:
+                    # print('in absorber')
+                    # print(z)
                     absorber = True
                 
                 if fuel == True and scattering == True:

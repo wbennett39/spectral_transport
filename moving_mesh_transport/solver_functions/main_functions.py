@@ -204,6 +204,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     initialize.shift = shift
     print(sigma_func)
 
+
     if sigma_func['converging'] == 1:
         f = h5py.File('heat_wavepos.h5', 'r+')
         boundary_temp = f['temperature'][:] / 10 # convert from HeV to keV
@@ -286,6 +287,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
             normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
+            print(initialize.sigma_f, 'sigma_f array')
+            print((mesh.edges[1:]+mesh.edges[:-1])/2, 'cell centers')
+            cell_centers = (mesh.edges[1:]+mesh.edges[:-1])/2
+            for k in range(N_space):
+                print(initialize.sigma_f[k], 'sigma_f')
+                print(initialize.nu[k], 'nu')
+                print(cell_centers[k], 'center')
+            
+
        
             # normalization = kold
             # check normalize

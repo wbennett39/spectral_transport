@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [360], N_ang = 8, MM = 1):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [180], N_ang = 10, MM = 1):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
@@ -120,7 +120,8 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [360], N_ang = 8, 
         # menis_times = np.array([-145.47, -145.4, -145.3])
 
         dimensional_times =  145.4733877 + menis_times 
-
+        new_dimensional_times = np.linspace(dimensional_times[0], dimensional_times[-1], 25)
+        dimensional_times = new_dimensional_times
         run.mesh_parameters['eval_array'] = dimensional_times * 29.98
         run.mesh_parameters['eval_times'] = True
         print(run.mesh_parameters['eval_array'], 'evaluation times')

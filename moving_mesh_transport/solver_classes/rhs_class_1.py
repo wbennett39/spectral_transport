@@ -357,7 +357,7 @@ class rhs_class():
             print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
             print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
             print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
-            print(mesh.edges, 'edges')
+            # print(mesh.edges, 'edges')
             print(np.max(V_old), 'max u')
             print(np.min(V_old), 'min u')
             # if np.min(V_old) <= -1:
@@ -761,7 +761,7 @@ class rhs_class():
                                 for ii in range(self.M+1):
                                     PV2[ii] = np.sum(np.multiply(V_old[:,space,ii],self.ws)) #* (self.c) 
                                 RHS += PV2 * self.c
-                            RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi   #/ self.sigma_t # fixed fission source
+                            RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t # fixed fission source
                             if const_crosssection ==False:
                                 RHS -= VV / self.sigma_t / self.l # absorption
                             if const_crosssection ==True:

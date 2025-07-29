@@ -66,7 +66,7 @@ import numpy as np
 
 
 
-def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [180], N_ang = 10, MM = 1):
+def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [85], N_ang = 4, MM = 1):
     from moving_mesh_transport.solver_functions.run_functions import run
     menis_times = np.array(ts)
     # N_spaces_list = [45]
@@ -95,8 +95,8 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [180], N_ang = 10,
     for it, N_space in enumerate(N_spaces_list):
         run.parameters['boundary_source']['x0'] = np.array([10.0])
         run.parameters['all']['N_spaces'] = [N_space]
-        run.parameters['all']['rt'] = 11e-3
-        run.parameters['all']['at'] = 11e-4
+        run.parameters['all']['rt'] = 11e-1
+        run.parameters['all']['at'] = 11e-2
         print('rtol', run.parameters['all']['rt'] )
         print('atol',run.parameters['all']['at'] )
         # if MM > 0:
@@ -107,7 +107,7 @@ def get_results(ts = [-94.706889, -27.126998, -1], N_spaces = [180], N_ang = 10,
         run.parameters['boundary_source']['N_angles'] = [N_ang]
         run.parameters['all']['Ms'] = [MM]
         run.mesh_parameters['Msigma'] = MM
-        # run.parameters['all']['integrator'] = 'Euler'
+        run.parameters['all']['integrator'] = 'Euler'
         print(run.parameters['all']['integrator'], 'integrator methods')
 
         # menis_times = 

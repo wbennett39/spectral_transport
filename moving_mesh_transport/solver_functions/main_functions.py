@@ -273,11 +273,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         fixed_source_coeffs_norm = fixed_source_coeffs/normalization
         # print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
         if normalization > 0:
-            initialize.fixed_source_coeffs = fixed_source_coeffs_norm
+            initialize.fixed_source_coeffs = fixed_source_coeffs_norm 
             flux.fixed_source_coeffs = fixed_source_coeffs_norm
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
-            initialize.IC = fixed_source_coeffs_norm
+            initialize.IC = fixed_source_coeffs_norm * kold
             flux.make_fixed_phi(mesh.edges)
         else:
             print('initializing with random IC')
@@ -290,10 +290,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             print(initialize.sigma_f, 'sigma_f array')
             print((mesh.edges[1:]+mesh.edges[:-1])/2, 'cell centers')
             cell_centers = (mesh.edges[1:]+mesh.edges[:-1])/2
-            for k in range(N_space):
-                print(initialize.sigma_f[k], 'sigma_f')
-                print(initialize.nu[k], 'nu')
-                print(cell_centers[k], 'center')
+            # for k in range(N_space):
+            #     print(initialize.sigma_f[k], 'sigma_f')
+            #     print(initialize.nu[k], 'nu')
+            #     print(cell_centers[k], 'center')
             
 
        
@@ -303,7 +303,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             if normalization > 0:
                 flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
-                initialize.IC = initialize.IC / normalization
+                initialize.IC = initialize.IC #/ normalization
                 flux.make_fixed_phi(mesh.edges)
 
 
@@ -496,7 +496,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             ts = np.concatenate((ts, eval_array))
             ts = np.unique(np.sort(ts))
 
-        Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+        Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         if eval_times == True:
             indices = []

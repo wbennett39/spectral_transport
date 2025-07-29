@@ -1,7 +1,7 @@
 # parameters shared by all source types
 'all':
     'problem_name': 'transport'
-    'tfinal': 500.0
+    'tfinal': 200.0
     'c_scaling': False
     'epsilon_scaling': False  # This isn't going to work for moving mesh or for scattering != 1 -- need to implement still
     'epsilon': 1.0
@@ -31,7 +31,7 @@
     'thick': False            # optically thick or thin
     'integrator': 'Euler'
     'Euler_dt_spacing': 'log'
-    'Euler_dt_num': 12
+    'Euler_dt_num': 16
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'N_groups': 1
@@ -145,6 +145,6 @@
     'shift': 200.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [32]    # corresponds to N_spaces
+    'N_angles': [16]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

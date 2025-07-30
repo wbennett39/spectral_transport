@@ -230,6 +230,7 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
     Y  = np.zeros((m, len(ts)))
     Y =  np.ascontiguousarray(Y)
     Y[:,0] = y0
+    print(tol, 'backward Euler tolerance')
 
     for i in range(1, len(ts)):
         t_prev, t = ts[i-1], ts[i]

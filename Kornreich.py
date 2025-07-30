@@ -55,9 +55,10 @@ def RMS(l1, l2):
 run = run()
 # run.load('transport', 'mesh_parameters_modak_gupta')
 # run.plane_IC(0,0)
-run.load('Kornreich', 'mesh_parameters_Kornreich')
+
 loader = load()
 def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = True, IRAM = True, guess_k = 1, sparse_time_points = 12, skip =4):
+    run.load('Kornreich', 'mesh_parameters_Kornreich')
     if prime == True:
         run.parameters['all']['N_spaces'] = [10]
         run.parameters['all']['Ms'] = [0]

@@ -29,7 +29,7 @@
     'thick': False            # optically thick or thin
     'integrator': 'BDF'
     'Euler_dt_spacing': 'linear'
-    'Euler_dt_num': 60000
+    'Euler_dt_num': 12000
     'geometry': {slab: False, sphere: True}
     'lumping': False
     'chi': 1.0

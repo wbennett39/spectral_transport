@@ -92,15 +92,16 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     sigma_interp = interp1d(run.xs, sigma_f_array * nu_array) # interpolated fission rate 
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
     k_new = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
+    
     klist.append(k_new)
     k_old = k_new
     n_iters = 1
 
     # plt.ioff()
-    plt.figure('fission')
-    xtest = np.linspace(edges[0], edges[-1], 100)
-    plt.plot(xtest, sigma_interp(xtest))
-    plt.show()
+    # plt.figure('fission')
+    # xtest = np.linspace(edges[0], edges[-1], 100)
+    # plt.plot(xtest, sigma_interp(xtest))
+    # plt.show()
     # assert 0
     # normalization = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
     # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) # this is broken. I would need to multiply by sigma nu
@@ -111,6 +112,15 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
     plt.close()
+    sigma_f_vec = np.ones(N_space) *sigma_f
+    nu_vec = np.ones(N_space) * nu
+    for space in range(N_space):
+                left_edge = edges[space]-shift
+                right_edge = edges[space+1]-shift
+                if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
+         
+                    sigma_f_vec[space] = 0.0   
+                    nu_vec[space] = 0.0
 
     while converged == False and n_iters < 25: 
         run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
@@ -118,7 +128,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         normalized_source = coeffs_old/ k_old #/ normalization
         # run solver    
         t1 = time.time()
-        run.parameters['all']['kold'] = k_old
+        # run.parameters['all']['kold'] = k_old
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         t_calc = time.time() - t1
@@ -137,8 +147,13 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # integrand_old = lambda x: (phi_interpolated(x)) * x**2 * 4 * math.pi * sigma_interp(x) # old fission source
         # k_new = k_old *  integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         k_new = integrate.quad(integrand, xs[0], xs[-1])[0] 
-        # k_new2 = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
-        
+        print(k_new, 'k from scipy integration')
+        res_coefficients = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
+        for k in range(N_space):
+             res_coefficients[:, k, :] *= sigma_f_vec[k] * nu_vec[space]
+        k_new2 = normalize_phi(res_coefficients, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
+        k_new = k_new2
+        print(k_new, 'k from analytic integral')
         if k_new <0:
             raise ValueError('negative k_eff')
         # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
@@ -161,7 +176,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 iw = n_iters - 1
             else:
                 iw = n_iters
-            print(k_wynn_epsilon[iw:,iw])
+            print(k_wynn_epsilon[iw:,iw], 'k accelerated')
             if use_we_accel == True:
                 k_old = k_wynn_epsilon[iw:, iw][-1]
             n_iters +=1

@@ -313,7 +313,7 @@ class sigma_integrator():
                     # resmax = 300 / (b-a)
                     # resmax = 10400
                     # resmax = 18e3  # this is the resmax I settled on last time
-                    resmax = 18e3
+                    resmax = 8e3
                     if self.loud == True:
                         print('###   ###   ###   ###   ###   ###   ###   ###')
                         print(resmax, 'max sigma')
@@ -329,7 +329,7 @@ class sigma_integrator():
                     rho = np.mean(x + 1e-10)
                     if (x<0).any():
                         assert(0)
-                    res = (result+1e-8) ** -3.5 * rho ** 2
+                    res = (result+1e-10) ** -3.5 * rho ** 2
                     if (res<0).any():
                         assert 0
                     if (res > resmax).any():

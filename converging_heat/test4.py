@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 180
+spaces = 88
 
 M = 1
 #####
@@ -24,7 +24,7 @@ kev_kelvin = 1000. * ev_kelvin
 
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
-sn_transport = h5py.File('results_test4_0624.h5', 'r+')
+sn_transport = h5py.File('test4_0624.h5', 'r+')
 print(sn_transport.keys())
 tr = sn_transport[f'M=[{M}]_[{spaces}]_cells']
 e = tr['energy_density'][:]    
@@ -32,7 +32,7 @@ edges = tr['edges'][:]
 
 
 
-spaces2 = 250
+spaces2 = 88
 
 #####
 sigma_sb = 5.670374419e-5
@@ -44,7 +44,7 @@ kev_kelvin = 1000. * ev_kelvin
  
 diff = np.loadtxt("test4_diff.txt")
 #mc = np.loadtxt("test4_mc.txt")
-sn_transport2 = h5py.File('results_test4_0624.h5', 'r+')
+sn_transport2 = h5py.File('test4_0624.h5', 'r+')
 print(sn_transport2.keys())
 tr2 = sn_transport2[f'M=[{M}]_[{spaces2}]_cells']
 e2 = tr2['energy_density'][:]    
@@ -169,15 +169,15 @@ plt.plot(r_anal, Trt_fit(r_anal, t3)*0.1, c="r", ls="--", lw=2, label="Diffusion
 plt.plot(r_anal, Trt_fit(r_anal, t2)*0.1, c="r", ls="--", lw=2)
 plt.plot(r_anal, Trt_fit(r_anal, t1)*0.1, c="r", ls="--", lw=2)
 
-plt.plot(xs[0,:], (np.abs(phi_dim[-3,:])/a/c)**.25*np.sign(phi_dim[0,:]), 'b-x', label = 'radiation temp')
-plt.plot(xs[1,:], (np.abs(phi_dim[-2,:])/a/c)**.25*np.sign(phi_dim[1,:]), 'b-x')
-plt.plot(xs[2,:], (np.abs(phi_dim[-1,:])/a/c)**.25*np.sign(phi_dim[2,:]), 'b-x')
+plt.plot(xs[0,:], (np.abs(phi_dim[-3,:])/a/c)**.25*np.sign(phi_dim[0,:])**2, 'b-x', label = 'radiation temp')
+plt.plot(xs[1,:], (np.abs(phi_dim[-2,:])/a/c)**.25*np.sign(phi_dim[1,:])**2, 'b-x')
+plt.plot(xs[2,:], (np.abs(phi_dim[-1,:])/a/c)**.25*np.sign(phi_dim[2,:])**2, 'b-x')
 
 
 
-plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
-plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
-plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
+# plt.plot(xs2[0,:], (np.abs(phi_dim2[0,:])/a/c)**.25*np.sign(phi_dim2[0,:]), 'b-o', label = 'radiation temp')
+# plt.plot(xs2[1,:], (np.abs(phi_dim2[1,:])/a/c)**.25*np.sign(phi_dim2[1,:]), 'b-o')
+# plt.plot(xs2[2,:], (np.abs(phi_dim2[2,:])/a/c)**.25*np.sign(phi_dim2[2,:]), 'b-o')
 plt.plot(edges2, edges2*0, 'k|', markersize = 40)
 
 

@@ -150,7 +150,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         print(k_new, 'k from scipy integration')
         res_coefficients = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
         for k in range(N_space):
-             res_coefficients[:, k, :] *= sigma_f_vec[k] * nu_vec[space]
+             res_coefficients[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
         k_new2 = normalize_phi(res_coefficients, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
         k_new = k_new2
         print(k_new, 'k from analytic integral')

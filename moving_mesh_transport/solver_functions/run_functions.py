@@ -452,7 +452,10 @@ class run:
             self.get_results(solver)
         plt.plot(self.xs, self.phi, 'k-')
         plt.show()
-                
+        plt.figure('symmetric')
+        plt.plot(self.xs, self.phi, 'k')
+        plt.plot(self.xs, np.flip(self.phi), 'r')
+        plt.show()
       
 
 

@@ -75,6 +75,17 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
     res_coefficients_new = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     IC = np.copy(run.IC.reshape((N_ang * N_groups, N_space, M+1)))
+    sigma_f_vec = np.ones(N_space) *sigma_f
+    nu_vec = np.ones(N_space) * nu
+    edges = run.edges
+    shift = run.parameters['fixed_source']['shift']
+    for space in range(N_space):
+                left_edge = edges[space]-shift
+                right_edge = edges[space+1]-shift
+                if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
+         
+                    sigma_f_vec[space] = 0.0   
+                    nu_vec[space] = 0.0
     # calculate the fission source from the random IC
     for k in range(N_space):
              res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
@@ -85,6 +96,9 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     k_old = S_old # Initializing k 
     S_old = S_new
     uncollided = False
+    
+    sigma_f_array = np.ones(run.xs.size) * sigma_f
+    nu_array = np.ones(run.xs.size) * nu
     # geometry = run.parameters['all']['geometry']
     for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
         if -3.5 <= run.xs[k]-shift <= 3.5:
@@ -92,14 +106,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             nu_array[k] = 0.
     geometry = run.geometry
     uncollided_ob = run.uncollided_ob
-    edges = run.edges
+    
     # phi_interpolated = interp1d(run.xs, run.phi[:,0])
 
             # self.sigma_f = np.zeros(self.N_space)
             # self.nu = np.zeros(self.N_space)
-    shift = run.parameters['fixed_source']['shift']
-    sigma_f_array = np.ones(run.xs.size) * sigma_f
-    nu_array = np.ones(run.xs.size) * nu
+
   
     
     print(sigma_f_array, 'sigmaf')
@@ -109,8 +121,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     
     S_old = S_new
 
-    klist.append(k_new)
-    k_old = k_new
+    klist.append(k_old)
     n_iters = 1
 
     # plt.ioff()
@@ -128,15 +139,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
     plt.close()
-    sigma_f_vec = np.ones(N_space) *sigma_f
-    nu_vec = np.ones(N_space) * nu
-    for space in range(N_space):
-                left_edge = edges[space]-shift
-                right_edge = edges[space+1]-shift
-                if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
-         
-                    sigma_f_vec[space] = 0.0   
-                    nu_vec[space] = 0.0
+    coeffs_old = res_coefficients_new
+
 
     while converged == False and n_iters < 25: 
         run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
@@ -146,7 +150,6 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         t1 = time.time()
         # run.parameters['all']['kold'] = k_old
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
-        coeffs_old = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
         t_calc = time.time() - t1
         # update k
         xs = run.xs

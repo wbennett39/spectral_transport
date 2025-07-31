@@ -91,8 +91,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     print(sigma_f_array, 'sigmaf')
     sigma_interp = interp1d(run.xs, sigma_f_array * nu_array) # interpolated fission rate 
     integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
-    k_new = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
-    
+    S_new = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
+    S_old = S_new
     klist.append(k_new)
     k_old = k_new
     n_iters = 1
@@ -148,11 +148,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # k_new = k_old *  integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         k_new = integrate.quad(integrand, xs[0], xs[-1])[0] 
         print(k_new, 'k from scipy integration')
-        res_coefficients = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
+        res_coefficients_new = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
         for k in range(N_space):
-             res_coefficients[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
-        k_new2 = normalize_phi(res_coefficients, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
-        k_new = k_new2
+             res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
+        S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
+        
         print(k_new, 'k from analytic integral')
         if k_new <0:
             raise ValueError('negative k_eff')
@@ -169,6 +169,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             print(k_old-k_new, 'k difference')
             print('iteration count: ', n_iters)
             k_old = k_new
+            S_old = S_new
             # phi_interpolated = lambda x:  phi_interpolated_new(x)
             klist.append(k_new)
             k_wynn_epsilon = wynn_epsilon(np.array(klist))

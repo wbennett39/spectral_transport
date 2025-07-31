@@ -277,7 +277,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             flux.fixed_source_coeffs = fixed_source_coeffs_norm
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
-            initialize.IC = fixed_source_coeffs_norm * kold
+            initialize.IC = fixed_source_coeffs_norm * kold # un-normalize coefficients
             flux.make_fixed_phi(mesh.edges)
         else:
             print('initializing with random IC')

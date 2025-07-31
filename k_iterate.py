@@ -74,6 +74,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
     res_coefficients_new = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
+    coeffs_old = res_coefficients_new.copy()
     IC = np.copy(run.IC.reshape((N_ang * N_groups, N_space, M+1)))
     sigma_f_vec = np.ones(N_space) *sigma_f
     nu_vec = np.ones(N_space) * nu
@@ -94,18 +95,17 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # calculate the new fission source
     S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups)
     k_old = S_old # Initializing k 
-    S_old = S_new
     uncollided = False
     
-    sigma_f_array = np.ones(run.xs.size) * sigma_f
-    nu_array = np.ones(run.xs.size) * nu
-    # geometry = run.parameters['all']['geometry']
-    for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
-        if -3.5 <= run.xs[k]-shift <= 3.5:
-            sigma_f_array[k] = 0.0 
-            nu_array[k] = 0.
-    geometry = run.geometry
-    uncollided_ob = run.uncollided_ob
+    # sigma_f_array = np.ones(run.xs.size) * sigma_f
+    # nu_array = np.ones(run.xs.size) * nu
+    # # geometry = run.parameters['all']['geometry']
+    # for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
+    #     if -3.5 <= run.xs[k]-shift <= 3.5:
+    #         sigma_f_array[k] = 0.0 
+    #         nu_array[k] = 0.
+    # geometry = run.geometry
+    # uncollided_ob = run.uncollided_ob
     
     # phi_interpolated = interp1d(run.xs, run.phi[:,0])
 
@@ -114,7 +114,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
   
     
-    print(sigma_f_array, 'sigmaf')
+    # print(sigma_f_array, 'sigmaf')
     # sigma_interp = interp1d(run.xs, sigma_f_array * nu_array) # interpolated fission rate 
     # integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
     # S_new = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
@@ -139,7 +139,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
     plt.close()
-    coeffs_old = res_coefficients_new
+    
 
 
     while converged == False and n_iters < 25: 
@@ -148,7 +148,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         normalized_source = coeffs_old/ k_old #/ normalization
         # run solver    
         t1 = time.time()
-        # run.parameters['all']['kold'] = k_old
+        run.parameters['all']['kold'] = k_old
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         t_calc = time.time() - t1
         # update k
@@ -167,11 +167,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # k_new = k_old *  integrate.quad(integrand, xs[0], xs[-1])[0] / integrate.quad(integrand_old, xs[0], xs[-1])[0]
         # k_new = integrate.quad(integrand, xs[0], xs[-1])[0] 
         # print(k_new, 'k from scipy integration')
+        coeffs_old = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
         res_coefficients_new = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
         for k in range(N_space):
              res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
         S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
-        k_new = k_old * S_new / S_old # update k 
+        k_new =  k_old * S_new / S_old # update k 
         print(k_new, 'k from analytic integral')
         if k_new <0:
             raise ValueError('negative k_eff')
@@ -187,6 +188,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             print('iteration count: ', n_iters)
             k_old = k_new
             S_old = S_new
+            # coeffs_old = res_coefficients_new
             # phi_interpolated = lambda x:  phi_interpolated_new(x)
             klist.append(k_new)
             k_wynn_epsilon = wynn_epsilon(np.array(klist))
@@ -203,4 +205,4 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             # normalization_list.append(normalization)
             calc_time_list.append(t_calc)
     
-    return klist, calc_time_list, normalization_list, run, sigma_f_array, nu_array, run.phi[:,0]
+    return klist, calc_time_list, normalization_list, run, sigma_f_vec, nu_vec, run.phi[:,0]

@@ -2,13 +2,11 @@
 
 #Submit this script with: sbatch filename
 
-SBATCH --time=1:00:00   # walltime
-#SBATCH --no-requeue   # do not requeue when preempted and on node failure
-#SBATCH --signal=23@60  # send signal to job at [seconds] before end
-SBATCH --mail-type=BEGIN
-SBATCH --mail-type=END
-SBATCH --mail-type=FAIL
-SBATCH --mail-user=wbennett@lanl.gov   # email address
+#SBATCH --time=1:00:00   # walltime
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=wbennett@lanl.gov   # email address
 #SBATCH --no-requeue   # do not requeue when preempted and on node failure
 #SBATCH --signal=23@60  # send signal to job at [seconds] before end
 

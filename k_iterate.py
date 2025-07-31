@@ -9,7 +9,8 @@ from scipy import integrate as integrate
 import matplotlib.pyplot as plt
 
 def integrate_phi_cell(cs, ws, a, b, M, N_ang):
-    cell_volume = 4 * math.pi * (b**3 - a**3)
+    # cell_volume = 4 * math.pi * (b**3 - a**3)
+    # normTn_intcell includes the r^2 term in the integrand
     psi = np.zeros(N_ang)
     for l in range(N_ang):
         for j in range(M+1):
@@ -55,7 +56,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # klist.append(kguess)
     # k_old = kguess
     # k_old = kguess
-    klist.append(kguess)
+    # klist.append(kguess)
     converged = False
     sigma_f = run.parameters['all']['sigma_f']
     nu = run.parameters['all']['nu']
@@ -63,7 +64,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     coeffs = run.sol_ob.y[:,-1]
     N_ang = run.parameters['fixed_source']['N_angles'][0]
     if run.parameters['all']['angular_derivative']['diamond'] == True:
-        N_ang += 2
+        N_ang += 1
     ws = run.ws
     N_groups = run.parameters['all']['N_groups']
     M  = run.parameters['all']['Ms'][0]
@@ -76,6 +77,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     res_coefficients_new = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     coeffs_old = res_coefficients_new.copy()
     IC = np.copy(run.IC.reshape((N_ang * N_groups, N_space, M+1)))
+    initial_fission_source = IC.copy()*0
     sigma_f_vec = np.ones(N_space) *sigma_f
     nu_vec = np.ones(N_space) * nu
     edges = run.edges
@@ -84,26 +86,27 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 left_edge = edges[space]-shift
                 right_edge = edges[space+1]-shift
                 if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
-         
                     sigma_f_vec[space] = 0.0   
                     nu_vec[space] = 0.0
     # calculate the fission source from the random IC
     for k in range(N_space):
              res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
-             IC[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
-    S_old = normalize_phi(IC, edges, ws, N_ang, M, N_space, N_groups)
+             initial_fission_source[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
+    S_old = IC / normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
+    print(S_old, 'S0')
+    k0 = normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
     # calculate the new fission source
     S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups)
-    k_old = S_old # Initializing k 
+    k_old = kguess * S_new/ S_old # Initializing k 
     uncollided = False
     
-    # sigma_f_array = np.ones(run.xs.size) * sigma_f
-    # nu_array = np.ones(run.xs.size) * nu
+    sigma_f_array = np.ones(run.xs.size) * sigma_f
+    nu_array = np.ones(run.xs.size) * nu
     # # geometry = run.parameters['all']['geometry']
-    # for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
-    #     if -3.5 <= run.xs[k]-shift <= 3.5:
-    #         sigma_f_array[k] = 0.0 
-    #         nu_array[k] = 0.
+    for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
+        if -3.5 <= run.xs[k]-shift <= 3.5:
+            sigma_f_array[k] = 0.0 
+            nu_array[k] = 0.
     # geometry = run.geometry
     # uncollided_ob = run.uncollided_ob
     
@@ -120,7 +123,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # S_new = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
     
     S_old = S_new
-
+    klist.append(k0)
     klist.append(k_old)
     n_iters = 1
 
@@ -183,6 +186,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # k_new = k_old * normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups,N_space,M+1)), edges, ws, N_ang, M, N_space, N_groups, sigma_f, nu, chi) / normalization
 
         if abs(k_new - k_old ) <=tol:
+            klist.append(k_new)
             print('power iteration complete')
             print(k_new, 'k effective')
             print(n_iters, 'total iterations required')
@@ -209,4 +213,4 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             # normalization_list.append(normalization)
             calc_time_list.append(t_calc)
     
-    return klist, calc_time_list, normalization_list, run, sigma_f_vec, nu_vec, run.phi[:,0]
+    return klist, calc_time_list, normalization_list, run, sigma_f_array, nu_array, run.phi[:,0]

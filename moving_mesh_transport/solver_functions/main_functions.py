@@ -287,6 +287,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
             normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
+            print(normalization, 'k0')
             print(initialize.sigma_f, 'sigma_f array')
             print((mesh.edges[1:]+mesh.edges[:-1])/2, 'cell centers')
             cell_centers = (mesh.edges[1:]+mesh.edges[:-1])/2

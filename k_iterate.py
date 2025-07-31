@@ -173,6 +173,10 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
              res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
         S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
         k_new =  k_old * S_new / S_old # update k 
+        print(S_new, 'S new')
+        print(S_old, 'S old')
+        print(k_new, 'k new')
+        print(k_old, 'k old')
         print(k_new, 'k from analytic integral')
         if k_new <0:
             raise ValueError('negative k_eff')

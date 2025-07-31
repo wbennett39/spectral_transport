@@ -3,12 +3,17 @@
 #Submit this script with: sbatch filename
 
 #SBATCH --time=1:00:00   # walltime
+#SBATCH --nodes=1   # number of nodes
+#SBATCH --job-name=test4   # job name
+#SBATCH --mail-user=wbennett@lanl.gov   # email address
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
-#SBATCH --mail-user=wbennett@lanl.gov   # email address
 #SBATCH --no-requeue   # do not requeue when preempted and on node failure
 #SBATCH --signal=23@60  # send signal to job at [seconds] before end
+
+
+# LOAD MODULEFILES, INSERT CODE, AND RUN YOUR PROGRAMS HERE
 
 
 python3 -i converging_test4.py

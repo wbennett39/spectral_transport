@@ -7,7 +7,7 @@ matplotlib.rcParams.update({
     'font.size': 16,        # Default font size
 })
 #####
-spaces = 88
+spaces = 220
 
 M = 1
 #####
@@ -60,6 +60,7 @@ phi = tr['scalar_flux'][:]
 phi_dim = phi * a * c
 sn_transport.close()
 mat_T = phi_dim * 0
+
 ee1 = e[-3,:] * a   / 10**-2  * 4 / 5 / 1.372017 * 5
 mat_T[0,:] = np.abs(ee1)**.25 * np.sign(ee1)
 

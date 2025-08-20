@@ -15,7 +15,7 @@ matplotlib.rcParams.update({
 
 
 #####
-spaces = 260
+spaces = 250
 M = 1
 #####
 #####
@@ -107,9 +107,9 @@ plt.plot(xs[1,:], 10*(np.abs(phi_dim[1,:])/a/c)**.25, 'b-x')
 plt.plot(xs[2,:], 10*(np.abs(phi_dim[2,:])/a/c)**.25, 'b-x')
 
 
-plt.plot(xs[0,:], 10*T_mat[0,:], 'k--', label = 'radiation temp')
-plt.plot(xs[1,:], 10*T_mat[1,:], 'k--')
-plt.plot(xs[2,:], 10*T_mat[2,:], 'k--')
+# plt.plot(xs[0,:], 10*T_mat[0,:], 'k--', label = 'radiation temp')
+# plt.plot(xs[1,:], 10*T_mat[1,:], 'k--')
+# plt.plot(xs[2,:], 10*T_mat[2,:], 'k--')
 
 plt.plot(edges, edges*0, 'k|', markersize = 40)
 rad_T = phi*0

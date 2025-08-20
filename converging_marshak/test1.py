@@ -12,8 +12,9 @@ mc = np.loadtxt("test1_mc.txt")
 sn = h5py.File('SN.h5', 'r+')
 xs = sn['test1']['xs']
 mat_T =  sn['test1']['T4']
-u = sn['test1']['u']
+u = sn['test1']['u'][:]
 
+a = 0.0137225
 # analytical solution
 R = 0.001
 delta = 0.6795011543956738
@@ -97,9 +98,10 @@ plt.plot(r_anal/1e-4, urt(r_anal, t3), c="r", ls="--", lw=2, label="Diffusion An
 plt.plot(r_anal/1e-4, urt(r_anal, t2), c="r", ls="--", lw=2)
 plt.plot(r_anal/1e-4, urt(r_anal, t1), c="r", ls="--", lw=2)
 
-plt.plot(xs[0,:]/1e-4, u[0,:], c="b", ls="--", lw=2, label=r"$S_8$ transport")
-plt.plot(xs[1,:]/1e-4, u[1,:], c="b", ls="--", lw=2)
-plt.plot(xs[2,:]/1e-4, u[2,:], c="b", ls="--", lw=2)
+
+plt.plot(xs[0,:]/1e-4, u[0,:]/1e13*a, c="b", ls="--", lw=2, label=r"$S_8$ transport")
+plt.plot(xs[1,:]/1e-4, u[1,:]/1e13*a, c="b", ls="--", lw=2)
+plt.plot(xs[2,:]/1e-4, u[2,:]/1e13*a, c="b", ls="--", lw=2)
 
 plt.ylabel("$u \\ [10^{{13}} \\ \\mathrm{{erg/cm^{{3}}}}]$", fontsize=24)
 plt.xlabel("$r \\ [\\mathrm{{\\mu m}}]$", fontsize=24)

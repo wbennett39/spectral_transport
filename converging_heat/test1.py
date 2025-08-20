@@ -160,7 +160,8 @@ def plot_answers(spaces):
     del ff['test1']['u']
     ff['test1']['xs'] = xs
     ff['test1']['T4'] = 10* mat_T
-    ff['test1']['u'] = e * 10**16 #convert GJ to kelvin
+    ff['test1']['u'] = e #* 10**16 #convert GJ to kelvin
+    # print(ff['test1']['u'])
     ff.close()
 
 

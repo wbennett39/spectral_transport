@@ -77,8 +77,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     res_coefficients_new = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     coeffs_old = res_coefficients_new.copy()
     IC = np.copy(run.IC.reshape((N_ang * N_groups, N_space, M+1)))
-    initial_fission_source = IC.copy()*0
-    sigma_f_vec = np.ones(N_space) *sigma_f
+    initial_fission_source = IC.copy()
+    sigma_f_vec = np.ones(N_space) * sigma_f
     nu_vec = np.ones(N_space) * nu
     edges = run.edges
     shift = run.parameters['fixed_source']['shift']
@@ -92,12 +92,18 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     for k in range(N_space):
              res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
              initial_fission_source[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
-    S_old = IC / normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
+    # S_old = IC / normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
+    S_old = 1
+
+    S_old = normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
+    # print(k0, 'k0')
     print(S_old, 'S0')
-    k0 = normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
     # calculate the new fission source
     S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups)
-    k_old = kguess * S_new/ S_old # Initializing k 
+    print(S_new, 'S1')
+    k_old = kguess * S_new/ S_old 
+    
+    # Initializing k 
     uncollided = False
     
     sigma_f_array = np.ones(run.xs.size) * sigma_f
@@ -123,8 +129,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # S_new = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
     
     S_old = S_new
-    klist.append(k0)
-    klist.append(k_old)
+    # klist.append(k0)
+    # klist.append(k_old)
     n_iters = 1
 
     # plt.ioff()
@@ -142,10 +148,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
     plt.close()
+    k_old = kguess
+    klist.append(k_old)
     
 
 
-    while converged == False and n_iters < 25: 
+    while converged == False and n_iters < 100: 
         run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
         normalized_source = coeffs_old/ k_old #/ normalization
@@ -171,14 +179,13 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # k_new = integrate.quad(integrand, xs[0], xs[-1])[0] 
         # print(k_new, 'k from scipy integration')
         coeffs_old = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
-        res_coefficients_new = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1))
+        res_coefficients_new = coeffs_old.copy()
         for k in range(N_space):
              res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
         S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
         k_new =  k_old * S_new / S_old # update k 
         print(S_new, 'S new')
         print(S_old, 'S old')
-        print(k_new, 'k new')
         print(k_old, 'k old')
         print(k_new, 'k from analytic integral')
         if k_new <0:
@@ -205,8 +212,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             else:
                 iw = n_iters
             print(k_wynn_epsilon[iw:,iw], 'k accelerated')
-            if use_we_accel == True:
+            if use_we_accel == True and n_iters > 4:
                 k_old = k_wynn_epsilon[iw:, iw][-1]
+                print(k_wynn_epsilon, 'full k table')
+    
+                print(k_old, 'k accelerated')
             n_iters +=1
 
             # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)

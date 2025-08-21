@@ -108,6 +108,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups)
     print(S_new, 'S1')
     k_old = kguess * S_new/ S_old 
+    print(k_old, 'k old')
     
     # Initializing k 
     uncollided = False

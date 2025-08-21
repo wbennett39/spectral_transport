@@ -15,9 +15,9 @@
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
     'Ms': [1]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
-    'rt': 5e-11                          # rel tolerance for ODE integrator
-    'at': 1e-10                         # abs tolerance for ODE integrator
-    'mxstp': 1.0
+    'rt': 5e-10                          # rel tolerance for ODE integrator
+    'at': 1e-8                        # abs tolerance for ODE integrator
+    'mxstp': 100.0
     'major': 'cells'                       # whether the solver iterates over spaces or M's
     'radiative_transfer': {none: True}             # material temperature feedback. 1-True, 0 - False
     'temperature_dependence': [1,0,0,0] # first slot is Su-Olson problem
@@ -29,7 +29,7 @@
     'cv_const': 0.0
     'estimate_wavespeed': False # this never really worked
     'thick': False            # optically thick or thin
-    'integrator': 'BDF'
+    'integrator': 'LSODA'
     'Euler_dt_spacing': 'log'
     'Euler_dt_num': 16
     'geometry': {slab: False, sphere: True}
@@ -145,6 +145,6 @@
     'shift': 100.000000
     'source_strength': 1.0                   # source initial width/2
     'source_type': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
-    'N_angles': [4]    # corresponds to N_spaces
+    'N_angles': [8]    # corresponds to N_spaces
     'move_type': [1,0,0]              # moving mesh function selector
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE

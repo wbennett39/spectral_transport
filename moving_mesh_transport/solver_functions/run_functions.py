@@ -423,8 +423,8 @@ class run:
         else:
             solver.main(uncollided, moving)
             self.get_results(solver)
-        plt.plot(self.xs, self.phi, 'k-')
-        plt.show()
+        # plt.plot(self.xs, self.phi, 'k-')
+        # plt.show()
     def custom_source(self, randomstart = False, sol_coeffs = np.array([[0.0], [0.0], [0.0]]), uncollided = True, moving = True, All = False):
         plt.ion()
         # plt.figure(1)

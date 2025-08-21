@@ -226,7 +226,7 @@ class rhs_class():
         self.t_old_list = np.zeros(1)
         self.slope_limiter = False 
         print('### ### ### ### ### ###')
-        print(self.slope_limiter, 'slope limiter')
+        # print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
         self.g = 0
         self.t_old_list_Y = np.array([0.0])
@@ -238,7 +238,7 @@ class rhs_class():
         self.chi = build.chi
         self.nu = build.nu
         self.sigma_f = build.sigma_f
-        print(np.sum(self.ws), 'sum ws')
+        # print(np.sum(self.ws), 'sum ws')
         self.recalculate_sigma_coeffs = build.recalculate_sigma_coeffs
         
         
@@ -334,7 +334,7 @@ class rhs_class():
         # print(self.alphas[:middle])
         # print(self.alphas[middle:])
         # self.alphas[:middle] = np.flip(self.alphas[middle:])
-        print(self.alphas, 'alphas')
+        # print(self.alphas, 'alphas')
 
 
 

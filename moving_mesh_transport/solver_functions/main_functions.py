@@ -288,6 +288,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
             print(normalization, 'k0')
+            normalization = kold
             # print(initialize.sigma_f, 'sigma_f array')
             # print((mesh.edges[1:]+mesh.edges[:-1])/2, 'cell centers')
             cell_centers = (mesh.edges[1:]+mesh.edges[:-1])/2
@@ -354,6 +355,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     def RHS_wrap(t, V):
         # VV = V*0
         # tlist = np.append(tlist, t)
+        V = np.asarray(V)
         extra_deg = int(thermal_couple['none'] == False)
         # print(extra_deg, 'extra degree of freedom')
         V_new = V.copy().reshape((N_ang * N_groups + extra_deg, N_space, M+1))
@@ -513,8 +515,28 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         print(rt, 'rt')
         print(at, 'at')
         print('starting solve')
-        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, dense_output = dense)
+        vectorized_rhs_wrap = np.vectorize(RHS_wrap)
+        y0 = reshaped_IC.astype(float)
+        atol_vec = at * (1 + np.abs(y0))  
+        y0 = reshaped_IC.astype(float)
+        # for elem in y0:
+        #     print(elem, 'y0')
+        f0 = RHS_wrap(0.0, y0)
+        assert np.all(np.isfinite(f0))
+        y0 = np.asarray(reshaped_IC, dtype=float)
+        f0   = RHS_wrap(0.0, y0)
+        f1e6 = RHS_wrap(1e-12, y0)
+        assert np.all(np.isfinite(f0)) and np.all(np.isfinite(f1e6))
+        f_eps = RHS_wrap(1e-12, y0)
+        
+        # for elem in f_eps:
+        #     print(elem)
+        
+        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = None)
         ts = sol.t
+        print(tpnts, 'tpts')
+        print(sol.t, 't')
+
  
     # sol = ode15s.y
 

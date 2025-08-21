@@ -74,6 +74,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+
+
     res_coefficients_new = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     coeffs_old = res_coefficients_new.copy()
     IC = np.copy(run.IC.reshape((N_ang * N_groups, N_space, M+1)))

@@ -70,6 +70,9 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     M  = run.parameters['all']['Ms'][0]
     N_space = run.parameters['all']['N_spaces'][0]
     tt = run.parameters['all']['tfinal']
+    # run.parameters['all']['rt'] = 1
+    run.parameters['all']['at'] = 1e-4
+    run.parameters['all']['integrator'] = 'Euler'
     
 
     
@@ -78,13 +81,14 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     res_coefficients_new = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     coeffs_old = res_coefficients_new.copy()
-    IC = np.copy(run.IC.reshape((N_ang * N_groups, N_space, M+1)))
-    initial_fission_source = IC.copy()
+    initial_fission_source = run.fission_source
     sigma_f_vec = np.ones(N_space) * sigma_f
     nu_vec = np.ones(N_space) * nu
     edges = run.edges
     shift = run.parameters['fixed_source']['shift']
+    run.load(transport_parameters, mesh_parameters)
     for space in range(N_space):
+                
                 left_edge = edges[space]-shift
                 right_edge = edges[space+1]-shift
                 if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
@@ -150,13 +154,14 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
     plt.close()
-    k_old = kguess
+    # k_old = kguess
+    klist.append(kguess)
     klist.append(k_old)
     
 
 
     while converged == False and n_iters < 100: 
-        run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
+        # run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
         normalized_source = coeffs_old/ k_old #/ normalization
         # run solver    

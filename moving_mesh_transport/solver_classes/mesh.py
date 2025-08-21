@@ -554,7 +554,7 @@ class mesh_class(object):
 
             self.Dedges[N_inside + 1:] = (self.edges[N_inside + 1:] - self.x0)/(self.edges[-1] - self.x0) * self.speed
             self.Dedges_const = self.Dedges
-            print(self.Dedges_const, 'dedges')
+            # print(self.Dedges_const, 'dedges')
         else:
             x02 = self.x0 + self.shift
             x03 = self.shift - self.x0
@@ -567,7 +567,7 @@ class mesh_class(object):
             # self.edges[0] = 0.0
             self.Dedges = self.edges * 0
             self.Dedges_const = self.Dedges
-            print(self.edges, 'edges0')
+            # print(self.edges, 'edges0')
 
         
 
@@ -818,7 +818,7 @@ class mesh_class(object):
         # rf = min(rfront, self.x0/50)
         # self.edges = np.linspace(0*min(rfront, self.x0 - self.x0/20), self.x0, self.N_space + 1)
         self.edges = np.concatenate((np.array([rfront - dx]) ,np.linspace(rfront, self.x0 * self.l, self.N_space)))
-        print(self.edges, 'edges0')
+        # print(self.edges, 'edges0')
         self.Dedges = self.edges * 0
         self.edges0 = self.edges
         self.Dedges_const = self.Dedges
@@ -856,7 +856,7 @@ class mesh_class(object):
         # print(np.linspace(1, 0.0, third))
         self.Dedges_const[rest:] = np.linspace(1.0, 0.0, third) * v
         self.c1s[rest:] = np.linspace(1.0, 0.0, third) * a
-        print(self.Dedges_const*self.tfinal + 0.5 * self.c1s * self.tfinal**2 + self.edges0, 'final edges')
+        # print(self.Dedges_const*self.tfinal + 0.5 * self.c1s * self.tfinal**2 + self.edges0, 'final edges')
 
         # print(self.Dedges_const - v, 'dedges - v')
         # print(self.c1s - a, 'c1s - a')
@@ -888,7 +888,7 @@ class mesh_class(object):
                 self.Dedges = self.edges *0 
 
                 self.Dedges_const = self.edges*0
-                print(self.edges, 'edges')
+                # print(self.edges, 'edges')
              else:
                 menis_t = converging_time_function(self.tfinal, self.sigma_func)
                 # rfront = 0.01 * (-menis_t) ** 0.679502 
@@ -909,9 +909,9 @@ class mesh_class(object):
                 outside_wave_edges2 = np.linspace(0.0, self.x0-dx2-dx1, rest+1)[:-1]
                 self.edges = np.concatenate((outside_wave_edges2, cluster, right_edges))
                 self.edges0 = self.edges
-                print(self.edges, 'edges0')
+                # print(self.edges, 'edges0')
                 v, a, j = self.converging_move_interpolate2(self.edges0[-center_edge])
-                print(self.edges0[-center_edge], 'tracking edge')
+                # print(self.edges0[-center_edge], 'tracking edge')
                 if v >0:
                     v = 0
                     a = 0
@@ -1730,7 +1730,7 @@ class mesh_class(object):
             # self.edges[0] = -self.x0 + -self.tfinal * self.speed
 
 
-            print(self.edges, "final edges") 
+            # print(self.edges, "final edges") 
 
 
 

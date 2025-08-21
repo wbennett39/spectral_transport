@@ -217,7 +217,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # print(boundary_time, 'boundary time array')
         initialize.grab_converging_boundary_data(boundary_temp, boundary_time)
         
-    print(angular_derivative)
+    # print(angular_derivative)
 
     
 
@@ -250,8 +250,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     fake_T_eval_points = np.zeros(5)
     if recalculate_sigma_coeffs == False:
         sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points) # calculate moments of cross sections
-    print(mesh.edges, 'edges')
-    print(mesh.Dedges_const, 'dedges const')
+    # print(mesh.edges, 'edges')
+    # print(mesh.Dedges_const, 'dedges const')
 
 
     if thermal_couple['none'] != 1:
@@ -303,9 +303,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # check normalize
             print(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
             if normalization > 0:
+                flux.fixed_source_coeffs = np.mean(flux.fixed_source_coeffs) * np.ones(flux.fixed_source_coeffs.shape)
                 flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
-                initialize.IC = initialize.IC #/ normalization
+                initialize.IC = initialize.IC *0 #/ normalization
                 flux.make_fixed_phi(mesh.edges)
 
 
@@ -409,7 +410,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         tpnts = eval_array
         print(tpnts, 'time points')
     else:
-        tpnts = None
+        # tpnts = None
+        tpnts = np.linspace(0, tfinal, 3)
         # tpnts_dense = np.linspace(0.01, tpnts[-1], 100)
         # for it, tt in enumerate(tpnts_dense):
         #     mesh.move(tt)
@@ -534,8 +536,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         
         sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = None)
         ts = sol.t
-        print(tpnts, 'tpts')
-        print(sol.t, 't')
 
  
     # sol = ode15s.y
@@ -673,7 +673,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 e = phi*0
     computation_time = end-start
     
-    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol, uncollided_sol, initialize 
+    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol, uncollided_sol, flux.fixed_source_coeffs 
 
 
 

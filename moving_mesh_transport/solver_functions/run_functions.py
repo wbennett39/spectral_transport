@@ -478,7 +478,7 @@ class run:
         self.sol_ob = solver.sol_object
         self.uncollided_ob = solver.uncollided_ob
         self.geometry = solver.geometry 
-        self.IC = solver.IC
+        self.fission_source = solver.fission_source
     def run_all(self):
         # self.plane_IC(True, True)
         # self.plane_IC(True, False)

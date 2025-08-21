@@ -220,7 +220,7 @@ from scipy.optimize import newton_krylov
 
 def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer,
                           sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, jac=None,
-                          tol=1e-7, maxiter=5, use_gmres = False):
+                          tol=1e-3, maxiter=50, use_gmres = False):
     """
     Backward Euler solver using sparse matrix operations.
     """

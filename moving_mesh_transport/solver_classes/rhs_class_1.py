@@ -189,8 +189,8 @@ class rhs_class():
         print(self.c_a, 'c_a')
         self.legendre_moments = build.legendre_moments
         self.mean_free_time = 1/build.sigma_t
-        self.division = 1000
-        self.counter = 1000
+        self.division = 8000
+        self.counter = 8000
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])

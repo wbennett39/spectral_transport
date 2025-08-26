@@ -1461,19 +1461,33 @@ class mesh_class(object):
         self.Dedges_const = self.Dedges
 
     def Kornreich(self):
-        self.edges = self.edges = np.linspace(-self.x0 + self.shift, self.x0 + self.shift, self.N_space + 1)
-        pos1 = np.argmin(np.abs(self.edges - self.shift - -3.5))
-        pos2 = np.argmin(np.abs(self.edges - self.shift - -2.5))
-        pos3 = np.argmin(np.abs(self.edges - self.shift - 2.5))
-        pos4 = np.argmin(np.abs(self.edges - self.shift  - 3.5))
-        self.edges[pos1] = -3.5 + self.shift
-        self.edges[pos2] = -2.5 + self.shift
-        self.edges[pos3] = 2.5+ self.shift
-        self.edges[pos4] = 3.5+ self.shift
-        self.edges = np.sort(self.edges) 
-        self.edges0 = self.edges.copy()
-        self.Dedges = self.Dedges * 0
-        self.Dedges_const = self.Dedges
+        if self.shift >0:
+            self.edges = np.linspace(-self.x0 + self.shift, self.x0 + self.shift, self.N_space + 1)
+            pos1 = np.argmin(np.abs(self.edges - self.shift - -3.5))
+            pos2 = np.argmin(np.abs(self.edges - self.shift - -2.5))
+            pos3 = np.argmin(np.abs(self.edges - self.shift - 2.5))
+            pos4 = np.argmin(np.abs(self.edges - self.shift  - 3.5))
+            self.edges[pos1] = -3.5 + self.shift
+            self.edges[pos2] = -2.5 + self.shift
+            self.edges[pos3] = 2.5+ self.shift
+            self.edges[pos4] = 3.5+ self.shift
+            self.edges = np.sort(self.edges) 
+            
+            self.edges0 = self.edges.copy()
+            self.Dedges = self.Dedges * 0
+            self.Dedges_const = self.Dedges
+        else:
+            self.edges = np.linspace(0, self.x0, self.N_space+1)
+            pos2 = np.argmin(self.edges - 2.5)
+            pos4 = np.argmin(np.abs(self.edges - 3.5))
+            self.edges[pos1] = 2.5
+            self.edges[pos2] = 3.5
+            self.edges = np.sort(self.edges)
+            self.edges[0] = 0.0
+            self.edges0 = self.edges.copy()
+            self.Dedges = self.Dedges * 0
+            self.Dedges_const = self.Dedges
+
 
 
     def converging_move2(self, t):

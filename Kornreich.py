@@ -57,12 +57,13 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 1e-3, use_we = False):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-4, use_we = False):
     run.load('Kornreich', 'mesh_parameters_Kornreich')
     if prime == True:
         run.parameters['all']['N_spaces'] = [10]
         run.parameters['all']['Ms'] = [0]
         run.parameters['random_IC']['N_angles'] = [2]
+        # run.parameters['fixed_source']['N_angles'] = [2]
         run.parameters['all']['sigma_f'] = 1.0
         run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
@@ -74,8 +75,9 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         print(0.4243163, 'benchmark k effective')
         print(time_list, 'computation time required per iterate')
         N_ang = run.parameters['fixed_source']['N_angles'][0]
+        N_spaces = run.parameters['all']['N_spaces'][0]
         
-        f = h5py.File(f'Kornreich_keff_S{N_ang}.h5', 'w')
+        f = h5py.File(f'Kornreich_keff_S{N_ang}_{N_spaces}_cells.h5', 'w')
         f.create_dataset('scalar_flux', data = run_ob.phi)
         f.create_dataset('xs', data = run_ob.xs)
         f.create_dataset('psi', data = run_ob.psi)

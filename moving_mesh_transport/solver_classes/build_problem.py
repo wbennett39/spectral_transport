@@ -248,9 +248,9 @@ class build(object):
          
                     self.sigma_f[space] = 0.0   
                     self.nu[space] = 0.0
-            print(self.sigma_f, 'sigma_f')
-            print(self.nu, 'nu')
-            print(edges, 'edges')
+            # print(self.sigma_f, 'sigma_f')
+            # print(self.nu, 'nu')
+            # print(edges, 'edges')
 
             # assert 0
 

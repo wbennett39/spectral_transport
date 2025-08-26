@@ -303,10 +303,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             # check normalize
             print(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
             if normalization > 0:
-                flux.fixed_source_coeffs = np.mean(flux.fixed_source_coeffs) * np.ones(flux.fixed_source_coeffs.shape)
+                # flux.fixed_source_coeffs = np.mean(flux.fixed_source_coeffs) * np.ones(flux.fixed_source_coeffs.shape)
                 flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
-                initialize.IC = initialize.IC *0 #/ normalization
+                initialize.IC = initialize.IC  #/ normalization
                 flux.make_fixed_phi(mesh.edges)
 
 
@@ -673,7 +673,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 e = phi*0
     computation_time = end-start
     
-    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol, uncollided_sol, flux.fixed_source_coeffs 
+    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol, uncollided_sol, initialize.IC 
 
 
 

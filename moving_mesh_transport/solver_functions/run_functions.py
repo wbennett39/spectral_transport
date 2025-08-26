@@ -450,11 +450,13 @@ class run:
         else:
             solver.main(uncollided, moving)
             self.get_results(solver)
+        plt.figure('scalar flux')
         plt.plot(self.xs, self.phi, 'k-')
         plt.show()
         plt.figure('symmetric')
-        plt.plot(self.xs, self.phi, 'k')
-        plt.plot(self.xs, np.flip(self.phi), 'r')
+        plt.clf()
+        # plt.plot(self.xs, self.phi, 'k')
+        plt.plot(self.xs, np.flip(self.phi) - self.phi, 'r')
         plt.show()
       
 

@@ -71,7 +71,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     N_space = run.parameters['all']['N_spaces'][0]
     tt = run.parameters['all']['tfinal']
     # run.parameters['all']['rt'] = 1
-    run.parameters['all']['at'] = 1e-4
+    run.parameters['all']['at'] = 1e5
     run.parameters['all']['integrator'] = 'Euler'
     
 
@@ -99,11 +99,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
              res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
              initial_fission_source[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
     # S_old = IC / normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
-    S_old = 1
 
-    S_old = normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
+
+    # S_old = normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
     # print(k0, 'k0')
-    print(S_old, 'S0')
+    # print(S_old, 'S0')
+    S_old = 1
     # calculate the new fission source
     S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups)
     print(S_new, 'S1')
@@ -155,15 +156,16 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
     plt.close()
-    # k_old = kguess
+    k_old = kguess
     klist.append(kguess)
-    klist.append(k_old)
+    # klist.append(k_old)
     
 
 
     while converged == False and n_iters < 100: 
-        # run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
+        run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
+        # run.parameters['all']['integrator'] = 'Euler'
         normalized_source = coeffs_old/ k_old #/ normalization
         # run solver    
         t1 = time.time()
@@ -171,7 +173,6 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         run.custom_source(randomstart = False, sol_coeffs = normalized_source, uncollided = 0, moving = 0)
         t_calc = time.time() - t1
         # update k
-        xs = run.xs
         # phi_interpolated = interp1d(run.xs, run.phi[:,0])
         # integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x)  # new fission source 
         # plt.figure(2)

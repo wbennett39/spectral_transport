@@ -761,7 +761,7 @@ class rhs_class():
                                 for ii in range(self.M+1):
                                     PV2[ii] = np.sum(np.multiply(V_old[:,space,ii],self.ws)) #* (self.c) 
                                 RHS += PV2 * self.c
-                            RHS += fixed_source * self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t # fixed fission source
+                            RHS += self.chi * fixed_source #* self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t # fixed fission source
                             if const_crosssection ==False:
                                 RHS -= VV / self.sigma_t / self.l # absorption
                             if const_crosssection ==True:

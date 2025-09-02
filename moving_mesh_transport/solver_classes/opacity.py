@@ -408,6 +408,19 @@ class sigma_integrator():
 
                 else:
                     res[ix] = self.sigma_t
+            # print(' --- --- --- ---')
+            # print(x,'x')
+            # print(res)
+            # if scattering:
+            #     print('scattering')
+            # if fuel:
+            #     print('fuel')
+            # if moderator:
+            #     print('moderator')
+            # if absorber:
+            #     print('absorber')
+
+            
             return res
 
         elif self.sigma_func['picket_fence'] == 1:

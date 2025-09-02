@@ -284,11 +284,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             flux.fixed_source_coeffs = initialize.IC
             norm_integrand = initialize.IC.copy()
             for space in range(N_space):
+                flux.fixed_source_coeffs[:, space, :] *= initialize.sigma_f[space] * initialize.nu[space] 
                 norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
             normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
             print(normalization, 'k0')
-            normalization = kold
+            # normalization = kold
             # print(initialize.sigma_f, 'sigma_f array')
             # print((mesh.edges[1:]+mesh.edges[:-1])/2, 'cell centers')
             cell_centers = (mesh.edges[1:]+mesh.edges[:-1])/2
@@ -307,7 +308,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization
                 initialize.IC = initialize.IC  #/ normalization
-                flux.make_fixed_phi(mesh.edges)
+            flux.make_fixed_phi(mesh.edges)
 
 
     IC = initialize.IC  
@@ -530,11 +531,17 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         f1e6 = RHS_wrap(1e-12, y0)
         assert np.all(np.isfinite(f0)) and np.all(np.isfinite(f1e6))
         f_eps = RHS_wrap(1e-12, y0)
-        
+        ss_event = None
+        # if sigma_func['Kornreich'] == True:      
+        #     ss_event = make_steady_state_event(RHS_wrap, tol=1e-11)
         # for elem in f_eps:
         #     print(elem)
         
-        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = None)
+        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = None, events = ss_event)
+        # if sol.t_events[0].size:
+        #     tfinal = sol.t_events[0][0]
+        #     y_final = sol.sol(tfinal)    
+        print(sol.t, 'eval times')
         ts = sol.t
 
  
@@ -614,9 +621,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             phi = output.make_phi(uncollided_sol)
             Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
             phi = output.make_phi(uncollided_sol)
-            plt.ion()
-            plt.plot(xs, phi)
-            plt.show()
+            # plt.ion()
+            # plt.plot(xs, phi)
+            # plt.show()
         sol.Y_minus_psi = Y_minus_psi
         print(np.max(np.abs(sol.Y_minus_psi[:, -1] - sol.Y_minus_psi[:, -2] )), 'closeness to steady state')
     
@@ -792,3 +799,48 @@ def RHS_wrap_jit(t, V,  mesh, matrices, num_flux, source, uncollided_sol, flux, 
 
     # print(V_new[N_ang])
     return VV_new.reshape((N_ang * N_groups + extra_deg) * N_space *(M+1))
+
+
+
+def make_steady_state_event(f, tol=1e-8, norm=np.linalg.norm, direction=-1):
+    """
+    Create an event for solve_ivp that triggers when ||f(t, y)|| <= tol.
+
+    Parameters
+    ----------
+    f : callable
+        The RHS function dy/dt = f(t, y) used in solve_ivp.
+    tol : float
+        Steady-state threshold on the chosen norm of f(t, y).
+    norm : callable
+        A norm function; defaults to Euclidean norm.
+    direction : int
+        -1 to detect only downward crossings (recommended),
+         0 for any crossing, +1 for upward only.
+
+    Returns
+    -------
+    event : callable
+        Event function with attributes .terminal and .direction set.
+    """
+    def event(t, y):
+        return norm(f(t, y)) - tol  # fires when this crosses 0
+    event.terminal = True
+    event.direction = direction
+    return event
+
+
+def make_threshold_event(psi_of_state, U, *, rtol=1e-6, atol=1e-9, safety=10.0):
+    """
+    Event for solve_ivp that fires only when psi > U + eps,
+    where eps ~ safety*(atol + rtol*|psi|). This adds hysteresis so
+    flat/slow regions don't trigger early.
+    """
+    def event(t, y):
+        psi = psi_of_state(t, y)
+        eps = safety * (atol + rtol * abs(psi))
+        return psi - (U + eps)
+
+    event.terminal = True
+    event.direction = 1.0   # only upward crossings
+    return event

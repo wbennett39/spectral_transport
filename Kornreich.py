@@ -101,6 +101,17 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.show()
 
 
+        plt.figure('normalize')
+        nits = len(k_list)
+        plt.plot(np.linspace(0, nits, nits), normalization_list, '-o', mfc = 'none')
+        plt.xlabel('iterations', fontsize = 16)
+        plt.ylabel(r'$k_\mathrm{eff}$', fontsize = 16)
+        plt.legend()
+        plt.savefig('norm_iterations_Kornreich.pdf')
+        plt.show()
+        plt.show()
+
+
         plt.figure('keff_log')
         nits = len(k_list)
         plt.loglog(np.linspace(0, nits, nits)[1:], np.abs(np.array(k_list[1:]) - np.array(k_list[:-1])), '-o', mfc = 'none')

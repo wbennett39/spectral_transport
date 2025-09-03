@@ -59,7 +59,10 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # klist.append(kguess)
     converged = False
     sigma_f = run.parameters['all']['sigma_f']
-    nu = run.parameters['all']['nu']
+    nu = run.parameters['all']['nu'] 
+    chi = run.parameters['all']['chi'] 
+    print(nu, 'nu')
+
     chi = run.parameters['all']['chi']
     coeffs = run.sol_ob.y[:,-1]
     N_ang = run.parameters['fixed_source']['N_angles'][0]
@@ -73,18 +76,16 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # run.parameters['all']['rt'] = 1
     # run.parameters['all']['at'] = 1e-5
     # run.parameters['all']['integrator'] = 'Euler'
-    
-    
 
-    
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
-
+    
 
     res_coefficients_new = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     coeffs_old = res_coefficients_new.copy()
     initial_fission_source = run.fission_source
     sigma_f_vec = np.ones(N_space) * sigma_f
     nu_vec = np.ones(N_space) * nu
+    chi_vec = np.ones(N_space) * chi
     edges = run.edges
     shift = run.parameters['fixed_source']['shift']
     run.load(transport_parameters, mesh_parameters)
@@ -94,10 +95,13 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
                     sigma_f_vec[space] = 0.0   
                     nu_vec[space] = 0.0
+                    chi_vec[space] = 0.0
+    print(nu_vec, 'nu_vec')
+    print(sigma_f_vec, 'sigma vec')
     # calculate the fission source from the random IC
     for k in range(N_space):
-             res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
-             initial_fission_source[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
+             res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k] * chi_vec[k]
+             initial_fission_source[:, k, :] *= sigma_f_vec[k] * nu_vec[k] * chi_vec[k]
     # S_old = IC / normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
 
 
@@ -117,11 +121,31 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     
     sigma_f_array = np.ones(run.xs.size) * sigma_f
     nu_array = np.ones(run.xs.size) * nu
+    chi_array = np.ones(run.xs.size) * chi
     # # geometry = run.parameters['all']['geometry']
     for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
         if -3.5 <= run.xs[k]-shift <= 3.5:
             sigma_f_array[k] = 0.0 
             nu_array[k] = 0.
+            chi_array[k] = 0
+    plt.ion()
+    plt.figure('fission source')
+    plt.plot(run.xs, run.phi[:, -1] * sigma_f_array * nu_array * chi_array, '--', label = f'iteration {0}')
+    # plt.plot(run.xs, run.fission_source, '--', label = f'iteration {n_iters -1}')
+    
+    plt.legend()
+    plt.show()
+
+    plt.ion()
+    plt.figure('scalar flux')
+    plt.plot(run.xs, run.phi[:, -1], '--', label = f'iteration {0}')
+    plt.legend()
+    plt.show()
+
+    plt.figure('scalar flux difference')
+    plt.plot(run.xs, np.abs(run.phi[:, -1] - run.phi[:,0]), '--', label = f'iteration {0}')
+    plt.legend()
+    plt.show()
     # geometry = run.geometry
     # uncollided_ob = run.uncollided_ob
     
@@ -141,6 +165,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     normalization_list = []
     normalization_list.append(S_old)
     S_old = S_new
+    norm = S_old
     normalization_list.append(S_new)
     # klist.append(k0)
     # klist.append(k_old)
@@ -175,6 +200,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         plt.ion()
         plt.figure('fission source')
         plt.plot(run.xs, run.phi[:, -1] * sigma_f_array * nu_array, '--', label = f'iteration {n_iters -1}')
+        # plt.plot(run.xs, run.fission_source, '--', label = f'iteration {n_iters -1}')
+        
         plt.legend()
         plt.show()
 
@@ -189,7 +216,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         plt.legend()
         plt.show()
 
-        norm = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups)
+        
         # normalized_source = res_coefficients_new/ k_old #/ normalization
         normalized_source = res_coefficients_new / norm
         # run solver    
@@ -201,8 +228,22 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         res_coefficients_new = coeffs_old.copy()
 
         for k in range(N_space):
-             res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k]
-        S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
+             res_coefficients_new[:, k, :] *= sigma_f_vec[k] * nu_vec[k] * chi_vec[k]
+            #  if 3.5 < edges[k] < 4.5:
+            #       print(np.max(res_coefficients_new[:, k, :]), 'coeff inside of fission zone') 
+            #  else:
+            #       print(np.max(res_coefficients_new[:, k, :]), 'coeff outside of fission zone') 
+        
+        norm = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups)
+        
+        sigma_interp = interp1d(run.xs, sigma_f_array * nu_array * chi) # interpolated fission rate
+        phi_interpolated = interp1d(run.xs, run.phi[:, -1]) 
+        integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
+        test_norm = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
+        print((norm-test_norm) /test_norm, 'norm difference')
+        print(test_norm, 'scipy integral')
+        # S_new = normalize_phi(res_coefficients_new, edges, ws, N_ang, M, N_space, N_groups) #/ normalization # currently broken
+        S_new = test_norm
         # k_new =  k_old * S_new / S_old # update k 
         k_new = S_new
         print(S_new/S_old, 'S ratio')

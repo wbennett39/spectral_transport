@@ -64,7 +64,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         run.parameters['all']['Ms'] = [0]
         run.parameters['random_IC']['N_angles'] = [2]
         # run.parameters['fixed_source']['N_angles'] = [2]
-        run.parameters['all']['sigma_f'] = 1.0
+        # run.parameters['all']['sigma_f'] = 1.0
         run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
     # First, find k_eff

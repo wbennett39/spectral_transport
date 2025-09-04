@@ -132,8 +132,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # calculate the fission source from the random IC
 
     initial_fission_source = build_fission_source(initial_condition, sigma_f_vec * nu_vec * chi)
-    new_fission_source = build_fission_source(coeffs_old,sigma_f_vec * nu_vec * chi )
-    S_new = normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups)
+    new_fission_source = build_fission_source(coeffs_old,sigma_f_vec * nu_vec  )
+    S_new = normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups) * 2
     S_old = normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
     print(S_old, 'Sold')
     new_fission_source /= S_old  # normalize fission source
@@ -144,10 +144,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     normalization_list.append(S_new)
 
     norm = S_old
-    k_old = S_new / S_old * kguess
+    k_old = S_new 
     klist.append(kguess)
     klist.append(k_old)
     n_iters = 1
+
 
     
     
@@ -188,7 +189,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # run.parameters['all']['integrator'] = 'Euler'
         plt.ion()
         plt.figure('fission source')
-        plt.plot(run.xs, run.phi[:, -1] * sigma_f_array * nu_array, '--', label = f'iteration {n_iters -1}')
+        plt.plot(run.xs, run.phi[:, -1] * sigma_f_array * nu_array * chi, '--', label = f'iteration {n_iters -1}')
         # plt.plot(run.xs, run.fission_source, '--', label = f'iteration {n_iters -1}')
         
         plt.legend()
@@ -210,7 +211,13 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         run.parameters['all']['kold'] = k_old
         new_fission_source = build_fission_source(coeffs_old, sigma_f_vec * nu_vec) # multiply the scalar flux coefficientes by the fission vector
         P = normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups )  # integrate the source over the volume, Chi cancels out the normalized weights
+        plt.figure(f'fission source scaled')
+        phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, new_fission_source, ws)
+        plt.plot(run.xs, phioutIC, 'k--', label = 'fission source')
+        # plt.legend()
+        plt.show()
         new_fission_source *= 1/P # normalize fission source
+        print(normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
         run.custom_source(randomstart = False, sol_coeffs = new_fission_source / k_old, phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
         plt.figure(f'initial vs final {n_iters}')
         phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, coeffs_old, ws)

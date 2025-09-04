@@ -61,6 +61,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
     run.load('Kornreich', 'mesh_parameters_Kornreich')
     if prime == True:
         run.parameters['all']['N_spaces'] = [10]
+        run.parameters['all']['tfinal'] = 0.00000000001
         run.parameters['all']['Ms'] = [0]
         run.parameters['random_IC']['N_angles'] = [2]
         # run.parameters['fixed_source']['N_angles'] = [2]

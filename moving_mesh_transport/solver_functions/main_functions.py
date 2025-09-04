@@ -126,7 +126,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           find_edges_tol, source_strength, move_factor, integrator, l, save_wave_loc, pad, leader_pad, xs_quad_order, 
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
-          dense, shift, VDMD, fixed_source_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
+          dense, shift, VDMD, fixed_source_coeffs, phi_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
           Euler_dt_spacing, Euler_dt_num, kold):
 
     # if weights == "gauss_lobatto":
@@ -261,23 +261,12 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     initialize.make_IC(mesh.edges, randomstart)
 
     if source_type[16] == 1:
-        # print('normalizing source')
-        norm_integrand = fixed_source_coeffs.copy()
-        for space in range(N_space):
-            norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
-        # normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups)#/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3 # so the flux is not tiny for huge radii
-        normalization = 1
-        # print(normalization, 'normalization factor')
-        # normalization = kold
-        
-        fixed_source_coeffs_norm = fixed_source_coeffs/normalization
-        # print(normalize_phi(fixed_source_coeffs_norm, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
-        if normalization > 0:
-            initialize.fixed_source_coeffs = fixed_source_coeffs_norm 
-            flux.fixed_source_coeffs = fixed_source_coeffs_norm
+
+        initialize.fixed_source_coeffs = fixed_source_coeffs
+        flux.fixed_source_coeffs = fixed_source_coeffs
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
-            initialize.IC = fixed_source_coeffs_norm * kold # un-normalize coefficients
+            initialize.IC = phi_coeffs # un-normalize coefficients
             flux.make_fixed_phi(mesh.edges)
         else:
             print('initializing with random IC')

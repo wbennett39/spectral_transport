@@ -425,7 +425,7 @@ class run:
             self.get_results(solver)
         # plt.plot(self.xs, self.phi, 'k-')
         # plt.show()
-    def custom_source(self, randomstart = False, sol_coeffs = np.array([[0.0], [0.0], [0.0]]), uncollided = True, moving = True, All = False):
+    def custom_source(self, randomstart = False, sol_coeffs = np.array([[0.0], [0.0], [0.0]]), phi_coeffs =np.array([[0.0], [0.0], [0.0]]),  uncollided = True, moving = True, All = False):
         plt.ion()
         # plt.figure(1)
         source_name = "fixed_source"
@@ -438,10 +438,11 @@ class run:
         if randomstart == True:
             sol_coeffs = np.random.random(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
             solver.fixed_source_coeffs = sol_coeffs
+            solver.phi_coeffs = sol_coeffs
             solver.randomstart = True
         else:
             solver.randomstart = False
-            solver.load_custom_source(sol_coeffs, randomstart) 
+            solver.load_custom_source(sol_coeffs, phi_coeffs, randomstart) 
         if All == True:
             solver.main(True, True)
             solver.main(False, True)

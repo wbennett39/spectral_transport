@@ -93,6 +93,7 @@ class scalar_flux(object):
             xR = edges[k+1]
             for ig in range(self.N_groups):
                 u = self.fixed_source_coeffs[ig*self.N_ang:(ig+1)*self.N_ang, k,:]
+
                 # u = U[ig*self.N_ang:(ig+1)*self.N_ang, k,:]
                 for i in range(self.M+1):
                     for j in range(self.M+1):

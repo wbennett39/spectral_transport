@@ -100,6 +100,16 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.show()
         plt.show()
 
+        plt.figure('flux shape')
+        nits = len(k_list)
+        plt.plot(run_ob.xs, run_ob.phi, '-', mfc = 'none')
+        plt.xlabel('x', fontsize = 16)
+        plt.ylabel(r'$\phi$', fontsize = 16)
+        plt.legend()
+        plt.savefig('scalar_flux_Kornreich.pdf')
+        plt.show()
+        plt.show()
+
 
         plt.figure('normalize')
         nits = len(k_list)

@@ -1121,7 +1121,7 @@ def integrate_phi_cell(cs, ws, a, b, M, N_ang):
         for j in range(M+1):
             psi[l] += cs[l, j] * normTn_intcell(j, a, b)
     res = np.sum(np.multiply(psi,ws))
-    return 4 * math.pi * res #* cell_volume
+    return 4 * math.pi * res #* 2 # the multiply by two comes from the fact that the weights have been normalized
 
 
 @njit
@@ -1131,3 +1131,33 @@ def normalize_phi(VV, edges, ws, N_ang, M, N_space, N_groups):
         for ix in range(N_space):
             norm_phi[ix] += integrate_phi_cell(VV[ig * N_ang: (ig+1) * N_ang, ix, :], ws, edges[ix], edges[ix+1], M, N_ang)
     return np.sum(norm_phi) # * sigma_f * nu * chi
+
+
+@njit
+def make_phi_no_uncol(xs, N_groups, N_ang, edges, M, u, ws):
+        output = xs*0
+        psi = np.zeros((N_ang, xs.size, N_groups))
+        for g in range(N_groups):
+            for ang in range(N_ang):
+                for count in range(xs.size):
+                    idx = np.searchsorted(edges[:], xs[count])
+                    if (idx == 0):
+                        idx = 1
+                    if (idx >= edges.size):
+                        idx = edges.size - 1
+                    if edges[0] <= xs[count] <= edges[-1]:
+                        for i in range(M+1):
+
+                            # radiation = u[g * N_ang:(ig+1) * N_ang,:,:]
+                            # psi[ang, count] += u[ang,idx-1,i] * basis(i,xs[count:count+1],float(edges[idx-1]),float(edges[idx]))[0]
+                            psi[ang, count, g] += u[g*N_ang +ang,idx-1,i] * normTn(i,xs[count:count+1],float(edges[idx-1]),float(edges[idx]))[0]
+        
+        
+        output_phi = np.zeros((xs.size, N_groups))
+
+        for g in range(N_groups):
+            output_phi[:,g] = np.sum(np.multiply(psi[:, :, g].transpose(), ws), axis = 1)
+        psi_out = psi
+        phi_out = output_phi
+
+        return output_phi, psi_out

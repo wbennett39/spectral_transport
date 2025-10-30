@@ -151,7 +151,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         mus = mus_new
         ws = ws_new
         N_ang += 1
+        print('using diamond differencing in angle')
     print(np.sum(ws), 'ws sum')
+    print(mus, 'angles')
+    print(ws, 'weights')
     print('integrator method:', integrator)
     # N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
     #     print("mus =", mus)
@@ -266,36 +269,30 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         flux.fixed_source_coeffs = fixed_source_coeffs
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
-            initialize.IC = phi_coeffs # un-normalize coefficients
+            initialize.IC = phi_coeffs # un-normalized coefficients
             flux.make_fixed_phi(mesh.edges)
         else:
             print('initializing with random IC')
-            flux.fixed_source_coeffs = initialize.IC
+            flux.fixed_source_coeffs = initialize.IC.copy()
             norm_integrand = initialize.IC.copy()
             for space in range(N_space):
-                flux.fixed_source_coeffs[:, space, :] *= initialize.sigma_f[space] * initialize.nu[space]
+                flux.fixed_source_coeffs[:, space, :] *= initialize.sigma_f[space] * initialize.nu[space] 
                 norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
-            normalization = normalize_phi(norm_integrand, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
+            normalization = normalize_phi(flux.fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
-            print(normalization, 'k0')
-            # normalization = kold
-            # print(initialize.sigma_f, 'sigma_f array')
-            # print((mesh.edges[1:]+mesh.edges[:-1])/2, 'cell centers')
-            # for k in range(N_space):
-            #     print(initialize.sigma_f[k], 'sigma_f')
-            #     print(initialize.nu[k], 'nu')
-            #     print(cell_centers[k], 'center')
+            print(normalization, 'P0')
+           
             
 
        
             # normalization = kold
             # check normalize
-            print(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
+            print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1 if the initial random source is normalized properly')
             if normalization > 0:
                 # flux.fixed_source_coeffs = np.mean(flux.fixed_source_coeffs) * np.ones(flux.fixed_source_coeffs.shape)
-                flux.fixed_source_coeffs = flux.fixed_source_coeffs / normalization / kold
-                initialize.fixed_source_coeffs = flux.fixed_source_coeffs / normalization / kold
-                initialize.IC = initialize.IC  #/ normalization
+                flux.fixed_source_coeffs = flux.fixed_source_coeffs.copy() / normalization / kold * chi
+                initialize.fixed_source_coeffs = flux.fixed_source_coeffs.copy() 
+                # initialize.IC = initialize.IC  #/ normalization
             flux.make_fixed_phi(mesh.edges)
 
 
@@ -401,6 +398,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     else:
         # tpnts = None
         tpnts = np.linspace(0, tfinal, 3)
+        eval_array = tpnts
         # tpnts_dense = np.linspace(0.01, tpnts[-1], 100)
         # for it, tt in enumerate(tpnts_dense):
         #     mesh.move(tt)
@@ -530,6 +528,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         #     tfinal = sol.t_events[0][0]
         #     y_final = sol.sol(tfinal)    
         print(sol.t, 'eval times')
+        print(sol.y.shape, 'y vector shape')
         ts = sol.t
 
  

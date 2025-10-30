@@ -1116,6 +1116,7 @@ def mass_lumper(Mass, a, b, invert = True):
 @njit
 def integrate_phi_cell(cs, ws, a, b, M, N_ang):
     # cell_volume = 4 * math.pi * (b**3 - a**3)
+    # print(np.sum(ws), 'sum ws in integrate phi')
     psi = np.zeros(N_ang)
     for l in range(N_ang):
         for j in range(M+1):

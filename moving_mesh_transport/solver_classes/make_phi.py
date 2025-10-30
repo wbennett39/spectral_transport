@@ -6,7 +6,7 @@ Created on Wed Feb  2 18:17:08 2022
 @author: bennett
 """
 import numpy as np
-from .functions import normPn, dx_normPn, normTn
+from .functions import normPn, dx_normPn, normTn, normalize_phi
 from numba.experimental import jitclass
 from numba import int64, float64, deferred_type
 from .uncollided_solutions import uncollided_solution

@@ -15,7 +15,7 @@ from .GMAT_sphere import VV_matrix, VVmatLUMPED
 from numba import float64, int64, deferred_type
 from numba.experimental import jitclass
 from numba import types, typed
-from .functions import mass_lumper
+from .functions import mass_lumper, normalize_phi
 import numba as nb
 ###############################################################################
 build_type = deferred_type()
@@ -61,6 +61,7 @@ class scalar_flux(object):
         self.PV_RT = np.zeros(build.M+1).transpose()
         self.M = build.M
         self.ws = build.ws
+        print(np.sum(build.ws), 'weights in build class')
         self.thermal_couple = build.thermal_couple
         self.sigma_func = build.sigma_func
         self.sigma_s = build.sigma_s
@@ -73,7 +74,7 @@ class scalar_flux(object):
         self.N_space = build.N_space
         self.g = 0
         self.P_fixed = np.zeros((build.N_space, build.N_groups,  build.M+1))
-        self.fixed_source_coeffs = build.fixed_source_coeffs
+        # self.fixed_source_coeffs = build.fixed_source_coeffs
         
 
     # def make_P(self, u):
@@ -88,6 +89,7 @@ class scalar_flux(object):
     def make_fixed_phi(self, edges):
         # as of now, sigma_f must be constant
         self.P_fixed = np.zeros((self.N_space, self.N_groups, self.M+1))
+        print(normalize_phi(self.fixed_source_coeffs, edges, self.ws, self.N_ang, self.M, self.N_space, self.N_groups), 'should be 1/(2k)')
         for k in range(self.N_space):
             xL = edges[k]
             xR = edges[k+1]

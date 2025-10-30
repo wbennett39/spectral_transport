@@ -64,6 +64,7 @@ class sigma_integrator():
     def __init__(self, build, cross_section_data):
         self.cross_section_data = cross_section_data
         self.sigma_t = build.sigma_t
+        print(self.sigma_t, 'total cross section in opacity')
         self.sigma_s = build.sigma_s
         print(self.sigma_s,'sigma_s')
         self.sigma_a = self.sigma_t - self.sigma_s
@@ -398,13 +399,13 @@ class sigma_integrator():
                     # print('in absorber')
                     # print(z)
                     absorber = True
-                
-                if fuel == True and scattering == True:
-                    res[ix] =  0.8 * self.sigma_t
-                elif absorber == True and scattering == True:
-                    res[ix] =  0.1 * self.sigma_t
-                elif moderator == True and scattering == True:
-                    res[ix] = 0.8 * self.sigma_t
+                if scattering == True:
+                    if fuel == True and scattering == True:
+                        res[ix] =  0.8 * self.sigma_t
+                    elif absorber == True and scattering == True:
+                        res[ix] =  0.1 * self.sigma_t
+                    elif moderator == True and scattering == True:
+                        res[ix] = 0.8 * self.sigma_t
 
                 else:
                     res[ix] = self.sigma_t

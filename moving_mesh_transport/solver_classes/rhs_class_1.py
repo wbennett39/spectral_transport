@@ -242,6 +242,7 @@ class rhs_class():
         self.sigma_f = build.sigma_f
         # print(np.sum(self.ws), 'sum ws')
         self.recalculate_sigma_coeffs = build.recalculate_sigma_coeffs
+        print(np.sum(self.ws), 'ws sum in rhs')
         
         
         

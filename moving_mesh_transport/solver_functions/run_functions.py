@@ -70,6 +70,8 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
+
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -94,6 +96,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -117,6 +120,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -147,6 +151,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -186,6 +191,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -209,6 +215,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -232,6 +239,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -256,6 +264,7 @@ class run:
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -392,6 +401,7 @@ class run:
         solver.randomstart = False
         sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -415,6 +425,7 @@ class run:
         solver.randomstart = True
         sol_coeffs = np.random.random(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = sol_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)

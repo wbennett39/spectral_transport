@@ -1482,7 +1482,7 @@ class mesh_class(object):
             pos2 = np.argmin(np.abs(self.edges - 3.5))
             self.edges[pos1] = 2.5
             self.edges[pos2] = 3.5
-            self.edges = np.sort(self.edges)
+            self.edges = np.sort(np.unique(self.edges))
             self.edges[0] = 0.0
             self.edges0 = self.edges.copy()
             self.Dedges = self.Dedges * 0

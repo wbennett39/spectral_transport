@@ -67,22 +67,18 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     run.load(transport_parameters, mesh_parameters)
     klist = []
-    # klist.append(kguess)
-    # k_old = kguess
-    # k_old = kguess
-    # klist.append(kguess)
     converged = False
     sigma_f = run.parameters['all']['sigma_f']
     nu = run.parameters['all']['nu'] 
     chi = run.parameters['all']['chi'] 
     sigma_a = run.parameters['all']['sigma_t'] - run.parameters['all']['sigma_s']
-    print(nu, 'nu')
-
     chi = run.parameters['all']['chi']
-    coeffs = run.sol_ob.y[:,-1]
     N_ang = run.parameters['fixed_source']['N_angles'][0]
+    kold = run.parameters['all']['kold']
+    klist.append(kold)
     if run.parameters['all']['angular_derivative']['diamond'] == True:
         N_ang += 1
+        print(f'{N_ang} angles in k_iterator')
     ws = run.ws
     mus = run.mus
     N_groups = run.parameters['all']['N_groups']
@@ -92,13 +88,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # run.parameters['all']['rt'] = 1
     # run.parameters['all']['at'] = 1e-5
     # run.parameters['all']['integrator'] = 'Euler'
-
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
-    
-
     res_coefficients = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
-    initial_condition = run.fission_source
+    initial_condition = run.fission_source # I think this is just the initial condition mislabeled 
     coeffs_old = res_coefficients.copy()
+   
     sigma_f_vec = np.ones(N_space) * sigma_f
     nu_vec = np.ones(N_space) * nu
     chi_vec = np.ones(N_space) * chi
@@ -118,7 +112,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     for space in range(N_space):
                 left_edge = edges[space]-shift
                 right_edge = edges[space+1]-shift
-                if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
+                middle = 0.5 * (right_edge + left_edge)
+                if -3.5 <= middle < 3.5:
                     sigma_f_vec[space] = 0.0   
                     nu_vec[space] = 0.0
                     chi_vec[space] = 0.0
@@ -126,27 +121,37 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                      sigma_a_vec[space] = 0.9
                 if (-3.5 <= left_edge <= -2.5 and -3.5 <= right_edge <= -2.5) or (2.5 <= left_edge <= 3.5 and 2.5 <= right_edge <= 3.5):
                      sigma_a_vec[space] = 0.2
-    print(nu_vec, 'nu_vec')
-    print(sigma_f_vec, 'sigma vec')
-    print(sigma_a_vec, 'sigma a')
     # calculate the fission source from the random IC
-
-    initial_fission_source = build_fission_source(initial_condition, sigma_f_vec * nu_vec * chi)
-    new_fission_source = build_fission_source(coeffs_old,sigma_f_vec * nu_vec  )
-    S_new = normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups) * 2
+    initial_fission_source = build_fission_source(initial_condition, sigma_f_vec * nu_vec)
+    new_fission_source = build_fission_source(coeffs_old, sigma_f_vec * nu_vec)
+    S_new = normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups) 
     S_old = normalize_phi(initial_fission_source, edges, ws, N_ang, M, N_space, N_groups)
     print(S_old, 'Sold')
-    new_fission_source /= S_old  # normalize fission source
+    print(S_new, 'S_new first iteration')
+    sigma_interp = interp1d(run.xs, sigma_f_array * nu_array * chi) # interpolated fission rate
+    phi_interpolated = interp1d(run.xs, run.phi[:, -1])
+    phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, initial_fission_source, ws)
     
+    integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
+    
+    plt.figure('initial fission source')
+    plt.plot(run.xs, phioutIC, label = 'initial condition')
+    plt.plot(run.xs, integrand(run.xs), '-', label = 'after 1 iteration')
+    plt.show()
+    test_norm = integrate.quad(integrand, run.xs[0], run.xs[-1])[0]
+    # print((norm-test_norm) /test_norm, 'norm difference')
+    print(test_norm, 'scipy integral for S_new')
+
     # Initializing k 
     normalization_list = []
     normalization_list.append(S_old)
     normalization_list.append(S_new)
 
-    norm = S_old
-    k_old = S_new 
-    klist.append(kguess)
-    klist.append(k_old)
+    knew = kold * S_new
+    kold = knew
+    klist.append(knew) 
+    # k_old = 1
+
     n_iters = 1
 
 
@@ -182,7 +187,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     
 
 
-    while converged == False and n_iters < 10: 
+    while converged == False and n_iters < 6: 
         
         # run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
@@ -208,35 +213,44 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
         # run solver    
         t1 = time.time()
-        run.parameters['all']['kold'] = k_old
+        run.parameters['all']['kold'] = kold
         new_fission_source = build_fission_source(coeffs_old, sigma_f_vec * nu_vec) # multiply the scalar flux coefficientes by the fission vector
-        P = normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups )  # integrate the source over the volume, Chi cancels out the normalized weights
-        plt.figure(f'fission source scaled')
-        phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, new_fission_source, ws)
-        plt.plot(run.xs, phioutIC, 'k--', label = 'fission source')
+        P = normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups ) 
+        new_fission_source *= 1/P  # integrate the source over the volume
+        # np.testing.assert_allclose(normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups ),1)
+        # plt.figure(f'fission source scaled')
+        # phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, new_fission_source, ws)
+        # plt.plot(run.xs, phioutIC, '--', label = 'fission source')
         # plt.legend()
-        plt.show()
-        new_fission_source *= 1/P # normalize fission source
+        # plt.show()
+         # normalize fission source
         print(normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
-        run.custom_source(randomstart = False, sol_coeffs = new_fission_source / k_old, phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
-        plt.figure(f'initial vs final {n_iters}')
-        phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, coeffs_old, ws)
-        plt.plot(run.xs, phioutIC, 'k--', label = 'IC')
-        plt.plot(run.xs, run.phi[:, -1], '-', label = 'Final')
-        plt.legend()
-        plt.show()
+        # solve with new source
+        run.custom_source(randomstart = False, sol_coeffs = new_fission_source * chi/kold, phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
+        # plt.figure(f'initial vs final {n_iters}')
+        # phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, coeffs_old, ws)
+        # plt.plot(run.xs, phioutIC, 'k--', label = 'IC')
+        # plt.plot(run.xs, run.phi[:, -1], '-', label = 'Final')
+        # plt.legend()
+        # plt.show()
         t_calc = time.time() - t1
         coeffs_old = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)) # update scalar flux
+        phioutf, psi_outf = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, coeffs_old, ws)
+        # plt.figure(f'initial vs final {n_iters}')
+        # plt.plot(run.xs, phioutf, 'k--', label = 'Final (calculated from coefficients)')
+        # plt.legend()
+        # plt.show()
         F = build_fission_source(coeffs_old, sigma_f_vec * nu_vec) # build the new fission source (without chi?)
-        k_new = normalize_phi(F, edges, ws, N_ang, M, N_space, N_groups ) *2 # update k. x2 is because the chi is not included
-        absorption_term = build_fission_source(coeffs_old, sigma_a_vec) 
-        A = normalize_phi(absorption_term, edges, ws, N_ang, M, N_space, N_groups) * 2
-        L = boundary_leakage_from_angular_flux(run.psi[:, :, -1], ws, mus,  edges[-1])      # (2π) R^2 * sum_{μ>0} w μ ψ
-        print(L, 'leakage')
-        print(A, 'absorption')
-        FS = build_fission_source(coeffs_old, sigma_f_vec * nu_vec)
-        F2 = normalize_phi(FS, edges, ws, N_ang, M, N_space, N_groups)
-        print(A + L, F2 / k_new, 'balance term')
+        S_new = normalize_phi(F, edges, ws, N_ang, M, N_space, N_groups )
+        knew = S_new * kold   # update k. x2 is because the chi is not included
+        # absorption_term = build_fission_source(coeffs_old, sigma_a_vec) 
+        # A = normalize_phi(absorption_term, edges, ws, N_ang, M, N_space, N_groups) 
+        # L = boundary_leakage_from_angular_flux(run.psi[:, :, -1], ws, mus,  edges[-1])      # (2π) R^2 * sum_{μ>0} w μ ψ
+        # print(L, 'leakage')
+        # print(A, 'absorption')
+        # FS = build_fission_source(coeffs_old, sigma_f_vec * nu_vec)
+        # F2 = normalize_phi(FS, edges, ws, N_ang, M, N_space, N_groups)
+        # print(A + L, 1 / knew, 'balance term')
         # sigma_interp = interp1d(run.xs, sigma_f_array * nu_array * chi) # interpolated fission rate
         # phi_interpolated = interp1d(run.xs, run.phi[:, -1]) 
         # integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
@@ -244,29 +258,31 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # print((norm-test_norm) /test_norm, 'norm difference')
         # print(test_norm, 'scipy integral')
 
-        if k_new <0:
+        if knew <0:
             raise ValueError('negative k_eff')
     
-        if abs(k_new - k_old ) <=tol and abs(S_new - S_old) / S_old <= tol:
-            klist.append(k_new)
+        if abs(knew - kold ) <=tol and abs(S_new - S_old) / S_old <= tol:
+            klist.append(knew)
             normalization_list.append(S_new)
             print('power iteration complete')
-            print(k_new, 'k effective')
+            print(knew, 'k effective')
             print(n_iters, 'total iterations required')
             converged = True
         else:
-            print(k_old-k_new, 'k difference')
+            print(kold-knew, 'k difference')
             print('iteration count: ', n_iters)
-            k_old = k_new
-            print(k_old, 'k old')
+            kold = knew
+            klist.append(knew)
+            print(kold, 'k old')
             print(klist, 'k list')
+            S_old = S_new
     
 
             # S_old = 0.4243163
 
             # coeffs_old = res_coefficients_new
             # phi_interpolated = lambda x:  phi_interpolated_new(x)
-            klist.append(k_new)
+            
             normalization_list.append(P)
             k_wynn_epsilon = wynn_epsilon(np.array(klist))
             if n_iters % 2 == 0:
@@ -275,10 +291,10 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 iw = n_iters
             print(k_wynn_epsilon[iw:,iw], 'k accelerated')
             if use_we_accel == True and n_iters > 4:
-                k_old = k_wynn_epsilon[iw:, iw][-1]
+                kold = k_wynn_epsilon[iw:, iw][-1]
                 print(k_wynn_epsilon, 'full k table')
     
-                print(k_old, 'k accelerated')
+                print(kold, 'k accelerated')
             n_iters +=1
 
             # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)

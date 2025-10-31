@@ -57,7 +57,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100):
     test_normTnintcell()
     check_norm_flux()
     # assert 0
@@ -73,15 +73,16 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we)
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
         print(0.4243163, 'benchmark k effective')
         print(time_list, 'computation time required per iterate')
         N_ang = run.parameters['fixed_source']['N_angles'][0]
         N_spaces = run.parameters['all']['N_spaces'][0]
-        
-        f = h5py.File(f'Kornreich_keff_S{N_ang}_{N_spaces}_cells.h5', 'w')
+        x0 = run.parameters['fixed_source']['x0'][0]
+        nu =run.parameters['all']['nu']
+        f = h5py.File(f'Kornreich_results/Kornreich_keff_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
         f.create_dataset('scalar_flux', data = run_ob.phi)
         f.create_dataset('xs', data = run_ob.xs)
         f.create_dataset('psi', data = run_ob.psi)
@@ -94,13 +95,28 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         f.close()
 
         plt.figure('keff')
+        if run.parameters['fixed_source']['shift'] == 0.0:
+            if run.parameters['fixed_source']['x0'][0] ==4.5:
+                if run.parameters['all']['nu'] == 1.5:
+                    k_bench = 0.4241317
+                elif run.parameters['all']['nu'] == 3.5:
+                    k_bench = 0.9896407
+            elif run.parameters['fixed_source']['x0'][0] ==4.6:
+                if run.parameters['all']['nu'] == 1.5:
+                    k_bench = 0.4242237
+                elif run.parameters['all']['nu'] == 3.5:
+                    k_bench = 0.9898554
+
+
+        else: #not ready for other cases. Probably not necessary
+            k_bench = 0.4243163
         nits = len(k_list)
         plt.plot(np.linspace(0, nits, nits), k_list, '-o', mfc = 'none')
         plt.xlabel('iterations', fontsize = 16)
-        plt.plot(np.linspace(0, nits, nits), np.ones(nits) * 0.4243163, 'k-', label = 'benchmark')
+        plt.plot(np.linspace(0, nits, nits), np.ones(nits) * k_bench, 'k-', label = 'benchmark')
         plt.ylabel(r'$k_\mathrm{eff}$', fontsize = 16)
         plt.legend()
-        plt.savefig('k_iterations_Kornreich.pdf')
+        plt.savefig('Kornreich_results/k_iterations_Kornreich.pdf')
         plt.show()
 
 
@@ -110,7 +126,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.xlabel('x', fontsize = 16)
         plt.ylabel(r'$\phi$', fontsize = 16)
         plt.legend()
-        plt.savefig('scalar_flux_Kornreich.pdf')
+        plt.savefig('Kornreich_results/scalar_flux_Kornreich.pdf')
         plt.show()
 
 
@@ -121,7 +137,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.xlabel('iterations', fontsize = 16)
         plt.ylabel('normalization', fontsize = 16)
         plt.legend()
-        plt.savefig('norm_iterations_Kornreich.pdf')
+        plt.savefig('Kornreich_results/norm_iterations_Kornreich.pdf')
         plt.show()
         plt.show()
 
@@ -133,13 +149,13 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         # plt.loglog(np.linspace(0, nits, nits), np.ones(nits) * 0.4243163, 'k-', label = 'benchmark')
         plt.ylabel(r'$k_\mathrm{eff}$ difference', fontsize = 16)
         plt.legend()
-        plt.savefig('k_iterations_Kornreic_log.pdf')
+        plt.savefig('Kornreich_results/k_iterations_Kornreic_log.pdf')
         plt.show()
 
 
     # Estimate alpha modes with VDMD
     if VDMD_estimate == True:
-        f = h5py.File('Kornreich_keff.h5', 'r+')
+        f = h5py.File('Kornreich_results/Kornreich_results/Kornreich_keff.h5', 'r+')
         ts = f['t']
         fission_source = f['fission_source'][:]
         Y_minus = f['Y_minus'][:,:]

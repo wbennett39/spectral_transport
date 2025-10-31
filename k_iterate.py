@@ -168,7 +168,7 @@ def wynn_epsilon(S):
 
 
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -322,7 +322,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     
 
 
-    while converged == False and n_iters < 6: 
+    while converged == False and n_iters < max_its: 
         
         # run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized

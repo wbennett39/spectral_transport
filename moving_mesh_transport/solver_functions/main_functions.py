@@ -292,7 +292,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             if normalization > 0:
                 # flux.fixed_source_coeffs = np.mean(flux.fixed_source_coeffs) * np.ones(flux.fixed_source_coeffs.shape)
                 # flux.fixed_source_coeffs = flux.fixed_source_coeffs.copy() / normalization / kold * chi
-                flux.fixed_source_coeffs = normalize_fission_source(flux.fixed_source_coeffs, N_space, M, 1, mesh.edges)
+                flux.fixed_source_coeffs = normalize_fission_source(flux.fixed_source_coeffs, N_space, M, 1/normalization, mesh.edges)
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs.copy() 
                 # initialize.IC = initialize.IC  #/ normalization
             flux.make_fixed_phi(mesh.edges)

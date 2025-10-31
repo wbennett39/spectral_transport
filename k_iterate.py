@@ -284,7 +284,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     n_iters = 1
     # new_fission_source *= 1/S_new 
-    coeffs_old /=knew
+    # coeffs_old /=knew
     # new_fission_source/= knew
     new_fission_source = normalize_fission_source(new_fission_source,N_space, M, 1/knew, edges)
     old_fission_source = new_fission_source

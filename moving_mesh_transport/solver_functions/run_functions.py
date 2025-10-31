@@ -68,9 +68,10 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
 
         solver.randomstart = False
         if All == True:
@@ -92,11 +93,11 @@ class run:
         print("---  ---  ---  ---  ---  ---  ---")
         print("running Marshak Wave problem")
         print("---  ---  ---  ---  ---  ---  ---")
-        
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -118,9 +119,10 @@ class run:
         print("running square IC")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -149,9 +151,10 @@ class run:
         print("running square source")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -189,9 +192,10 @@ class run:
         print("running Gaussian IC")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -213,9 +217,10 @@ class run:
         print("running Gaussian source")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -237,9 +242,10 @@ class run:
         print("running MMS problem")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -262,9 +268,10 @@ class run:
         print("running boundary source problem")
         print("---  ---  ---  ---  ---  ---  ---")
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         solver.randomstart = False
         if All == True:
             solver.main(True, True)
@@ -376,8 +383,10 @@ class run:
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         solver.randomstart = False
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -399,9 +408,10 @@ class run:
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         solver.randomstart = False
-        sol_coeffs = np.zeros(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+        solver.phi_coeffs = phi_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -423,9 +433,11 @@ class run:
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters) 
         solver.randomstart = True
-        sol_coeffs = np.random.random(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        phi_coeffs = np.zeros(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+        sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
         solver.fixed_source_coeffs = sol_coeffs
-        solver.phi_coeffs = sol_coeffs
+
+        solver.phi_coeffs = phi_coeffs
         if All == True:
             solver.main(True, True)
             solver.main(False, True)
@@ -436,7 +448,7 @@ class run:
             self.get_results(solver)
         # plt.plot(self.xs, self.phi, 'k-')
         # plt.show()
-    def custom_source(self, randomstart = False, sol_coeffs = np.array([[0.0], [0.0], [0.0]]), phi_coeffs =np.array([[0.0], [0.0], [0.0]]),  uncollided = True, moving = True, All = False):
+    def custom_source(self, randomstart = False, sol_coeffs = np.array([[0.0], [0.0]]), phi_coeffs =np.array([[0.0], [0.0], [0.0]]),  uncollided = True, moving = True, All = False):
         plt.ion()
         # plt.figure(1)
         source_name = "fixed_source"
@@ -447,10 +459,14 @@ class run:
         
         solver = main_class(source_name, self.parameters, self.mesh_parameters)
         if randomstart == True:
-            sol_coeffs = np.random.random(((solver.N_angles[0]+2) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+            phi_coeffs = np.random.random(((solver.N_angles[0]+1) * solver.N_groups, solver.N_spaces[0], solver.Ms[0]+1))
+            sol_coeffs = np.random.random((solver.N_spaces[0], solver.Ms[0]+1))
             solver.fixed_source_coeffs = sol_coeffs
-            solver.phi_coeffs = sol_coeffs
+            solver.phi_coeffs = phi_coeffs
             solver.randomstart = True
+
+
+  
         else:
             solver.randomstart = False
             solver.load_custom_source(sol_coeffs, phi_coeffs, randomstart) 
@@ -462,14 +478,15 @@ class run:
         else:
             solver.main(uncollided, moving)
             self.get_results(solver)
+        
         plt.figure('scalar flux')
-        plt.plot(self.xs, self.phi, 'k-')
+        plt.plot(self.xs, self.phi[:, -1], '-', label = f'{solver.N_spaces[0]} cells')
         plt.show()
-        plt.figure('symmetric')
-        plt.clf()
-        # plt.plot(self.xs, self.phi, 'k')
-        plt.plot(self.xs, np.flip(self.phi) - self.phi, 'r')
-        plt.show()
+        # plt.figure('symmetric')
+        # plt.clf()
+        # # plt.plot(self.xs, self.phi, 'k')
+        # plt.plot(self.xs, np.flip(self.phi) - self.phi, 'r')
+        # plt.show()
       
 
 

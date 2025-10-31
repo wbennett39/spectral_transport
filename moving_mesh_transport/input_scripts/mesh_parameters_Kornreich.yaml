@@ -28,7 +28,7 @@
 
 
 'finite': True # Finite or infinite domain
-'domain_width': 9.0
+'domain_width': 4.5
 'boundary_on': [0,0]
 'boundary_source_strength': 1.0
 'boundary_source': False

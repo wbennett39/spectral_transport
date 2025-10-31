@@ -536,6 +536,7 @@ def DnormTn(n, r, a, b):
 
 @njit
 def normTn_intcell(j, a,b):
+
     if j ==0:
         return (math.sqrt(1/(-a + b))*(-a**3 + b**3))/(3.*math.sqrt(math.pi))
     elif j == 1:
@@ -1116,22 +1117,30 @@ def mass_lumper(Mass, a, b, invert = True):
 @njit
 def integrate_phi_cell(cs, ws, a, b, M, N_ang):
     # cell_volume = 4 * math.pi * (b**3 - a**3)
-    # print(np.sum(ws), 'sum ws in integrate phi')
-    psi = np.zeros(N_ang)
-    for l in range(N_ang):
-        for j in range(M+1):
-            psi[l] += cs[l, j] * normTn_intcell(j, a, b)
-    res = np.sum(np.multiply(psi,ws))
-    return 4 * math.pi * res #* 2 # the multiply by two comes from the fact that the weights have been normalized
+
+    # psi = np.zeros(N_ang)
+    # phi = np.zeros(M+1)
+    res = 0.0
+    for j in range(M+1):
+        # phi[j] =np.sum(np.multiply(cs[:, j],ws))
+        res += cs[j] *normTn_intcell(j, a, b)
+    
+    
+    # for l in range(N_ang):
+    #     for j in range(M+1):
+    #         psi[l] += cs[l, j] * normTn_intcell(j, a, b)
+    # res = np.sum(np.multiply(psi,ws))
+    return  res  #* 2 # the multiply by two comes from the fact that the weights have been normalized
 
 
 @njit
 def normalize_phi(VV, edges, ws, N_ang, M, N_space, N_groups):
     norm_phi = np.zeros(N_space)
-    for ig in range(N_groups):
-        for ix in range(N_space):
-            norm_phi[ix] += integrate_phi_cell(VV[ig * N_ang: (ig+1) * N_ang, ix, :], ws, edges[ix], edges[ix+1], M, N_ang)
-    return np.sum(norm_phi) # * sigma_f * nu * chi
+    # for ig in range(N_groups):
+    for ix in range(N_space):
+        # norm_phi[ix] += integrate_phi_cell(VV[ig * N_ang: (ig+1) * N_ang, ix, :], ws, edges[ix], edges[ix+1], M, N_ang)
+        norm_phi[ix] = integrate_phi_cell(VV[ix, :], ws, edges[ix], edges[ix+1], M, N_ang)
+    return 4 * math.pi * np.sum(norm_phi) # * sigma_f * nu * chi
 
 
 @njit
@@ -1162,3 +1171,14 @@ def make_phi_no_uncol(xs, N_groups, N_ang, edges, M, u, ws):
         phi_out = output_phi
 
         return output_phi, psi_out
+
+
+@njit
+def normalize_fission_source(VV, N_space, M, alpha, edges):
+    new_coeffs = VV.copy()*0
+    for k in range(N_space):
+        a = edges[k]
+        b = edges[k+1]
+        for j in range(M+1):
+            new_coeffs[k, j] = VV[k,j] * alpha / normTn_intcell(j, a, b)/2
+    return new_coeffs

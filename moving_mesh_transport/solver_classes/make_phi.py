@@ -88,6 +88,7 @@ class make_output:
 
     def make_phi(self, uncollided_solution):
         output = self.xs*0
+
         psi = np.zeros((self.N_ang, self.xs.size, self.N_groups))
         for g in range(self.N_groups):
             for ang in range(self.N_ang):

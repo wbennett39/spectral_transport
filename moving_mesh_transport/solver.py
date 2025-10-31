@@ -39,6 +39,7 @@ class main_class(parameter_load_class):
 
     def load_custom_source(self, coefficients, phi_coeffs, randomstart):
         self.fixed_source_coeffs = coefficients
+       
         self.phi_coeffs = phi_coeffs
         self.randomstart = randomstart
 

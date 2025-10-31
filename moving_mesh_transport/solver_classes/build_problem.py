@@ -93,7 +93,7 @@ data = [('N_ang', int64),
         ('N_groups', int64),
         ('VDMD', int64),
         ('shift', float64),
-        ('fixed_source_coeffs', float64[:,:,:]),
+        ('fixed_source_coeffs', float64[:,:]),
         ('chi', float64),
         ('nu', float64[:]),
         ('sigma_f', float64[:]),
@@ -181,7 +181,7 @@ class build(object):
         if self.source_type[16] == 1:
             self.fixed_source_coeffs = fixed_source_coeffs
         else:
-            self.fixed_source_coeffs = np.zeros((self.N_ang, self.N_space, self.M+1))
+            self.fixed_source_coeffs = np.zeros((self.N_space, self.M+1))
         self.chi = chi
         
 

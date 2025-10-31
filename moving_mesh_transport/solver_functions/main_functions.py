@@ -273,14 +273,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             flux.make_fixed_phi(mesh.edges)
         else:
             print('initializing with random IC')
-            flux.fixed_source_coeffs = initialize.IC.copy()
-            norm_integrand = initialize.IC.copy()
+            # flux.fixed_source_coeffs = initialize.IC.copy()
+            norm_integrand = fixed_source_coeffs.copy()
             for space in range(N_space):
-                flux.fixed_source_coeffs[:, space, :] *= initialize.sigma_f[space] * initialize.nu[space] 
-                norm_integrand[:, space, :] = norm_integrand[:, space, :] * initialize.sigma_f[space] * initialize.nu[space] 
+                flux.fixed_source_coeffs[space, :] *= initialize.sigma_f[space] * initialize.nu[space] 
+                norm_integrand[space, :] = norm_integrand[space, :] * initialize.sigma_f[space] * initialize.nu[space] 
             normalization = normalize_phi(flux.fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
-            print(normalization, 'P0')
+            # normalization = normalize_phi()
+            # print(normalization, 'P0')
            
             
 

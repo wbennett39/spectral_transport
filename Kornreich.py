@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import h5py 
 
 from moving_mesh_transport.solver_classes.functions import *
-from k_iterate import power_iterate 
+from k_iterate import power_iterate, test_normTnintcell, check_norm_flux
 
 # from moving_mesh_transport.plots.plot_square_s_times import main as plot_square_s_times
 # from moving_mesh_transport.solution_plotter import plot_thin_nonlinear_problems as plot_thin
@@ -57,7 +57,10 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-4, use_we = False):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False):
+    test_normTnintcell()
+    check_norm_flux()
+    # assert 0
     run.load('Kornreich', 'mesh_parameters_Kornreich')
     if prime == True:
         run.parameters['all']['N_spaces'] = [10]
@@ -99,7 +102,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.legend()
         plt.savefig('k_iterations_Kornreich.pdf')
         plt.show()
-        plt.show()
+
 
         plt.figure('flux shape')
         nits = len(k_list)
@@ -109,7 +112,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.legend()
         plt.savefig('scalar_flux_Kornreich.pdf')
         plt.show()
-        plt.show()
+
 
 
         plt.figure('normalize')
@@ -132,7 +135,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.legend()
         plt.savefig('k_iterations_Kornreic_log.pdf')
         plt.show()
-        plt.show()
+
 
     # Estimate alpha modes with VDMD
     if VDMD_estimate == True:

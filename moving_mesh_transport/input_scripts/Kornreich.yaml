@@ -9,9 +9,9 @@
     'sigma_s': .8
     'sigma_f': .2
     'chi': 1
-    'nu': 1.5
+    'nu': 3.5
     't0': 10000000000000.0                       # time the source is turned off
-    'N_spaces': [50]                   # number of cells
+    'N_spaces': [100]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
     'Ms': [1]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot
@@ -140,7 +140,7 @@
     'benchmarking': False                # If 'True', will attempt to load benchmark and calculate RMSE
 
 'fixed_source':
-    'x0': [4.5]
+    'x0': [4.6]
     'l': 1.0
     'shift': 00.000000
     'source_strength': 1.0                   # source initial width/2

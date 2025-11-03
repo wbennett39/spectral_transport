@@ -387,7 +387,7 @@ class sigma_integrator():
                 fuel = False
                 moderator = False
                 absorber = False
-                if -4.5 <= z <= -3.5 or 3.5 <= z <= 4.5:
+                if -4.5 <= z <= -3.5 or 3.5 <= z <= 4.6:
                     fuel = True
                     # print('in fuel')
                     # print(z)

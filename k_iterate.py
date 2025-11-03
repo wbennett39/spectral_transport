@@ -226,7 +226,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     sigma_a_vec = np.zeros(N_space) 
     # # geometry = run.parameters['all']['geometry']
     for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
-        if -3.5 <= run.xs[k]-shift <= 3.5:
+        if -3.5 <= run.xs[k]-shift <= 3.6:
             sigma_f_array[k] = 0.0 
             nu_array[k] = 0.
             chi_array[k] = 0
@@ -235,11 +235,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 left_edge = edges[space]-shift
                 right_edge = edges[space+1]-shift
                 middle = 0.5 * (right_edge + left_edge)
-                if -3.5 <= middle < 3.5:
+                if -3.5 <= middle < 3.6:
                     sigma_f_vec[space] = 0.0   
                     nu_vec[space] = 0.0
                     # chi_vec[space] = 0.0
-                    if left_edge <-3.5 or right_edge >3.5:
+                    if left_edge <-3.5 or right_edge >3.6:
                          print('edge straddle')
                          print(left_edge, right_edge)
                          assert 0
@@ -334,6 +334,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         
         plt.legend()
         plt.show()
+
 
         plt.ion()
         plt.figure('k_it scalar flux')

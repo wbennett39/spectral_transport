@@ -126,7 +126,7 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.xlabel('x', fontsize = 16)
         plt.ylabel(r'$\phi$', fontsize = 16)
         plt.legend()
-        plt.savefig('Kornreich_results/scalar_flux_Kornreich.pdf')
+        # plt.savefig('Kornreich_results/scalar_flux_Kornreich.pdf')
         plt.show()
 
 
@@ -151,6 +151,14 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         plt.legend()
         plt.savefig('Kornreich_results/k_iterations_Kornreic_log.pdf')
         plt.show()
+
+        plt.figure('solution plot')
+        plt.xlabel('x [cm]', fontsize = 16)
+        plt.ylabel(r'$\phi$', fontsize = 16)
+        plt.plot(run_ob.xs, run_ob.phi, 'k-', mfc = 'none')
+        plt.savefig('Kornreich_results/scalar_flux_Kornreich.pdf')
+        plt.show()
+
 
 
     # Estimate alpha modes with VDMD

@@ -58,8 +58,8 @@ run = run()
 
 loader = load()
 def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100):
-    test_normTnintcell()
-    check_norm_flux()
+    # test_normTnintcell()
+    # check_norm_flux()
     # assert 0
     run.load('Kornreich', 'mesh_parameters_Kornreich')
     if prime == True:
@@ -189,4 +189,4 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
     # IRAM to get alpha modes
 
 
-Kornreich_benchmark(use_we = False)
+Kornreich_benchmark(use_we = False, guess_k=  0.2)

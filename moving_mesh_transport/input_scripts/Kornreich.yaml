@@ -11,7 +11,7 @@
     'chi': 1
     'nu': 3.5
     't0': 10000000000000.0                       # time the source is turned off
-    'N_spaces': [100]                   # number of cells
+    'N_spaces': [40]                   # number of cells
     'tnodes': 40                        # quadrature divisions for uncol. Gauss. source
     'Ms': [1]                         # number of basis functions -1
     'N_runs': 1                         # number of iterations over N_spaces. For error vs time plot

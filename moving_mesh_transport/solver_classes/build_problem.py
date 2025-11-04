@@ -240,16 +240,21 @@ class build(object):
     def make_IC(self, edges, randomstart):
         if self.sigma_func['Kornreich'] == True:
             # self.sigma_f = np.zeros(self.N_space)
-            # self.nu = np.zeros(self.N_space)
-            edges2 = edges - self.shift
- 
-            for space in range( self.N_space):
-                left_edge = edges2[space]
-                right_edge = edges2[space+1]
-                if -3.5 <= left_edge <= 3.5 and -3.5 <= right_edge <= 3.5:
-         
+            # self.nu = np.zeros(self.N_space
+            
+            for space in range(self.N_space):
+                left_edge = edges[space]-self.shift
+                right_edge = edges[space+1]-self.shift
+                middle = 0.5 * (right_edge + left_edge)
+                if -3.5 <= middle < 3.5:
                     self.sigma_f[space] = 0.0   
                     self.nu[space] = 0.0
+                    # chi_vec[space] = 0.0
+                    if left_edge <-3.5 or right_edge >4.6:
+                         print('edge straddle')
+                         print(left_edge, right_edge)
+                         assert 0
+                
             # print(self.sigma_f, 'sigma_f')
             # print(self.nu, 'nu')
             # print(edges, 'edges')

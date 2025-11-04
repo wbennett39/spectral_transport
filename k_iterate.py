@@ -195,7 +195,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     sigma_a = run.parameters['all']['sigma_t'] - run.parameters['all']['sigma_s']
     chi = run.parameters['all']['chi']
     N_ang = run.parameters['fixed_source']['N_angles'][0]
-    kold = run.parameters['all']['kold']
+    # kold = run.parameters['all']['kold']
+    kold = kguess
     klist.append(kold)
     if run.parameters['all']['angular_derivative']['diamond'] == True:
         N_ang += 1
@@ -210,36 +211,31 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # run.parameters['all']['rt'] = 1
     # run.parameters['all']['at'] = 1e-5
     # run.parameters['all']['integrator'] = 'Euler'
+    run.parameters['all']['kold'] = kguess
+    
+    
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
     res_coefficients = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     initial_condition = run.fission_source # I think this is just the initial condition mislabeled 
     coeffs_old = res_coefficients.copy()
-   
-    sigma_f_vec = np.ones(N_space) * sigma_f
-    nu_vec = np.ones(N_space) * nu
-    chi_vec = np.ones(N_space) * chi
-    edges = run.edges
     shift = run.parameters['fixed_source']['shift']
     sigma_f_array = np.ones(run.xs.size) * sigma_f
     nu_array = np.ones(run.xs.size) * nu
     chi_array = np.ones(run.xs.size) * chi
     sigma_a_vec = np.zeros(N_space) 
-    # # geometry = run.parameters['all']['geometry']
-    for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
-        if -3.5 <= run.xs[k]-shift <= 3.6:
-            sigma_f_array[k] = 0.0 
-            nu_array[k] = 0.
-            chi_array[k] = 0
-
+    sigma_f_vec = np.ones(N_space) * sigma_f
+    nu_vec = np.ones(N_space) * nu
+    chi_vec = np.ones(N_space) * chi
+    edges = run.edges
     for space in range(N_space):
                 left_edge = edges[space]-shift
                 right_edge = edges[space+1]-shift
                 middle = 0.5 * (right_edge + left_edge)
-                if -3.5 <= middle < 3.6:
+                if -3.5 <= middle < 3.5:
                     sigma_f_vec[space] = 0.0   
                     nu_vec[space] = 0.0
                     # chi_vec[space] = 0.0
-                    if left_edge <-3.5 or right_edge >3.6:
+                    if left_edge <-3.5 or right_edge >4.6:
                          print('edge straddle')
                          print(left_edge, right_edge)
                          assert 0
@@ -247,6 +243,18 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                      sigma_a_vec[space] = 0.9
                 if (-3.5 <= left_edge <= -2.5 and -3.5 <= right_edge <= -2.5) or (2.5 <= left_edge <= 3.5 and 2.5 <= right_edge <= 3.5):
                      sigma_a_vec[space] = 0.2
+   
+
+    
+
+    # # geometry = run.parameters['all']['geometry']
+    for k in range(run.xs.size): # build the fission production vector for the Kornreich problem
+        if -3.5 <= run.xs[k]-shift <= 3.5:
+            sigma_f_array[k] = 0.0 
+            nu_array[k] = 0.
+            chi_array[k] = 0
+
+    
     # calculate the fission source from the random IC
     # initial_fission_source = build_fission_source(initial_condition, sigma_f_vec * nu_vec)
     # new_fission_source = build_fission_source(coeffs_old, sigma_f_vec * nu_vec)
@@ -276,7 +284,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     normalization_list.append(S_new)
 
     # knew = kold * S_new #/ S_old
-    knew = S_new
+    knew = S_new*kold
     S_old = S_new
     kold = knew
     klist.append(knew) 

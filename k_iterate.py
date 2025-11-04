@@ -284,9 +284,9 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     normalization_list.append(S_new)
 
     # knew = kold * S_new #/ S_old
-    knew = S_new*kold
+    knew = S_new * kold
     S_old = S_new
-    kold = knew
+    
     klist.append(knew) 
     # k_old = 1
 
@@ -294,8 +294,9 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # new_fission_source *= 1/S_new 
     # coeffs_old /=knew
     # new_fission_source/= knew
-    new_fission_source = normalize_fission_source(new_fission_source,N_space, M, 1/knew, edges)
-    old_fission_source = new_fission_source
+    new_fission_source = normalize_fission_source(new_fission_source,N_space, M, kold/knew, edges)
+    old_fission_source = new_fission_source.copy()
+    kold = knew
 
 
     
@@ -370,7 +371,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # plt.legend()
         # plt.show()
          # normalize fission source
-        print(normalize_phi(new_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1')
+        print(normalize_phi(old_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1/k')
         # solve with new source
         run.custom_source(randomstart = False, sol_coeffs = old_fission_source , phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
         # plt.figure(f'initial vs final {n_iters}')
@@ -398,7 +399,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         print(S_new/P_scipy[0], 'P ratio')
         # knew = S_new * kold# /S_old   # update k. x2 is because the chi is not included
         knew = S_new
-        coeffs_old = coeffs_new/knew
+        coeffs_old = coeffs_new
         new_fission_source = normalize_fission_source(new_fission_source,N_space, M, 1/knew, edges)
         old_fission_source = new_fission_source
         # new_fission_source *= 1/S_new

@@ -208,13 +208,14 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     M  = run.parameters['all']['Ms'][0]
     N_space = run.parameters['all']['N_spaces'][0]
     print(N_space, 'spatial cells')
-    # run.parameters['all']['rt'] = 1
-    # run.parameters['all']['at'] = 1e-5
-    # run.parameters['all']['integrator'] = 'Euler'
+    run.parameters['all']['rt'] = 1
+    run.parameters['all']['at'] = 1e-5
+    run.parameters['all']['integrator'] = 'Euler'
     run.parameters['all']['kold'] = kguess
     
-    
+    t1 = time.time()
     run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+    t_calc = time.time() - t1
     res_coefficients = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     initial_condition = run.fission_source # I think this is just the initial condition mislabeled 
     coeffs_old = res_coefficients.copy()
@@ -323,6 +324,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
    
     
     calc_time_list = []
+    calc_time_list.append(t_calc)
     # normalization_list.append(normalization)
     plt.close()
     plt.close()
@@ -333,7 +335,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     while converged == False and n_iters < max_its: 
         
-        # run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
+        run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
         # run.parameters['all']['integrator'] = 'Euler'
         plt.ion()
@@ -429,6 +431,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             print(knew, 'k effective')
             print(n_iters, 'total iterations required')
             converged = True
+            calc_time_list.append(t_calc)
         else:
             print(kold-knew, 'k difference')
             print('iteration count: ', n_iters)

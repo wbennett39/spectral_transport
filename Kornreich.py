@@ -112,13 +112,19 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
             k_bench = 0.4243163
         nits = len(k_list)
         plt.plot(np.linspace(0, nits, nits), k_list, '-o', mfc = 'none')
-        plt.xlabel('iterations', fontsize = 16)
+        plt.xlabel('iteration', fontsize = 16)
         plt.plot(np.linspace(0, nits, nits), np.ones(nits) * k_bench, 'k-', label = 'benchmark')
         plt.ylabel(r'$k_\mathrm{eff}$', fontsize = 16)
         plt.legend()
         plt.savefig('Kornreich_results/k_iterations_Kornreich.pdf')
         plt.show()
 
+        plt.figure('calc time')
+        plt.loglog(np.linspace(0, nits, nits)[1:], time_list, '-o', mfc = 'none')
+        plt.xlabel('iteration', fontsize = 16)
+        plt.ylabel('time [s]', fontsize = 16)
+        plt.savefig('Kornreich_results/calc_time_Kornreich.pdf')
+        plt.show()
 
         plt.figure('flux shape')
         nits = len(k_list)

@@ -58,7 +58,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM = False, power_iterate = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, coarse_angles = 4, alpha_tol = 1e-5):
+def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM = False, power_method = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, coarse_angles = 4, alpha_tol = 1e-5):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -199,17 +199,24 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
     # IRAM to get alpha modes
 
     # power iteration
-    if power_iterate == True:
+    if power_method == True:
         alpha_old = 1e-5
         alpha_old_old = 0
         k_old = k_list[-1]
         g_old = 0
         sigma_t_base = run.parameters['all']['sigma_t'] 
+        alpha_list = []
+        alpha_list.append[alpha_old_old]
+        alpha_list.append(alpha_old)
+        iterations = 2
         while abs(k_old-1) > alpha_tol:
             g = k_old -1
             alpha_new = alpha_old - g * (alpha_old - alpha_old_old) /(g - g_old)
             g_old = g
             alpha_old_old = alpha_old
+            print(alpha_new, 'alpha')
+            print(k_old, 'k')
+
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
 
         # Use yaml.safe_load() for security when dealing with untrusted input
@@ -221,9 +228,23 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
                     yaml.dump(data, file, sort_keys=False)
             k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=phi)
             k_old = k_list[-1]
+            alpha_old = alpha_new
+            iterations += 1
+            alpha_list.append(alpha_old)
+        plt.figure('alpha power method')
+        nits = len(alpha_list)
+        plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none')
+        plt.xlabel('iterations', fontsize = 16)
+        plt.ylabel(r'$\alpha$', fontsize = 16)
+        plt.legend()
+        plt.savefig('Kornreich_results/power_method_alpha_Kornreich.pdf')
+        plt.show()
+        plt.show()
+            
     with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
                 data = yaml.safe_load(file)
                 data['all']['sigma_t'] = sigma_t_base
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                     yaml.dump(data, file, sort_keys=False)
+
 Kornreich_benchmark(use_we = False, guess_k=  0.2)

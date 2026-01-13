@@ -14,6 +14,7 @@ warnings.simplefilter('ignore', category=NumbaPerformanceWarning)
 from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
+from scipy.sparse.linalg import LinearOperator, eigs  # o
 import h5py 
 
 from moving_mesh_transport.solver_classes.functions import *
@@ -58,7 +59,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM = False, power_method = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, coarse_angles = 4, alpha_tol = 1e-5):
+def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, power_method = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, coarse_angles = 4, alpha_tol = 1e-3):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -103,13 +104,17 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
             if run.parameters['fixed_source']['x0'][0] ==4.5:
                 if run.parameters['all']['nu'] == 1.5:
                     k_bench = 0.4241317
+                    alpha_bench = -0.3229855
                 elif run.parameters['all']['nu'] == 3.5:
                     k_bench = 0.9896407
+                    alpha_bench = -0.006440766
             elif run.parameters['fixed_source']['x0'][0] ==4.6:
                 if run.parameters['all']['nu'] == 1.5:
                     k_bench = 0.4242237
+                    alpha_bench = -0.3213939
                 elif run.parameters['all']['nu'] == 3.5:
                     k_bench = 0.9898554
+                    alpha_bench = -0.006298843
 
 
         else: #not ready for other cases. Probably not necessary
@@ -173,6 +178,7 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
 
     # Estimate alpha modes with VDMD
     if VDMD_estimate == True:
+
         f = h5py.File('Kornreich_results/Kornreich_results/Kornreich_keff.h5', 'r+')
         ts = f['t']
         fission_source = f['fission_source'][:]
@@ -197,6 +203,28 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
 
 
     # IRAM to get alpha modes
+    if IRAM == True:
+        N_space = run.parameters['all']['N_spaces'] 
+        N_ang = run.parameters['fixed_source']['N_angles'][0]
+        M =  run.parameters['all']['Ms'][0]
+        N_groups = run.parameters['all']['N_groups']
+        n = N_space * N_ang * (M+1) *N_groups
+        def matvec(x):
+            run.load('Kornreich', 'mesh_parameters_Kornreich')
+            run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+            res_coefficients = np.copy(run.sol_ob.y[:,-1])
+            return res_coefficients
+
+
+        A = LinearOperator((n, n), matvec=matvec, dtype=np.float64)
+
+# Compute k eigenvalues (largest magnitude by default)
+        vals, vecs = eigs(A, k=6)
+        print(vals, 'eigenvalues IRAM')
+        f = h5py.File(f'Kornreich_results/Kornreich_alpha_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
+        f.create_dataset('alpha_list_IRAM_iteration', data = vals)
+        f.close()
+
 
     # power iteration
     if power_method == True:
@@ -206,7 +234,7 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
         g_old = 0
         sigma_t_base = run.parameters['all']['sigma_t'] 
         alpha_list = []
-        alpha_list.append[alpha_old_old]
+        alpha_list.append(alpha_old_old)
         alpha_list.append(alpha_old)
         iterations = 2
         while abs(k_old-1) > alpha_tol:
@@ -214,7 +242,9 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
             alpha_new = alpha_old - g * (alpha_old - alpha_old_old) /(g - g_old)
             g_old = g
             alpha_old_old = alpha_old
+            print('## ## ## ## ## ## ## ## ## ## ## ## ## ##')
             print(alpha_new, 'alpha')
+            print('## ## ## ## ## ## ## ## ## ## ## ## ## ##')
             print(k_old, 'k')
 
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
@@ -231,16 +261,22 @@ def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM
             alpha_old = alpha_new
             iterations += 1
             alpha_list.append(alpha_old)
-        plt.figure('alpha power method')
-        nits = len(alpha_list)
-        plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none')
-        plt.xlabel('iterations', fontsize = 16)
-        plt.ylabel(r'$\alpha$', fontsize = 16)
-        plt.legend()
-        plt.savefig('Kornreich_results/power_method_alpha_Kornreich.pdf')
-        plt.show()
-        plt.show()
-            
+            plt.figure('alpha power method')
+            nits = len(alpha_list)
+            plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none')
+            plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits) * alpha_bench, 'k-', mfc = 'none')
+
+            plt.xlabel('iterations', fontsize = 16)
+            plt.ylabel(r'$\alpha$', fontsize = 16)
+            plt.legend()
+            plt.savefig('Kornreich_results/power_method_alpha_Kornreich.pdf')
+            plt.show()
+            plt.show()
+            f = h5py.File(f'Kornreich_results/Kornreich_alpha_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
+            f.create_dataset('alpha_list_power_iteration', data = alpha_list)
+            f.close()
+        print('alpha power iteration converged')
+        
     with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
                 data = yaml.safe_load(file)
                 data['all']['sigma_t'] = sigma_t_base

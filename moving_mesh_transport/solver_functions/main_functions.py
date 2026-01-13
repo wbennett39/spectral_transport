@@ -288,7 +288,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
        
             # normalization = kold
             # check normalize
-            print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1 if the initial random source is normalized properly')
+            # print(normalize_phi(flux.fixed_source_coeffs/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups), 'should be 1 if the initial random source is normalized properly')
             if normalization > 0:
                 # flux.fixed_source_coeffs = np.mean(flux.fixed_source_coeffs) * np.ones(flux.fixed_source_coeffs.shape)
                 # flux.fixed_source_coeffs = flux.fixed_source_coeffs.copy() / normalization / kold * chi

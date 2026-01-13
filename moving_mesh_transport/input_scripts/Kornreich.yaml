@@ -4,17 +4,17 @@ all:
   c_scaling: false
   epsilon_scaling: false
   epsilon: 1.0
-  sigma_t: 1.061341515698655
+  sigma_t: 1.0417899800772672
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
   nu: 3.5
   t0: 10000000000000.0
   N_spaces:
-  - 20
+  - 10
   tnodes: 40
   Ms:
-  - 2
+  - 1
   N_runs: 1
   rt: 5e-11
   at: 1e-9
@@ -375,7 +375,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 8
+  - 4
   move_type:
   - 1
   - 0

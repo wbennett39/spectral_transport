@@ -227,7 +227,7 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRA
 # Compute k eigenvalues (largest magnitude by default)
         vals, vecs = eigs(A, k=6)
         print(1/vals, 'eigenvalues IRAM')
-        f = h5py.File(f'Kornreich_results/Kornreich_alpha_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
+        f = h5py.File(f'Kornreich_results/Kornreich_alpha_S{N_ang}_{N_space}_cells_x0={x0}_nu={nu}.h5', 'w')
         f.create_dataset('alpha_list_IRAM_iteration', data = 1/vals)
         f.close()
 

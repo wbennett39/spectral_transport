@@ -59,7 +59,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, power_method = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, coarse_angles = 4, alpha_tol = 1e-3):
+def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRAM = True, power_method = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, coarse_angles = 4, alpha_tol = 1e-4):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -209,10 +209,14 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
         M =  run.parameters['all']['Ms'][0]
         N_groups = run.parameters['all']['N_groups']
         n = N_space * N_ang * (M+1) *N_groups
+        print(n, 'n')
+        assert 0
         def matvec(x):
             run.load('Kornreich', 'mesh_parameters_Kornreich')
             run.custom_source(randomstart = True, uncollided = 0, moving = 0)
             res_coefficients = np.copy(run.sol_ob.y[:,-1])
+            print(res_coefficients.shape)
+
             return res_coefficients
 
 
@@ -220,9 +224,9 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
 
 # Compute k eigenvalues (largest magnitude by default)
         vals, vecs = eigs(A, k=6)
-        print(vals, 'eigenvalues IRAM')
+        print(1/vals, 'eigenvalues IRAM')
         f = h5py.File(f'Kornreich_results/Kornreich_alpha_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
-        f.create_dataset('alpha_list_IRAM_iteration', data = vals)
+        f.create_dataset('alpha_list_IRAM_iteration', data = 1/vals)
         f.close()
 
 
@@ -262,9 +266,10 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
             iterations += 1
             alpha_list.append(alpha_old)
             plt.figure('alpha power method')
+            plt.clf()
             nits = len(alpha_list)
             plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none')
-            plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits) * alpha_bench, 'k-', mfc = 'none')
+            plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
 
             plt.xlabel('iterations', fontsize = 16)
             plt.ylabel(r'$\alpha$', fontsize = 16)

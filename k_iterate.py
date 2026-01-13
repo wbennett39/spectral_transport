@@ -7,6 +7,7 @@ import time
 from scipy.interpolate import interp1d as interp1d
 from scipy import integrate as integrate
 import matplotlib.pyplot as plt
+import yaml
 
 # def integrate_phi_cell(cs, ws, a, b, M, N_ang):
 #     # cell_volume = 4 * math.pi * (b**3 - a**3)
@@ -166,9 +167,15 @@ def wynn_epsilon(S):
 
 
 
+def transfer_coefficients(coeffs_old, M):
+    K = coeffs_old.shape[0]
+    coeffs_new = np.zeros((K, M+1))
+    for k in range(K):
+        coeffs_new[k, 0] = coeffs_old[k]
+    return coeffs_new
 
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0])):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -186,7 +193,23 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     """
 
-    run.load(transport_parameters, mesh_parameters)
+    
+    if coarse_solve == True:
+        with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+    # Use yaml.safe_load() for security when dealing with untrusted input
+    # For a trusted config file, you might use yaml.FullLoader
+            data = yaml.safe_load(file)
+            data['all']['Ms'][0] = 0
+            data['fixed_source']['N_angles'][0] = coarse_angles
+            with open('moving_mesh_transport/input_scripts/Kornreich_new.yaml', 'w') as file:
+    # Use sort_keys=False to maintain a sensible order (optional)
+                yaml.dump(data, file, sort_keys=False)
+        run.load('Kornreich_new', mesh_parameters)
+    else:
+        run.load(transport_parameters, mesh_parameters)
+    # print(run.ws.size)
+    # assert 0
     klist = []
     converged = False
     sigma_f = run.parameters['all']['sigma_f']
@@ -201,9 +224,9 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     if run.parameters['all']['angular_derivative']['diamond'] == True:
         N_ang += 1
         print(f'{N_ang} angles in k_iterator')
-    ws = run.ws
-    mus = run.mus
-    assert ws.size == N_ang
+
+
+    # assert ws.size == N_ang
     N_groups = run.parameters['all']['N_groups']
     M  = run.parameters['all']['Ms'][0]
     N_space = run.parameters['all']['N_spaces'][0]
@@ -214,7 +237,13 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     run.parameters['all']['kold'] = kguess
     
     t1 = time.time()
-    run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+    if coarse_solve == True:
+        run.custom_source(randomstart = True, uncollided = 0, moving = 0)
+    else:
+        new_phi_coeffs = transfer_coefficients(input_phi, M)
+        run.custom_source(randomstart = True, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs )
+    ws = run.ws
+    mus = run.mus
     t_calc = time.time() - t1
     res_coefficients = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     initial_condition = run.fission_source # I think this is just the initial condition mislabeled 
@@ -334,8 +363,10 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
 
     while converged == False and n_iters < max_its: 
-        
-        run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
+        if coarse_solve == True:
+            run.load('Kornreich_new', mesh_parameters)
+        else:
+            run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
         # run.parameters['all']['integrator'] = 'Euler'
         plt.ion()

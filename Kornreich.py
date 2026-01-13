@@ -18,6 +18,7 @@ import h5py
 
 from moving_mesh_transport.solver_classes.functions import *
 from k_iterate import power_iterate, test_normTnintcell, check_norm_flux
+import yaml
 
 # from moving_mesh_transport.plots.plot_square_s_times import main as plot_square_s_times
 # from moving_mesh_transport.solution_plotter import plot_thin_nonlinear_problems as plot_thin
@@ -57,7 +58,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100):
+def Kornreich_benchmark(prime = False, get_k = True, VDMD_estimate = False, IRAM = False, power_iterate = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, coarse_angles = 4, alpha_tol = 1e-5):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -73,7 +74,10 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
 
     # First, find k_eff
     if get_k == True:
-        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop)
+        # coarse solve
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=coarse_angles, coarse_solve=True)
+        # fine solve
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=phi)
         print(k_list, 'k_list')
         print(k_list[-1], 'k effective')
         print(0.4243163, 'benchmark k effective')
@@ -194,5 +198,32 @@ def Kornreich_benchmark(prime = True, get_k = True, VDMD_estimate = False, IRAM 
 
     # IRAM to get alpha modes
 
+    # power iteration
+    if power_iterate == True:
+        alpha_old = 1e-5
+        alpha_old_old = 0
+        k_old = k_list[-1]
+        g_old = 0
+        sigma_t_base = run.parameters['all']['sigma_t'] 
+        while abs(k_old-1) > alpha_tol:
+            g = k_old -1
+            alpha_new = alpha_old - g * (alpha_old - alpha_old_old) /(g - g_old)
+            g_old = g
+            alpha_old_old = alpha_old
+            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
 
+        # Use yaml.safe_load() for security when dealing with untrusted input
+        # For a trusted config file, you might use yaml.FullLoader
+                data = yaml.safe_load(file)
+                data['all']['sigma_t'] = sigma_t_base + alpha_new
+                with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
+        # Use sort_keys=False to maintain a sensible order (optional)
+                    yaml.dump(data, file, sort_keys=False)
+            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=phi)
+            k_old = k_list[-1]
+    with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+                data = yaml.safe_load(file)
+                data['all']['sigma_t'] = sigma_t_base
+                with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
+                    yaml.dump(data, file, sort_keys=False)
 Kornreich_benchmark(use_we = False, guess_k=  0.2)

@@ -100,7 +100,8 @@ data = [('N_ang', int64),
         ('legendre_moments', int64),
         ('angular_derivative', nb.typeof(params_default) ),
         ('recalculate_sigma_coeffs', int64),
-        ('k_old', float64)
+        ('k_old', float64),
+        ('fixed_source', int64)
         ]
 ###############################################################################
 
@@ -111,7 +112,7 @@ class build(object):
     edge_v, cv0, thick, wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
     quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma, finite_domain, domain_width, 
     fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD, fixed_source_coeffs, chi, nu, sigma_f, legendre_moments,
-    angular_derivative, recalculate_sigma_coeffs, k_old):
+    angular_derivative, recalculate_sigma_coeffs, k_old, fixed_source):
         self.N_ang = N_ang
         print(self.N_ang, 'angles')
         self.N_space = N_space
@@ -165,6 +166,7 @@ class build(object):
         self.domain_width = domain_width
         self.fake_sedov_v0 = fake_sedov_v0
         self.recalculate_sigma_coeffs = recalculate_sigma_coeffs
+        self.fixed_source = fixed_source
     
 
         

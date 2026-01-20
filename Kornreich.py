@@ -59,7 +59,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRAM = True, power_method = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
+def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM = False, power_method = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -178,24 +178,43 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRA
 
     # Estimate alpha modes with VDMD
     if VDMD_estimate == True:
-        run.load('Kornreich', 'mesh_parameters_Kornreich')
-        f = h5py.File('Kornreich_results/Kornreich_results/Kornreich_keff.h5', 'r+')
-        ts = f['t']
-        fission_source = f['fission_source'][:]
-        Y_minus = f['Y_minus'][:,:]
-        N_ang = f['N_angles'][:][0]
-        xs = f['xs']
+        with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+        # Use yaml.safe_load() for security when dealing with untrusted input
+        # For a trusted config file, you might use yaml.FullLoader
+                data = yaml.safe_load(file)
+                data['all']['integrator'] = 'Euler'
+                data['all']['fixed_source'] = False
+                with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
+        # Use sort_keys=False to maintain a sensible order (optional)
+                    yaml.dump(data, file, sort_keys=False)
+        run.load('Kornreich_DMD', 'mesh_parameters_Kornreich')
+        # f = h5py.File('Kornreich_results/Kornreich_results/Kornreich_keff.h5', 'r+')
+        # ts = f['t']
+        # fission_source = f['fission_source'][:]
+        # Y_minus = f['Y_minus'][:,:]
+        # N_ang = f['N_angles'][:][0]
+        # xs = f['xs']
         # Y_minus_shifted = np.array(Y_minus).copy().reshape(N_ang, xs.size, ts.size)
         # adjust Y- to remove source influence
       
         integrator = run.parameters['all']['integrator']
         sigma_t = run.parameters['all']['sigma_t']
+        N_ang = run.parameters['fixed_source']['N_angles'][0]
         run.kold = 1
         # skip = 4
         theta = 0
-        eigen_vals = DMD_func3(Y_minus, ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source, N_ang = N_ang, xs = xs)
-        print(np.flip(eigen_vals), 'alpha eigen values VDMD')
-        print(-0.3196537,-0.3229855, 'benchmark first two alpha eigen values' )
+        run.custom_source(randomstart = True, uncollided = 0, moving=0)
+        Yminus = run.sol_ob.Y_minus_psi
+        ts =   run.sol_ob.t
+        xs = run.xs
+        phi = run.phi
+        fission_source =  phi * 0 
+        res_coeffs_VDMD = run.sol_ob.y[:,-1]
+
+        eigen_vals_DMD = DMD_func3(Yminus, ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
+        print(np.flip(np.sort(eigen_vals_DMD)), 'alpha eigen values VDMD')
+        print(alpha_bench, 'benchmark alpha eigen value' )
     # Y_minus_residual = Y_minus.copy() 
     # for it in range(1, time_list.size):
     #     dt = time_list[it] - time_list[it-1]
@@ -261,8 +280,12 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRA
         A = LinearOperator((n, n), matvec=matvec, dtype=np.float64)
 
 # Compute k eigenvalues (largest magnitude by default)
-        vals, vecs = eigs(A, k=6)
+        sigma = None
+        if VDMD_estimate == True:
+             sigma = -eigen_vals_DMD[-1]
+        vals, vecs = eigs(A, k=6, sigma = sigma)
         print(vals, 'vals')
+        print(vecs.size, 'eigenvector size')
         x0 = run.parameters['fixed_source']['x0']
         nu =run.parameters['all']['nu']
         alphas_IRAM = np.sort(-1/vals)

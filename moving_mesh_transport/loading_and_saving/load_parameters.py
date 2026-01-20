@@ -53,6 +53,7 @@ class parameter_load_class:
         self.N_groups = int(parameters['all']['N_groups'])
         self.dense = int(mesh_parameters['dense'])
         self.VDMD = int(parameters['all']['VDMD'])
+        self.fixed_source = int(parameters['all']['fixed_source'])
 
         self.thick = int(parameters['all']['thick'])
         if self.thick == True:

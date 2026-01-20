@@ -35,7 +35,7 @@ all:
   cv_const: 0.0
   estimate_wavespeed: false
   thick: false
-  integrator: BDF
+  integrator: Euler
   Euler_dt_spacing: log
   Euler_dt_num: 16
   geometry:
@@ -45,7 +45,7 @@ all:
   N_groups: 1
   kold: 1.0
   VDMD: true
-  fixed_source: true
+  fixed_source: false
   legendre_moments: 11
   angular_derivative:
     finite_differences: false

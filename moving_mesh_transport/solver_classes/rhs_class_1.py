@@ -143,8 +143,9 @@ data = [('N_ang', int64),
         ('legendre_moments', int64),
         ('angular_derivative',nb.typeof(params_default) ),
         ('recalculate_sigma_coeffs', int64),
-        ('k_old', float64)
-
+        ('k_old', float64),
+        ('fixed_source_on', int64),
+        ('PV_fission', float64[:, :])
         ]
 ##############################################################################
 #thermal couple, l scaling
@@ -243,6 +244,8 @@ class rhs_class():
         # print(np.sum(self.ws), 'sum ws')
         self.recalculate_sigma_coeffs = build.recalculate_sigma_coeffs
         print(np.sum(self.ws), 'ws sum in rhs')
+        self.fixed_source_on = build.fixed_source
+        self.PV_fission = np.zeros((self.N_space, self.M+1))
         
         
         
@@ -548,6 +551,13 @@ class rhs_class():
         # iterate over all cells
         # flux.fixed_source_coeffs = V_old
         # flux.make_fixed_phi(mesh.edges)
+
+        if (self.nu > 0).any():
+            if self.fixed_source_on == False:
+                for ii in range(self.M+1):
+                    for k in range(self.N_space):
+                        self.PV_fission[k, ii] = np.sum(np.multiply(V_old[:,k,ii],self.ws)) #* (self.c) 
+        flux.make_fission_source(mesh.edges, self.PV_fission)
         for space in range(0, self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments, legendre_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
@@ -767,7 +777,14 @@ class rhs_class():
                                 for ii in range(self.M+1):
                                     PV2[ii] = np.sum(np.multiply(V_old[:,space,ii],self.ws)) #* (self.c) 
                                 RHS += PV2 * self.c
-                            RHS +=  fixed_source / self.sigma_t #* self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t #/ self.k_old # fixed fission source
+                            if self.fixed_source_on == True:
+                                RHS +=  fixed_source / self.sigma_t #* self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t #/ self.k_old # fixed fission source
+                            else:
+                                if (self.nu > 0).any():
+                                    fission_source = self.nu * self.sigma_f * flux.fission_source[space, self.g, :]
+                                    RHS += fission_source / self.sigma_t
+
+
                             if const_crosssection ==False:
                                 RHS -= VV / self.sigma_t / self.l # absorption
                             if const_crosssection ==True:

@@ -127,7 +127,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
           dense, shift, VDMD, fixed_source_coeffs, phi_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
-          Euler_dt_spacing, Euler_dt_num, kold):
+          Euler_dt_spacing, Euler_dt_num, kold, fixed_source):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -203,7 +203,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        wave_loc_array, source_strength, move_factor, l, save_wave_loc, pad, leader_pad, quad_thick_source,
                        quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
-                       fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative, recalculate_sigma_coeffs, kold)
+                       fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative, recalculate_sigma_coeffs,
+                        kold, fixed_source)
     initialize.shift = shift
     print(sigma_func)
 

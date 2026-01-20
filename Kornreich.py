@@ -205,6 +205,7 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRA
 
     # IRAM to get alpha modes
     if IRAM == True:
+        run.load('Kornreich', 'mesh_parameters_Kornreich')
         run.custom_source(randomstart = True, uncollided = 0, moving=0)
         edges = run.edges
         N_space = run.parameters['all']['N_spaces'][0] 
@@ -246,13 +247,13 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRA
 
     
         def matvec(x):
-            run.load('Kornreich', 'mesh_parameters_Kornreich')
+            # run.load('Kornreich', 'mesh_parameters_Kornreich')
             run.kold = 1
             psi = x.reshape(((N_ang+1)*N_groups, N_space, M+1))
             fission_source = make_fission_scalar_flux(psi, run.edges, run.ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
             run.custom_source(randomstart = False, uncollided = 0, moving = 0, phi_coeffs=psi, sol_coeffs = fission_source)
             res_coefficients = np.copy(run.sol_ob.y[:,-1])
-            print(res_coefficients.shape)
+            # print(res_coefficients.shape)
 
             return res_coefficients
 
@@ -264,13 +265,13 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = False, IRA
         print(vals, 'vals')
         x0 = run.parameters['fixed_source']['x0']
         nu =run.parameters['all']['nu']
-        alphas_IRAM = np.sort(1/vals)
+        alphas_IRAM = np.sort(-1/vals)
         print(np.max(alphas_IRAM), 'max alpha IRAM')
 
-        print(1/vals, 'eigenvalues IRAM')
+        print(alphas_IRAM, 'eigenvalues IRAM')
 
         f = h5py.File(f'Kornreich_results/Kornreich_alpha_S{N_ang}_{N_space}_cells_x0={x0}_nu={nu}.h5', 'w')
-        f.create_dataset('alpha_list_IRAM_iteration', data = 1/vals)
+        f.create_dataset('alpha_list_IRAM_iteration', data = alphas_IRAM)
         f.close()
 
 

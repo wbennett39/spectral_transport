@@ -14,7 +14,7 @@ all:
   - 50
   tnodes: 40
   Ms:
-  - 1
+  - 2
   N_runs: 1
   rt: 5e-11
   at: 1e-9
@@ -375,7 +375,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 4
+  - 8
   move_type:
   - 1
   - 0

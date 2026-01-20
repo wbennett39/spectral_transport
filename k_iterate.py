@@ -28,7 +28,7 @@ def coeff_for_const_one(a, b, n):
     return 0.0
 def make_fission_scalar_flux(coeffs_old, edges, ws, N_ang, M, N_space, N_groups, fission_vec):
     phi = np.zeros((edges.size-1, M+1))
-    psi = np.zeros((N_ang, edges.size-1, M+1))
+    # psi = np.zeros((N_ang, edges.size-1, M+1))
    
     for ik in range(edges.size-1):
         a = edges[ik]

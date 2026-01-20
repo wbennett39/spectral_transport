@@ -253,8 +253,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     fake_T_eval_points = np.zeros(5)
     if recalculate_sigma_coeffs == False:
         sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points) # calculate moments of cross sections
-    # print(mesh.edges, 'edges')
-    # print(mesh.Dedges_const, 'dedges const')
+
 
 
     if thermal_couple['none'] != 1:
@@ -272,7 +271,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             initialize.IC = phi_coeffs # un-normalized coefficients
             flux.make_fixed_phi(mesh.edges)
         else:
-            print('initializing with random IC')
             # flux.fixed_source_coeffs = initialize.IC.copy()
             norm_integrand = fixed_source_coeffs.copy()
             for space in range(N_space):
@@ -281,8 +279,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             normalization = normalize_phi(flux.fixed_source_coeffs, mesh.edges, ws, N_ang, M, N_space, N_groups) #/ 4 /math.pi /(mesh.edges[-1]**3-mesh.edges[0]**3) * 3
             # normalization = 1
             # normalization = normalize_phi()
-            # print(normalization, 'P0')
-           
             
 
        
@@ -295,6 +291,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 flux.fixed_source_coeffs = normalize_fission_source(flux.fixed_source_coeffs, N_space, M, 1/normalization/kold, mesh.edges)
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs.copy() 
                 # initialize.IC = initialize.IC  #/ normalization
+            print(kold, 'k')
             flux.make_fixed_phi(mesh.edges)
 
 
@@ -372,7 +369,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 VV2 = radiation
             # VV2 = V_new[:,:,:]
             VV3 = VV2.reshape((N_ang  + extra_deg) * N_space *(M+1))
-            # print(VV2.shape())
             res = RHS(t, VV3, ig)
             res2 = res.reshape((N_ang+extra_deg, N_space, M+1))
             if extra_deg != 0:
@@ -380,11 +376,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:-1,:,:]
             else:
                 VV_new[ig * N_ang:(ig+1) *( N_ang),:,:] = res2[:,:,:]
-
-
-     
-
-        # print(V_new[N_ang])
         return VV_new.reshape((N_ang * N_groups + extra_deg) * N_space *(M+1))
 
     start = timer()
@@ -430,7 +421,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     # sol_JL = jl_integrator_func(RHS, IC, (0, tfinal), tpnts)
 
     # sol = integrate.solve_ivp(RHS, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = at, max_step = mxstp, min_step = 1e-7)
-    print('starting solve')
     if integrator == 'BDF_VODE':
         it2 = 0
         ts = np.logspace(-5,math.log10(tfinal), 100 + 1)
@@ -476,7 +466,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                         it2 += 1
             
             # ode15s.set_initial_value(ode15s.y, tf)
-        print(sol.y, 'Y')
+
         
 
     
@@ -530,7 +520,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         #     tfinal = sol.t_events[0][0]
         #     y_final = sol.sol(tfinal)    
         print(sol.t, 'eval times')
-        print(sol.y.shape, 'y vector shape')
         ts = sol.t
 
  

@@ -175,7 +175,7 @@ def transfer_coefficients(coeffs_old, M):
     return coeffs_new
 
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0])):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -298,7 +298,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     phi_interpolated = interp1d(run.xs, run.phi[:, -1])
     # phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, initial_fission_source, ws)
     
-    integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
+    # integrand = lambda x:  phi_interpolated(x) * x**2 * 4 * math.pi * sigma_interp(x) 
     
     # plt.figure('initial fission source')
     # plt.plot(run.xs, phioutIC, label = 'initial condition')
@@ -405,6 +405,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # plt.show()
          # normalize fission source
         print(normalize_phi(old_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1/k')
+
         # solve with new source
         run.custom_source(randomstart = False, sol_coeffs = old_fission_source , phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
         # plt.figure(f'initial vs final {n_iters}')

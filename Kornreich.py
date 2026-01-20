@@ -74,6 +74,24 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
         run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
     # First, find k_eff
+    if run.parameters['fixed_source']['shift'] == 0.0:
+            if run.parameters['fixed_source']['x0'][0] ==4.5:
+                if run.parameters['all']['nu'] == 1.5:
+                    k_bench = 0.4241317
+                    alpha_bench = -0.3229855
+                elif run.parameters['all']['nu'] == 3.5:
+                    k_bench = 0.9896407
+                    alpha_bench = -0.006440766
+            elif run.parameters['fixed_source']['x0'][0] ==4.6:
+                if run.parameters['all']['nu'] == 1.5:
+                    k_bench = 0.4242237
+                    alpha_bench = -0.3213939
+                elif run.parameters['all']['nu'] == 3.5:
+                    k_bench = 0.9898554
+                    alpha_bench = -0.006298843
+            else: #not ready for other cases. Probably not necessary
+                # k_bench = 0.4243163
+                raise ValueError('Do not have this case')
     if get_k == True:
         # coarse solve
         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=coarse_angles, coarse_solve=True)
@@ -100,25 +118,10 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
         f.close()
 
         plt.figure('keff')
-        if run.parameters['fixed_source']['shift'] == 0.0:
-            if run.parameters['fixed_source']['x0'][0] ==4.5:
-                if run.parameters['all']['nu'] == 1.5:
-                    k_bench = 0.4241317
-                    alpha_bench = -0.3229855
-                elif run.parameters['all']['nu'] == 3.5:
-                    k_bench = 0.9896407
-                    alpha_bench = -0.006440766
-            elif run.parameters['fixed_source']['x0'][0] ==4.6:
-                if run.parameters['all']['nu'] == 1.5:
-                    k_bench = 0.4242237
-                    alpha_bench = -0.3213939
-                elif run.parameters['all']['nu'] == 3.5:
-                    k_bench = 0.9898554
-                    alpha_bench = -0.006298843
+        
 
 
-        else: #not ready for other cases. Probably not necessary
-            k_bench = 0.4243163
+
         nits = len(k_list)
         plt.plot(np.linspace(0, nits, nits), k_list, '-o', mfc = 'none')
         plt.xlabel('iteration', fontsize = 16)
@@ -185,6 +188,7 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
                 data = yaml.safe_load(file)
                 data['all']['integrator'] = 'Euler'
                 data['all']['fixed_source'] = False
+                data['all']['tfinal'] = 500 
                 with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)
                     yaml.dump(data, file, sort_keys=False)
@@ -200,7 +204,7 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
       
         integrator = run.parameters['all']['integrator']
         sigma_t = run.parameters['all']['sigma_t']
-        N_ang = run.parameters['fixed_source']['N_angles'][0]
+        N_ang = run.parameters['fixed_source']['N_angles'][0] +1
         run.kold = 1
         # skip = 4
         theta = 0

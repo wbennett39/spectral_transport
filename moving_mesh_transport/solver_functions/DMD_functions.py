@@ -488,7 +488,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
                 Y_plus_shifted = np.array(Y_plus).copy().reshape(N_ang, xs.size, ts.size)
                 for ij in range(N_ang):
                         # assert 0
-                        Y_plus_shifted[ij, :, it] = Y_plus.reshape(N_ang, xs.size, ts.size)[ij,:, it] - sourcevec #* (ts[it] - ts[it-1])
+                        Y_plus_shifted[ij, :, it] = Y_plus.reshape(N_ang, xs.size, ts.size)[ij,:, it] #- sourcevec #* (ts[it] - ts[it-1])
             Y_plus = Y_plus_shifted.reshape(N_ang * xs.size, ts.size)
                 # elif integrator == 'BDF_VODE':
             #     if it > 1:

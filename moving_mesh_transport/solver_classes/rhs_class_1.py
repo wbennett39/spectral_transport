@@ -145,7 +145,8 @@ data = [('N_ang', int64),
         ('recalculate_sigma_coeffs', int64),
         ('k_old', float64),
         ('fixed_source_on', int64),
-        ('PV_fission', float64[:, :])
+        ('PV_fission', float64[:, :]),
+        ('LOUD', int64)
         ]
 ##############################################################################
 #thermal couple, l scaling
@@ -181,7 +182,8 @@ class rhs_class():
         self.sigma_a = build.sigma_a
         self.sigma_t = build.sigma_t
         self.c = build.sigma_s/ build.sigma_t 
-        print(self.c, 'c')
+        self.LOUD = False
+
         self.particle_v = build.particle_v
         self.lumping = build.lumping
         self.k_old = build.k_old
@@ -189,7 +191,7 @@ class rhs_class():
         self.radiative_transfer = build.thermal_couple
        
         self.c_a = build.sigma_a / build.sigma_t
-        print(self.c_a, 'c_a')
+        
         self.legendre_moments = build.legendre_moments
         self.mean_free_time = 1/build.sigma_t
         self.division = 8000
@@ -210,8 +212,6 @@ class rhs_class():
         self.T_old = np.zeros((self.N_space, self.xs_quad.size))
         # self.alphas = np.zeros(self.N_ang-1)
         self.alphas = np.zeros(self.N_ang)
-        # print(self.mus, 'mus')
-        # print(self.ws, 'ws')
         self.make_alphas()
         self.old_percent_complete = 0.0
         self.stymie_count = 0
@@ -228,7 +228,7 @@ class rhs_class():
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
         self.slope_limiter = False 
-        print('### ### ### ### ### ###')
+        
         # print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
         self.g = 0
@@ -243,11 +243,14 @@ class rhs_class():
         self.sigma_f = build.sigma_f
         # print(np.sum(self.ws), 'sum ws')
         self.recalculate_sigma_coeffs = build.recalculate_sigma_coeffs
-        print(np.sum(self.ws), 'ws sum in rhs')
+        
         self.fixed_source_on = build.fixed_source
         self.PV_fission = np.zeros((self.N_space, self.M+1))
-        
-        
+        print('### ### ### ### ### ###')
+        if self.LOUD == True:
+            print(self.c, 'c')
+            print(np.sum(self.ws), 'ws sum in rhs')
+        # print(self.c_a, 'c_a')
         
     def V_new_refl_enforce(self, V_new):
         res = V_new.copy()
@@ -350,7 +353,7 @@ class rhs_class():
         self.told = t
         
         self.delta_tavg += delta_t / self.division
-        if self.counter == self.division:
+        if self.counter == self.division and self.LOUD ==True:
             print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
             print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
             if np.round((t/self.tfinal) * 100, 3)-self.old_percent_complete <= 0.001:
@@ -959,9 +962,6 @@ class rhs_class():
             res = V_old.copy()  
             for tangle in range(0, int(self.N_ang/2)):
                     refl_index = self.N_ang-tangle-1
-                    # print(refl_index, self.mus[refl_index], 'ref')
-                    # print(tangle, self.mus[tangle], 'ang')
-                    # print('-----')
                           
                     res[tangle, 0, :] = res[refl_index, 0, :]
             return res

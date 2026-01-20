@@ -1,6 +1,6 @@
 all:
   problem_name: transport
-  tfinal: 19800.0
+  tfinal: 500
   c_scaling: false
   epsilon_scaling: false
   epsilon: 1.0
@@ -11,7 +11,7 @@ all:
   nu: 3.5
   t0: 10000000000000.0
   N_spaces:
-  - 35
+  - 5
   tnodes: 40
   Ms:
   - 0
@@ -376,7 +376,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 4
+  - 2
   move_type:
   - 1
   - 0

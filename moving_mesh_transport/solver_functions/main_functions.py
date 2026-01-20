@@ -151,10 +151,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         mus = mus_new
         ws = ws_new
         N_ang += 1
-        print('using diamond differencing in angle')
-    print(np.sum(ws), 'ws sum')
-    print(mus, 'angles')
-    print(ws, 'weights')
+        # print('using diamond differencing in angle')
+    # print(np.sum(ws), 'ws sum')
+    # print(mus, 'angles')
+    # print(ws, 'weights')
     print('integrator method:', integrator)
     # N_ang += 2 # add starting angles. I probably only need one but I'm not going to change it now
     #     print("mus =", mus)
@@ -206,9 +206,6 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative, recalculate_sigma_coeffs,
                         kold, fixed_source)
     initialize.shift = shift
-    print(sigma_func)
-
-
     if sigma_func['converging'] == 1:
         f = h5py.File('heat_wavepos.h5', 'r+')
         boundary_temp = f['temperature'][:] / 10 # convert from HeV to keV
@@ -715,7 +712,7 @@ def mesh_dry_run(mesh, tfinal):
     tlist = np.linspace(0.0, tfinal, 500)
     for it, tt in enumerate(tlist):
         mesh.move(tt)
-    print('mesh dry run complete')
+    # print('mesh dry run complete')
     mesh.move(0.0)
 
 

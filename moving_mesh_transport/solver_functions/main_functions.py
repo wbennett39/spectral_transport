@@ -206,6 +206,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative, recalculate_sigma_coeffs,
                         kold, fixed_source)
     initialize.shift = shift
+    print(dense)
+
     if sigma_func['converging'] == 1:
         f = h5py.File('heat_wavepos.h5', 'r+')
         boundary_temp = f['temperature'][:] / 10 # convert from HeV to keV
@@ -386,10 +388,13 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     if eval_times == True:
         tpnts = eval_array
         print(tpnts, 'time points')
-    else:
+    else: 
+        if dense == False:
         # tpnts = None
-        tpnts = np.linspace(0, tfinal, 3)
-        eval_array = tpnts
+            tpnts = np.linspace(0, tfinal, 3)
+            eval_array = tpnts
+        else:
+            tpnts = None
         # tpnts_dense = np.linspace(0.01, tpnts[-1], 100)
         # for it, tt in enumerate(tpnts_dense):
         #     mesh.move(tt)
@@ -517,7 +522,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         # if sol.t_events[0].size:
         #     tfinal = sol.t_events[0][0]
         #     y_final = sol.sol(tfinal)    
-        print(sol.t, 'eval times')
+        if dense == False:
+            print(sol.t, 'eval times')
+        # print(dense, 'dense')
+        # assert 0
         ts = sol.t
 
  

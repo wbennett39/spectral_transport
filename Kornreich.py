@@ -59,7 +59,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM = False, power_method = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
+def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM = True, power_method = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -192,7 +192,19 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
                 with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)
                     yaml.dump(data, file, sort_keys=False)
-        run.load('Kornreich_DMD', 'mesh_parameters_Kornreich')
+        with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
+
+        # Use yaml.safe_load() for security when dealing with untrusted input
+        # For a trusted config file, you might use yaml.FullLoader
+                data = yaml.safe_load(file)
+                # data['all']['integrator'] = 'Euler'
+                data['dense'] = True
+                data['eval_times'] =False
+ 
+                with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich_DMD.yaml', 'w') as file:
+        # Use sort_keys=False to maintain a sensible order (optional)
+                    yaml.dump(data, file, sort_keys=False)
+        run.load('Kornreich_DMD', 'mesh_parameters_Kornreich_DMD')
         # f = h5py.File('Kornreich_results/Kornreich_results/Kornreich_keff.h5', 'r+')
         # ts = f['t']
         # fission_source = f['fission_source'][:]
@@ -215,10 +227,13 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
         phi = run.phi
         fission_source =  phi * 0 
         res_coeffs_VDMD = run.sol_ob.y[:,-1]
-
-        eigen_vals_DMD = DMD_func3(Yminus, ts,  integrator, sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
-        print(np.flip(np.sort(eigen_vals_DMD)), 'alpha eigen values VDMD')
+        print(Yminus, 'y-')
+        print(ts, 'ts')
+        eigen_vals_DMD = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=20, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
+        eigen_vals_DMD = np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0]))
+        print(eigen_vals_DMD, 'alpha eigen values VDMD')
         print(alpha_bench, 'benchmark alpha eigen value' )
+        
     # Y_minus_residual = Y_minus.copy() 
     # for it in range(1, time_list.size):
     #     dt = time_list[it] - time_list[it-1]
@@ -370,5 +385,15 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
                     data['all']['sigma_t'] = sigma_t_base
                     with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                         yaml.dump(data, file, sort_keys=False)
+
+    if VDMD_estimate == True and IRAM == True and power_method == True:
+        plt.figure('alpha_vals')
+        plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
+        plt.plot(nits, eigen_vals_DMD[-1], 'o', label = 'DMD')          
+        plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none', label = 'iterations')
+        plt.plot(nits, alphas_IRAM[-1], 'o', label = 'IRAM')
+        plt.savefig('Kornreich_results/alphas_Kornreich.pdf')
+
+
 
 Kornreich_benchmark(use_we = False, guess_k=  0.2)

@@ -1,0 +1,54 @@
+find_edges_tol: 1000000000.0
+sqrt_t_move_factor: 1.0
+save_wave_loc: false
+estimate_wavespeed: false
+find_wave_loc: false
+choose_xs: false
+pad: 35.0
+leader_pad: 0.025
+xs_list:
+- 0.0
+- 0.5
+- 1.0
+- 1.5
+- 2.0
+- 2.5
+xs_quad: 25
+eval_times: false
+eval_array:
+- 204.20877
+- 523.519754
+- 692.759852
+- 813.786114
+dense: true
+finite: true
+domain_width: 4.5
+boundary_on:
+- 0
+- 0
+boundary_source_strength: 1.0
+boundary_source: false
+boundary_source_loc:
+- 0
+- 0.1
+sigma_func:
+  constant: false
+  linear: false
+  siewert1: false
+  siewert2: false
+  gaussian: false
+  f_sedov: false
+  converging: false
+  test1: false
+  test2: false
+  test3: false
+  test4: false
+  picket_fence: false
+  modak_gupta0: false
+  modak_gupta05: false
+  modak_gupta1: false
+  modak_gupta25: false
+  modak_gupta5: false
+  Kornreich: true
+Msigma: 0
+fake_sedov_v0: 0.005

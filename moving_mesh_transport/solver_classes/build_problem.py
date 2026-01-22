@@ -114,7 +114,7 @@ class build(object):
     fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD, fixed_source_coeffs, chi, nu, sigma_f, legendre_moments,
     angular_derivative, recalculate_sigma_coeffs, k_old, fixed_source):
         self.N_ang = N_ang
-        print(self.N_ang, 'angles')
+        # print(self.N_ang, 'angles')
         self.N_space = N_space
         self.M = M
         self.lumping = lumping

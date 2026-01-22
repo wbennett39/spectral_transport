@@ -131,7 +131,7 @@ class main_class(parameter_load_class):
                 else:
                     choose_xs = False
                     specified_xs = 0.0
-                print(self.finite_domain, 'finite domain')
+                # print(self.finite_domain, 'finite domain')
 
                 xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol_object, uncollided_ob, fission_source =  solve(
                     self.tfinal,N_space, N_ang, M, self.N_groups, x0_new, self.t0, self.sigma_t, self.sigma_s, self.t_nodes, self.source_type, uncollided, moving, self.move_type, self.thermal_couple,

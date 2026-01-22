@@ -491,9 +491,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
   
     else:
-        print(rt, 'rt')
-        print(at, 'at')
-        print('starting solve')
+        # print(rt, 'rt')
+        # print(at, 'at')
+        # print('starting solve')
         vectorized_rhs_wrap = np.vectorize(RHS_wrap)
         y0 = reshaped_IC.astype(float)
         atol_vec = at * (1 + np.abs(y0))  

@@ -59,7 +59,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM = False, power_method = False, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
+def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM = False, power_method = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-3, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -186,9 +186,9 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
         # Use yaml.safe_load() for security when dealing with untrusted input
         # For a trusted config file, you might use yaml.FullLoader
                 data = yaml.safe_load(file)
-                data['all']['integrator'] = 'Euler'
+                # data['all']['integrator'] = 'Euler'
                 data['all']['fixed_source'] = False
-                data['all']['tfinal'] = 500 
+                data['all']['tfinal'] = 50
                 with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)
                     yaml.dump(data, file, sort_keys=False)
@@ -306,9 +306,18 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
     if power_method == True:
         alpha_old = 1e-5
         alpha_old_old = 0
-        k_old = k_list[-1]
+        if get_k == True:
+            k_old = k_list[-1]
+            coarse_solve = False
+        else:
+             k_old = 1e-3
+             phi = None
+             coarse_solve = True
         g_old = 0
         sigma_t_base = run.parameters['all']['sigma_t'] 
+        N_spaces = run.parameters['all']['N_spaces'][0] 
+        x0 = run.parameters['fixed_source']['x0'][0]
+        nu = run.parameters['all']['nu']
         alpha_list = []
         alpha_list.append(alpha_old_old)
         alpha_list.append(alpha_old)
@@ -332,7 +341,7 @@ def Kornreich_benchmark(prime = False, get_k = False, VDMD_estimate = True, IRAM
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)
                     yaml.dump(data, file, sort_keys=False)
-            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=phi)
+            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_old, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, coarse_solve=coarse_solve, max_its = max_its_kloop, input_phi=phi)
             k_old = k_list[-1]
             alpha_old = alpha_new
             iterations += 1

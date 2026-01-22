@@ -107,7 +107,7 @@ class scalar_flux(object):
                             self.P_fixed[k, ig, i] +=  u[j] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
     def make_fission_source(self, edges, V):
         # as of now, sigma_f must be constant
-        # self.P_fixed = np.zeros((self.N_space, self.N_groups, self.M+1))
+        self.fission_source = np.zeros((self.N_space, self.N_groups, self.M+1))
         # print(normalize_phi(self.fixed_source_coeffs, edges, 2*self.ws, self.N_ang, self.M, self.N_space, self.N_groups), 'should be 1/(k) * chi')
         for k in range(self.N_space):
             xL = edges[k]

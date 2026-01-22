@@ -147,8 +147,8 @@ class mesh_class(object):
         self.t0 = t0
         # print(self.t0, 't0')
         self.finite_domain = finite_domain
-        if self.finite_domain == True:
-            print('finite domain')
+        # if self.finite_domain == True:
+            # print('finite domain')
         self.domain_width = domain_width
         
         self.boundary_on = np.array(list(boundary_on), dtype = np.int64)

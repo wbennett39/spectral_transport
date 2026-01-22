@@ -182,7 +182,7 @@ class rhs_class():
         self.sigma_a = build.sigma_a
         self.sigma_t = build.sigma_t
         self.c = build.sigma_s/ build.sigma_t 
-        self.LOUD = False
+        self.LOUD = True
 
         self.particle_v = build.particle_v
         self.lumping = build.lumping
@@ -194,8 +194,8 @@ class rhs_class():
         
         self.legendre_moments = build.legendre_moments
         self.mean_free_time = 1/build.sigma_t
-        self.division = 8000
-        self.counter = 8000
+        self.division = 1000
+        self.counter = 1000
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])
@@ -784,7 +784,9 @@ class rhs_class():
                                 RHS +=  fixed_source / self.sigma_t #* self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t #/ self.k_old # fixed fission source
                             else:
                                 if (self.nu > 0).any():
-                                    fission_source = self.nu * self.sigma_f * flux.fission_source[space, self.g, :]
+                                    
+                                    fission_source = self.nu[space] * self.sigma_f[space] * flux.fission_source[space, self.g, :]
+                                    # print(fission_source)
                                     RHS += fission_source / self.sigma_t
 
 

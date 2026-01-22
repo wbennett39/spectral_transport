@@ -231,10 +231,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     M  = run.parameters['all']['Ms'][0]
     N_space = run.parameters['all']['N_spaces'][0]
     print(N_space, 'spatial cells')
-    run.parameters['all']['rt'] = 1
-    run.parameters['all']['at'] = 1e-5
-    run.parameters['all']['integrator'] = 'Euler'
-    run.parameters['all']['kold'] = kguess
+    if coarse_solve == True:
+        run.parameters['all']['rt'] = 1
+        run.parameters['all']['at'] = 1e-5
+        run.parameters['all']['integrator'] = 'Euler'
+        run.parameters['all']['kold'] = kguess
     
     t1 = time.time()
     if coarse_solve == True:

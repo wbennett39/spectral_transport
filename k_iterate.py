@@ -454,8 +454,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # print((norm-test_norm) /test_norm, 'norm difference')
         # print(test_norm, 'scipy integral')
 
-        if knew <0:
-            raise ValueError('negative k_eff')
+        # if knew <0:
+        #     raise ValueError('negative k_eff')
     
         if abs(knew - kold ) <=tol:
             klist.append(knew)

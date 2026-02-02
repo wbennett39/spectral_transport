@@ -127,7 +127,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
           dense, shift, VDMD, fixed_source_coeffs, phi_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
-          Euler_dt_spacing, Euler_dt_num, kold, fixed_source):
+          Euler_dt_spacing, Euler_dt_num, kold, fixed_source, first_step):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -517,8 +517,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         #     ss_event = make_steady_state_event(RHS_wrap, tol=1e-11)
         # for elem in f_eps:
         #     print(elem)
-        
-        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = None, events = ss_event)
+        if first_step < 0:
+            first_step = None
+        elif first_step >= tfinal:
+            first_step = None
+        sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = first_step, events = ss_event)
         # if sol.t_events[0].size:
         #     tfinal = sol.t_events[0][0]
         #     y_final = sol.sol(tfinal)    

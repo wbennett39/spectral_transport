@@ -410,6 +410,22 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # solve with new source
         run.custom_source(randomstart = False, sol_coeffs = old_fission_source , phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
         # plt.figure(f'initial vs final {n_iters}')
+        with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
+
+        # Use yaml.safe_load() for security when dealing with untrusted input
+        # For a trusted config file, you might use yaml.FullLoader
+                data = yaml.safe_load(file)
+                # data['all']['integrator'] = 'Euler'
+                # data['dense'] = True
+                # data['eval_times'] =False
+                ts = run.sol_ob.t
+                first_step = float(ts[1] - ts[0])
+                data['first_step'] = first_step
+                print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
+                # assert 0
+                with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'w') as file:
+        # Use sort_keys=False to maintain a sensible order (optional)
+                    yaml.dump(data, file, sort_keys=False)
         # phioutIC, psi_outIC = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, coeffs_old, ws)
         # plt.plot(run.xs, phioutIC, 'k--', label = 'IC')
         # plt.plot(run.xs, run.phi[:, -1], '-', label = 'Final')

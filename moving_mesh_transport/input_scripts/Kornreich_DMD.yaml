@@ -1,6 +1,6 @@
 all:
   problem_name: transport
-  tfinal: 50
+  tfinal: 500
   c_scaling: false
   epsilon_scaling: false
   epsilon: 1.0
@@ -11,7 +11,7 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 50
+  - 5
   tnodes: 40
   Ms:
   - 0
@@ -35,7 +35,7 @@ all:
   cv_const: 0.0
   estimate_wavespeed: false
   thick: false
-  integrator: BDF
+  integrator: Euler
   Euler_dt_spacing: log
   Euler_dt_num: 16
   geometry:

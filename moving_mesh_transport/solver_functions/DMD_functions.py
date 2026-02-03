@@ -474,7 +474,7 @@ def sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector):
 
 
 
-def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10, try_WDMD = False, source = False, sourcevec = np.zeros(10), N_ang = 0, xs = np.zeros(1)):
+def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10, try_WDMD = False, source = False, sourcevec = np.zeros(10), N_ang = 0, xs = np.zeros(1), sparsify = False):
         ts =t
         Y_plus = np.zeros((Y_minus[:,0].size, t.size))
         # populate Y+ assuming Backward Euler 
@@ -497,15 +497,16 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         
 
         # This needs to take tfinal as an input
-        if integrator == 'Euler' or integrator == 'BDF_VODE':
+        if integrator == 'Euler' or integrator == 'BDF_VODE' and sparsify == True:
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, -5, np.log(100), sparse_time_points)
                 # weak_Yminus_sparse = sparsify_data_mat2( weak_Yminus, sparse_time_points)
                 # weak_Yplus_sparse = sparsify_data_mat2(weak_Yplus, sparse_time_points)
         else:
-                ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
-                ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, 0, 100, sparse_time_points, 'const')
-        
+                # ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, 0, 100, sparse_time_points, 'const')
+                # ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, 0, 100, sparse_time_points, 'const')
+                ts_sparse, Y_minus_sparse = ts, Y_minus
+                ts_sparse, Y_plus_sparse = ts, Y_plus
         if try_WDMD == True:
             weak_Yminus, weak_Yplus, associated_time_vector = weak_VDMD(Y_minus, Y_plus, ts)
             # weak_Yminus_sparse, weak_Yplus_sparse = sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector)

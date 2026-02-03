@@ -421,6 +421,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 ts = run.sol_ob.t
                 first_step = float(ts[1] - ts[0])
                 data['first_step'] = first_step
+                data['dense'] = True
+                data['eval_times'] =False
                 print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
                 # assert 0
                 with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'w') as file:

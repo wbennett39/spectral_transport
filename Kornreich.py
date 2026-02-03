@@ -279,7 +279,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         M =  run.parameters['all']['Ms'][0]
         N_groups = 1 
         N_groups = run.parameters['all']['N_groups']
-        n = N_space * (N_ang+1) * (M+1) *N_groups
+        n = N_space * (N_ang) * (M+1) *N_groups
         sigma_f = run.parameters['all']['sigma_f']
         nu = run.parameters['all']['nu'] 
         chi = run.parameters['all']['chi'] 
@@ -316,7 +316,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
             # run.load('Kornreich', 'mesh_parameters_Kornreich')
 
             run.kold = 1
-            psi = x.reshape(((N_ang+1)*N_groups, N_space, M+1))
+            psi = x.reshape(((N_ang)*N_groups, N_space, M+1))
             fission_source = make_fission_scalar_flux(psi, run.edges, run.ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
             run.custom_source(randomstart = False, uncollided = 0, moving = 0, phi_coeffs=psi, sol_coeffs = fission_source)
             res_coefficients = np.copy(run.sol_ob.y[:,-1])
@@ -364,8 +364,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         f.create_dataset('alpha_list_IRAM_iteration', data = alphas_IRAM)
         f.close()
         
-        phi0 = coeffs_to_phi(coeffs_to_phi(vecs[:,0].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M))
-        phi1 = coeffs_to_phi(coeffs_to_phi(vecs[:,1].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M))
+        phi0 = coeffs_to_phi(vecs[:,0].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
+        phi1 = coeffs_to_phi(vecs[:,1].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
 
         plt.figure('eigenvectors')
         plt.xlabel('r [cm]', fontsize = 16)

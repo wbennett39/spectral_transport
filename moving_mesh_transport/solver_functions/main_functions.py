@@ -535,6 +535,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                                     f_tol=1e-4,   # stop when ||F|| is small
                                     maxiter=500)
                 reshaped_IC = Y_star
+                atol_vec = at * (1 + np.abs(reshaped_IC))  
             except:
                 print('minimization failed')
             

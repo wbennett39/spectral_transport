@@ -362,8 +362,14 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
 
     
-
-
+    if coarse_solve == True:
+            run.load('Kornreich_new', mesh_parameters)
+    else:
+            run.load(transport_parameters, mesh_parameters) 
+    at = run.parameters['all']['at'] 
+    rt = run.parameters['all']['rt']
+    atlist = np.logspace(0, np.log10(at),3)
+    rtlist = np.logspace(0, np.log10(rt), 3)
     while converged == False and n_iters < max_its: 
         if coarse_solve == True:
             run.load('Kornreich_new', mesh_parameters)
@@ -371,6 +377,9 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             run.load(transport_parameters, mesh_parameters) # reset parameters to agree with YAML file
         # the source is actually not normalized
         # run.parameters['all']['integrator'] = 'Euler'
+        if n_iters < 3:
+            run.parameters['all']['at'] = atlist[n_iters]
+            run.parameters['all']['rt'] = rtlist[n_iters]
         plt.ion()
         plt.figure('fission source')
         plt.plot(run.xs, run.phi[:, -1] * sigma_f_array * nu_array * chi, '--', label = f'iteration {n_iters -1}')
@@ -424,7 +433,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 data['first_step'] = first_step
                 data['dense'] = True
                 data['eval_times'] =False
-                print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
+                # print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
                 # assert 0
                 with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)

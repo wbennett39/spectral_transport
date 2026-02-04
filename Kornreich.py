@@ -260,6 +260,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
     eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0])))
     print(eigen_vals_DMD, 'alpha eigen values VDMD')
     print(alpha_bench, 'benchmark alpha eigen value' )
+    print(eigen_vectors.shape, 'eigen vec shape')
     
 # Y_minus_residual = Y_minus.copy() 
 # for it in range(1, time_list.size):
@@ -349,7 +350,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         sigma = None
         
         sigma = -1/np.max(eigen_vals_DMD)
-        vals, vecs = eigs(A, k=4, sigma = sigma, v0 = eigen_vectors[0])
+        vals, vecs = eigs(A, k=4, sigma = sigma, v0 = eigen_vectors[:,0])
         ws = run.ws
         print(vals, 'vals')
 
@@ -478,6 +479,65 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         f['res_string'] =  [k_list[-1], alpha_final]
     f.close()
 
+    return k_list[-1], alpha_final
 
 
-Kornreich_benchmark(use_we = False, guess_k=  0.2)
+# Kornreich_benchmark(use_we = False, guess_k=  0.2)
+
+
+
+
+def mesh_converge_Kornreich(cells_start = 5, N_angles = 96):
+    converged = False
+    k_guess = 0.8
+    alpha_old = 1e-6
+    tol = 1e-13
+    k_list = [k_guess]
+    alpha_list = [alpha_old]
+    cells_list = [cells_start]
+    while not converged:
+          with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+    # Use yaml.safe_load() for security when dealing with untrusted input
+    # For a trusted config file, you might use yaml.FullLoader
+            data = yaml.safe_load(file)
+            data['all']['N_spaces'][0] = cells_start
+            data['fixed_source']['N_angles'][0] = N_angles
+            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
+    # Use sort_keys=False to maintain a sensible order (optional)
+                yaml.dump(data, file, sort_keys=False)
+          
+          k_new, alpha_new = Kornreich_benchmark(guess_k=k_guess)
+
+          if np.abs(k_guess - k_new) <= tol and np.abs(alpha_new-alpha_old) <= tol:
+               converged = True
+          else:
+               k_guess = k_new
+               alpha_old = alpha_new
+               cells_start = int(cells_start * 2)
+               k_list.append(k_guess)
+               alpha_list.append(alpha_old)
+               cells_list.append(cells_start)
+               plt.figure('k converge')
+               plt.semilogx(cells_list, k_list, '-o')
+               plt.xlabel('spatial cells', fontsize = 16)
+               plt.ylabel(r'$k_\mathrm{eff}$', fontsize= 16)
+               ax = plt.gca()
+               ax.spines['top'].set_visible(False)
+               ax.spines['right'].set_visible(False)
+               plt.savefig(f'Kornreich_results/mesh_converge_k_N_angles={N_angles}.pdf')
+               plt.figure('alpha converge')
+               plt.loglog(cells_list, alpha_list, '-o')
+               plt.xlabel('spatial cells', fontsize = 16)
+               plt.ylabel(r'$k_\mathrm{eff}$', fontsize= 16)
+               ax = plt.gca()
+               ax.spines['top'].set_visible(False)
+               ax.spines['right'].set_visible(False)
+               plt.savefig(f'Kornreich_results/mesh_converge_alpha_N_angles={N_angles}.pdf')
+
+
+
+mesh_converge_Kornreich(N_angles = 2)
+
+     
+     

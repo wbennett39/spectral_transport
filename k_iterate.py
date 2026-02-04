@@ -366,8 +366,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             run.load('Kornreich_new', mesh_parameters)
     else:
             run.load(transport_parameters, mesh_parameters) 
-    at = run.parameters['all']['at'] 
-    rt = run.parameters['all']['rt']
+    at = float(run.parameters['all']['at']) 
+    rt = float(run.parameters['all']['rt'])
     atlist = np.logspace(0, np.log10(at),3)
     rtlist = np.logspace(0, np.log10(rt), 3)
     while converged == False and n_iters < max_its: 

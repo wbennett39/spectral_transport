@@ -90,6 +90,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
     # assert 0
     run.load('Kornreich', 'mesh_parameters_Kornreich')
     if prime == True:
+        at = float(run.parameters['all']['at']) 
+        rt = float(run.parameters['all']['rt'])
         run.parameters['all']['N_spaces'] = [10]
         run.parameters['all']['tfinal'] = 0.001
         run.parameters['all']['Ms'] = [0]
@@ -491,7 +493,7 @@ def mesh_converge_Kornreich(cells_start = 5, N_angles = 96):
     converged = False
     k_guess = 0.8
     alpha_old = 1e-6
-    tol = 1e-13
+    tol = 1e-8
     k_list = [k_guess]
     alpha_list = [alpha_old]
     cells_list = [cells_start]

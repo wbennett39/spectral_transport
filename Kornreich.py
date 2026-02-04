@@ -256,8 +256,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
     res_coeffs_VDMD = run.sol_ob.y[:,-1]
     print(Yminus, 'y-')
     print(ts, 'ts')
-    eigen_vals_DMD = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
-    eigen_vals_DMD = np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0]))
+    eigen_vals_DMD, eigen_vectors = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
+    eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0])))
     print(eigen_vals_DMD, 'alpha eigen values VDMD')
     print(alpha_bench, 'benchmark alpha eigen value' )
     
@@ -332,6 +332,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
                 data['first_step'] = first_step
                 data['dense'] = True
                 data['eval_times'] =False
+
                 print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
                 # assert 0
                 with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'w') as file:
@@ -348,7 +349,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         sigma = None
         
         sigma = -1/np.max(eigen_vals_DMD)
-        vals, vecs = eigs(A, k=4, sigma = sigma)
+        vals, vecs = eigs(A, k=4, sigma = sigma, v0 = eigen_vectors[0])
         ws = run.ws
         print(vals, 'vals')
 

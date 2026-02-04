@@ -16,6 +16,15 @@ def VDMD2(Y_minus, Y_plus, skip):
     tmp2=np.dot(tmp,V.transpose())
     tmp3=np.dot(tmp2,np.diag(Sinv))
     deigs = np.linalg.eigvals(tmp3)
+    r = Spos.size
+    Ur  = U[:, :r]               # m x r
+    Sr  = S[:r]                  # r
+    Vr = V.conj().T[:, :r] 
+    A_tilde = Ur.conj().T @ Y_plus @ Vr @ np.diag(1.0 / Sr)
+    eigvals, W = np.linalg.eig(A_tilde)
+    # print('A_tilde eigenvalues', eigvals)
+
+    modes = Y_plus @ Vr @ np.diag(1.0 / Sr) @ W
     #deigs = deigs[deigs>0]
     #print(np.log(deigs)/dt)
     # print(Y_minus, 'Y-')
@@ -25,5 +34,5 @@ def VDMD2(Y_minus, Y_plus, skip):
     # if (np.real(deigs) >0).any():
         # print('positive eigen val', np.max(np.real(deigs)))
     # print('############################')
-    return np.real(deigs)
+    return np.real(deigs), modes
     # return np.array([0.0])

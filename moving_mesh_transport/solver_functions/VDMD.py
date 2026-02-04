@@ -24,7 +24,7 @@ def VDMD2(Y_minus, Y_plus, skip):
     eigvals, W = np.linalg.eig(A_tilde)
     # print('A_tilde eigenvalues', eigvals)
 
-    modes = Y_plus @ Vr @ np.diag(1.0 / Sr) @ W
+    modes = Y_plus @ Vr.T @ np.diag(1.0 / Sr) @ W
     #deigs = deigs[deigs>0]
     #print(np.log(deigs)/dt)
     # print(Y_minus, 'Y-')

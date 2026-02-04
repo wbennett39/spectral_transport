@@ -54,7 +54,6 @@ def RMS(l1, l2):
     return np.sqrt(np.mean((l1-l2)**2))
 
 def coeffs_to_phi(u, xs, N_ang, N_groups, edges, ws, M):
-        output = xs*0
         psi = np.zeros((N_ang, xs.size, N_groups))
         for g in range(N_groups):
             for ang in range(N_ang):
@@ -70,8 +69,6 @@ def coeffs_to_phi(u, xs, N_ang, N_groups, edges, ws, M):
                             # radiation = u[g * N_ang:(ig+1) * N_ang,:,:]
                             # psi[ang, count] += u[ang,idx-1,i] * basis(i,xs[count:count+1],float(edges[idx-1]),float(edges[idx]))[0]
                             psi[ang, count, g] += u[g*N_ang +ang,idx-1,i] * basis(i,xs[count:count+1],float(edges[idx-1]),float(edges[idx]))[0]
-        
-        
         output_phi = np.zeros((xs.size, N_groups))
 
         for g in range(N_groups):
@@ -217,6 +214,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
             data['all']['integrator'] = 'Euler'
             data['all']['fixed_source'] = False
             data['all']['tfinal'] = 500
+            data['all']['guess_steady_state'] = False
             with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
     # Use sort_keys=False to maintain a sensible order (optional)
                 yaml.dump(data, file, sort_keys=False)
@@ -228,6 +226,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
             # data['all']['integrator'] = 'Euler'
             data['dense'] = True
             data['eval_times'] =False
+   
 
             with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich_DMD.yaml', 'w') as file:
     # Use sort_keys=False to maintain a sensible order (optional)
@@ -370,8 +369,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         plt.figure('eigenvectors')
         plt.xlabel('r [cm]', fontsize = 16)
         plt.ylabel(r'$\phi$', fontsize = 16)
-        plt.plot(run.sol_ob.xs, phi0, 'k-')
-        plt.plot(run.sol_ob.xs, phi1, 'k--')
+        plt.plot(run.xs, phi0, 'k-')
+        plt.plot(run.xs, phi1, 'k--')
         ax = plt.gca()
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -465,8 +464,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
     if k_list[-1] <1:
         print('subcritical')
         print(alpha_bench, 'benchmark alpha')
-        print(np.max(alphas_IRAM), 'dominant alpha IRAM')
-        print(np.max(eigen_vals_DMD), 'DMD guess')
+        print(np.sort(alphas_IRAM)[0], 'dominant alpha IRAM')
+        print(np.sort(eigen_vals_DMD)[0], 'DMD guess')
 
 
 

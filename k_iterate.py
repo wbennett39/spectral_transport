@@ -9,6 +9,7 @@ from scipy import integrate as integrate
 import matplotlib.pyplot as plt
 import yaml
 
+
 # def integrate_phi_cell(cs, ws, a, b, M, N_ang):
 #     # cell_volume = 4 * math.pi * (b**3 - a**3)
 #     # normTn_intcell includes the r^2 term in the integrand
@@ -478,7 +479,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         if abs(knew - kold ) <=tol:
             klist.append(knew)
             normalization_list.append(S_new)
-            print('power iteration complete')
+            print('k iteration complete')
             print(knew, 'k effective')
             print(n_iters, 'total iterations required')
             converged = True

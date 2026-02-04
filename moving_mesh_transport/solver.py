@@ -140,7 +140,7 @@ class main_class(parameter_load_class):
                     self.leader_pad, self.xs_quad, self.eval_times, self.eval_array,self.boundary_on, self.boundary_source_strength, self.boundary_source, self.sigma_func, self.Msigma, 
                     self.finite_domain,self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry, self.lumping, self.cross_section_data, self.dense, self.shift, self.VDMD,
                     self.fixed_source_coeffs, self.phi_coeffs, self.randomstart, self.chi, self.nu, self.sigma_f, self.legendre_moments, self.angular_derivative, self.Euler_dt_spacing, self.Euler_dt_num, self.kold, self.fixed_source, 
-                    self.first_step)
+                    self.first_step, self.guess_steady_state)
                 # print(edges, 'final edges')
                 # print(edges, "edges")
                 # print(wave_tpnts, wave_xpnts, "wave points")

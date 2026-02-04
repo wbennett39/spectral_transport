@@ -363,12 +363,12 @@ class rhs_class():
             self.old_percent_complete = np.round((t/self.tfinal) * 100, 3)
              
             
-            print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
-            print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
-            print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
-            # print(mesh.edges, 'edges')
-            print(np.max(V_old), 'max u')
-            print(np.min(V_old), 'min u')
+            # print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
+            # print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
+            # print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
+            # # print(mesh.edges, 'edges')
+            # print(np.max(V_old), 'max u')
+            # print(np.min(V_old), 'min u')
             # if np.min(V_old) <= -1:
             #     raise ValueError('The solution is becoming too negative')
 

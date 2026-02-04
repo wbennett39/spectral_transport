@@ -36,6 +36,7 @@ from ..solver_classes.opacity import sigma_integrator
 from timeit import default_timer as timer
 from .wavespeed_estimator import wavespeed_estimator
 from .wave_loc_estimator import find_wave
+from scipy import optimize
 # from diffeqpy import de
 # import chaospy
 from .theta_DMD import theta_DMD
@@ -127,7 +128,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
           dense, shift, VDMD, fixed_source_coeffs, phi_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
-          Euler_dt_spacing, Euler_dt_num, kold, fixed_source, first_step):
+          Euler_dt_spacing, Euler_dt_num, kold, fixed_source, first_step, guess_steady_state):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -521,6 +522,22 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             first_step = None
         elif first_step >= tfinal:
             first_step = None
+
+        if guess_steady_state == True:
+            print('minimizing residual')
+            Y0 = reshaped_IC.copy()
+            def residual(Y):
+                t0 = 1e-15
+                return RHS_wrap(t0, Y)
+            try:
+                Y_star = optimize.newton_krylov(residual, Y0,
+                                    method='lgmres',
+                                    f_tol=1e-4,   # stop when ||F|| is small
+                                    maxiter=500)
+                reshaped_IC = Y_star
+            except:
+                print('minimization failed')
+            
         sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = first_step, events = ss_event)
         # if sol.t_events[0].size:
         #     tfinal = sol.t_events[0][0]

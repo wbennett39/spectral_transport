@@ -247,9 +247,9 @@ class rhs_class():
         self.fixed_source_on = build.fixed_source
         self.PV_fission = np.zeros((self.N_space, self.M+1))
         print('### ### ### ### ### ###')
-        if self.LOUD == True:
-            print(self.c, 'c')
-            print(np.sum(self.ws), 'ws sum in rhs')
+        # if self.LOUD == True:
+        #     print(self.c, 'c')
+        #     print(np.sum(self.ws), 'ws sum in rhs')
         # print(self.c_a, 'c_a')
         
     def V_new_refl_enforce(self, V_new):
@@ -560,7 +560,8 @@ class rhs_class():
                 for ii in range(self.M+1):
                     for k in range(self.N_space):
                         self.PV_fission[k, ii] = np.sum(np.multiply(V_old[:,k,ii],self.ws)) #* (self.c) 
-        flux.make_fission_source(mesh.edges, self.PV_fission)
+        if self.fixed_source_on == False:
+            flux.make_fission_source(mesh.edges, self.PV_fission)
         for space in range(0, self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments, legendre_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)

@@ -84,7 +84,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 5e-4, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
+def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 1e-6, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -453,6 +453,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         plt.plot(nits, np.max(eigen_vals_DMD), 'o', label = 'DMD')          
         plt.plot(nits, np.max(alphas_IRAM[-1]), 'o', label = 'IRAM')
         plt.legend()
+        alpha_final = np.sort(alphas_IRAM)[0]
         # plt.ylim(-1, 1)
     else:
         plt.figure('alpha_vals')
@@ -460,12 +461,21 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         plt.plot(nits, eigen_vals_DMD[-1], 'o', label = 'DMD')          
         plt.legend()
         plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none', label = 'iterations')
+        alpha_final = alpha_list[-1]
     plt.savefig('Kornreich_results/alphas_Kornreich.pdf')
     if k_list[-1] <1:
         print('subcritical')
         print(alpha_bench, 'benchmark alpha')
         print(np.sort(alphas_IRAM)[0], 'dominant alpha IRAM')
         print(np.sort(eigen_vals_DMD)[0], 'DMD guess')
+    
+    f = h5py.File(f'Kornreich_results/kalpha_x0={x0}_nu={nu}.h5', 'r+')
+    res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
+    if not f.__contains__(res_str):
+        f.create_dataset('res_string', data = [k_list[-1], alpha_final])
+    else:
+        f['res_string'] =  [k_list[-1], alpha_final]
+    f.close()
 
 
 

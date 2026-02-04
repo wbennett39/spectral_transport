@@ -47,6 +47,7 @@ all:
   VDMD: true
   fixed_source: false
   legendre_moments: 11
+  guess_steady_state: false
   angular_derivative:
     finite_differences: false
     diamond: true

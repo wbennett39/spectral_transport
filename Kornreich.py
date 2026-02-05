@@ -84,7 +84,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 1e-6, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
+def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 1e-4, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -154,8 +154,11 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
     plt.xlabel('iteration', fontsize = 16)
     plt.plot(np.linspace(0, nits, nits), np.ones(nits) * k_bench, 'k-', label = 'benchmark')
     plt.ylabel(r'$k_\mathrm{eff}$', fontsize = 16)
-    plt.legend()
-    plt.savefig('Kornreich_results/k_iterations_Kornreich.pdf')
+    # plt.legend()
+    ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.savefig(f'Kornreich_results/k_iterations_Kornreich_{N_ang}_angles_x0={x0}_nu={nu}_{N_spaces}_spatial_cells.pdf')
     plt.show()
 
     plt.figure('calc time')
@@ -352,23 +355,26 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         sigma = None
         
         sigma = -1/np.max(eigen_vals_DMD)
-        vals, vecs = eigs(A, k=4, sigma = sigma, v0 = eigen_vectors[:,0])
+        #v0 = eigen_vectors[:,0] # will onlt be able to use this guess if VDMD is fed the coefficients, not psi
+        vals, vecs = eigs(A, k=4, sigma = sigma)
         ws = run.ws
         print(vals, 'vals')
 
         x0 = run.parameters['fixed_source']['x0']
         nu =run.parameters['all']['nu']
         alphas_IRAM = np.sort(-1/vals)
+        phi0 = coeffs_to_phi(vecs[:,0].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
+        phi1 = coeffs_to_phi(vecs[:,1].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
         print(np.max(alphas_IRAM), 'max alpha IRAM')
 
         print(alphas_IRAM, 'eigenvalues IRAM')
 
         f = h5py.File(f'Kornreich_results/Kornreich_alpha_S{N_ang}_{N_space}_cells_x0={x0}_nu={nu}.h5', 'w')
         f.create_dataset('alpha_list_IRAM_iteration', data = alphas_IRAM)
+        f.create_dataset('eigenvectors', data = [phi0, phi1])
         f.close()
         
-        phi0 = coeffs_to_phi(vecs[:,0].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
-        phi1 = coeffs_to_phi(vecs[:,1].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
+     
 
         plt.figure('eigenvectors')
         plt.xlabel('r [cm]', fontsize = 16)
@@ -457,7 +463,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         plt.plot(nits, np.max(eigen_vals_DMD), 'o', label = 'DMD')          
         plt.plot(nits, np.max(alphas_IRAM[-1]), 'o', label = 'IRAM')
         plt.legend()
-        alpha_final = np.sort(alphas_IRAM)[0]
+        alpha_final = np.sort(alphas_IRAM)[-1]
         # plt.ylim(-1, 1)
     else:
         plt.figure('alpha_vals')
@@ -465,7 +471,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         plt.plot(nits, eigen_vals_DMD[-1], 'o', label = 'DMD')          
         plt.legend()
         plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none', label = 'iterations')
-        alpha_final = alpha_list[-1]
+        alpha_final = np.sort(alpha_list[-1])
     plt.savefig('Kornreich_results/alphas_Kornreich.pdf')
     if k_list[-1] <1:
         print('subcritical')
@@ -475,13 +481,19 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
     
     f = h5py.File(f'Kornreich_results/kalpha_x0={x0}_nu={nu}.h5', 'r+')
     res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
-    if not f.__contains__(res_str):
-        f.create_dataset('res_string', data = [k_list[-1], alpha_final])
-    else:
-        f['res_string'] =  [k_list[-1], alpha_final]
+    if f.__contains__(res_str):
+        del f[res_str]
+    f.create_dataset(res_str, data = [k_list[-1], alpha_final])
     f.close()
-
-    return k_list[-1], alpha_final
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    return k_list[-1], alpha_final, alpha_bench, k_bench, np.max(eigen_vals_DMD)
 
 
 # Kornreich_benchmark(use_we = False, guess_k=  0.2)
@@ -493,10 +505,11 @@ def mesh_converge_Kornreich(cells_start = 5, N_angles = 96):
     converged = False
     k_guess = 0.8
     alpha_old = 1e-6
-    tol = 1e-8
-    k_list = [k_guess]
-    alpha_list = [alpha_old]
-    cells_list = [cells_start]
+    tol = 1e-3
+    k_list = []
+    alpha_list = []
+    cells_list = []
+    DMD_alpha_list = []
     while not converged:
           with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
 
@@ -509,8 +522,9 @@ def mesh_converge_Kornreich(cells_start = 5, N_angles = 96):
     # Use sort_keys=False to maintain a sensible order (optional)
                 yaml.dump(data, file, sort_keys=False)
           
-          k_new, alpha_new = Kornreich_benchmark(guess_k=k_guess)
-
+          k_new, alpha_new, alpha_bench, k_bench, DMD_alpha = Kornreich_benchmark(guess_k=k_guess)
+          DMD_alpha_list.append(DMD_alpha)
+          cells_list.append(cells_start)
           if np.abs(k_guess - k_new) <= tol and np.abs(alpha_new-alpha_old) <= tol:
                converged = True
           else:
@@ -519,27 +533,56 @@ def mesh_converge_Kornreich(cells_start = 5, N_angles = 96):
                cells_start = int(cells_start * 2)
                k_list.append(k_guess)
                alpha_list.append(alpha_old)
-               cells_list.append(cells_start)
+               
                plt.figure('k converge')
-               plt.semilogx(cells_list, k_list, '-o')
+               plt.loglog(cells_list, np.abs(np.array(k_list)-k_bench), '-o')
                plt.xlabel('spatial cells', fontsize = 16)
-               plt.ylabel(r'$k_\mathrm{eff}$', fontsize= 16)
+               plt.ylabel(r'$k_\mathrm{eff}$ error', fontsize= 16)
                ax = plt.gca()
                ax.spines['top'].set_visible(False)
                ax.spines['right'].set_visible(False)
-               plt.savefig(f'Kornreich_results/mesh_converge_k_N_angles={N_angles}.pdf')
+               plt.savefig(f'Kornreich_results/mesh_converge_k_N_angles={N_angles}.pdf', bbox_inches = 'tight')
                plt.figure('alpha converge')
-               plt.loglog(cells_list, alpha_list, '-o')
+               plt.loglog(cells_list, np.abs(np.array(alpha_list)-alpha_bench), '-o')
                plt.xlabel('spatial cells', fontsize = 16)
-               plt.ylabel(r'$k_\mathrm{eff}$', fontsize= 16)
+               plt.ylabel(r'$\alpha$ error', fontsize= 16)
                ax = plt.gca()
                ax.spines['top'].set_visible(False)
                ax.spines['right'].set_visible(False)
-               plt.savefig(f'Kornreich_results/mesh_converge_alpha_N_angles={N_angles}.pdf')
+               plt.savefig(f'Kornreich_results/mesh_converge_alpha_N_angles={N_angles}.pdf', bbox_inches = 'tight')
+               plt.figure('alpha vals iterations')
+               plt.semilogx(cells_list, alpha_list, '-o', mfc = 'none')
+               plt.semilogx(cells_list, DMD_alpha_list, '-^', mfc = 'none')
+               plt.semilogx(cells_list, np.ones(len(cells_list)) * alpha_bench, 'k-')
+               ax = plt.gca()
+               ax.spines['top'].set_visible(False)
+               ax.spines['right'].set_visible(False)
+               plt.xlabel('spatial cells', fontsize = 16)
+               plt.ylabel(r'$\alpha$', fontsize= 16)
+               plt.savefig(f'Kornreich_results/mesh_converge_alphaval_N_angles={N_angles}.pdf', bbox_inches = 'tight')
 
+               
 
 
 mesh_converge_Kornreich(N_angles = 2)
+
+
+mesh_converge_Kornreich(N_angles = 8)
+
+
+mesh_converge_Kornreich(N_angles = 16)
+
+
+mesh_converge_Kornreich(N_angles = 32)
+
+
+mesh_converge_Kornreich(N_angles = 64)
+
+
+
+mesh_converge_Kornreich(N_angles = 128)
+
+
 
      
      

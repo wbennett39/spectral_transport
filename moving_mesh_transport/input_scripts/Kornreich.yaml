@@ -14,7 +14,7 @@ all:
   - 5
   tnodes: 40
   Ms:
-  - 0
+  - 1
   N_runs: 1
   rt: 5e-11
   at: 1e-9
@@ -35,7 +35,7 @@ all:
   cv_const: 0.0
   estimate_wavespeed: false
   thick: false
-  integrator: BDF
+  integrator: Euler
   Euler_dt_spacing: log
   Euler_dt_num: 16
   geometry:
@@ -46,7 +46,7 @@ all:
   kold: 1.0
   VDMD: true
   fixed_source: true
-  legendre_moments: 11
+  legendre_moments: 1
   guess_steady_state: true
   angular_derivative:
     finite_differences: false

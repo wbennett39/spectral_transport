@@ -146,7 +146,9 @@ data = [('N_ang', int64),
         ('k_old', float64),
         ('fixed_source_on', int64),
         ('PV_fission', float64[:, :]),
-        ('LOUD', int64)
+        ('LOUD', int64),
+        ('percent_to_print', float64),
+        ('last_print', float64)
         ]
 ##############################################################################
 #thermal couple, l scaling
@@ -194,8 +196,11 @@ class rhs_class():
         
         self.legendre_moments = build.legendre_moments
         self.mean_free_time = 1/build.sigma_t
-        self.division = 1000
+        self.division = 1000000000000
         self.counter = 1000
+        self.percent_to_print = 0.1
+        self.last_print = 0.0
+        
         self.delta_tavg = 0.0
         self.l = build.l
         self.times_list = np.array([0.0])
@@ -353,58 +358,63 @@ class rhs_class():
         self.told = t
         
         self.delta_tavg += delta_t / self.division
-        if self.counter == self.division and self.LOUD ==True:
-            print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
-            print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
-            if np.round((t/self.tfinal) * 100, 3)-self.old_percent_complete <= 0.001:
-                self.stymie_count += 1
-            # if self.stymie_count >= 15:
-            #     raise ValueError('Solver stuck')
-            self.old_percent_complete = np.round((t/self.tfinal) * 100, 3)
-             
-            
-            # print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
-            # print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
-            # print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
-            # # print(mesh.edges, 'edges')
-            # print(np.max(V_old), 'max u')
-            # print(np.min(V_old), 'min u')
-            # if np.min(V_old) <= -1:
-            #     raise ValueError('The solution is becoming too negative')
 
-            third = int((self.N_space+1)/3)
-            rest = int(self.N_space+1 - 2*third)
-            
-            # print(np.argmin(np.abs(V_old - np.min(V_old))), 'location of min')
-            
-            # print(np.min(V_old.copy().reshape((self.N_ang+1, self.N_space, self.M+1))[-1, :, :]), 'min e vec')
-            dimensional_t = t/29.98
-            # menis_t = -29.6255 + dimensional_t
-            menis_t = converging_time_function(t, self.sigma_func)
-            # rfront = 0.01 * (-menis_t) ** 0.679502 
-            rfront = converging_r(menis_t, self.sigma_func)
- 
-            # print(np.min(np.abs(rfront-mesh.edges)), 'closest edge to rf')
-            # tracker_edge = int(-third) 
-            # print(tracker_edge)
-            # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
-            # print(rfront, 'marshak wavefront location')
-            # print(self.wavefront_estimator, 'wave loc estimate')
-            if mesh.moving == True:
-                tracker_edges = mesh.edges[third:third+rest]
-                rf_in_tracker_region = tracker_edges[0] <rfront < tracker_edges[-1]           # if self.N_space <= 100:
-            # print('is the wavefront in the tracking region?', rf_in_tracker_region)
-            #     if self.geometry['sphere'] == True:
-            #         print(mesh.edges/self.x0)
-                # else:
-                #     print(mesh.edges)
-            # print(mesh.edges)
-            print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')
-            self.delta_tavg = 0.0
-            self.counter = 0
-        else:
-            self.counter += 1
-        self.told = t
+        if self.LOUD == True:
+            if t/self.tfinal >= self.percent_to_print + self.last_print: 
+                self.last_print += self.percent_to_print
+
+        # if self.counter == self.division and self.LOUD ==True:
+                print('t = ', t, '|', 'delta_t average= ', self.delta_tavg)
+                print(np.round((t/self.tfinal) * 100, 3), ' percent complete')
+                if np.round((t/self.tfinal) * 100, 3)-self.old_percent_complete <= 0.001:
+                    self.stymie_count += 1
+                # if self.stymie_count >= 15:
+                #     raise ValueError('Solver stuck')
+                self.old_percent_complete = np.round((t/self.tfinal) * 100, 3)
+                
+                
+                # print(self.N_space, 'spatial cells, ', self.M+1, ' basis functions ', self.N_ang, ' angles' )
+                # print(np.min(mesh.edges[1:]-mesh.edges[:-1]), 'min edge spacing')
+                # print(np.mean(mesh.edges[1:]-mesh.edges[:-1]), 'mean edge spacing')
+                # # print(mesh.edges, 'edges')
+                # print(np.max(V_old), 'max u')
+                # print(np.min(V_old), 'min u')
+                # if np.min(V_old) <= -1:
+                #     raise ValueError('The solution is becoming too negative')
+
+                third = int((self.N_space+1)/3)
+                rest = int(self.N_space+1 - 2*third)
+                
+                # print(np.argmin(np.abs(V_old - np.min(V_old))), 'location of min')
+                
+                # print(np.min(V_old.copy().reshape((self.N_ang+1, self.N_space, self.M+1))[-1, :, :]), 'min e vec')
+                dimensional_t = t/29.98
+                # menis_t = -29.6255 + dimensional_t
+                menis_t = converging_time_function(t, self.sigma_func)
+                # rfront = 0.01 * (-menis_t) ** 0.679502 
+                rfront = converging_r(menis_t, self.sigma_func)
+    
+                # print(np.min(np.abs(rfront-mesh.edges)), 'closest edge to rf')
+                # tracker_edge = int(-third) 
+                # print(tracker_edge)
+                # print(np.abs(mesh.edges[tracker_edge]-rfront), ' abs diff of wavefront and tracker edge')
+                # print(rfront, 'marshak wavefront location')
+                # print(self.wavefront_estimator, 'wave loc estimate')
+                if mesh.moving == True:
+                    tracker_edges = mesh.edges[third:third+rest]
+                    rf_in_tracker_region = tracker_edges[0] <rfront < tracker_edges[-1]           # if self.N_space <= 100:
+                # print('is the wavefront in the tracking region?', rf_in_tracker_region)
+                #     if self.geometry['sphere'] == True:
+                #         print(mesh.edges/self.x0)
+                    # else:
+                    #     print(mesh.edges)
+                # print(mesh.edges)
+                print('--- --- --- --- --- --- --- --- --- --- --- --- --- ---')
+                self.delta_tavg = 0.0
+                self.counter = 0
+            else:
+                self.counter += 1
+            self.told = t
 
     def slope_scale(self, V, edges, stop = False):
         floor = -1e-8#floor 1e-4 

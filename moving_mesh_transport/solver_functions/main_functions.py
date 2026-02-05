@@ -483,7 +483,21 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         if eval_times == True:
             ts = np.concatenate((ts, eval_array))
             ts = np.unique(np.sort(ts))
-
+        if guess_steady_state == True:
+            print('minimizing residual')
+            Y0 = reshaped_IC.copy()
+            def residual(Y):
+                t0 = 1e-15
+                return RHS_wrap(t0, Y)
+            try:
+                Y_star = optimize.newton_krylov(residual, Y0,
+                                    method='lgmres',
+                                    f_tol=1e-4,   # stop when ||F|| is small
+                                    maxiter=500)
+                reshaped_IC = Y_star
+                atol_vec = at * (1 + np.abs(reshaped_IC))  
+            except:
+                print('minimization failed')
         Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         if eval_times == True:

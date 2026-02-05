@@ -11,10 +11,10 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 10
+  - 40
   tnodes: 40
   Ms:
-  - 0
+  - 1
   N_runs: 1
   rt: 5e-11
   at: 1e-9
@@ -46,7 +46,7 @@ all:
   kold: 1.0
   VDMD: true
   fixed_source: false
-  legendre_moments: 11
+  legendre_moments: 1
   guess_steady_state: false
   angular_derivative:
     finite_differences: false
@@ -377,7 +377,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 2
+  - 8
   move_type:
   - 1
   - 0

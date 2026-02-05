@@ -316,7 +316,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     normalization_list.append(S_new)
 
     # knew = kold * S_new #/ S_old
-    knew = S_new * kold
+    knew = S_new 
     S_old = S_new
     
     klist.append(knew) 
@@ -326,7 +326,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # new_fission_source *= 1/S_new 
     # coeffs_old /=knew
     # new_fission_source/= knew
-    new_fission_source = normalize_fission_source(new_fission_source,N_space, M, kold/knew, edges)
+    new_fission_source = normalize_fission_source(new_fission_source,N_space, M, 1/knew, edges)
     old_fission_source = new_fission_source.copy()
     kold = knew
 
@@ -525,5 +525,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             # normalization = normalize_phi(run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)), edges, ws, N_ang, M, N_space, N_groups)
             # normalization_list.append(normalization)
             calc_time_list.append(t_calc)
-    
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
+    plt.close()
     return klist, calc_time_list, normalization_list, run, sigma_f_array, nu_array, run.phi[:,0]

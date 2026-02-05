@@ -176,7 +176,7 @@ def transfer_coefficients(coeffs_old, M):
     return coeffs_new
 
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None, ss_tol = 1e-12):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -368,6 +368,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             run.load(transport_parameters, mesh_parameters) 
     at = float(run.parameters['all']['at']) 
     rt = float(run.parameters['all']['rt'])
+    euler_dt_num = int(run.parameters['all']['euler_dt_num'])
     atlist = np.logspace(0, np.log10(at),3)
     rtlist = np.logspace(0, np.log10(rt), 3)
     while converged == False and n_iters < max_its: 
@@ -445,6 +446,29 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # plt.show()
         t_calc = time.time() - t1
         coeffs_new = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)) # update scalar flux
+        Y = run.sol_ob.y
+        if np.max(np.abs(Y[:,-1] - Y[:,-2])) <=ss_tol:
+            new_tf = ts[-2]
+            if np.max(np.abs(Y[:,-1] - Y[:,-3])) <= ss_tol:
+                euler_dt_num -= 1
+                if euler_dt_num <= 3:
+                    euler_dt_num = 3
+            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+        # Use yaml.safe_load() for security when dealing with untrusted input
+        # For a trusted config file, you might use yaml.FullLoader
+                data = yaml.safe_load(file)
+                # data['all']['integrator'] = 'Euler'
+                # data['dense'] = True
+                # data['eval_times'] =False
+                data['all']['tfinal'] = new_tf
+                data['all']['euler_dt_num'] = euler_dt_num
+               
+                # print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
+                # assert 0
+                with open('moving_mesh_transport/input_scripts/mKornreich.yaml', 'w') as file:
+        # Use sort_keys=False to maintain a sensible order (optional)
+                    yaml.dump(data, file, sort_keys=False)
         # phioutf, psi_outf = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, coeffs_old, ws)
         # plt.figure(f'initial vs final {n_iters}')
         # plt.plot(run.xs, phioutf, 'k--', label = 'Final (calculated from coefficients)')

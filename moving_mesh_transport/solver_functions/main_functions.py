@@ -500,6 +500,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 print('minimization failed')
         Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
+        
+
         if eval_times == True:
             indices = []
             for itt, tt in enumerate(eval_array):

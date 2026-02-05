@@ -84,7 +84,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 1e-4, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6, nalphas = 2):
+def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip =4, ktol = 1e-4, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-6, nalphas = 2, tf = 5e3):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -121,6 +121,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
                 raise ValueError('Do not have this case')
 
     # coarse solve
+    
     k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=coarse_angles, coarse_solve=True)
     # fine solve
     k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=phi)
@@ -220,6 +221,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
             data['all']['fixed_source'] = False
             data['all']['tfinal'] = 500
             data['all']['guess_steady_state'] = False
+            data['all']['Euler_dt_num'] = sparse_time_points
             with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
     # Use sort_keys=False to maintain a sensible order (optional)
                 yaml.dump(data, file, sort_keys=False)
@@ -231,6 +233,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
             # data['all']['integrator'] = 'Euler'
             data['dense'] = True
             data['eval_times'] =False
+
    
 
             with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich_DMD.yaml', 'w') as file:
@@ -288,6 +291,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
         sigma_f = run.parameters['all']['sigma_f']
         nu = run.parameters['all']['nu'] 
         chi = run.parameters['all']['chi'] 
+        euler_dt_num = run.parameters['all']['Euler_dt_num']
         sigma_a = run.parameters['all']['sigma_t'] - run.parameters['all']['sigma_s']
         shift = run.parameters['fixed_source']['shift']
         sigma_f_array = np.ones(run.xs.size) * sigma_f
@@ -353,10 +357,13 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
 
 # Compute k eigenvalues (largest magnitude by default)
         sigma = None
-        
-        sigma = -1/np.max(eigen_vals_DMD)
+        try:
+            sigma = -1/np.max(eigen_vals_DMD)
+        except:
+             sigma = None
+             print('DMD did not work')
         #v0 = eigen_vectors[:,0] # will onlt be able to use this guess if VDMD is fed the coefficients, not psi
-        vals, vecs = eigs(A, k=nalphas, sigma = sigma, which = 'LM')
+        vals, vecs = eigs(A, k=nalphas, sigma = sigma, which = 'LM', tol = alpha_tol, maxiter = 50 )
         ws = run.ws
         print(vals, 'vals')
 
@@ -501,7 +508,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
 
 
 
-def mesh_converge_Kornreich(cells_start = 5, N_angles = 96, max_cells = 100):
+def mesh_converge_Kornreich(cells_start = 5, N_angles = 96, max_cells = 100, tf = 5e4, euler_dt = 10):
     converged = False
     k_guess = 0.8
     alpha_old = 1e-6
@@ -517,6 +524,8 @@ def mesh_converge_Kornreich(cells_start = 5, N_angles = 96, max_cells = 100):
     # For a trusted config file, you might use yaml.FullLoader
             data = yaml.safe_load(file)
             data['all']['N_spaces'][0] = cells_start
+            data['all']['tfinal'] = float(tf)
+            data['all']['Euler_dt_num'] = euler_dt
             data['fixed_source']['N_angles'][0] = N_angles
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
     # Use sort_keys=False to maintain a sensible order (optional)

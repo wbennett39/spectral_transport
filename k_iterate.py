@@ -449,11 +449,13 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         Y = run.sol_ob.y
         if np.max(np.abs(Y[:,-1] - Y[:,-2])) <=ss_tol:
             new_tf = float(ts[-2])
-            if np.max(np.abs(Y[:,-1] - Y[:,-3])) <= ss_tol:
-                euler_dt_num -= 1
-                if euler_dt_num <= 3:
-                    euler_dt_num = 3
-            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+        else: 
+            new_tf = float(ts*10)
+        if np.max(np.abs(Y[:,-1] - Y[:,-3])) <= ss_tol:
+            euler_dt_num -= 1
+            if euler_dt_num <= 3:
+                euler_dt_num = 3
+        with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
 
         # Use yaml.safe_load() for security when dealing with untrusted input
         # For a trusted config file, you might use yaml.FullLoader

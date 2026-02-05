@@ -501,7 +501,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 12, skip
 
 
 
-def mesh_converge_Kornreich(cells_start = 5, N_angles = 96):
+def mesh_converge_Kornreich(cells_start = 5, N_angles = 96, max_cells = 100):
     converged = False
     k_guess = 0.8
     alpha_old = 1e-6
@@ -525,7 +525,7 @@ def mesh_converge_Kornreich(cells_start = 5, N_angles = 96):
           k_new, alpha_new, alpha_bench, k_bench, DMD_alpha = Kornreich_benchmark(guess_k=k_guess)
           DMD_alpha_list.append(DMD_alpha)
           cells_list.append(cells_start)
-          if np.abs(k_guess - k_new) <= tol and np.abs(alpha_new-alpha_old) <= tol:
+          if (np.abs(k_guess - k_new) <= tol and np.abs(alpha_new-alpha_old) <= tol) or cells_start > max_cells:
                converged = True
           else:
                k_guess = k_new

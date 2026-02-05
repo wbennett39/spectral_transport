@@ -368,7 +368,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             run.load(transport_parameters, mesh_parameters) 
     at = float(run.parameters['all']['at']) 
     rt = float(run.parameters['all']['rt'])
-    euler_dt_num = int(run.parameters['all']['euler_dt_num'])
+    euler_dt_num = int(run.parameters['all']['Euler_dt_num'])
     atlist = np.logspace(0, np.log10(at),3)
     rtlist = np.logspace(0, np.log10(rt), 3)
     while converged == False and n_iters < max_its: 
@@ -448,7 +448,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         coeffs_new = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)) # update scalar flux
         Y = run.sol_ob.y
         if np.max(np.abs(Y[:,-1] - Y[:,-2])) <=ss_tol:
-            new_tf = ts[-2]
+            new_tf = float(ts[-2])
             if np.max(np.abs(Y[:,-1] - Y[:,-3])) <= ss_tol:
                 euler_dt_num -= 1
                 if euler_dt_num <= 3:
@@ -462,11 +462,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 # data['dense'] = True
                 # data['eval_times'] =False
                 data['all']['tfinal'] = new_tf
-                data['all']['euler_dt_num'] = euler_dt_num
+                data['all']['Euler_dt_num'] = euler_dt_num
                
                 # print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
                 # assert 0
-                with open('moving_mesh_transport/input_scripts/mKornreich.yaml', 'w') as file:
+                with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)
                     yaml.dump(data, file, sort_keys=False)
         # phioutf, psi_outf = make_phi_no_uncol(run.xs, N_groups, N_ang, edges, M, coeffs_old, ws)

@@ -6,7 +6,7 @@ find_wave_loc: false
 choose_xs: false
 pad: 35.0
 leader_pad: 0.025
-first_step: 4.338543063543321e-05
+first_step: 0.00027172691138478423
 xs_list:
 - 0.0
 - 0.5

@@ -466,11 +466,10 @@ class run:
             solver.fixed_source_coeffs = sol_coeffs
             solver.phi_coeffs = phi_coeffs
             solver.randomstart = True
-
-
-  
         else:
             solver.randomstart = False
+            if input_phi_coeffs is not None:
+                phi_coeffs = input_phi_coeffs
             solver.load_custom_source(sol_coeffs, phi_coeffs, randomstart) 
         if All == True:
             solver.main(True, True)

@@ -1,6 +1,6 @@
 all:
   problem_name: transport
-  tfinal: 50000.0
+  tfinal: 5000.0
   c_scaling: false
   epsilon_scaling: false
   epsilon: 1.0
@@ -11,7 +11,7 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 5
+  - 200
   tnodes: 40
   Ms:
   - 0
@@ -37,7 +37,7 @@ all:
   thick: false
   integrator: Euler
   Euler_dt_spacing: log
-  Euler_dt_num: 10
+  Euler_dt_num: 6
   geometry:
     slab: false
     sphere: true

@@ -169,14 +169,15 @@ def wynn_epsilon(S):
 
 
 def transfer_coefficients(coeffs_old, M):
-    K = coeffs_old.shape[0]
-    coeffs_new = np.zeros((K, M+1))
+    K = coeffs_old.shape[1]
+    N_ang = coeffs_old.shape[0]
+    coeffs_new = np.zeros((N_ang, K, M+1))
     for k in range(K):
-        coeffs_new[k, 0] = coeffs_old[k]
+        coeffs_new[:, k, 0] = coeffs_old[:, k]
     return coeffs_new
 
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None, ss_tol = 1e-12):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None, ss_tol = 1e-10):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -243,7 +244,11 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         run.custom_source(randomstart = True, uncollided = 0, moving = 0)
     else:
         new_phi_coeffs = transfer_coefficients(input_phi, M)
-        run.custom_source(randomstart = True, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs )
+        print(new_phi_coeffs.shape, 'shape of transfered phi coeffs')
+        edges = run.edges
+        transfer_fission_source = make_fission_scalar_flux(new_phi_coeffs, edges, ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
+        print(np.shape(input_phi), 'shape of input phi')
+        run.custom_source(randomstart = False, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs, sol_coeffs = transfer_fission_source )
     ws = run.ws
     mus = run.mus
     t_calc = time.time() - t1
@@ -447,14 +452,15 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         t_calc = time.time() - t1
         coeffs_new = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)) # update scalar flux
         Y = run.sol_ob.y
-        if np.max(np.abs(Y[:,-1] - Y[:,-2])) <=ss_tol:
-            new_tf = float(ts[-2])
-        else: 
-            new_tf = float(ts*10)
-        if np.max(np.abs(Y[:,-1] - Y[:,-3])) <= ss_tol:
-            euler_dt_num -= 1
-            if euler_dt_num <= 3:
-                euler_dt_num = 3
+        # if np.max(np.abs(Y[:,-1] - Y[:,-2])) <=ss_tol:
+        #     new_tf = float(ts[-2])
+        # else: 
+        #     new_tf = float(ts[-1]*10)
+        #     # euler_dt_num += 1
+        # if np.max(np.abs(Y[:,-1] - Y[:,-3])) <= ss_tol:
+        #     euler_dt_num -= 1
+        #     if euler_dt_num <= 3:
+        #         euler_dt_num = 3
         with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
 
         # Use yaml.safe_load() for security when dealing with untrusted input
@@ -463,8 +469,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 # data['all']['integrator'] = 'Euler'
                 # data['dense'] = True
                 # data['eval_times'] =False
-                data['all']['tfinal'] = new_tf
-                data['all']['Euler_dt_num'] = euler_dt_num
+                # data['all']['tfinal'] = new_tf
+                # data['all']['Euler_dt_num'] = euler_dt_num
                
                 # print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
                 # assert 0
@@ -559,4 +565,4 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     plt.close()
     plt.close()
     plt.close()
-    return klist, calc_time_list, normalization_list, run, sigma_f_array, nu_array, run.phi[:,0]
+    return klist, calc_time_list, normalization_list, run, sigma_f_array, nu_array, run.phi[:,-1]

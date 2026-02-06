@@ -269,7 +269,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         flux.fixed_source_coeffs = fixed_source_coeffs
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
-            initialize.IC = phi_coeffs # un-normalized coefficients
+            initialize.IC = phi_coeffs 
+
             flux.make_fixed_phi(mesh.edges)
         else:
             # flux.fixed_source_coeffs = initialize.IC.copy()
@@ -475,6 +476,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
     
     elif integrator == 'Euler':
+        IC_old = reshaped_IC
         # ts = np.linspace(0.0, tfinal, 50)
         if Euler_dt_spacing == 'log':
             ts = np.logspace(-5,math.log10(tfinal), Euler_dt_num + 1)
@@ -493,14 +495,16 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 Y_star = optimize.newton_krylov(residual, Y0,
                                     method='lgmres',
                                     f_tol=1e-4,   # stop when ||F|| is small
-                                    maxiter=500)
+                                    maxiter=50)
                 reshaped_IC = Y_star
                 atol_vec = at * (1 + np.abs(reshaped_IC))  
             except:
                 print('minimization failed')
         Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
-        
+        print(np.max(np.abs(Y[:, -1] - reshaped_IC)), 'max difference from IC')
+        print(np.max(np.abs(Y[:, -1] - IC_old)), 'max difference from IC (before minimization)')
+
 
         if eval_times == True:
             indices = []

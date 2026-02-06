@@ -173,7 +173,7 @@ def transfer_coefficients(coeffs_old, M):
     N_ang = coeffs_old.shape[0]
     coeffs_new = np.zeros((N_ang, K, M+1))
     for k in range(K):
-        coeffs_new[:, k, 0] = coeffs_old[:, k]
+        coeffs_new[:, k, 0] = coeffs_old[:, k, 0]
     return coeffs_new
 
 
@@ -232,6 +232,14 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     N_groups = run.parameters['all']['N_groups']
     M  = run.parameters['all']['Ms'][0]
     N_space = run.parameters['all']['N_spaces'][0]
+
+    sigma_a_vec = np.zeros(N_space) 
+    sigma_f_vec = np.ones(N_space) * sigma_f
+    nu_vec = np.ones(N_space) * nu
+    shift = run.parameters['fixed_source']['shift']
+
+    
+   
     print(N_space, 'spatial cells')
     if coarse_solve == True:
         run.parameters['all']['rt'] = 1
@@ -246,8 +254,28 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         new_phi_coeffs = transfer_coefficients(input_phi, M)
         print(new_phi_coeffs.shape, 'shape of transfered phi coeffs')
         edges = run.edges
+        ws = run.ws
+        edges = run.edges
+        chi_vec = np.ones(N_space) * chi
+        for space in range(N_space):
+                    left_edge = edges[space]-shift
+                    right_edge = edges[space+1]-shift
+                    middle = 0.5 * (right_edge + left_edge)
+                    if -3.5 <= middle < 3.5:
+                        sigma_f_vec[space] = 0.0   
+                        nu_vec[space] = 0.0
+                        # chi_vec[space] = 0.0
+                        if left_edge <-3.5 or right_edge >4.6:
+                            print('edge straddle')
+                            print(left_edge, right_edge)
+                            assert 0
+                    if -2.5 <= left_edge <= 2.5 and -2.5 <= right_edge <= 2.5:
+                        sigma_a_vec[space] = 0.9
+                    if (-3.5 <= left_edge <= -2.5 and -3.5 <= right_edge <= -2.5) or (2.5 <= left_edge <= 3.5 and 2.5 <= right_edge <= 3.5):
+                        sigma_a_vec[space] = 0.2
         transfer_fission_source = make_fission_scalar_flux(new_phi_coeffs, edges, ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
         print(np.shape(input_phi), 'shape of input phi')
+        run.load('Kornreich', mesh_parameters)
         run.custom_source(randomstart = False, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs, sol_coeffs = transfer_fission_source )
     ws = run.ws
     mus = run.mus
@@ -255,15 +283,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     res_coefficients = np.copy(run.sol_ob.y[:,-1].reshape((N_ang * N_groups, N_space, M+1)))
     initial_condition = run.fission_source # I think this is just the initial condition mislabeled 
     coeffs_old = res_coefficients.copy()
-    shift = run.parameters['fixed_source']['shift']
+
     sigma_f_array = np.ones(run.xs.size) * sigma_f
     nu_array = np.ones(run.xs.size) * nu
     chi_array = np.ones(run.xs.size) * chi
-    sigma_a_vec = np.zeros(N_space) 
-    sigma_f_vec = np.ones(N_space) * sigma_f
-    nu_vec = np.ones(N_space) * nu
-    chi_vec = np.ones(N_space) * chi
     edges = run.edges
+    chi_vec = np.ones(N_space) * chi
     for space in range(N_space):
                 left_edge = edges[space]-shift
                 right_edge = edges[space+1]-shift
@@ -280,7 +305,6 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                      sigma_a_vec[space] = 0.9
                 if (-3.5 <= left_edge <= -2.5 and -3.5 <= right_edge <= -2.5) or (2.5 <= left_edge <= 3.5 and 2.5 <= right_edge <= 3.5):
                      sigma_a_vec[space] = 0.2
-   
 
     
 

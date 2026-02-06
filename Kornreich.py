@@ -84,7 +84,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip =4, ktol = 1e-4, use_we = False, max_its_kloop = 100, maxits_power = 15, coarse_angles = 4, alpha_tol = 1e-4, nalphas = 2, tf = 5e3, coarse_solve =True):
+def Kornreich_benchmark(prime = False, guess_k = 1, sparse_time_points = 7, skip =4, ktol = 1e-4, use_we = False, max_its_kloop = 100, maxits_power = 15, coarse_angles = 4, alpha_tol = 1e-4, nalphas = 2, tf = 5e3, coarse_solve =True):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -96,6 +96,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         run.parameters['all']['tfinal'] = 0.001
         run.parameters['all']['Ms'] = [0]
         run.parameters['random_IC']['N_angles'] = [2]
+
         # run.parameters['fixed_source']['N_angles'] = [2]
         # run.parameters['all']['sigma_f'] = 1.0
         run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
@@ -121,13 +122,15 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
                 raise ValueError('Do not have this case')
 
     # coarse solve
-    N_ang = run.parameters['fixed_source']['N_angles'][0]
+    run.load('Kornreich_new', 'mesh_parameters_Kornreich')
+    N_ang = run.parameters['fixed_source']['N_angles'][0] + 1
+
     N_spaces = run.parameters['all']['N_spaces'][0]
     N_groups = run.parameters['all']['N_groups']
     M = run.parameters['all']['Ms'][0]
     if coarse_solve ==True:
-        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=coarse_angles, coarse_solve=True)
-        precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape((N_ang*N_groups, N_space, M+1))
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=N_ang-1, coarse_solve=True)
+        precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape((N_ang*N_groups, N_spaces, M+1))
     # fine solve
         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=precondition_sol_coeffs)
     else:
@@ -136,7 +139,11 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     print(k_list[-1], 'k effective')
     print(0.4243163, 'benchmark k effective')
     print(time_list, 'computation time required per iterate')
-
+    run.load('Kornreich', 'mesh_parameters_Kornreich')
+    N_ang = run.parameters['fixed_source']['N_angles'][0]
+    N_spaces = run.parameters['all']['N_spaces'][0]
+    N_groups = run.parameters['all']['N_groups']
+    M = run.parameters['all']['Ms'][0]
     x0 = run.parameters['fixed_source']['x0'][0]
     nu =run.parameters['all']['nu']
     f = h5py.File(f'Kornreich_results/Kornreich_keff_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
@@ -514,7 +521,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 
 
 
-def mesh_converge_Kornreich(cells_start = 200, N_angles = 96, max_cells = 200, tf = 5e3, euler_dt =6):
+def mesh_converge_Kornreich(cells_start = 10, N_angles = 96, max_cells = 200, tf = 5e3, euler_dt =6):
     converged = False
     k_guess = 0.8
     alpha_old = 1e-6

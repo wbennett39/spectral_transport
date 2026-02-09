@@ -240,7 +240,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     
    
-    print(N_space, 'spatial cells')
+
     if coarse_solve == True:
         run.parameters['all']['rt'] = 1
         run.parameters['all']['at'] = 1e-5
@@ -251,32 +251,45 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     if coarse_solve == True:
         run.custom_source(randomstart = True, uncollided = 0, moving = 0)
     else:
-        new_phi_coeffs = transfer_coefficients(input_phi, M)
-        print(new_phi_coeffs.shape, 'shape of transfered phi coeffs')
-        edges = run.edges
-        ws = run.ws
-        edges = run.edges
-        chi_vec = np.ones(N_space) * chi
-        for space in range(N_space):
-                    left_edge = edges[space]-shift
-                    right_edge = edges[space+1]-shift
-                    middle = 0.5 * (right_edge + left_edge)
-                    if -3.5 <= middle < 3.5:
-                        sigma_f_vec[space] = 0.0   
-                        nu_vec[space] = 0.0
-                        # chi_vec[space] = 0.0
-                        if left_edge <-3.5 or right_edge >4.6:
-                            print('edge straddle')
-                            print(left_edge, right_edge)
-                            assert 0
-                    if -2.5 <= left_edge <= 2.5 and -2.5 <= right_edge <= 2.5:
-                        sigma_a_vec[space] = 0.9
-                    if (-3.5 <= left_edge <= -2.5 and -3.5 <= right_edge <= -2.5) or (2.5 <= left_edge <= 3.5 and 2.5 <= right_edge <= 3.5):
-                        sigma_a_vec[space] = 0.2
-        transfer_fission_source = make_fission_scalar_flux(new_phi_coeffs, edges, ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
-        print(np.shape(input_phi), 'shape of input phi')
-        run.load('Kornreich', mesh_parameters)
-        run.custom_source(randomstart = False, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs, sol_coeffs = transfer_fission_source )
+        if input_phi is not None:
+            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+                data = yaml.safe_load(file)
+                data['all']['kold'] = kold
+
+                with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
+        # Use sort_keys=False to maintain a sensible order (optional)
+                    yaml.dump(data, file, sort_keys=False)
+            run.load('Kornreich', mesh_parameters)
+            run.parameters['all']['kold'] = kold
+            new_phi_coeffs = transfer_coefficients(input_phi, M)
+
+            edges = run.edges
+            ws = run.ws
+            edges = run.edges
+            chi_vec = np.ones(N_space) * chi
+            for space in range(N_space):
+                        left_edge = edges[space]-shift
+                        right_edge = edges[space+1]-shift
+                        middle = 0.5 * (right_edge + left_edge)
+                        if -3.5 <= middle < 3.5:
+                            sigma_f_vec[space] = 0.0   
+                            nu_vec[space] = 0.0
+                            # chi_vec[space] = 0.0
+                            if left_edge <-3.5 or right_edge >4.6:
+                                print('edge straddle')
+                                print(left_edge, right_edge)
+                                assert 0
+                        if -2.5 <= left_edge <= 2.5 and -2.5 <= right_edge <= 2.5:
+                            sigma_a_vec[space] = 0.9
+                        if (-3.5 <= left_edge <= -2.5 and -3.5 <= right_edge <= -2.5) or (2.5 <= left_edge <= 3.5 and 2.5 <= right_edge <= 3.5):
+                            sigma_a_vec[space] = 0.2
+            transfer_fission_source = make_fission_scalar_flux(new_phi_coeffs, edges, ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
+            print(np.shape(input_phi), 'shape of input phi')
+            transfer_fission_source = normalize_fission_source(transfer_fission_source ,N_space, 0, 1/kold, edges)
+            run.custom_source(randomstart = False, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs, sol_coeffs = transfer_fission_source )
+        else:
+            run.custom_source(randomstart = True, uncollided = 0, moving = 0 )
     ws = run.ws
     mus = run.mus
     t_calc = time.time() - t1
@@ -346,9 +359,16 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     # knew = kold * S_new #/ S_old
     knew = S_new 
+    klist.append(S_new)
+    # print(klist)
+    # print(S_new, 'Snew')
+    # print(S_old, 'S_OLD')
+ 
+    # if coarse_solve == False:
+    #     assert 0
     S_old = S_new
     
-    klist.append(knew) 
+    
     # k_old = 1
 
     n_iters = 1
@@ -445,11 +465,12 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # plt.legend()
         # plt.show()
          # normalize fission source
-        print(normalize_phi(old_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1/k')
+        # print(normalize_phi(old_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1/k')
 
         # solve with new source
         run.custom_source(randomstart = False, sol_coeffs = old_fission_source , phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
         # plt.figure(f'initial vs final {n_iters}')
+        t_calc = time.time() - t1
         with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
 
         # Use yaml.safe_load() for security when dealing with untrusted input
@@ -473,7 +494,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # plt.plot(run.xs, run.phi[:, -1], '-', label = 'Final')
         # plt.legend()
         # plt.show()
-        t_calc = time.time() - t1
+        
         coeffs_new = run.sol_ob.y[:, -1].reshape((N_ang * N_groups, N_space, M+1)) # update scalar flux
         Y = run.sol_ob.y
         # if np.max(np.abs(Y[:,-1] - Y[:,-2])) <=ss_tol:

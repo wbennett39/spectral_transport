@@ -84,7 +84,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = False, guess_k = 1, sparse_time_points = 7, skip =4, ktol = 1e-4, use_we = False, max_its_kloop = 100, maxits_power = 15, coarse_angles = 4, alpha_tol = 1e-4, nalphas = 2, tf = 5e3, coarse_solve =True):
+def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip =4, ktol = 5e-5, use_we = False, max_its_kloop = 100, maxits_power = 15, coarse_angles = 4, alpha_tol = 1e-4, nalphas = 2, tf = 5e3, coarse_solve =True):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -134,7 +134,7 @@ def Kornreich_benchmark(prime = False, guess_k = 1, sparse_time_points = 7, skip
     # fine solve
         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=precondition_sol_coeffs, coarse_angles=N_ang)
     else:
-         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop)
+         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_solve=False, input_phi=None)
     print(k_list, 'k_list')
     print(k_list[-1], 'k effective')
     print(0.4243163, 'benchmark k effective')
@@ -179,7 +179,7 @@ def Kornreich_benchmark(prime = False, guess_k = 1, sparse_time_points = 7, skip
     plt.loglog(np.linspace(0, nits, nits)[1:], time_list, '-o', mfc = 'none')
     plt.xlabel('iteration', fontsize = 16)
     plt.ylabel('time [s]', fontsize = 16)
-    plt.savefig('Kornreich_results/time_plots/calc_time_Kornreich_{N_ang}_angles_x0={x0}_nu={nu}_{N_spaces}_spatial_cells_coarse_solve={coarse_solve}.pdf', bbox_inches = 'tight')
+    plt.savefig(f'Kornreich_results/time_plots/calc_time_Kornreich_{N_ang}_angles_x0={x0}_nu={nu}_{N_spaces}_spatial_cells_coarse_solve={coarse_solve}.pdf', bbox_inches = 'tight')
     plt.show()
 
     plt.figure('flux shape')
@@ -590,7 +590,7 @@ def mesh_converge_Kornreich(cells_start = 50, N_angles = 96, max_cells = 200, tf
                
 
 
-# mesh_converge_Kornreich(N_angles = 2)
+mesh_converge_Kornreich(N_angles = 2)
 
 
 # mesh_converge_Kornreich(N_angles = 8)
@@ -599,7 +599,7 @@ def mesh_converge_Kornreich(cells_start = 50, N_angles = 96, max_cells = 200, tf
 # mesh_converge_Kornreich(N_angles = 16)
 
 
-mesh_converge_Kornreich(N_angles = 32)
+# mesh_converge_Kornreich(N_angles = 32)
 
 
 mesh_converge_Kornreich(N_angles = 64)

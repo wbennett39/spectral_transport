@@ -599,7 +599,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
 # mesh_converge_Kornreich(N_angles = 8)
 
 
-mesh_converge_Kornreich(cells_start=10,N_angles = 16)
+mesh_converge_Kornreich(cells_start=100,N_angles = 96)
 
 
 # mesh_converge_Kornreich(N_angles = 32)

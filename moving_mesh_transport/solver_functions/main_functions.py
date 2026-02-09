@@ -37,6 +37,7 @@ from timeit import default_timer as timer
 from .wavespeed_estimator import wavespeed_estimator
 from .wave_loc_estimator import find_wave
 from scipy import optimize
+from scipy.optimize.nonlin import NoConvergence
 # from diffeqpy import de
 # import chaospy
 from .theta_DMD import theta_DMD
@@ -491,16 +492,27 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             def residual(Y):
                 t0 = 1e-15
                 return RHS_wrap(t0, Y)
-            try:
-                Y_star = optimize.newton_krylov(residual, Y0,
-                                    method='lgmres',
-                                    f_tol=at,   # stop when ||F|| is small
-                                    maxiter=50)
-                reshaped_IC = Y_star
-                atol_vec = at * (1 + np.abs(reshaped_IC))  
-                print('minimization successful')
-            except:
-                print('minimization failed')
+            maxiter = 1000
+            maxiter_max = 1e5
+            converged = False
+            while converged == False and maxiter < maxiter_max:
+
+                try:
+                    Y_star = optimize.newton_krylov(residual, Y0,
+                                        method='lgmres',
+                                        f_tol=at,   # stop when ||F|| is small
+                                        maxiter=maxiter)
+                    reshaped_IC = Y_star
+                    atol_vec = at * (1 + np.abs(reshaped_IC))  
+                    print('minimization successful')
+                    converged = True
+                    print(maxiter, 'number of iterations required')
+                except NoConvergence as e:
+                    Y_star = e.args[0] 
+                    Y0 = Y_star.copy()
+                    print('minimization failed')
+                    print(maxiter, 'iterations')
+                    maxiter *= 10
         Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at)
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         print(np.max(np.abs(Y[:, -1] - reshaped_IC)), 'max difference from IC')
@@ -553,12 +565,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             try:
                 Y_star = optimize.newton_krylov(residual, Y0,
                                     method='lgmres',
-                                    f_tol=1e-4,   # stop when ||F|| is small
-                                    maxiter=500)
+                                    f_tol=at,   # stop when ||F|| is small
+                                    maxiter=1000)
                 reshaped_IC = Y_star
                 atol_vec = at * (1 + np.abs(reshaped_IC))  
-            except:
-                print('minimization failed')
+            except NoConvergence as e:
+                    Y_star = e.args[0] 
+                    print('minimization failed')
+                    maxiter *= 10
+          
             
         sol = integrate.solve_ivp(RHS_wrap, [0.0,tfinal], reshaped_IC, method=integrator, t_eval = tpnts , rtol = rt, atol = atol_vec, dense_output = dense, vectorized = False, first_step = first_step, events = ss_event)
         # if sol.t_events[0].size:

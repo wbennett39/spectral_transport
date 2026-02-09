@@ -242,8 +242,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     at = float(run.parameters['all']['at']) 
     rt = float(run.parameters['all']['rt'])
     euler_dt_num = int(run.parameters['all']['Euler_dt_num'])
-    atlist = np.logspace(0, np.log10(at),3)
-    rtlist = np.logspace(0, np.log10(rt), 3)
+    atlist = np.logspace(-1, np.log10(at),3)
+    rtlist = np.logspace(-1, np.log10(rt), 3)
 
     if coarse_solve == True:
         run.parameters['all']['rt'] = 1

@@ -216,6 +216,9 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 
     plt.figure('solution plot')
     plt.xlabel('x [cm]', fontsize = 16)
+    ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
     plt.ylabel(r'$\phi$', fontsize = 16)
     plt.plot(run_ob.xs, run_ob.phi, 'k-', mfc = 'none')
     plt.savefig('Kornreich_results/solution_plots/scalar_flux_Kornreich.pdf', bbox_inches = 'tight')
@@ -499,7 +502,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         print(np.sort(alphas_IRAM)[-1], 'dominant alpha IRAM')
         print(np.sort(eigen_vals_DMD)[-1], 'DMD guess')
     
-    f = h5py.File(f'Kornreich_results/kalpha_x0={x0}_nu={nu}.h5', 'r+')
+    f = h5py.File(f'Kornreich_results/data/kalpha_x0={x0}_nu={nu}.h5', 'r+')
     res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
     if f.__contains__(res_str):
         del f[res_str]
@@ -521,7 +524,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 
 
 
-def mesh_converge_Kornreich(cells_start = 50, N_angles = 96, max_cells = 200, tf = 5e3, euler_dt =6):
+def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf = 5e3, euler_dt =6):
     converged = False
     k_guess = 0.8
     alpha_old = 1e-6
@@ -590,21 +593,21 @@ def mesh_converge_Kornreich(cells_start = 50, N_angles = 96, max_cells = 200, tf
                
 
 
-mesh_converge_Kornreich(N_angles = 2)
+# mesh_converge_Kornreich(N_angles = 2)
 
 
 # mesh_converge_Kornreich(N_angles = 8)
 
 
-# mesh_converge_Kornreich(N_angles = 16)
+mesh_converge_Kornreich(cells_start=10,N_angles = 16)
 
 
 # mesh_converge_Kornreich(N_angles = 32)
 
 
-mesh_converge_Kornreich(N_angles = 64)
+# mesh_converge_Kornreich(N_angles = 64)
 
-mesh_converge_Kornreich(N_angles = 96)
+# mesh_converge_Kornreich(N_angles = 96)
 
 
 

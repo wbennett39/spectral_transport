@@ -494,10 +494,11 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             try:
                 Y_star = optimize.newton_krylov(residual, Y0,
                                     method='lgmres',
-                                    f_tol=1e-4,   # stop when ||F|| is small
+                                    f_tol=at,   # stop when ||F|| is small
                                     maxiter=50)
                 reshaped_IC = Y_star
                 atol_vec = at * (1 + np.abs(reshaped_IC))  
+                print('minimization successful')
             except:
                 print('minimization failed')
         Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at)

@@ -239,11 +239,15 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     shift = run.parameters['fixed_source']['shift']
 
     
-   
+    at = float(run.parameters['all']['at']) 
+    rt = float(run.parameters['all']['rt'])
+    euler_dt_num = int(run.parameters['all']['Euler_dt_num'])
+    atlist = np.logspace(0, np.log10(at),3)
+    rtlist = np.logspace(0, np.log10(rt), 3)
 
     if coarse_solve == True:
         run.parameters['all']['rt'] = 1
-        run.parameters['all']['at'] = 1e-5
+        run.parameters['all']['at'] = 1e-3
         run.parameters['all']['integrator'] = 'Euler'
         run.parameters['all']['kold'] = kguess
     
@@ -256,6 +260,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
                 data = yaml.safe_load(file)
                 data['all']['kold'] = kold
+                # data['all']['at'] = float(atlist[0])
+                # data['all']['rt'] = float(rtlist[0])
 
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)
@@ -286,6 +292,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                             sigma_a_vec[space] = 0.2
             transfer_fission_source = make_fission_scalar_flux(new_phi_coeffs, edges, ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
             print(np.shape(input_phi), 'shape of input phi')
+            run.parameters['all']['rt'] = rtlist[0]
+            run.parameters['all']['at'] = atlist[0]
             transfer_fission_source = normalize_fission_source(transfer_fission_source ,N_space, 0, 1/kold, edges)
             run.custom_source(randomstart = False, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs, sol_coeffs = transfer_fission_source )
         else:
@@ -415,11 +423,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             run.load('Kornreich_new', mesh_parameters)
     else:
             run.load(transport_parameters, mesh_parameters) 
-    at = float(run.parameters['all']['at']) 
-    rt = float(run.parameters['all']['rt'])
-    euler_dt_num = int(run.parameters['all']['Euler_dt_num'])
-    atlist = np.logspace(0, np.log10(at),3)
-    rtlist = np.logspace(0, np.log10(rt), 3)
+   
     while converged == False and n_iters < max_its: 
         if coarse_solve == True:
             run.load('Kornreich_new', mesh_parameters)
@@ -428,8 +432,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # the source is actually not normalized
         # run.parameters['all']['integrator'] = 'Euler'
         if n_iters < 3:
-            run.parameters['all']['at'] = atlist[n_iters]
-            run.parameters['all']['rt'] = rtlist[n_iters]
+            run.parameters['all']['at'] = float(atlist[n_iters])
+            run.parameters['all']['rt'] = float(rtlist[n_iters])
         plt.ion()
         plt.figure('fission source')
         plt.plot(run.xs, run.phi[:, -1] * sigma_f_array * nu_array * chi, '--', label = f'iteration {n_iters -1}')

@@ -11,7 +11,7 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 10
+  - 50
   tnodes: 40
   Ms:
   - 0
@@ -377,7 +377,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 5
+  - 32
   move_type:
   - 1
   - 0

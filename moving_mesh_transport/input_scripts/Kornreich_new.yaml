@@ -11,10 +11,10 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 100
+  - 20
   tnodes: 40
   Ms:
-  - 1
+  - 0
   N_runs: 1
   rt: 1e-10
   at: 1e-9
@@ -43,7 +43,7 @@ all:
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.4100947535568191
+  kold: 0.4569173807083733
   VDMD: true
   fixed_source: true
   legendre_moments: 1
@@ -377,7 +377,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 2
+  - 96
   move_type:
   - 1
   - 0

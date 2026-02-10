@@ -174,7 +174,7 @@ def transfer_coefficients(coeffs_old, M):
     N_ang = coeffs_old.shape[0]
     coeffs_new = np.zeros((N_ang, K, M+1))
     for k in range(K):
-        for im in range(M_old+1):
+        for im in range(M_old):
             coeffs_new[:, k, im] = coeffs_old[:, k, im]
     return coeffs_new
 

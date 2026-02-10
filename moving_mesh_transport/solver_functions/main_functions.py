@@ -505,8 +505,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                         return RHS_wrap(t0, Y)
                     Y_star = optimize.newton_krylov(residual, Y0,
                                         method='lgmres',
-                                        f_tol=1,   # stop when ||F|| is small
-                                        maxiter=maxiter)
+                                        f_tol=at,   # stop when ||F|| is small
+                                        maxiter=maxiter,
+                                        x_rtol = 1e-3)
                     reshaped_IC = Y_star.copy()
                     
                     print('minimization successful')

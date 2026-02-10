@@ -45,7 +45,7 @@ def backward_euler(f, ts, y0,  mesh, matrices, num_flux, source, uncollided_sol,
         y_new = np.ascontiguousarray(y_new)
 
         # Newton solve:  G(y) = y - y_prev - dt * f(t_next, y) = 0
-        for _ in range(maxiter):
+        for _ in range(int(maxiter)):
 
             F = y_new - y_prev - dt * f(t_next, y_new,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
             if np.linalg.norm(F) < tol:
@@ -267,7 +267,7 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
 
         z = y.copy()
         if use_gmres == True:
-            for _ in range(maxiter):
+            for _ in range(int(maxiter)):
                 res = G(z)
                 if np.linalg.norm(res) < tol:
                     break
@@ -285,7 +285,7 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
                 
         else:
             # dz = spsolve(lhs, -res)
-            zsol = newton_krylov(G, y, f_tol=tol, maxiter=maxiter, verbose=0)
+            zsol = newton_krylov(G, y, f_tol=tol, maxiter=int(maxiter), verbose=0)
             
         y = zsol
         Y[:, i] = y

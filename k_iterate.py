@@ -170,14 +170,16 @@ def wynn_epsilon(S):
 
 def transfer_coefficients(coeffs_old, M):
     K = coeffs_old.shape[1]
+    M_old = coeffs_old.shape[2]
     N_ang = coeffs_old.shape[0]
     coeffs_new = np.zeros((N_ang, K, M+1))
     for k in range(K):
-        coeffs_new[:, k, 0] = coeffs_old[:, k, 0]
+        for im in range(M_old+1):
+            coeffs_new[:, k, im] = coeffs_old[:, k, im]
     return coeffs_new
 
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None, ss_tol = 1e-10):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None, ss_tol = 1e-10, coarse_M=0):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -202,7 +204,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
     # Use yaml.safe_load() for security when dealing with untrusted input
     # For a trusted config file, you might use yaml.FullLoader
             data = yaml.safe_load(file)
-            data['all']['Ms'][0] = 0
+            data['all']['Ms'][0] = coarse_M
             data['fixed_source']['N_angles'][0] = coarse_angles
             with open('moving_mesh_transport/input_scripts/Kornreich_new.yaml', 'w') as file:
     # Use sort_keys=False to maintain a sensible order (optional)

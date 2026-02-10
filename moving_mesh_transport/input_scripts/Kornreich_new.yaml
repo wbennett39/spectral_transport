@@ -43,7 +43,7 @@ all:
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.4585924355186381
+  kold: 0.4554998785045048
   VDMD: true
   fixed_source: true
   legendre_moments: 1
@@ -377,7 +377,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 96
+  - 2
   move_type:
   - 1
   - 0

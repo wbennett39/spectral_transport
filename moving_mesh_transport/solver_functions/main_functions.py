@@ -489,21 +489,26 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         if guess_steady_state == True:
             print('minimizing residual')
             Y0 = reshaped_IC.copy()
+            atol_vec = at * (1 + np.abs(Y0))  
             def residual(Y):
                 t0 = 1e-15
                 return RHS_wrap(t0, Y)
-            maxiter = 1000
-            maxiter_max = 1e5
+            maxiter = 100
+            maxiter_max = 1e6
             converged = False
             while converged == False and maxiter < maxiter_max:
 
                 try:
+                    atol_vec = at * (1 + np.abs(Y0))  
+                    def residual(Y):
+                        t0 = 1e-15
+                        return RHS_wrap(t0, Y)
                     Y_star = optimize.newton_krylov(residual, Y0,
                                         method='lgmres',
-                                        f_tol=at,   # stop when ||F|| is small
+                                        f_tol=1,   # stop when ||F|| is small
                                         maxiter=maxiter)
-                    reshaped_IC = Y_star
-                    atol_vec = at * (1 + np.abs(reshaped_IC))  
+                    reshaped_IC = Y_star.copy()
+                    
                     print('minimization successful')
                     converged = True
                     print(maxiter, 'number of iterations required')
@@ -512,8 +517,15 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                     Y0 = Y_star.copy()
                     print('minimization failed')
                     print(maxiter, 'iterations')
+                    atol_vec = at * (1 + np.abs(Y0)) 
                     maxiter *= 10
-        Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at)
+                    reshaped_IC = Y_star.copy()
+        try:
+            maxiter_max = 1e6
+            Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max)
+        except NoConvergence as e:
+            Y = e.args[0] 
+            print('solve failed')
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         print(np.max(np.abs(Y[:, -1] - reshaped_IC)), 'max difference from IC')
         print(np.max(np.abs(Y[:, -1] - IC_old)), 'max difference from IC (before minimization)')
@@ -656,11 +668,14 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         xs = specified_xs
     if VDMD == True:
         Y_minus_psi = np.zeros((N_ang * N_groups * xs.size, sol.t.size))
+ 
+
         for it in range(ts.size):
             output = make_output(ts[it], N_ang, ws, xs, sol.y[:, it].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             # output = make_output(tt, N_ang, ws, xs, Y_minus[it,:].reshape((N_ang * N_groups,N_space,M+1)), M, edges, uncollided, geometry, N_groups)
             phi = output.make_phi(uncollided_sol)
             Y_minus_psi[:,it] = output.psi_out.reshape((N_groups * N_ang * xs.size))
+
             phi = output.make_phi(uncollided_sol)
             # plt.ion()
             # plt.plot(xs, phi)

@@ -129,10 +129,11 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     N_groups = run.parameters['all']['N_groups']
     M = run.parameters['all']['Ms'][0]
     if coarse_solve ==True:
-        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=N_ang, coarse_solve=True)
-        precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang+1)*N_groups, N_spaces, 1))
+        for im in range(M+1):
+            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=N_ang, coarse_solve=True, coarse_M=im)
+            precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang+1)*N_groups, N_spaces, im))
     # fine solve
-        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=precondition_sol_coeffs, coarse_angles=N_ang)
+            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=precondition_sol_coeffs, coarse_angles=N_ang)
     else:
          k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_solve=False, input_phi=None)
     print(k_list, 'k_list')
@@ -281,6 +282,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     print(Yminus, 'y-')
     print(ts, 'ts')
     eigen_vals_DMD, eigen_vectors = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
+    eigen_vals_DMD_coeffs, eigen_vectors_coeffs = DMD_func3(run.sol_ob.y, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
     eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0])))
     print(eigen_vals_DMD, 'alpha eigen values VDMD')
     print(alpha_bench, 'benchmark alpha eigen value' )
@@ -338,7 +340,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 
     
         def matvec(x):
-            # run.load('Kornreich', 'mesh_parameters_Kornreich')
+            run.load('Kornreich', 'mesh_parameters_Kornreich')
 
             run.kold = 1
             psi = x.reshape(((N_ang)*N_groups, N_space, M+1))
@@ -346,9 +348,6 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
             run.custom_source(randomstart = False, uncollided = 0, moving = 0, phi_coeffs=psi, sol_coeffs = fission_source)
             res_coefficients = np.copy(run.sol_ob.y[:,-1])
             with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
-
-        # Use yaml.safe_load() for security when dealing with untrusted input
-        # For a trusted config file, you might use yaml.FullLoader
                 data = yaml.safe_load(file)
                 # data['all']['integrator'] = 'Euler'
                 # data['dense'] = True
@@ -377,9 +376,11 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
             sigma = -1/np.max(eigen_vals_DMD)
         except:
              sigma = None
-             print('DMD did not work')
+             print('DMD did not give a nonzero eigenvalue')
+        max_DMD_alpha_coeffs_ind = np.argmin(np.max(eigen_vals_DMD_coeffs)-eigen_vals_DMD_coeffs)
+        v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
         #v0 = eigen_vectors[:,0] # will onlt be able to use this guess if VDMD is fed the coefficients, not psi
-        vals, vecs = eigs(A, k=nalphas, sigma = sigma, which = 'LM', tol = alpha_tol, maxiter = maxits_power )
+        vals, vecs = eigs(A, k=nalphas, sigma = sigma, which = 'LM', tol = alpha_tol, maxiter = maxits_power, v0 = v0)
         ws = run.ws
         print(vals, 'vals')
 
@@ -599,7 +600,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
 # mesh_converge_Kornreich(N_angles = 8)
 
 
-mesh_converge_Kornreich(cells_start=100,N_angles = 96)
+mesh_converge_Kornreich(cells_start=100,N_angles = 2)
 
 
 # mesh_converge_Kornreich(N_angles = 32)

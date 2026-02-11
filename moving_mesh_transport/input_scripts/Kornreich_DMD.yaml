@@ -8,13 +8,13 @@ all:
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
-  nu: 1.5
+  nu: 3.5
   t0: 10000000000000.0
   N_spaces:
-  - 5
+  - 15
   tnodes: 40
   Ms:
-  - 1
+  - 2
   N_runs: 1
   rt: 1e-10
   at: 1e-9
@@ -43,7 +43,7 @@ all:
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.3978036207368695
+  kold: 0.8800909569690305
   VDMD: true
   fixed_source: false
   legendre_moments: 1
@@ -354,7 +354,7 @@ random_IC:
   benchmarking: false
 fixed_source:
   x0:
-  - 4.6
+  - 4.5
   l: 1.0
   shift: 0.0
   source_strength: 1.0

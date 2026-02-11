@@ -114,10 +114,10 @@ def test_normTnintcell():
     for n in range(3):
         # print('n', n)
         for N in [10, 20, 30, 40, 50]:
-            edges = np.linspace(0, 5, N+1)
+            edges = np.linspace(0, 4.5, N+1)
             # print(N, 'N')
             for ix in range(edges.size-1):
-                xs = np.linspace(edges[ix], edges[ix+1], 100)
+                xs = np.linspace(edges[ix], edges[ix+1], 15000)
                 f = normTn(n, xs, edges[ix], edges[ix+1])
                 interp_f = interp1d( xs,f)
 
@@ -125,6 +125,7 @@ def test_normTnintcell():
                 integrand = lambda x: interp_f(x)  * x**2 
                 analytic = normTn_intcell(n, edges[ix], edges[ix+1])
                 scipy_answer = integrate.quad(integrand, edges[ix], edges[ix+1])[0]
+                np.testing.assert_allclose(analytic, scipy_answer, atol = 1e-6, rtol = 1e-6)
                 # print(analytic/ scipy_answer, 'ratio')    
                 # print(analytic, 'analytic')
                 # print('answer scipy', scipy_answer)
@@ -197,7 +198,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
 
     """
 
-    
+    test_normTnintcell()
     if coarse_solve == True:
         with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
 
@@ -328,6 +329,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                      sigma_a_vec[space] = 0.9
                 if (-3.5 <= left_edge <= -2.5 and -3.5 <= right_edge <= -2.5) or (2.5 <= left_edge <= 3.5 and 2.5 <= right_edge <= 3.5):
                      sigma_a_vec[space] = 0.2
+                # print(left_edge, right_edge, 'edges')
+                # print(sigma_f_vec[space], 'sigma_f')
 
     
 

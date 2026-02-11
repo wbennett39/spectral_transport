@@ -6,7 +6,7 @@ find_wave_loc: false
 choose_xs: false
 pad: 35.0
 leader_pad: 0.025
-first_step: 0.00027172691138478423
+first_step: 0.000539280271653059
 xs_list:
 - 0.0
 - 0.5
@@ -27,7 +27,7 @@ domain_width: 4.5
 boundary_on:
 - 0
 - 0
-boundary_source_strength: 1.0
+boundary_source_strength: 0.0
 boundary_source: false
 boundary_source_loc:
 - 0

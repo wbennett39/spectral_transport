@@ -1,6 +1,7 @@
 # imports functions to run package from terminal 
 
 import sys
+import os
 import matplotlib.pyplot as plt
 sys.path.append('/Users/bennett/Documents/Github/transport_benchmarks/')
 from numba.core.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning, NumbaPerformanceWarning
@@ -49,71 +50,127 @@ from moving_mesh_transport.solver_functions.DMD_functions import DMD_func3
 import h5py
 
 
-def make_table(x0, nu, DMD_alpha, IRAM_alpha, iteration_k):
-    try:
-        df = pd.read_csv('Kornreich_results/table/eigenvalues.csv')
-        print(df)
-        eigenvals = {df['analytic k'], df['Iteration k'], df['analytic alpha'], df['DMD alpha'], df['IRAM alpha']}
-    except:
-        eigenvals = {
-        "analytic k": {
-            4.5: [0.4241317, 0.9896407],
-            4.6: [0.4242237, 0.9898554],
-        },
-        "VDMD alpha": {
-            4.5: [0,0],
-            4.6: [0,0],
-        },
-        "IRAM alpha": {
-            4.5: [0,0],
-            4.6: [0,0],
-        }, 
-        "Iteration k": {
-            4.5: [0,0],
-            4.6: [0, 0],
-        },
-        "analytic alpha": {
-            4.5: [-0.3229855,-0.006440766],
-            4.6: [-0.3213939, -0.006298843],
-        },
+# def make_table(x0, nu, DMD_alpha, IRAM_alpha, iteration_k):
+#     try:
+#         df = pd.read_csv('Kornreich_results/table/eigenvalues.csv')
+#         print(df)
+#         eigenvals = {df['analytic k'], df['Iteration k'], df['analytic alpha'], df['DMD alpha'], df['IRAM alpha']}
+#     except:
+#         eigenvals = {
+#         "analytic k": {
+#             4.5: [0.4241317, 0.9896407],
+#             4.6: [0.4556758, 1.063244],
+#         },
+#         "VDMD alpha": {
+#             4.5: [0,0],
+#             4.6: [0,0],
+#         },
+#         "IRAM alpha": {
+#             4.5: [0,0],
+#             4.6: [0,0],
+#         }, 
+#         "Iteration k": {
+#             4.5: [0,0],
+#             4.6: [0, 0],
+#         },
+#         "analytic alpha": {
+#             4.5: [-0.3229855,-0.006440766],
+#             4.6: [-0.2932468, 0.03759991],
+#         },
 
         
+#     }
+
+
+#     if nu == 1.5:
+#         index = 0
+#     elif nu == 3.5:
+#             index = 1
+
+
+#     eigenvals['VDMD alpha'][x0][index] = DMD_alpha
+#     eigenvals['IRAM alpha'][x0][index] = IRAM_alpha
+#     eigenvals['Iteration k'][x0][index] = iteration_k
+
+
+
+
+#     # rows = []
+#     # x0s = [4.5, 4.6]
+#     # for method, resolutions in eigenvals.items():
+#     #     for N, (x01, x02) in x0s.items():
+#     #         rows.append({
+#     #             "Method": method,
+#     #             "Resolution (particles)": int(N),
+#     #             "Eigenvalue 1": np.round(eig1,4),
+#     #             "Eigenvalue 2": np.round(eig2,4),
+#     #         })
+ 
+
+#     df = pd.DataFrame(eigenvals)
+#     df.to_csv("Kornreich_results/table/eigenvalues.csv", index=False)
+def make_table(x0, nu, DMD_alpha, IRAM_alpha, iteration_k):
+
+    filepath = "Kornreich_results/table/eigenvalues.csv"
+
+    # Default analytic values
+    analytic_k = {
+        4.5: [0.4243163, 0.9900716],
+        4.6: [0.4556758, 1.063244],
     }
 
+    analytic_alpha = {
+        4.5: [-0.3196537, -0.006156369],
+        4.6: [-0.2932468, 0.03759991],
+    }
 
+    # Determine index based on nu
     if nu == 1.5:
         index = 0
     elif nu == 3.5:
-            index = 1
+        index = 1
+    else:
+        raise ValueError("Unsupported nu value")
 
+    # Create new row
+    new_row = {
+        "x0": x0,
+        "nu": nu,
+        "analytic k": analytic_k[x0][index],
+        "Iteration k": iteration_k,
+        "analytic alpha": analytic_alpha[x0][index],
+        "VDMD alpha": np.real(DMD_alpha),
+        "IRAM alpha": np.real(IRAM_alpha),
+    }
 
-    eigenvals['VDMD alpha'][x0][index] = DMD_alpha
-    eigenvals['IRAM alpha'][x0][index] = IRAM_alpha
-    eigenvals['Iteration k'][x0][index] = iteration_k
+    # Load existing file if it exists
+    if os.path.exists(filepath):
+        df = pd.read_csv(filepath)
 
+        # Remove existing row for same (x0, nu) to avoid duplicates
+        df = df[~((df["x0"] == x0) & (df["nu"] == nu))]
 
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    else:
+        df = pd.DataFrame([new_row])
 
+    # Sort nicely
+    df = df.sort_values(by=["x0", "nu"])
 
-    # rows = []
-    # x0s = [4.5, 4.6]
-    # for method, resolutions in eigenvals.items():
-    #     for N, (x01, x02) in x0s.items():
-    #         rows.append({
-    #             "Method": method,
-    #             "Resolution (particles)": int(N),
-    #             "Eigenvalue 1": np.round(eig1,4),
-    #             "Eigenvalue 2": np.round(eig2,4),
-    #         })
- 
+    # Round for prettier output
+    df = df.round(6)
 
-    df = pd.DataFrame(eigenvals)
-    df.to_csv("Kornreich_results/table/eigenvalues.csv", index=False)
+    df.to_csv(filepath, index=False)
+
+    print("Table updated successfully.")
 
 
 
 def plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, M):
-    plt.figure('keff')
     
+    
+    plt.figure('keff')
+    plt.clf()
 
 
 
@@ -130,13 +187,18 @@ def plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coar
     plt.show()
 
     plt.figure('calc time')
-    plt.loglog(np.linspace(0, nits, nits)[1:], time_list, '-o', mfc = 'none')
+    plt.clf()
+    plt.semilogy(np.linspace(0, nits, nits)[1:], time_list, '-o', mfc = 'none')
     plt.xlabel('iteration', fontsize = 16)
     plt.ylabel('time [s]', fontsize = 16)
+    ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
     plt.savefig(f'Kornreich_results/time_plots/calc_time_Kornreich_{N_ang}_angles_x0={x0}_nu={nu}_{N_spaces}_spatial_cells_coarse_solve={coarse_solve}_{M+1}_bases.pdf', bbox_inches = 'tight')
     plt.show()
 
     plt.figure('flux shape')
+    plt.clf()
     nits = len(k_list)
     plt.plot(run_ob.xs, run_ob.phi, '-', mfc = 'none')
     plt.xlabel('x', fontsize = 16)
@@ -148,6 +210,7 @@ def plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coar
 
 
     plt.figure('normalize')
+    plt.clf()
     nits = len(k_list)
     plt.plot(np.linspace(0, nits, nits)[1:], normalization_list[1:], '-o', mfc = 'none')
     plt.xlabel('iterations', fontsize = 16)
@@ -159,6 +222,7 @@ def plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coar
 
 
     plt.figure('keff_log')
+    plt.clf()
     nits = len(k_list)
     plt.loglog(np.linspace(0, nits, nits)[1:], np.abs(np.array(k_list[1:]) - np.array(k_list[:-1])), '-o', mfc = 'none')
     plt.xlabel('iterations', fontsize = 16)
@@ -169,6 +233,7 @@ def plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coar
     plt.show()
 
     plt.figure('solution plot')
+    plt.clf()
     plt.xlabel('x [cm]', fontsize = 16)
     ax = plt.gca()
     ax.spines['top'].set_visible(False)
@@ -218,8 +283,15 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
-    make_table(4.6, 1.5, 0.1, -.2, 0.5)
+
+    with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+                data = yaml.safe_load(file)
+                data['all']['kold'] = float(guess_k)
+    with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
+                yaml.dump(data, file, sort_keys=False)
+
     run.load('Kornreich', 'mesh_parameters_Kornreich')
+
     if prime == True:
         at = float(run.parameters['all']['at']) 
         rt = float(run.parameters['all']['rt'])
@@ -243,11 +315,14 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
                     alpha_bench = -0.006440766
             elif run.parameters['fixed_source']['x0'][0] ==4.6:
                 if run.parameters['all']['nu'] == 1.5:
-                    k_bench = 0.4242237
-                    alpha_bench = -0.3213939
+                    # k_bench = 0.4242237
+                    k_bench = 0.4556758
+                    # alpha_bench = -0.3213939
+                    alpha_bench = -0.2932468
                 elif run.parameters['all']['nu'] == 3.5:
-                    k_bench = 0.9898554
-                    alpha_bench = -0.006298843
+                    # k_bench = 0.9898554
+                    k_bench = 1.063244
+                    alpha_bench = 0.03759991
             else: #not ready for other cases. Probably not necessary
                 # k_bench = 0.4243163
                 raise ValueError('Do not have this case')
@@ -267,23 +342,25 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     x0 = run.parameters['fixed_source']['x0'][0]
     nu =run.parameters['all']['nu']
     if coarse_solve ==True:
-        for im in range(M+1):
-            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=N_ang, coarse_solve=True, coarse_M=im)
-            precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang+1)*N_groups, N_spaces, im+1))
-            plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im)
+        im =0
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=N_ang, coarse_solve=True, coarse_M=im)
+        precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang+1)*N_groups, N_spaces, im+1))
+        plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im)
+        for im in range(1, M+1):
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
                 data = yaml.safe_load(file)
-                data['all']['Ms'] = int(im+1)
+                data['all']['Ms'][0] = int(im)
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                 yaml.dump(data, file, sort_keys=False)
             k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=precondition_sol_coeffs, coarse_angles=N_ang)
-            plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im+1)
+            plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im)
+            precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang+1)*N_groups, N_spaces, im+1))
     else:
          k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_solve=False, input_phi=None)
          plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, M)
     print(k_list, 'k_list')
     print(k_list[-1], 'k effective')
-    print(0.4243163, 'benchmark k effective')
+    print(k_bench, 'benchmark k effective')
     print(time_list, 'computation time required per iterate')
     
     f = h5py.File(f'Kornreich_results/data/Kornreich_keff_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
@@ -484,14 +561,14 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 
     # power iteration
     elif k_list[-1]>=1:
-        alpha_old = 1e-5
+        alpha_old = np.max(eigen_vals_DMD)
         alpha_old_old = 0
         # if get_k == True:
-        k_old = k_list[-1]
+        # k_old = k_list[-1]
         coarse_solve = False
         # else:
         k_old = 1e-3
-        phi = None
+        phi = v0
         coarse_solve = True
         g_old = 0
         sigma_t_base = run.parameters['all']['sigma_t'] 
@@ -628,7 +705,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
           cells_list.append(cells_start)
           if (np.abs(k_guess - k_new) <= tol and np.abs(alpha_new-alpha_old) <= tol):
                converged = True
-          elif cells_start > max_cells:
+          elif cells_start >= max_cells:
                converged = True
           else:
                k_guess = k_new
@@ -667,13 +744,33 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
                
 
 
+def fill_Kornreich_table():
+     x0_list = [4.5, 4.6]
+     nu_list = [1.5, 3.5]
+     for x0 in x0_list:
+          for nu in nu_list:
+            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+                data = yaml.safe_load(file)
+                # data['all']['integrator'] = 'Euler'
+                # data['dense'] = True
+                # data['eval_times'] =False
+                data['all']['nu'] = float(nu)
+                data['fixed_source']['x0'][0] = float(x0)
+                with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
+                    yaml.dump(data, file, sort_keys=False)
+            mesh_converge_Kornreich(cells_start = 40, max_cells = 45, N_angles = 64, tf = 5e3, euler_dt =5)
+
+     
+fill_Kornreich_table()
+
+
 # mesh_converge_Kornreich(N_angles = 2)
 
 
 # mesh_converge_Kornreich(N_angles = 8)
 
 
-mesh_converge_Kornreich(cells_start=30, N_angles = 96)
+# mesh_converge_Kornreich(cells_start=30, N_angles = 32)
 
 
 # mesh_converge_Kornreich(N_angles = 32)
@@ -685,7 +782,7 @@ mesh_converge_Kornreich(cells_start=30, N_angles = 96)
 
 
 
-mesh_converge_Kornreich(N_angles = 128)
+# mesh_converge_Kornreich(N_angles = 128)
 
 
 

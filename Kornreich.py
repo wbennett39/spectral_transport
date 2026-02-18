@@ -583,19 +583,25 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         alpha_list.append(alpha_old_old)
         alpha_list.append(alpha_old)
         iterations = 2
-        phi = v0
+        phi = v0.reshape((N_ang, N_space, M+1))
+        # if isinstance(phi, tuple) and len(phi) == 1 and isinstance(phi[0], np.ndarray):
+            # phi = phi[0]
+
         def residual(alpha_new, phi):
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
                     data = yaml.safe_load(file)
-                    data['all']['sigma_t'] = sigma_t_base + alpha_new
+                    data['all']['sigma_t'] = float(sigma_t_base + alpha_new)
                     with open('moving_mesh_transport/input_scripts/Kornreich_new.yaml', 'w') as file:
          
                         yaml.dump(data, file, sort_keys=False)
-            k_list_new, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_old, 'Kornreich_new', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, coarse_solve=coarse_solve, max_its = max_its_kloop, input_phi=phi)
+            # run.load('Kornreich_new', 'mesh_parameters_Kornreich')
+            k_list_new, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi_new = power_iterate(k_old, 'Kornreich_new', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, coarse_solve=False, max_its = max_its_kloop, input_phi=phi)
             return abs(k_list_new[-1]) -1
              
+        # print(type(phi), 'phi type')
+        # print(phi.shape(), 'phi shape')
         
-        alpha_final = newton(residual, np.max(eigen_vals_DMD), fprime=None, args=(phi), tol=alpha_tol, maxiter=maxits_power, fprime2=None, x1=None, rtol=alpha_tol, full_output=False, disp=True)
+        alpha_final = newton(residual, np.max(eigen_vals_DMD), fprime=None, args=(phi,), tol=alpha_tol, maxiter=maxits_power, fprime2=None, x1=None, rtol=alpha_tol, full_output=False, disp=True)
 
 
         # while abs(abs(k_old)-1) > alpha_tol and iterations < maxits_power:
@@ -783,7 +789,7 @@ def fill_Kornreich_table():
                 data['fixed_source']['x0'][0] = float(x0)
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                     yaml.dump(data, file, sort_keys=False)
-            mesh_converge_Kornreich(cells_start = 20, max_cells = 21, N_angles = 64, tf = 5e3, euler_dt =5)
+            mesh_converge_Kornreich(cells_start = 20, max_cells = 21, N_angles = 16, tf = 5e3, euler_dt =5)
 
      
 fill_Kornreich_table()

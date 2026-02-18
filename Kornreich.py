@@ -23,6 +23,7 @@ from moving_mesh_transport.solver_classes.functions import *
 from k_iterate import power_iterate, test_normTnintcell, check_norm_flux
 import yaml
 import pandas as pd
+from scipy.optimize import newton
 
 # from moving_mesh_transport.plots.plot_square_s_times import main as plot_square_s_times
 # from moving_mesh_transport.solution_plotter import plot_thin_nonlinear_problems as plot_thin
@@ -305,33 +306,34 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
 
     # First, find k_eff
-    if run.parameters['fixed_source']['shift'] == 0.0:
-            if run.parameters['fixed_source']['x0'][0] ==4.5:
-                if run.parameters['all']['nu'] == 1.5:
-                    k_bench = 0.4241317
-                    alpha_bench = -0.3229855
-                elif run.parameters['all']['nu'] == 3.5:
-                    k_bench = 0.9896407
-                    alpha_bench = -0.006440766
-            elif run.parameters['fixed_source']['x0'][0] ==4.6:
-                if run.parameters['all']['nu'] == 1.5:
-                    # k_bench = 0.4242237
-                    k_bench = 0.4556758
-                    # alpha_bench = -0.3213939
-                    alpha_bench = -0.2932468
-                elif run.parameters['all']['nu'] == 3.5:
-                    # k_bench = 0.9898554
-                    k_bench = 1.063244
-                    alpha_bench = 0.03759991
-            else: #not ready for other cases. Probably not necessary
-                # k_bench = 0.4243163
-                raise ValueError('Do not have this case')
+    # if run.parameters['fixed_source']['shift'] == 0.0:
+    if run.parameters['fixed_source']['x0'][0] ==4.5:
+        if run.parameters['all']['nu'] == 1.5:
+            k_bench = 0.4241317
+            alpha_bench = -0.3229855
+        elif run.parameters['all']['nu'] == 3.5:
+            k_bench = 0.9896407
+            alpha_bench = -0.006440766
+    elif run.parameters['fixed_source']['x0'][0] ==4.6:
+        if run.parameters['all']['nu'] == 1.5:
+            # k_bench = 0.4242237
+            k_bench = 0.4556758
+            # alpha_bench = -0.3213939
+            alpha_bench = -0.2932468
+        elif run.parameters['all']['nu'] == 3.5:
+            # k_bench = 0.9898554
+            k_bench = 1.063244
+            alpha_bench = 0.03759991
+    else: #not ready for other cases. Probably not necessary
+        # k_bench = 0.4243163
+        raise ValueError('Do not have this case')
 
     # coarse solve
     run.load('Kornreich', 'mesh_parameters_Kornreich')
     N_ang = run.parameters['fixed_source']['N_angles'][0] 
 
     N_spaces = run.parameters['all']['N_spaces'][0]
+    N_space = N_spaces
     N_groups = run.parameters['all']['N_groups']
     M = run.parameters['all']['Ms'][0]
     run.load('Kornreich', 'mesh_parameters_Kornreich')
@@ -432,6 +434,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     eigen_vals_DMD, eigen_vectors = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
     eigen_vals_DMD_coeffs, eigen_vectors_coeffs = DMD_func3(run.sol_ob.y, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang*(M+1), xs = np.zeros(N_spaces))
     eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0])))
+    max_DMD_alpha_coeffs_ind = np.argmin(np.max(eigen_vals_DMD_coeffs)-eigen_vals_DMD_coeffs)
+    v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
     print(eigen_vals_DMD, 'alpha eigen values VDMD')
     print(alpha_bench, 'benchmark alpha eigen value' )
     print(eigen_vectors.shape, 'eigen vec shape')
@@ -525,7 +529,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         except:
              sigma = None
              print('DMD did not give a nonzero eigenvalue')
-        max_DMD_alpha_coeffs_ind = np.argmin(np.max(eigen_vals_DMD_coeffs)-eigen_vals_DMD_coeffs)
+        
         v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
         #v0 = eigen_vectors[:,0] # will onlt be able to use this guess if VDMD is fed the coefficients, not psi
         vals, vecs = eigs(A, k=nalphas, sigma = sigma, which = 'LM', tol = alpha_tol, maxiter = maxits_power, v0 = v0)
@@ -579,48 +583,66 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         alpha_list.append(alpha_old_old)
         alpha_list.append(alpha_old)
         iterations = 2
-        while abs(abs(k_old)-1) > alpha_tol and iterations < maxits_power:
-            g = k_old -1
-            alpha_new = alpha_old - g * (alpha_old - alpha_old_old) /(g - g_old + 1e-18)
-            g_old = g
-            alpha_old_old = alpha_old
-            print('## ## ## ## ## ## ## ## ## ## ## ## ## ##')
-            print(alpha_new, 'alpha')
-            print('## ## ## ## ## ## ## ## ## ## ## ## ## ##')
-            print(k_old, 'k')
-
+        phi = v0
+        def residual(alpha_new, phi):
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+                    data = yaml.safe_load(file)
+                    data['all']['sigma_t'] = sigma_t_base + alpha_new
+                    with open('moving_mesh_transport/input_scripts/Kornreich_new.yaml', 'w') as file:
+         
+                        yaml.dump(data, file, sort_keys=False)
+            k_list_new, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_old, 'Kornreich_new', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, coarse_solve=coarse_solve, max_its = max_its_kloop, input_phi=phi)
+            return abs(k_list_new[-1]) -1
+             
+        
+        alpha_final = newton(residual, np.max(eigen_vals_DMD), fprime=None, args=(phi), tol=alpha_tol, maxiter=maxits_power, fprime2=None, x1=None, rtol=alpha_tol, full_output=False, disp=True)
 
-        # Use yaml.safe_load() for security when dealing with untrusted input
-        # For a trusted config file, you might use yaml.FullLoader
-                data = yaml.safe_load(file)
-                data['all']['sigma_t'] = sigma_t_base + alpha_new
-                with open('moving_mesh_transport/input_scripts/Kornreich_new.yaml', 'w') as file:
-        # Use sort_keys=False to maintain a sensible order (optional)
-                    yaml.dump(data, file, sort_keys=False)
-            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_old, 'Kornreich_new', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, coarse_solve=coarse_solve, max_its = max_its_kloop, input_phi=phi)
-            k_old = k_list[-1]
-            alpha_old = alpha_new
-            iterations += 1
-            alpha_list.append(alpha_old)
-            plt.figure('alpha power method')
-            plt.clf()
-            nits = len(alpha_list)
-            plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none')
-            plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
 
-            plt.xlabel('iterations', fontsize = 16)
-            plt.ylabel(r'$\alpha$', fontsize = 16)
-            plt.legend()
-            plt.savefig('Kornreich_results/convergence_plots/power_method_alpha_Kornreich.pdf')
-            plt.show()
-            plt.close()
-            f = h5py.File(f'Kornreich_results/data/Kornreich_alpha_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
-            f.create_dataset('alpha_list_power_iteration', data = alpha_list)
-            f.close()
-            iterations += 1
-        print(alpha_list, 'alpha iterations')
-        print('alpha power iteration converged')
+        # while abs(abs(k_old)-1) > alpha_tol and iterations < maxits_power:
+        #     g = k_old -1
+        #     alpha_new = alpha_old - g * (alpha_old - alpha_old_old) /(g - g_old + 1e-18)
+        #     g_old = g
+        #     # alpha_old_old = alpha_old
+        #     print('## ## ## ## ## ## ## ## ## ## ## ## ## ##')
+        #     print(alpha_new, 'alpha')
+        #     print('## ## ## ## ## ## ## ## ## ## ## ## ## ##')
+        #     print(k_old, 'k')
+
+        #     with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+        # # Use yaml.safe_load() for security when dealing with untrusted input
+        # # For a trusted config file, you might use yaml.FullLoader
+        #         data = yaml.safe_load(file)
+        #         data['all']['sigma_t'] = sigma_t_base + alpha_new
+        #         with open('moving_mesh_transport/input_scripts/Kornreich_new.yaml', 'w') as file:
+        # # Use sort_keys=False to maintain a sensible order (optional)
+        #             yaml.dump(data, file, sort_keys=False)
+        #     k_list_new, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_old, 'Kornreich_new', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, coarse_solve=coarse_solve, max_its = max_its_kloop, input_phi=phi)
+        #     k_old = k_list_new[-1]
+        #     alpha_old_old = alpha_old
+        #     alpha_old = alpha_new
+            
+        #     iterations += 1
+        #     alpha_list.append(alpha_old)
+        #     plt.figure('alpha power method')
+        #     plt.clf()
+        #     nits = len(alpha_list)
+        #     plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none')
+        #     plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
+
+        #     plt.xlabel('iterations', fontsize = 16)
+        #     plt.ylabel(r'$\alpha$', fontsize = 16)
+        #     plt.legend()
+        #     plt.savefig(f'Kornreich_results/convergence_plots/power_method_alpha_Kornreich_{N_ang}_{N_space}_cells_x0={x0}_nu={nu}.pdf')
+        #     plt.show()
+        #     plt.close()
+        #     f = h5py.File(f'Kornreich_results/data/Kornreich_alpha_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
+        #     f.create_dataset('alpha_list_power_iteration', data = alpha_list)
+        #     f.close()
+        # #     iterations += 1
+        # print(alpha_list, 'alpha iterations')
+        # print('alpha power iteration converged')
+        # assert 0
         
         with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
                     data = yaml.safe_load(file)
@@ -631,21 +653,21 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     # if VDMD_estimate == True and IRAM == True:
     if k_list[-1] < 1:
         nits = len(k_list)
-        plt.figure('alpha_vals')
-        plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
-        plt.plot(nits, np.max(eigen_vals_DMD), 'o', label = 'DMD')          
-        plt.plot(nits, np.max(alphas_IRAM[-1]), 'o', label = 'IRAM')
-        plt.legend()
+        # plt.figure('alpha_vals')
+        # plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
+        # plt.plot(nits, np.max(eigen_vals_DMD), 'o', label = 'DMD')          
+        # plt.plot(nits, np.max(alphas_IRAM[-1]), 'o', label = 'IRAM')
+        # plt.legend()
         alpha_final = np.sort(alphas_IRAM)[-1]
         # plt.ylim(-1, 1)
-    else:
-        plt.figure('alpha_vals')
-        plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
-        plt.plot(nits, eigen_vals_DMD[-1], 'o', label = 'DMD')          
-        plt.legend()
-        plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none', label = 'iterations')
-        alpha_final = np.sort(alpha_list[-1])
-    plt.savefig('Kornreich_results/convergence_plots/alphas_Kornreich.pdf')
+    # else:
+        # plt.figure('alpha_vals')
+        # plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
+        # plt.plot(nits, eigen_vals_DMD[-1], 'o', label = 'DMD')          
+        # plt.legend()
+        # plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none', label = 'iterations')
+        # alpha_final = np.sort(alpha_list)[-1]
+    # plt.savefig('Kornreich_results/convergence_plots/alphas_Kornreich.pdf')
     if k_list[-1] <1:
         print('subcritical')
         print(alpha_bench, 'benchmark alpha')
@@ -703,6 +725,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
           k_new, alpha_new, alpha_bench, k_bench, DMD_alpha = Kornreich_benchmark(guess_k=k_guess)
           DMD_alpha_list.append(DMD_alpha)
           cells_list.append(cells_start)
+          converged = True
           if (np.abs(k_guess - k_new) <= tol and np.abs(alpha_new-alpha_old) <= tol):
                converged = True
           elif cells_start >= max_cells:
@@ -745,8 +768,10 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
 
 
 def fill_Kornreich_table():
-     x0_list = [4.5, 4.6]
-     nu_list = [1.5, 3.5]
+     x0_list = [4.6, 4.5]
+     nu_list = [3.5, 1.5]
+    #  x0_list = [4.6]
+    #  nu_list = [3.5]
      for x0 in x0_list:
           for nu in nu_list:
             with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
@@ -758,7 +783,7 @@ def fill_Kornreich_table():
                 data['fixed_source']['x0'][0] = float(x0)
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                     yaml.dump(data, file, sort_keys=False)
-            mesh_converge_Kornreich(cells_start = 40, max_cells = 45, N_angles = 64, tf = 5e3, euler_dt =5)
+            mesh_converge_Kornreich(cells_start = 20, max_cells = 21, N_angles = 64, tf = 5e3, euler_dt =5)
 
      
 fill_Kornreich_table()

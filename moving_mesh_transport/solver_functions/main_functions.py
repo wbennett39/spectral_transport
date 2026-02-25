@@ -487,6 +487,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             ts = np.concatenate((ts, eval_array))
             ts = np.unique(np.sort(ts))
         print(ts, 'eval times')
+        maxiter_max = 5e4
         if guess_steady_state == True:
             print('minimizing residual')
             Y0 = reshaped_IC.copy()
@@ -495,7 +496,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 t0 = 1e-15
                 return RHS_wrap(t0, Y)
             maxiter = 100
-            maxiter_max = 1e6
+            
             converged = False
             while converged == False and maxiter < maxiter_max:
 
@@ -523,24 +524,34 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                     maxiter *= 10
                     reshaped_IC = Y_star.copy()
             try:
-                maxiter_max = 1e6
                 if precon_mat is None:
                     change_from_ic = 10
                     itt = 0
-                    Y = np.zeros((reshaped_IC.size, ts.size-1))
-                    while change_from_ic >= at and itt < ts.size-2:
-                        Y[:, itt:itt+1] = backward_euler_sparse(RHS_wrap_jit, ts[itt:itt+1], reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max, use_gmres=False)
+                    Y = np.zeros((reshaped_IC.size, len(ts)))
+                    while change_from_ic >= at and itt <= ts.size-2:
+                        sol_temp  = backward_euler_sparse(RHS_wrap_jit, ts[itt:itt+2], reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max, use_gmres=False)
+                        # print(sol_temp.shape)
+                        # print(sol_temp)
+                        Y[:, itt] = sol_temp[:,0]
+                        Y[:, itt+1] = sol_temp[:,1]
                         change_from_ic = np.max(np.abs(Y[:, itt+1] - reshaped_IC))
                         reshaped_IC = Y[:, itt+1]
+                        # print(Y, 'Y')
+                        # print(itt, 'itt')
 
                         # if itt >= ts.size-2:
                         #     ts = np.append(ts, ts[-1] + (ts[-1] - ts[-2])) 
                         itt += 1
                     print(itt, 'number of timesteps until steady state')
                     if itt < ts.size -1:
-                        print(Y[:, itt+1:-1].shape)
-                        print(Y[:, itt+1].shape)
-                        Y[:, itt+1:-1] = Y[:, itt+1].copy()
+                        # print(Y[:, itt+1:-1].shape)
+                        # print(Y[:, itt+1], 'plus 1')
+
+                        for it2 in range(itt+1, ts.size):
+                            Y[:, it2] = Y[:, itt].copy()
+                    # print(Y[:, -1], 'last Y')
+
+                        
                 else:
                     Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max,
                                                 use_preconditioner=True, prec_mat=precon_mat )

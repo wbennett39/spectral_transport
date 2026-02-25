@@ -8,16 +8,16 @@ all:
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
-  nu: 3.5
+  nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 80
+  - 20
   tnodes: 40
   Ms:
   - 0
   N_runs: 1
   rt: 1e-9
-  at: 1e-7
+  at: 1e-9
   mxstp: 10000.0
   major: cells
   radiative_transfer:
@@ -377,7 +377,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 16
+  - 2
   move_type:
   - 1
   - 0

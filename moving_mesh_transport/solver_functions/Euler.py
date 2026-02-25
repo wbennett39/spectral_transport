@@ -219,8 +219,8 @@ from scipy.sparse.linalg import gmres, LinearOperator, spilu
 from scipy.optimize import newton_krylov
 
 def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollided_sol, flux, transfer,
-                          sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, jac=None,
-                          tol=1e-3, maxiter=500, use_gmres = False):
+                          sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, prec_mat=None, jac=None,
+                          tol=1e-3, maxiter=500, use_gmres = False, use_preconditioner = False):
     """
     Backward Euler solver using sparse matrix operations.
     """
@@ -230,7 +230,7 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
     Y  = np.zeros((m, len(ts)))
     Y =  np.ascontiguousarray(Y)
     Y[:,0] = y0
-    print(tol, 'backward Euler tolerance')
+    # print(tol, 'backward Euler tolerance')
 
     for i in range(1, len(ts)):
         t_prev, t = ts[i-1], ts[i]
@@ -239,7 +239,8 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
         def G(z):
             return z - y - dt * f(t, z, mesh, matrices, num_flux, source, uncollided_sol, flux,
                                   transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
-
+        def G2(z):
+            return z - y - dt * f(t, z)
         def J(z):
             if jac is not None:
                 return jac(t, z)
@@ -250,13 +251,11 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
                 J_data = []
                 J_rows = []
                 J_cols = []
-                f0 = f(t, z, mesh, matrices, num_flux, source, uncollided_sol, flux,
-                       transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+                f0 = f(t, z)
                 for j in range(n):
                     dz = np.zeros(n)
                     dz[j] = eps
-                    f1 = f(t, z + dz, mesh, matrices, num_flux, source, uncollided_sol, flux,
-                           transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs)
+                    f1 = f(t, z + dz)
                     df = (f1 - f0) / eps
                     for i_ in range(n):
                         if df[i_] != 0:
@@ -268,7 +267,7 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
         z = y.copy()
         if use_gmres == True:
             for _ in range(int(maxiter)):
-                res = G(z)
+                res = G2(z)
                 if np.linalg.norm(res) < tol:
                     break
                 Jz = J(z)
@@ -280,13 +279,17 @@ def backward_euler_sparse(f, ts, y0, mesh, matrices, num_flux, source, uncollide
                 M = spilu(lhs)  # Create an ILU preconditioner (Seems to break numba)
                 M_x = lambda x: M.solve(x)
                 M_op = LinearOperator(lhs.shape, M_x)
-                dz, info = gmres(lhs, -res, M= M_op)
+                dz, info = gmres(lhs, -res, M= M_op, rtol=tol)
                 z += dz
-                
+            zsol = z
+            y = zsol
         else:
             # dz = spsolve(lhs, -res)
-            zsol = newton_krylov(G, y, f_tol=tol, maxiter=int(maxiter), verbose=0)
+            if use_preconditioner == False:
+                zsol = newton_krylov(G, y, f_tol=tol, maxiter=int(maxiter), verbose=0)
+            else:
+                zsol = newton_krylov(G, y, f_tol=tol, maxiter=int(maxiter), verbose=0, inner_M = prec_mat)
             
-        y = zsol
+            y = zsol
         Y[:, i] = y
     return Y

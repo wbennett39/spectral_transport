@@ -180,7 +180,7 @@ def transfer_coefficients(coeffs_old, M):
     return coeffs_new
 
 
-def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None, ss_tol = 1e-10, coarse_M=0):
+def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-12, use_we_accel = False, max_its = 100, coarse_angles = 4, coarse_solve = False, input_phi = np.array([0.0]), input_psi = None, ss_tol = 1e-10, coarse_M=0, precon_mat = None):
     """
     Calls the solver and updates k_eff until desired tolerance between sucessive k_values is achieved
 
@@ -298,7 +298,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
             run.parameters['all']['rt'] = rtlist[0]
             run.parameters['all']['at'] = atlist[0]
             transfer_fission_source = normalize_fission_source(transfer_fission_source ,N_space, 0, 1/kold, edges)
-            run.custom_source(randomstart = False, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs, sol_coeffs = transfer_fission_source )
+            run.custom_source(randomstart = False, uncollided = 0, moving = 0, input_phi_coeffs = new_phi_coeffs, sol_coeffs = transfer_fission_source, input_A = precon_mat )
         else:
             run.custom_source(randomstart = True, uncollided = 0, moving = 0 )
     ws = run.ws
@@ -477,7 +477,7 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
         # print(normalize_phi(old_fission_source, edges, ws, N_ang, M, N_space, N_groups), 'should be 1/k')
 
         # solve with new source
-        run.custom_source(randomstart = False, sol_coeffs = old_fission_source , phi_coeffs = coeffs_old, uncollided = 0, moving = 0) # steady state solve
+        run.custom_source(randomstart = False, sol_coeffs = old_fission_source , phi_coeffs = coeffs_old, uncollided = 0, moving = 0, input_A = precon_mat) # steady state solve
         # plt.figure(f'initial vs final {n_iters}')
         t_calc = time.time() - t1
         with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:

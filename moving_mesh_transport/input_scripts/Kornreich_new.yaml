@@ -4,20 +4,20 @@ all:
   c_scaling: false
   epsilon_scaling: false
   epsilon: 1.0
-  sigma_t: 1.0621309912350685
+  sigma_t: 1
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
   nu: 3.5
   t0: 10000000000000.0
   N_spaces:
-  - 20
+  - 80
   tnodes: 40
   Ms:
-  - 2
+  - 0
   N_runs: 1
-  rt: 1e-10
-  at: 1e-9
+  rt: 1e-9
+  at: 1e-7
   mxstp: 10000.0
   major: cells
   radiative_transfer:
@@ -37,13 +37,13 @@ all:
   thick: false
   integrator: Euler
   Euler_dt_spacing: log
-  Euler_dt_num: 5
+  Euler_dt_num: 9
   geometry:
     slab: false
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.001
+  kold: 0.8
   VDMD: true
   fixed_source: true
   legendre_moments: 1
@@ -354,7 +354,7 @@ random_IC:
   benchmarking: false
 fixed_source:
   x0:
-  - 4.6
+  - 4.5
   l: 1.0
   shift: 0.0
   source_strength: 1.0

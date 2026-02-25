@@ -530,7 +530,7 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         #     # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
         #     eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:], t[skip:]/sigma_t, theta = theta)))
         if integrator == 'Euler' or integrator == 'BDF_VODE':
-            eigen_vals, eigen_vectors = VDMD_func(Y_minus[:, :] , Y_plus[:, :], skip)
+            eigen_vals, eigen_vectors, A_operator = VDMD_func(Y_minus[:, :] , Y_plus[:, :], skip)
             # eigen_vals_DMD = np.sort(np.real(eigen_vals) )
         else:
             assert 0
@@ -543,4 +543,4 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         # eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:]+1e-18, t[skip:], theta = 1)))
         
        
-        return eigen_vals, eigen_vectors
+        return eigen_vals, eigen_vectors, A_operator

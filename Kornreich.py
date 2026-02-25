@@ -304,8 +304,72 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         # run.parameters['fixed_source']['N_angles'] = [2]
         # run.parameters['all']['sigma_f'] = 1.0
         run.custom_source(randomstart=True, uncollided = 0, moving = 0 )
+    # First, do DMD
+    run.load('Kornreich', 'mesh_parameters_Kornreich')
+    N_ang = run.parameters['fixed_source']['N_angles'][0] 
 
-    # First, find k_eff
+    N_spaces = run.parameters['all']['N_spaces'][0]
+    N_space = N_spaces
+    N_groups = run.parameters['all']['N_groups']
+    M = run.parameters['all']['Ms'][0]
+    run.load('Kornreich', 'mesh_parameters_Kornreich')
+    N_ang = run.parameters['fixed_source']['N_angles'][0]
+    N_spaces = run.parameters['all']['N_spaces'][0]
+    N_groups = run.parameters['all']['N_groups']
+    M = run.parameters['all']['Ms'][0]
+    x0 = run.parameters['fixed_source']['x0'][0]
+    nu =run.parameters['all']['nu']
+    integrator = run.parameters['all']['integrator']
+    sigma_t = run.parameters['all']['sigma_t']
+    N_ang = run.parameters['fixed_source']['N_angles'][0] +1
+    run.kold = 1
+    # skip = 4
+    theta = 0
+    # Estimate alpha modes with VDMD
+
+    with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+    # Use yaml.safe_load() for security when dealing with untrusted input
+    # For a trusted config file, you might use yaml.FullLoader
+            data = yaml.safe_load(file)
+            data['all']['integrator'] = 'Euler'
+            data['all']['fixed_source'] = False
+            data['all']['tfinal'] = 500
+            data['all']['guess_steady_state'] = False
+            data['all']['Euler_dt_num'] = sparse_time_points
+            with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
+    # Use sort_keys=False to maintain a sensible order (optional)
+                yaml.dump(data, file, sort_keys=False)
+    with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
+
+    # Use yaml.safe_load() for security when dealing with untrusted input
+    # For a trusted config file, you might use yaml.FullLoader
+            data = yaml.safe_load(file)
+            # data['all']['integrator'] = 'Euler'
+            data['dense'] = True
+            data['eval_times'] =False
+
+   
+
+            with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich_DMD.yaml', 'w') as file:
+    # Use sort_keys=False to maintain a sensible order (optional)
+                yaml.dump(data, file, sort_keys=False)
+    run.load('Kornreich_DMD', 'mesh_parameters_Kornreich_DMD')
+    run.custom_source(randomstart = True, uncollided = 0, moving=0)
+    Yminus = run.sol_ob.Y_minus_psi
+    ts =   run.sol_ob.t
+    xs = run.xs
+    phi = run.phi
+    fission_source =  phi * 0 
+    res_coeffs_VDMD = run.sol_ob.y[:,-1]
+
+    eigen_vals_DMD, eigen_vectors, A_operator_DMD_ = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
+    eigen_vals_DMD_coeffs, eigen_vectors_coeffs, A_operator_DMD = DMD_func3(run.sol_ob.y, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang*(M+1), xs = np.zeros(N_spaces))
+    eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0])))
+    max_DMD_alpha_coeffs_ind = np.argmin(np.max(eigen_vals_DMD_coeffs)-eigen_vals_DMD_coeffs)
+    v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
+    A_operator_DMD = None
+    # Second, find k_eff
     # if run.parameters['fixed_source']['shift'] == 0.0:
     if run.parameters['fixed_source']['x0'][0] ==4.5:
         if run.parameters['all']['nu'] == 1.5:
@@ -327,7 +391,9 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     else: #not ready for other cases. Probably not necessary
         # k_bench = 0.4243163
         raise ValueError('Do not have this case')
-
+    print(eigen_vals_DMD, 'alpha eigen values VDMD')
+    print(alpha_bench, 'benchmark alpha eigen value' )
+    print(eigen_vectors.shape, 'eigen vec shape')
     # coarse solve
     run.load('Kornreich', 'mesh_parameters_Kornreich')
     N_ang = run.parameters['fixed_source']['N_angles'][0] 
@@ -378,36 +444,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     f.close()
 
 
-    # Estimate alpha modes with VDMD
-
-    with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
-
-    # Use yaml.safe_load() for security when dealing with untrusted input
-    # For a trusted config file, you might use yaml.FullLoader
-            data = yaml.safe_load(file)
-            data['all']['integrator'] = 'Euler'
-            data['all']['fixed_source'] = False
-            data['all']['tfinal'] = 500
-            data['all']['guess_steady_state'] = False
-            data['all']['Euler_dt_num'] = sparse_time_points
-            with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
-    # Use sort_keys=False to maintain a sensible order (optional)
-                yaml.dump(data, file, sort_keys=False)
-    with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
-
-    # Use yaml.safe_load() for security when dealing with untrusted input
-    # For a trusted config file, you might use yaml.FullLoader
-            data = yaml.safe_load(file)
-            # data['all']['integrator'] = 'Euler'
-            data['dense'] = True
-            data['eval_times'] =False
-
-   
-
-            with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich_DMD.yaml', 'w') as file:
-    # Use sort_keys=False to maintain a sensible order (optional)
-                yaml.dump(data, file, sort_keys=False)
-    run.load('Kornreich_DMD', 'mesh_parameters_Kornreich_DMD')
+    
     # f = h5py.File('Kornreich_results/Kornreich_results/Kornreich_keff.h5', 'r+')
     # ts = f['t']
     # fission_source = f['fission_source'][:]
@@ -417,28 +454,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     # Y_minus_shifted = np.array(Y_minus).copy().reshape(N_ang, xs.size, ts.size)
     # adjust Y- to remove source influence
     
-    integrator = run.parameters['all']['integrator']
-    sigma_t = run.parameters['all']['sigma_t']
-    N_ang = run.parameters['fixed_source']['N_angles'][0] +1
-    run.kold = 1
-    # skip = 4
-    theta = 0
-    run.custom_source(randomstart = True, uncollided = 0, moving=0)
-    Yminus = run.sol_ob.Y_minus_psi
-    ts =   run.sol_ob.t
-    xs = run.xs
-    phi = run.phi
-    fission_source =  phi * 0 
-    res_coeffs_VDMD = run.sol_ob.y[:,-1]
-
-    eigen_vals_DMD, eigen_vectors = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
-    eigen_vals_DMD_coeffs, eigen_vectors_coeffs = DMD_func3(run.sol_ob.y, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang*(M+1), xs = np.zeros(N_spaces))
-    eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0])))
-    max_DMD_alpha_coeffs_ind = np.argmin(np.max(eigen_vals_DMD_coeffs)-eigen_vals_DMD_coeffs)
-    v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
-    print(eigen_vals_DMD, 'alpha eigen values VDMD')
-    print(alpha_bench, 'benchmark alpha eigen value' )
-    print(eigen_vectors.shape, 'eigen vec shape')
+   
     
 # Y_minus_residual = Y_minus.copy() 
 # for it in range(1, time_list.size):
@@ -497,7 +513,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
             run.kold = 1
             psi = x.reshape(((N_ang)*N_groups, N_space, M+1))
             fission_source = make_fission_scalar_flux(psi, run.edges, run.ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
-            run.custom_source(randomstart = False, uncollided = 0, moving = 0, phi_coeffs=psi, sol_coeffs = fission_source)
+            run.custom_source(randomstart = False, uncollided = 0, moving = 0, phi_coeffs=psi, sol_coeffs = fission_source, input_A=A_operator_DMD)
             res_coefficients = np.copy(run.sol_ob.y[:,-1])
             with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
                 data = yaml.safe_load(file)
@@ -773,9 +789,9 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
                
 
 
-def fill_Kornreich_table():
-     x0_list = [4.6, 4.5]
-     nu_list = [3.5, 1.5]
+def fill_Kornreich_table(N_ang = 16):
+     x0_list = [4.5]
+     nu_list = [1.5, 3.5]
     #  x0_list = [4.6]
     #  nu_list = [3.5]
      for x0 in x0_list:
@@ -789,10 +805,21 @@ def fill_Kornreich_table():
                 data['fixed_source']['x0'][0] = float(x0)
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                     yaml.dump(data, file, sort_keys=False)
-            mesh_converge_Kornreich(cells_start = 20, max_cells = 21, N_angles = 16, tf = 5e3, euler_dt =5)
+            mesh_converge_Kornreich(cells_start =20, max_cells = 21, N_angles = N_ang, tf = 5e3, euler_dt =9)
 
      
-fill_Kornreich_table()
+# fill_Kornreich_table(2)
+# fill_Kornreich_table(64)
+# fill_Kornreich_table(96)
+# fill_Kornreich_table(128)
+fill_Kornreich_table(2)
+fill_Kornreich_table(4)
+fill_Kornreich_table(8)
+fill_Kornreich_table(16)
+fill_Kornreich_table(32)
+fill_Kornreich_table(64)
+fill_Kornreich_table(128)
+
 
 
 # mesh_converge_Kornreich(N_angles = 2)

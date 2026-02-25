@@ -167,6 +167,7 @@ class build(object):
         self.fake_sedov_v0 = fake_sedov_v0
         self.recalculate_sigma_coeffs = recalculate_sigma_coeffs
         self.fixed_source = fixed_source
+       
     
 
         
@@ -189,6 +190,7 @@ class build(object):
 
         self.sigma_f =np.ones(self.N_space) * sigma_f
         self.nu = np.ones(self.N_space) * nu
+        print(self.nu[0], 'nu')
         
         # print(self.randomstart)
         # assert 0
@@ -303,7 +305,7 @@ class build(object):
                 # temp = (edges_init[int(self.N_space/2 + 1)] - edges_init[self.N_space/2 - 1]) 
                 elif self.geometry['sphere'] == True:
                     self.x0 = edges_init[1] - edges_init[0]
-                    print(self.x0, 'x0')
+                    # print(self.x0, 'x0')
                 
 
 

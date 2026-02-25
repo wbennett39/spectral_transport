@@ -377,7 +377,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 2
+  - 64
   move_type:
   - 1
   - 0

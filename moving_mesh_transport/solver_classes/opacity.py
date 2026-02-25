@@ -64,11 +64,11 @@ class sigma_integrator():
     def __init__(self, build, cross_section_data):
         self.cross_section_data = cross_section_data
         self.sigma_t = build.sigma_t
-        print(self.sigma_t, 'total cross section in opacity')
+        # print(self.sigma_t, 'total cross section in opacity')
         self.sigma_s = build.sigma_s
-        print(self.sigma_s,'sigma_s')
+        # print(self.sigma_s,'sigma_s')
         self.sigma_a = self.sigma_t - self.sigma_s
-        print(self.sigma_a,'sigma_a')
+        # print(self.sigma_a,'sigma_a')
         self.sigma_func = build.sigma_func
         self.M = build.M
         self.a = 0.0137225

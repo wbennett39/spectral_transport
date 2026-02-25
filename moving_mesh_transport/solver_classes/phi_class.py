@@ -62,7 +62,7 @@ class scalar_flux(object):
         self.PV_RT = np.zeros(build.M+1).transpose()
         self.M = build.M
         self.ws = build.ws
-        print(np.sum(build.ws), 'weights in build class')
+        # print(np.sum(build.ws), 'weights in build class')
         self.thermal_couple = build.thermal_couple
         self.sigma_func = build.sigma_func
         self.sigma_s = build.sigma_s

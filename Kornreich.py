@@ -563,6 +563,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 
         f = h5py.File(f'Kornreich_results/data/Kornreich_alpha_S{N_ang}_{N_space}_cells_x0={x0}_nu={nu}.h5', 'w')
         f.create_dataset('alpha_list_IRAM_iteration', data = alphas_IRAM)
+        
+
         f.create_dataset('eigenvectors', data = [phi0, phi1])
         f.close()
         
@@ -700,7 +702,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
     if f.__contains__(res_str):
         del f[res_str]
-    f.create_dataset(res_str, data = [k_list[-1], alpha_final])
+    f.create_dataset(res_str, data = [k_list[-1], alpha_final, alpha_bench, k_bench])
     f.close()
     plt.close()
     plt.close()
@@ -805,20 +807,13 @@ def fill_Kornreich_table(N_ang = 16):
                 data['fixed_source']['x0'][0] = float(x0)
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                     yaml.dump(data, file, sort_keys=False)
-            mesh_converge_Kornreich(cells_start =20, max_cells = 21, N_angles = N_ang, tf = 5e3, euler_dt =9)
+            mesh_converge_Kornreich(cells_start =40, max_cells = 41, N_angles = N_ang, tf = 5e3, euler_dt =9)
 
      
 # fill_Kornreich_table(2)
 # fill_Kornreich_table(64)
 # fill_Kornreich_table(96)
 # fill_Kornreich_table(128)
-fill_Kornreich_table(2)
-fill_Kornreich_table(4)
-fill_Kornreich_table(8)
-fill_Kornreich_table(16)
-fill_Kornreich_table(32)
-fill_Kornreich_table(64)
-fill_Kornreich_table(128)
 
 
 
@@ -845,4 +840,70 @@ fill_Kornreich_table(128)
 
 
      
-     
+def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 40, M = 1):
+    x0_list = [4.5]
+    nu_list = [1.5, 3.5]
+    for x0 in x0_list:
+         for nu in nu_list:
+            alpha_list = []
+            k_list = []
+            for N_ang in N_ang_list:
+                N_ang+=1
+                f = h5py.File(f'Kornreich_results/data/kalpha_x0={x0}_nu={nu}.h5', 'r+')
+                res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
+ 
+                # print(f.keys())
+                # print(res_str)
+                if f.__contains__(res_str):
+                    res = f[res_str] 
+                    k = res[0]
+                    alpha = res[1]
+                    # print(alpha, 'alpha', nu)
+                    # print(k, 'k', nu)
+                    
+                    alpha_bench = res[2]
+                    # print(alpha_bench, 'alpha bench', nu)
+                    k_bench = res[3]
+                    # print(k_bench)
+                    k_list.append(k)
+                    alpha_list.append(alpha)
+            plt.figure('k')
+            error_k = np.abs(np.array(k_list) - k_bench)/k_bench
+        
+            
+            plt.loglog(N_ang_list, error_k, '-o', mfc = 'none', label = r'$\nu=$' + f'{nu}')
+            ax = plt.gca()
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            plt.xlabel('angles', fontsize = 16)
+            plt.ylabel(r'$k_\mathrm{eff}$ relative error', fontsize= 16)
+            plt.legend()
+            plt.savefig(f'Kornreich_results/angle_converge/k_x0={x0}_nu={nu}.pdf')
+            plt.close()
+            plt.figure('alpha')
+            error_alpha = np.abs(np.array(alpha_list) - alpha_bench)/np.abs(alpha_bench)
+            plt.loglog(N_ang_list, error_alpha, '-o', mfc = 'none', label = r'$\nu=$' + f'{nu}')
+            ax = plt.gca()
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            plt.xlabel('angles', fontsize = 16)
+            plt.ylabel(r'$\alpha$ relative error', fontsize= 16)
+            plt.legend()
+            plt.savefig(f'Kornreich_results/angle_converge/alpha_x0={x0}_nu={nu}.pdf')
+            plt.close()
+
+                        
+
+# assert 0
+fill_Kornreich_table(2)
+fill_Kornreich_table(4)
+plot_results(N_ang_list = [2,4])
+fill_Kornreich_table(8)
+plot_results(N_ang_list = [2,4,8])
+fill_Kornreich_table(16)
+plot_results(N_ang_list = [2,4,8,16])
+fill_Kornreich_table(32)
+plot_results(N_ang_list = [2,4,8,16,32])
+fill_Kornreich_table(64)
+plot_results()
+fill_Kornreich_table(128)

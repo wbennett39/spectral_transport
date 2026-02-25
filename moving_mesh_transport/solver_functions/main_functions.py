@@ -478,6 +478,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     elif integrator == 'Euler':
         IC_old = reshaped_IC
+        IC_start = reshaped_IC.copy()
         # ts = np.linspace(0.0, tfinal, 50)
         if Euler_dt_spacing == 'log':
             ts = np.logspace(-5,math.log10(tfinal), Euler_dt_num + 1)
@@ -486,10 +487,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         if eval_times == True:
             ts = np.concatenate((ts, eval_array))
             ts = np.unique(np.sort(ts))
-        print(ts, 'eval times')
+        # print(ts, 'eval times')
         maxiter_max = 5e4
         if guess_steady_state == True:
-            print('minimizing residual')
+            # print('minimizing residual')
             Y0 = reshaped_IC.copy()
             atol_vec = at * (1 + np.abs(Y0))  
             def residual(Y):
@@ -511,6 +512,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                                         maxiter=maxiter,
                                         x_rtol = 1e-3)
                     reshaped_IC = Y_star.copy()
+                    IC_start = reshaped_IC.copy()
                     
                     print('minimization successful')
                     converged = True
@@ -518,24 +520,27 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 except NoConvergence as e:
                     Y_star = e.args[0] 
                     Y0 = Y_star.copy()
-                    print('minimization failed')
-                    print(maxiter, 'iterations')
+                    # print('minimization failed')
+                    # print(maxiter, 'iterations')
                     atol_vec = at * (1 + np.abs(Y0)) 
                     maxiter *= 10
                     reshaped_IC = Y_star.copy()
+                    IC_start = reshaped_IC.copy()
             try:
                 if precon_mat is None:
                     change_from_ic = 10
                     itt = 0
                     Y = np.zeros((reshaped_IC.size, len(ts)))
-                    while change_from_ic >= at and itt <= ts.size-2:
+                    
+                    while (change_from_ic >= at and itt <= ts.size-2) or itt <= 1:
                         sol_temp  = backward_euler_sparse(RHS_wrap_jit, ts[itt:itt+2], reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max, use_gmres=False)
                         # print(sol_temp.shape)
                         # print(sol_temp)
                         Y[:, itt] = sol_temp[:,0]
                         Y[:, itt+1] = sol_temp[:,1]
                         change_from_ic = np.max(np.abs(Y[:, itt+1] - reshaped_IC))
-                        reshaped_IC = Y[:, itt+1]
+                        print(change_from_ic)
+                        reshaped_IC = Y[:, itt+1].copy()
                         # print(Y, 'Y')
                         # print(itt, 'itt')
 
@@ -562,7 +567,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
              Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max,
                                                 use_preconditioner=False, prec_mat=None )
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
-        print(np.max(np.abs(Y[:, -1] - reshaped_IC)), 'max difference from IC')
+        print(np.max(np.abs(Y[:, -1] - IC_start)), 'max difference from IC')
         print(np.max(np.abs(Y[:, -1] - IC_old)), 'max difference from IC (before minimization)')
 
 

@@ -8,13 +8,13 @@ all:
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
-  nu: 1.5
+  nu: 3.5
   t0: 10000000000000.0
   N_spaces:
-  - 40
+  - 20
   tnodes: 40
   Ms:
-  - 1
+  - 2
   N_runs: 1
   rt: 1e-9
   at: 1e-9

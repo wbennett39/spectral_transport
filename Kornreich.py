@@ -16,7 +16,7 @@ from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
 from scipy.sparse.linalg import LinearOperator, eigs  # o
-import h5py 
+import numpy as np
 
 from moving_mesh_transport.solver_classes.functions import *
 
@@ -280,7 +280,7 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip =4, ktol = 5e-5, use_we = False, max_its_kloop = 100, maxits_power = 15, coarse_angles = 4, alpha_tol = 1e-4, nalphas = 2, tf = 5e3, coarse_solve =True):
+def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip =4, ktol = 5e-5, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-4, nalphas = 4, tf = 5e3, coarse_solve =True):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -464,7 +464,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 
 
     # IRAM to get alpha modes
-    if k_list[-1] < 1:
+    if k_list[-1] < 1 and np.max(eigen_vals_DMD) <0:
         run.load('Kornreich', 'mesh_parameters_Kornreich')
         run.custom_source(randomstart = True, uncollided = 0, moving=0)
         edges = run.edges
@@ -581,8 +581,8 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         plt.savefig('Kornreich_results/solution_plots/IRAM_eigenvectors.pdf')
 
 
-    # power iteration
-    elif k_list[-1]>=1:
+    # power iteration fallback
+    else:
         alpha_old = np.max(eigen_vals_DMD)
         alpha_old_old = 0
         # if get_k == True:
@@ -601,7 +601,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         alpha_list.append(alpha_old_old)
         alpha_list.append(alpha_old)
         iterations = 2
-        phi = v0.reshape((N_ang, N_space, M+1))
+        phi = v0.reshape((N_ang+1, N_space, M+1))
         # if isinstance(phi, tuple) and len(phi) == 1 and isinstance(phi[0], np.ndarray):
             # phi = phi[0]
 
@@ -675,7 +675,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
                         yaml.dump(data, file, sort_keys=False)
 
     # if VDMD_estimate == True and IRAM == True:
-    if k_list[-1] < 1:
+    if k_list[-1] < 1 and np.max(eigen_vals_DMD) <0:
         nits = len(k_list)
         # plt.figure('alpha_vals')
         # plt.plot(np.linspace(0, nits, nits)[1:], np.ones(nits-1) * alpha_bench, 'k-', mfc = 'none')
@@ -683,6 +683,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         # plt.plot(nits, np.max(alphas_IRAM[-1]), 'o', label = 'IRAM')
         # plt.legend()
         alpha_final = np.sort(alphas_IRAM)[-1]
+    # else:
         # plt.ylim(-1, 1)
     # else:
         # plt.figure('alpha_vals')
@@ -692,11 +693,11 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         # plt.plot(np.linspace(0, nits, nits)[1:], alpha_list[1:], '-o', mfc = 'none', label = 'iterations')
         # alpha_final = np.sort(alpha_list)[-1]
     # plt.savefig('Kornreich_results/convergence_plots/alphas_Kornreich.pdf')
-    if k_list[-1] <1:
-        print('subcritical')
-        print(alpha_bench, 'benchmark alpha')
-        print(np.sort(alphas_IRAM)[-1], 'dominant alpha IRAM')
-        print(np.sort(eigen_vals_DMD)[-1], 'DMD guess')
+    # if k_list[-1] <1:
+    #     print('subcritical')
+    #     print(alpha_bench, 'benchmark alpha')
+    #     print(np.sort(alphas_IRAM)[-1], 'dominant alpha IRAM')
+    #     print(np.sort(eigen_vals_DMD)[-1], 'DMD guess')
     
     f = h5py.File(f'Kornreich_results/data/kalpha_x0={x0}_nu={nu}.h5', 'r+')
     res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
@@ -793,7 +794,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
 
 def fill_Kornreich_table(N_ang = 16):
      x0_list = [4.5]
-     nu_list = [1.5, 3.5]
+     nu_list = [3.5]
     #  x0_list = [4.6]
     #  nu_list = [3.5]
      for x0 in x0_list:
@@ -807,7 +808,7 @@ def fill_Kornreich_table(N_ang = 16):
                 data['fixed_source']['x0'][0] = float(x0)
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                     yaml.dump(data, file, sort_keys=False)
-            mesh_converge_Kornreich(cells_start =40, max_cells = 41, N_angles = N_ang, tf = 5e3, euler_dt =9)
+            mesh_converge_Kornreich(cells_start =20, max_cells = 21, N_angles = N_ang, tf = 5e3, euler_dt =9)
 
      
 # fill_Kornreich_table(2)
@@ -840,9 +841,9 @@ def fill_Kornreich_table(N_ang = 16):
 
 
      
-def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 40, M = 1):
+def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 20, M = 2):
     x0_list = [4.5]
-    nu_list = [1.5, 3.5]
+    nu_list = [3.5]
     for x0 in x0_list:
          for nu in nu_list:
             alpha_list = []
@@ -869,9 +870,9 @@ def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 40, M = 1):
                     alpha_list.append(alpha)
             plt.figure('k')
             error_k = np.abs(np.array(k_list) - k_bench)/k_bench
-        
-            
+            err_floor = 4e-5/k_bench
             plt.loglog(N_ang_list, error_k, '-o', mfc = 'none', label = r'$\nu=$' + f'{nu}')
+            plt.loglog(N_ang_list, np.ones(len(N_ang_list))* err_floor, 'k-', mfc = 'none', label = r'$\nu=$' + f'{nu}')
             ax = plt.gca()
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
@@ -882,7 +883,9 @@ def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 40, M = 1):
             plt.close()
             plt.figure('alpha')
             error_alpha = np.abs(np.array(alpha_list) - alpha_bench)/np.abs(alpha_bench)
+            err_floor = 4e-5/abs(alpha_bench)
             plt.loglog(N_ang_list, error_alpha, '-o', mfc = 'none', label = r'$\nu=$' + f'{nu}')
+            plt.loglog(N_ang_list, np.ones(len(N_ang_list))* err_floor, 'k-', mfc = 'none', label = r'$\nu=$' + f'{nu}')
             ax = plt.gca()
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
@@ -895,6 +898,7 @@ def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 40, M = 1):
                         
 
 # assert 0
+plot_results(N_ang_list = [2,4])
 fill_Kornreich_table(2)
 fill_Kornreich_table(4)
 plot_results(N_ang_list = [2,4])

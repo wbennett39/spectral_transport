@@ -16,14 +16,18 @@ from moving_mesh_transport.plots import plotting_script as plotter
 from moving_mesh_transport import solver
 import matplotlib.pyplot as plt
 from scipy.sparse.linalg import LinearOperator, eigs  # o
+from scipy.sparse.linalg import eigsh, ArpackNoConvergence
 import numpy as np
-
+from moving_mesh_transport.solver_functions.Chebyshev_matrix_reader import file_reader
 from moving_mesh_transport.solver_classes.functions import *
 
 from k_iterate import power_iterate, test_normTnintcell, check_norm_flux
 import yaml
 import pandas as pd
 from scipy.optimize import newton
+import logging
+
+logging.getLogger("fontTools.subset").setLevel(logging.WARNING)
 
 # from moving_mesh_transport.plots.plot_square_s_times import main as plot_square_s_times
 # from moving_mesh_transport.solution_plotter import plot_thin_nonlinear_problems as plot_thin
@@ -280,7 +284,9 @@ run = run()
 # run.plane_IC(0,0)
 
 loader = load()
-def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip =4, ktol = 5e-5, use_we = False, max_its_kloop = 100, maxits_power = 50, coarse_angles = 4, alpha_tol = 1e-4, nalphas = 4, tf = 5e3, coarse_solve =True):
+def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 17, skip =4, ktol = 5e-5, use_we = False,
+                         max_its_kloop = 100, maxits_power = 100, coarse_angles = 4, alpha_tol = 5e-5, nalphas = 4,
+                           tf = 5e3, coarse_solve =True, switch_to_power = 0.9):
     # test_normTnintcell()
     # check_norm_flux()
     # assert 0
@@ -327,6 +333,65 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     theta = 0
     # Estimate alpha modes with VDMD
 
+    
+    # Second, find k_eff
+    # if run.parameters['fixed_source']['shift'] == 0.0:
+    if run.parameters['fixed_source']['x0'][0] ==4.5:
+        if run.parameters['all']['nu'] == 1.5:
+            k_bench = 0.4241317
+            alpha_bench = -0.3229855
+        elif run.parameters['all']['nu'] == 3.5:
+            k_bench = 0.9896407
+            alpha_bench = -0.006440766
+    elif run.parameters['fixed_source']['x0'][0] ==4.6:
+        if run.parameters['all']['nu'] == 1.5:
+            # k_bench = 0.4242237
+            k_bench = 0.4556758
+            # alpha_bench = -0.3213939
+            alpha_bench = -0.2932468
+        elif run.parameters['all']['nu'] == 3.5:
+            # k_bench = 0.9898554
+            k_bench = 1.063244
+            alpha_bench = 0.03759991
+    else: #not ready for other cases. Probably not necessary
+        # k_bench = 0.4243163
+        raise ValueError('Do not have this case')
+
+    # coarse solve
+    run.load('Kornreich', 'mesh_parameters_Kornreich')
+    N_ang = run.parameters['fixed_source']['N_angles'][0] +1
+
+    N_spaces = run.parameters['all']['N_spaces'][0]
+    N_space = N_spaces
+    N_groups = run.parameters['all']['N_groups']
+    M = run.parameters['all']['Ms'][0]
+    run.load('Kornreich', 'mesh_parameters_Kornreich')
+    N_spaces = run.parameters['all']['N_spaces'][0]
+    N_groups = run.parameters['all']['N_groups']
+    M = run.parameters['all']['Ms'][0]
+    x0 = run.parameters['fixed_source']['x0'][0]
+    nu =run.parameters['all']['nu']
+    if coarse_solve ==True:
+        im =0
+        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=N_ang-1, coarse_solve=True, coarse_M=im)
+        precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang)*N_groups, N_spaces, im+1))
+        plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im)
+        for im in range(1, M+1):
+            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+                data = yaml.safe_load(file)
+                data['all']['Ms'][0] = int(im)
+            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
+                yaml.dump(data, file, sort_keys=False)
+            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=precondition_sol_coeffs, coarse_angles=N_ang-1)
+            plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im)
+            precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang)*N_groups, N_spaces, im+1))
+    else:
+         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_solve=False, input_phi=None)
+         plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, M)
+    print(k_list, 'k_list')
+    print(k_list[-1], 'k effective')
+    print(k_bench, 'benchmark k effective')
+    print(time_list, 'computation time required per iterate')
     with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
 
     # Use yaml.safe_load() for security when dealing with untrusted input
@@ -334,7 +399,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
             data = yaml.safe_load(file)
             data['all']['integrator'] = 'Euler'
             data['all']['fixed_source'] = False
-            data['all']['tfinal'] = 500
+            data['all']['tfinal'] = 5000
             data['all']['guess_steady_state'] = False
             data['all']['Euler_dt_num'] = sparse_time_points
             with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
@@ -362,75 +427,18 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     phi = run.phi
     fission_source =  phi * 0 
     res_coeffs_VDMD = run.sol_ob.y[:,-1]
-
-    eigen_vals_DMD, eigen_vectors, A_operator_DMD_ = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs)
-    eigen_vals_DMD_coeffs, eigen_vectors_coeffs, A_operator_DMD = DMD_func3(run.sol_ob.y, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang*(M+1), xs = np.zeros(N_spaces))
-    eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD[eigen_vals_DMD!=0])))
-    max_DMD_alpha_coeffs_ind = np.argmin(np.max(eigen_vals_DMD_coeffs)-eigen_vals_DMD_coeffs)
-    v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
-    A_operator_DMD = None
-    # Second, find k_eff
-    # if run.parameters['fixed_source']['shift'] == 0.0:
-    if run.parameters['fixed_source']['x0'][0] ==4.5:
-        if run.parameters['all']['nu'] == 1.5:
-            k_bench = 0.4241317
-            alpha_bench = -0.3229855
-        elif run.parameters['all']['nu'] == 3.5:
-            k_bench = 0.9896407
-            alpha_bench = -0.006440766
-    elif run.parameters['fixed_source']['x0'][0] ==4.6:
-        if run.parameters['all']['nu'] == 1.5:
-            # k_bench = 0.4242237
-            k_bench = 0.4556758
-            # alpha_bench = -0.3213939
-            alpha_bench = -0.2932468
-        elif run.parameters['all']['nu'] == 3.5:
-            # k_bench = 0.9898554
-            k_bench = 1.063244
-            alpha_bench = 0.03759991
-    else: #not ready for other cases. Probably not necessary
-        # k_bench = 0.4243163
-        raise ValueError('Do not have this case')
-    print(eigen_vals_DMD, 'alpha eigen values VDMD')
-    print(alpha_bench, 'benchmark alpha eigen value' )
-    print(eigen_vectors.shape, 'eigen vec shape')
-    # coarse solve
-    run.load('Kornreich', 'mesh_parameters_Kornreich')
-    N_ang = run.parameters['fixed_source']['N_angles'][0] 
-
-    N_spaces = run.parameters['all']['N_spaces'][0]
-    N_space = N_spaces
-    N_groups = run.parameters['all']['N_groups']
-    M = run.parameters['all']['Ms'][0]
-    run.load('Kornreich', 'mesh_parameters_Kornreich')
-    N_ang = run.parameters['fixed_source']['N_angles'][0]
-    N_spaces = run.parameters['all']['N_spaces'][0]
-    N_groups = run.parameters['all']['N_groups']
-    M = run.parameters['all']['Ms'][0]
-    x0 = run.parameters['fixed_source']['x0'][0]
-    nu =run.parameters['all']['nu']
-    if coarse_solve ==True:
-        im =0
-        k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_angles=N_ang, coarse_solve=True, coarse_M=im)
-        precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang+1)*N_groups, N_spaces, im+1))
-        plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im)
-        for im in range(1, M+1):
-            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
-                data = yaml.safe_load(file)
-                data['all']['Ms'][0] = int(im)
-            with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
-                yaml.dump(data, file, sort_keys=False)
-            k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(k_list[-1], 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, input_phi=precondition_sol_coeffs, coarse_angles=N_ang)
-            plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, im)
-            precondition_sol_coeffs = run_ob.sol_ob.y[:,-1].reshape(((N_ang+1)*N_groups, N_spaces, im+1))
+    if k_list[-1] < 1:
+         target = 'negative'
     else:
-         k_list, time_list, normalization_list, run_ob, sigma_f_vec, nu_vec, phi = power_iterate(guess_k, 'Kornreich', 'mesh_parameters_Kornreich', run, tol = ktol, use_we_accel= use_we, max_its = max_its_kloop, coarse_solve=False, input_phi=None)
-         plot_k_convergence(k_list, k_bench, N_ang, x0, N_spaces, nu, time_list, coarse_solve, run_ob, normalization_list, M)
-    print(k_list, 'k_list')
-    print(k_list[-1], 'k effective')
-    print(k_bench, 'benchmark k effective')
-    print(time_list, 'computation time required per iterate')
-    
+         target = 'positive'
+    eigen_vals_DMD, eigen_vectors, A_operator_DMD_ = DMD_func3(Yminus, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang, xs = xs, target = target)
+    eigen_vals_DMD_coeffs, eigen_vectors_coeffs, A_operator_DMD = DMD_func3(run.sol_ob.y, ts,  'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points, source = True, sourcevec =  fission_source* 0, N_ang = N_ang*(M+1), xs = np.zeros(N_spaces), target = target)
+    eigen_vals_DMD = np.real(np.flip(np.sort(eigen_vals_DMD_coeffs[eigen_vals_DMD_coeffs!=0])))
+ 
+    max_DMD_alpha_coeffs_ind = np.argmin(np.max(eigen_vals_DMD_coeffs[eigen_vals_DMD_coeffs!=0])-eigen_vals_DMD_coeffs)
+    v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
+    eigen_vals_DMD_coeffs = eigen_vals_DMD_coeffs[eigen_vals_DMD_coeffs!=0]
+    A_operator_DMD = None
     f = h5py.File(f'Kornreich_results/data/Kornreich_keff_S{N_ang}_{N_spaces}_cells_x0={x0}_nu={nu}.h5', 'w')
     f.create_dataset('scalar_flux', data = run_ob.phi)
     f.create_dataset('xs', data = run_ob.xs)
@@ -442,29 +450,12 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     f.create_dataset('k_list', data = k_list)
     f.create_dataset('fission_source', data = sigma_f_vec * nu_vec * phi  )
     f.close()
-
-
-    
-    # f = h5py.File('Kornreich_results/Kornreich_results/Kornreich_keff.h5', 'r+')
-    # ts = f['t']
-    # fission_source = f['fission_source'][:]
-    # Y_minus = f['Y_minus'][:,:]
-    # N_ang = f['N_angles'][:][0]
-    # xs = f['xs']
-    # Y_minus_shifted = np.array(Y_minus).copy().reshape(N_ang, xs.size, ts.size)
-    # adjust Y- to remove source influence
-    
-   
-    
-# Y_minus_residual = Y_minus.copy() 
-# for it in range(1, time_list.size):
-#     dt = time_list[it] - time_list[it-1]
-#     Y_minus_residual -= dt * source
-    # eigen_vals = DMD_func3(Y_minus_residual, time_list, 'Euler', sigma_t, skip = skip, theta = theta, sparse_time_points=sparse_time_points)
-
+    print(eigen_vals_DMD, 'alpha eigen values VDMD')
+    print(alpha_bench, 'benchmark alpha eigen value' )
+    print(eigen_vectors.shape, 'eigen vec shape')
 
     # IRAM to get alpha modes
-    if k_list[-1] < 1 and np.max(eigen_vals_DMD) <0:
+    if k_list[-1] < switch_to_power:
         run.load('Kornreich', 'mesh_parameters_Kornreich')
         run.custom_source(randomstart = True, uncollided = 0, moving=0)
         edges = run.edges
@@ -487,6 +478,19 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         sigma_f_vec = np.ones(N_space) * sigma_f
         nu_vec = np.ones(N_space) * nu
         chi_vec = np.ones(N_space) * chi
+        matrices = run_ob.matrices
+        with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'r') as file:
+
+        # Use yaml.safe_load() for security when dealing with untrusted input
+        # For a trusted config file, you might use yaml.FullLoader
+                data = yaml.safe_load(file)
+                data['all']['guess_steady_state'] = True
+                data['all']['fixed_source'] = True
+                data['all']['fission_operator'] = True
+                data['all']['guess_steady_state'] = True
+                with open('moving_mesh_transport/input_scripts/Kornreich_IRAM.yaml', 'w') as file:
+        # Use sort_keys=False to maintain a sensible order (optional)
+                    yaml.dump(data, file, sort_keys=False)
 
         for space in range(N_space):
                 left_edge = edges[space]-shift
@@ -506,34 +510,35 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
                      sigma_a_vec[space] = 0.2
        
 
-    
+
         def matvec(x):
-            run.load('Kornreich', 'mesh_parameters_Kornreich')
-
+            run.load('Kornreich_IRAM', 'mesh_parameters_Kornreich')
+            print('calling matvec')
             run.kold = 1
-            psi = x.reshape(((N_ang)*N_groups, N_space, M+1))
-            fission_source = make_fission_scalar_flux(psi, run.edges, run.ws, N_ang, M, N_space, N_groups, sigma_f_vec * nu_vec)
-            run.custom_source(randomstart = False, uncollided = 0, moving = 0, phi_coeffs=psi, sol_coeffs = fission_source, input_A=A_operator_DMD)
-            res_coefficients = np.copy(run.sol_ob.y[:,-1])
-            with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'r') as file:
-                data = yaml.safe_load(file)
-                # data['all']['integrator'] = 'Euler'
-                # data['dense'] = True
-                # data['eval_times'] =False
-                ts = run.sol_ob.t
-                first_step = float(ts[1] - ts[0])
-                data['first_step'] = first_step
-                data['dense'] = True
-                data['eval_times'] =False
+            input_vec = x.reshape(((N_ang)*N_groups, N_space, M+1))
+            diff = 10
+            for space in range(N_space):
+                xL = edges[space]
+                xR = edges[space+1]
+                matrices.make_all_matrices(xL, xR, 0, 0)
+                Mass = matrices.Mass
+                for angle in range(N_ang):
+                      input_vec[angle, space, :] = Mass @ input_vec[angle, space, :] 
+            psi_old = input_vec.copy()
+            coeffs_old = psi_old.flatten()
+            iterations = 0
 
-                print(run.sol_ob.t[1] - run.sol_ob.t[0], 'first step')
-                # assert 0
-                with open('moving_mesh_transport/input_scripts/mesh_parameters_Kornreich.yaml', 'w') as file:
-        # Use sort_keys=False to maintain a sensible order (optional)
-                    yaml.dump(data, file, sort_keys=False)
+            while diff > alpha_tol and iterations < maxits_power:
+                run.custom_source(randomstart = False, uncollided = 0, moving = 0, phi_coeffs=psi_old, input_A=None, input_coeffs=input_vec)
+                res_coefficients = np.copy(run.sol_ob.y[:,-1])
+                diff = np.max(np.abs(res_coefficients-coeffs_old))
+                print(diff, 'diff')
+                coeffs_old = res_coefficients
+                iterations+=1
+
             # print(res_coefficients.shape)
 
-            return res_coefficients
+            return -res_coefficients
 
 
         A = LinearOperator((n, n), matvec=matvec, dtype=np.float64)
@@ -541,22 +546,47 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
 # Compute k eigenvalues (largest magnitude by default)
         sigma = None
         try:
-            sigma = -1/np.max(eigen_vals_DMD)
+            # sigma = -1/np.max(eigen_vals_DMD)
+            sigma = None
         except:
              sigma = None
              print('DMD did not give a nonzero eigenvalue')
         
         v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
+        print(v0)
+        print('## ## ## ##')
+        print(np.shape(v0))
+        print(eigen_vals_DMD_coeffs.size)
+        print(eigen_vectors_coeffs.size)
+        print('## ## ## ##')
+        for ixtx in range(eigen_vectors_coeffs[0,:].size-1):
+            print(eigen_vectors_coeffs[:, ixtx])
         #v0 = eigen_vectors[:,0] # will onlt be able to use this guess if VDMD is fed the coefficients, not psi
-        vals, vecs = eigs(A, k=nalphas, sigma = sigma, which = 'LM', tol = alpha_tol, maxiter = maxits_power, v0 = v0)
+        try:
+            vals, vecs = eigs(A, k=nalphas, sigma = sigma, which = 'LM', tol = alpha_tol, maxiter = maxits_power, v0 = v0)
+        except ArpackNoConvergence as err:
+            vals = err.eigenvalues
+            vecs = err.eigenvectors 
+            # Use what converged:
+            print(f"Only {len(vals)} eigenpairs converged")
         ws = run.ws
+        #  try LR?
+        # normalize?
+        # more iterations?
+        # check DMD v0
         print(vals, 'vals')
 
         x0 = run.parameters['fixed_source']['x0'][0]
         nu =run.parameters['all']['nu']
-        alphas_IRAM = np.sort(-1/vals)
-        phi0 = coeffs_to_phi(vecs[:,0].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
-        phi1 = coeffs_to_phi(vecs[:,1].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
+        alphas_IRAM = np.sort(1/vals)
+        dominant_alpha = np.max(alphas_IRAM)
+        print(dominant_alpha, 'dominant alpha')
+        second_alpha = np.sort(alphas_IRAM)[-2]
+        max_alpha_IRAM_index = np.argmin(np.abs(alphas_IRAM-dominant_alpha))
+        second_alpha_IRAM_index = np.argmin(np.abs(alphas_IRAM-second_alpha))
+        phi0 = coeffs_to_phi(vecs[:,max_alpha_IRAM_index].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
+        phi1 = coeffs_to_phi(vecs[:,second_alpha_IRAM_index].reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
+        phiguess = coeffs_to_phi(v0.reshape((N_ang*N_groups, N_space, M+1)), xs, N_ang, N_groups, edges, ws, M)
         print(np.max(alphas_IRAM), 'max alpha IRAM')
 
         print(alphas_IRAM, 'eigenvalues IRAM')
@@ -573,23 +603,30 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         plt.figure('eigenvectors')
         plt.xlabel('r [cm]', fontsize = 16)
         plt.ylabel(r'$\phi$', fontsize = 16)
-        plt.plot(run.xs, phi0, 'k-')
-        plt.plot(run.xs, phi1, 'k--')
+        plt.plot(run.xs, phi0/phi0[-1], 'k-')
+        plt.plot(run.xs, phi1/phi1[-1], 'k--')
+        plt.plot(run.xs, phiguess/phiguess[-1], 'ko', mfc = 'none')
         ax = plt.gca()
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        plt.savefig('Kornreich_results/solution_plots/IRAM_eigenvectors.pdf')
+        plt.savefig(f'Kornreich_results/solution_plots/IRAM_eigenvectors_{N_ang}_{N_space}_cells_x0={x0}_nu={nu}.pdf')
 
 
     # power iteration fallback
     else:
         alpha_old = np.max(eigen_vals_DMD)
+        # alpha_old = -0.3
+        # if k_list[-1] < 1 and np.max(eigen_vals_DMD) > 0:
+        #      alpha_old = -1e-3
+        # else:
+        #      alpha_old = np.max(eigen_vals_DMD)
         alpha_old_old = 0
         # if get_k == True:
         # k_old = k_list[-1]
+        N_ang = run.parameters['fixed_source']['N_angles'][0] + 1
         coarse_solve = False
         # else:
-        k_old = 1e-3
+        k_old = 1 - 2*ktol
         phi = v0
         coarse_solve = True
         g_old = 0
@@ -601,7 +638,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         alpha_list.append(alpha_old_old)
         alpha_list.append(alpha_old)
         iterations = 2
-        phi = v0.reshape((N_ang+1, N_space, M+1))
+        phi = v0.reshape((N_ang, N_space, M+1))
         # if isinstance(phi, tuple) and len(phi) == 1 and isinstance(phi[0], np.ndarray):
             # phi = phi[0]
 
@@ -619,7 +656,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
         # print(type(phi), 'phi type')
         # print(phi.shape(), 'phi shape')
         
-        alpha_final = newton(residual, np.max(eigen_vals_DMD), fprime=None, args=(phi,), tol=alpha_tol, maxiter=maxits_power, fprime2=None, x1=None, rtol=alpha_tol, full_output=False, disp=True)
+        alpha_final = newton(residual, alpha_old, fprime=None, args=(phi,), tol=alpha_tol, maxiter=maxits_power, fprime2=None, x1=None, rtol=alpha_tol, full_output=False, disp=True)
 
 
         # while abs(abs(k_old)-1) > alpha_tol and iterations < maxits_power:
@@ -703,7 +740,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 7, skip 
     res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
     if f.__contains__(res_str):
         del f[res_str]
-    f.create_dataset(res_str, data = [k_list[-1], alpha_final, alpha_bench, k_bench])
+    f.create_dataset(res_str, data = [k_list[-1], alpha_final, alpha_bench, k_bench, np.max(eigen_vals_DMD)])
     f.close()
     plt.close()
     plt.close()
@@ -747,7 +784,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
     # Use sort_keys=False to maintain a sensible order (optional)
                 yaml.dump(data, file, sort_keys=False)
           
-          k_new, alpha_new, alpha_bench, k_bench, DMD_alpha = Kornreich_benchmark(guess_k=k_guess)
+          k_new, alpha_new, alpha_bench, k_bench, DMD_alpha = Kornreich_benchmark(guess_k=k_guess, sparse_time_points=euler_dt)
           DMD_alpha_list.append(DMD_alpha)
           cells_list.append(cells_start)
           converged = True
@@ -794,7 +831,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
 
 def fill_Kornreich_table(N_ang = 16):
      x0_list = [4.5]
-     nu_list = [3.5]
+     nu_list = [1.5, 3.5]
     #  x0_list = [4.6]
     #  nu_list = [3.5]
      for x0 in x0_list:
@@ -808,7 +845,7 @@ def fill_Kornreich_table(N_ang = 16):
                 data['fixed_source']['x0'][0] = float(x0)
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
                     yaml.dump(data, file, sort_keys=False)
-            mesh_converge_Kornreich(cells_start =20, max_cells = 21, N_angles = N_ang, tf = 5e3, euler_dt =9)
+            mesh_converge_Kornreich(cells_start=25, max_cells =26, N_angles = N_ang, tf = 5e3, euler_dt =28)
 
      
 # fill_Kornreich_table(2)
@@ -841,24 +878,28 @@ def fill_Kornreich_table(N_ang = 16):
 
 
      
-def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 20, M = 2):
+def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space =25, M = 2):
     x0_list = [4.5]
-    nu_list = [3.5]
+    nu_list = [1.5]
+   
     for x0 in x0_list:
          for nu in nu_list:
             alpha_list = []
             k_list = []
+            N_ang_plot = []
+            DMD_alpha_list = []
             for N_ang in N_ang_list:
-                N_ang+=1
+                # N_ang+=1
                 f = h5py.File(f'Kornreich_results/data/kalpha_x0={x0}_nu={nu}.h5', 'r+')
-                res_str = f'N_spaces={N_space}_N_angles={N_ang}_M={M}'
- 
-                # print(f.keys())
-                # print(res_str)
+                res_str = f'N_spaces={N_space}_N_angles={N_ang+1}_M={M}'
+                print(nu)
+                print(f.keys())
+                print(res_str)
                 if f.__contains__(res_str):
                     res = f[res_str] 
                     k = res[0]
                     alpha = res[1]
+                    print(alpha, nu)
                     # print(alpha, 'alpha', nu)
                     # print(k, 'k', nu)
                     
@@ -867,41 +908,78 @@ def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space = 20, M = 2):
                     k_bench = res[3]
                     # print(k_bench)
                     k_list.append(k)
+                    DMD_alpha = res[4]
+                    print(DMD_alpha, 'DMD')
                     alpha_list.append(alpha)
-            plt.figure('k')
-            error_k = np.abs(np.array(k_list) - k_bench)/k_bench
-            err_floor = 4e-5/k_bench
-            plt.loglog(N_ang_list, error_k, '-o', mfc = 'none', label = r'$\nu=$' + f'{nu}')
-            plt.loglog(N_ang_list, np.ones(len(N_ang_list))* err_floor, 'k-', mfc = 'none', label = r'$\nu=$' + f'{nu}')
+                    N_ang_plot.append(N_ang)
+                    DMD_alpha_list.append(DMD_alpha)
+            N_ang_list = N_ang_plot
+            plt.figure('kerr')
+            error_k = np.abs(np.array(k_list) - k_bench)
+            err_floor = 4e-5
+            plt.loglog(N_ang_list, error_k, '-o', mfc = 'none')
+            plt.loglog(N_ang_list, np.ones(len(N_ang_list))* err_floor, 'k-', mfc = 'none')
             ax = plt.gca()
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             plt.xlabel('angles', fontsize = 16)
-            plt.ylabel(r'$k_\mathrm{eff}$ relative error', fontsize= 16)
+            plt.ylabel(r'$k_\mathrm{eff}$ absolute error', fontsize= 16)
+            # plt.legend()
+            plt.savefig(f'Kornreich_results/angle_converge/kerr_x0={x0}_nu={nu}.pdf', bbox_inches='tight')
+            plt.close()
+            plt.figure('alphaerr')
+            error_alpha = np.abs(np.array(alpha_list) - alpha_bench)
+            error_alpha_DMD =  np.abs(np.array(DMD_alpha_list) - alpha_bench)
+            err_floor = 4e-5
+            plt.loglog(N_ang_list, error_alpha, '-o', mfc = 'none', label = 'iterative methods')
+            plt.loglog(N_ang_list, error_alpha_DMD, '-^', mfc = 'none', label = 'DMD')
+            plt.loglog(N_ang_list, np.ones(len(N_ang_list))* err_floor, 'k-', mfc = 'none')
+            ax = plt.gca()
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            plt.xlabel('angles', fontsize = 16)
+            plt.ylabel(r'$\alpha$ absolute error', fontsize= 16)
             plt.legend()
+            plt.savefig(f'Kornreich_results/angle_converge/alphaerr_x0={x0}_nu={nu}.pdf', bbox_inches='tight')
+            plt.close()
+
+            plt.figure('k')
+            error_k = np.abs(np.array(k_list) - k_bench)/k_bench
+            err_floor = 4e-5/k_bench
+            plt.semilogx(N_ang_list, k_list, '-o', mfc = 'none')
+            plt.semilogx(N_ang_list, np.ones(len(N_ang_list))* k_bench, 'k-', mfc = 'none')
+            ax = plt.gca()
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            plt.xlabel('angles', fontsize = 16)
+            plt.ylabel(r'$k_\mathrm{eff}$', fontsize= 16)
+            # plt.legend()
             plt.savefig(f'Kornreich_results/angle_converge/k_x0={x0}_nu={nu}.pdf')
             plt.close()
             plt.figure('alpha')
             error_alpha = np.abs(np.array(alpha_list) - alpha_bench)/np.abs(alpha_bench)
+            error_alpha_DMD =  np.abs(np.array(DMD_alpha_list) - alpha_bench)/np.abs(alpha_bench)
             err_floor = 4e-5/abs(alpha_bench)
-            plt.loglog(N_ang_list, error_alpha, '-o', mfc = 'none', label = r'$\nu=$' + f'{nu}')
-            plt.loglog(N_ang_list, np.ones(len(N_ang_list))* err_floor, 'k-', mfc = 'none', label = r'$\nu=$' + f'{nu}')
+            plt.semilogx(N_ang_list, alpha_list, '-o', mfc = 'none', label = 'iterative methods')
+            plt.semilogx(N_ang_list, DMD_alpha_list, '-^', mfc = 'none', label = 'DMD')
+            plt.semilogx(N_ang_list, np.ones(len(N_ang_list))* alpha_bench, 'k-', mfc = 'none')
             ax = plt.gca()
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             plt.xlabel('angles', fontsize = 16)
-            plt.ylabel(r'$\alpha$ relative error', fontsize= 16)
+            plt.ylabel(r'$\alpha$', fontsize= 16)
             plt.legend()
             plt.savefig(f'Kornreich_results/angle_converge/alpha_x0={x0}_nu={nu}.pdf')
             plt.close()
-
                         
 
+# plot_results(N_ang_list = [2,4])
+# plot_results(N_ang_list = [2,4,8])
 # assert 0
-plot_results(N_ang_list = [2,4])
 fill_Kornreich_table(2)
 fill_Kornreich_table(4)
 plot_results(N_ang_list = [2,4])
+# # assert 0
 fill_Kornreich_table(8)
 plot_results(N_ang_list = [2,4,8])
 fill_Kornreich_table(16)
@@ -909,5 +987,7 @@ plot_results(N_ang_list = [2,4,8,16])
 fill_Kornreich_table(32)
 plot_results(N_ang_list = [2,4,8,16,32])
 fill_Kornreich_table(64)
-plot_results()
-fill_Kornreich_table(128)
+plot_results(N_ang_list = [2,4,8,16,32,64])
+# plot_results()
+# fill_Kornreich_table(128)
+# plot_results(N_ang_list = [2,4,8,16,32,64,128])

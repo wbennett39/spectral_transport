@@ -37,12 +37,12 @@ class main_class(parameter_load_class):
     pass
     
 
-    def load_custom_source(self, coefficients, phi_coeffs, randomstart, input_A):
+    def load_custom_source(self, coefficients, phi_coeffs, randomstart, input_A, input_coeffs):
         self.fixed_source_coeffs = coefficients
-       
         self.phi_coeffs = phi_coeffs
         self.randomstart = randomstart
         self.precon_mat = input_A
+        self.input_source_coeffs = input_coeffs
 
     def main(self, uncollided = True, moving = True):  
         # self.fixed_source_coeffs = np.zeros((self.N_angles[0] * self.N_groups, self.N_spaces[0], self.Ms[0]+1))
@@ -134,14 +134,14 @@ class main_class(parameter_load_class):
                     specified_xs = 0.0
                 # print(self.finite_domain, 'finite domain')
 
-                xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol_object, uncollided_ob, fission_source =  solve(
+                xs, phi, psi, exit_dist, exit_phi, e, time, sol_matrix, angles, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol_object, uncollided_ob, fission_source, matrices =  solve(
                     self.tfinal,N_space, N_ang, M, self.N_groups, x0_new, self.t0, self.sigma_t, self.sigma_s, self.t_nodes, self.source_type, uncollided, moving, self.move_type, self.thermal_couple,
                     self.temp_function, self.rt, self.at, self.e_initial, choose_xs, specified_xs, self.weights, self.sigma, self.particle_v, self.edge_v, self.cv0, self.estimate_wavespeed, 
                     self.find_wave_loc, self.thick, self.mxstp, self.wave_loc_array, self.find_edges_tol, self.source_strength, self.move_factor, self.integrator, self.l, self.save_wave_loc, self.pad, 
                     self.leader_pad, self.xs_quad, self.eval_times, self.eval_array,self.boundary_on, self.boundary_source_strength, self.boundary_source, self.sigma_func, self.Msigma, 
                     self.finite_domain,self.domain_width, self.fake_sedov_v0, self.test_dimensional_rhs, self.epsilon, self.geometry, self.lumping, self.cross_section_data, self.dense, self.shift, self.VDMD,
                     self.fixed_source_coeffs, self.phi_coeffs, self.randomstart, self.chi, self.nu, self.sigma_f, self.legendre_moments, self.angular_derivative, self.Euler_dt_spacing, self.Euler_dt_num, self.kold, self.fixed_source, 
-                    self.first_step, self.guess_steady_state, self.precon_mat)
+                    self.first_step, self.guess_steady_state, self.precon_mat, self.fission_operator, self.input_source_coeffs)
                 # print(edges, 'final edges')
                 # print(edges, "edges")
                 # print(wave_tpnts, wave_xpnts, "wave points")
@@ -239,6 +239,7 @@ class main_class(parameter_load_class):
                     self.ws = ws
                     self.uncollided_ob = uncollided_ob
                     self.fission_source = fission_source
+                    self.matrices = matrices
                     # for it, t in enumerate(self.eval_array):
                     #     self.exit_phi[it, 0] = np.sum(np.multiply(self.ws, self.exit_dist[it, :, 0])) 
                     #     self.exit_phi[it, 1] = np.sum(np.multiply(self.ws, self.exit_dist[it, :, 1])) 

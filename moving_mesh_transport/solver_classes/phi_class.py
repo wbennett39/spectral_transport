@@ -51,7 +51,8 @@ data = [("P", float64[:]),
         ('P_fixed', float64[:, :, :]),
         ('fission_source', float64[:, :, :]),
         ('fixed_source_coeffs', float64[:, :]),
-        ('PV_RT', float64[:])
+        ('PV_RT', float64[:]),
+        ('input_source', float64[:,:,:])
         ]
 ###############################################################################
 @jitclass(data)
@@ -76,6 +77,8 @@ class scalar_flux(object):
         self.g = 0
         self.P_fixed = np.zeros((build.N_space, build.N_groups,  build.M+1))
         self.fission_source = np.zeros((build.N_space, build.N_groups,  build.M+1))
+        self.input_source = np.zeros((build.N_ang, build.N_space, build.M+1))
+
         # self.fixed_source_coeffs = build.fixed_source_coeffs
         
 
@@ -87,7 +90,9 @@ class scalar_flux(object):
     #     for i in range(0, self.M+1):
     #         self.P[i]  = np.sum(np.multiply(vec[:,i],self.ws)) 
     #     return self.P
-
+    def make_angle_dependent_source(self, input_source):
+         self.input_source = input_source
+         
     def make_fixed_phi(self, edges):
         # as of now, sigma_f must be constant
         self.P_fixed = np.zeros((self.N_space, self.N_groups, self.M+1))

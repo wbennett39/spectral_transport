@@ -145,6 +145,8 @@ class parameter_load_class:
         self.sigma_func = nb.typed.Dict.empty(key_type=nb.typeof('par_1'), value_type=nb.typeof(1))
         self.first_step = float(mesh_parameters['first_step'])
         self.guess_steady_state = int(parameters['all']['guess_steady_state'])
+        self.fission_operator = int(parameters['all']['fission_operator'])
+
         # for key in mesh_parameters['sigma_func'].keys():
         #     self.sigma_func[key] = mesh_parameters['sigma_func'][key]
         # 

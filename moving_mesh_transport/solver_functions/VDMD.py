@@ -2,15 +2,19 @@ import numpy as np
 from numpy.linalg import svd
 
 
-def VDMD2(Y_minus, Y_plus, skip):
+def VDMD2(Y_minus, Y_plus, skip, rank=None):
 
     [U,S,V] = svd(Y_minus[:,skip:],full_matrices=False)
-    print(S, 'singular values vector')
+    # print(S, 'singular values vector')
     # S = S[:8]
     # U = U[:8]
     # V = V[:8]
     Sinv = np.zeros(S.size)
-    Spos = S[S/np.cumsum(S)>1e-15]
+    if rank is None:
+        Spos = S[S/np.cumsum(S)>1e-15]
+        
+    else:
+        Spos = S[:rank]
     Sinv[0:Spos.size] = 1.0/Spos.copy()
     tmp=np.dot(U.transpose(),Y_plus[:, skip:])
     tmp2=np.dot(tmp,V.transpose())
@@ -23,13 +27,19 @@ def VDMD2(Y_minus, Y_plus, skip):
 
     eigvals, W = np.linalg.eig(tmp3)
     # print('A_tilde eigenvalues', eigvals)
-    print(Y_plus[:, skip:].shape)
-    print(V.shape)
-    print(V.T.shape)
-    print(W.shape)
-    modes = Y_plus[:, skip:] @ V.conj().transpose() @ np.diag(1.0 / Spos) @ W
-    Sigma = np.diag(Spos)
-    Atilde = U.T @ Y_plus[:, skip:] @ V @ np.linalg.inv(Sigma)
+    # print(Y_plus[:, skip:].shape)
+    # print(V.conj().transpose().shape)
+    # print(np.diag(1.0 / Spos).shape)
+    # print(Sinv.shape)
+    # print(W.shape)
+    # print(V.T.shape)
+
+
+    modes = Y_plus[:, skip:] @ V.conj().transpose() @ np.diag(Sinv) @ W
+
+    # Sigma = np.diag(Spos)
+    # Atilde = U.T @ Y_plus[:, skip:] @ V @ np.linalg.inv(Sigma)
+    Atilde = U.T @ Y_plus[:, skip:] @ V @ np.diag(Sinv)
     nrows, ncols = Atilde.shape
     k = min(U.shape[1], nrows, ncols)
     #deigs = deigs[deigs>0]

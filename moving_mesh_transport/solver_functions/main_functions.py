@@ -129,7 +129,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
           dense, shift, VDMD, fixed_source_coeffs, phi_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
-          Euler_dt_spacing, Euler_dt_num, kold, fixed_source, first_step, guess_steady_state, precon_mat):
+          Euler_dt_spacing, Euler_dt_num, kold, fixed_source, first_step, guess_steady_state, precon_mat, fission_operator, input_source_coeffs):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -206,7 +206,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                        quad_thick_edge, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
                        finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, VDMD,
                        fixed_source_coeffs, chi, nu, sigma_f, legendre_moments, angular_derivative, recalculate_sigma_coeffs,
-                        kold, fixed_source)
+                        kold, fixed_source, fission_operator)
     initialize.shift = shift
     print(dense)
 
@@ -268,6 +268,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
 
         initialize.fixed_source_coeffs = fixed_source_coeffs
         flux.fixed_source_coeffs = fixed_source_coeffs
+        if fission_operator == True:
+            flux.make_angle_dependent_source(input_source_coeffs)
         # assert abs(normalize_phi(norm_integrand/normalization, mesh.edges, ws, N_ang, M, N_space, N_groups) -1) < 1e-8
         if randomstart == False:
             initialize.IC = phi_coeffs 
@@ -291,10 +293,10 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
             if normalization > 0:
                 # flux.fixed_source_coeffs = np.mean(flux.fixed_source_coeffs) * np.ones(flux.fixed_source_coeffs.shape)
                 # flux.fixed_source_coeffs = flux.fixed_source_coeffs.copy() / normalization / kold * chi
-                flux.fixed_source_coeffs = normalize_fission_source(flux.fixed_source_coeffs, N_space, M, 1/normalization/kold, mesh.edges)
+                flux.fixed_source_coeffs = normalize_fission_source(flux.fixed_source_coeffs, N_space, M, 1/normalization, mesh.edges)
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs.copy() 
                 # initialize.IC = initialize.IC  #/ normalization
-            print(kold, 'k old in main')
+            # print(kold, 'k old in main')
             flux.make_fixed_phi(mesh.edges)
 
 
@@ -478,6 +480,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     
     elif integrator == 'Euler':
         IC_old = reshaped_IC
+   
         IC_start = reshaped_IC.copy()
         # ts = np.linspace(0.0, tfinal, 50)
         if Euler_dt_spacing == 'log':
@@ -564,7 +567,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 Y = e.args[0] 
                 print('solve failed')
         else:
-             Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max,
+
+            # assert 0
+            Y = backward_euler_sparse(RHS_wrap_jit, ts, reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max,
                                                 use_preconditioner=False, prec_mat=None )
         # Y = backward_euler(RHS_wrap, ts, reshaped_IC)
         print(np.max(np.abs(Y[:, -1] - IC_start)), 'max difference from IC')
@@ -776,7 +781,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 e = phi*0
     computation_time = end-start
     
-    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol, uncollided_sol, initialize.IC 
+    return xs_ret, phi, psi, exit_dist, exit_phi,  e, computation_time, sol_last, mus, ws, edges, wavespeed_array, tpnts, left_edges, right_edges, wave_tpnts, wave_xpnts, T_front_location, mus, sol, uncollided_sol, initialize.IC, matrices 
 
 
 

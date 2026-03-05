@@ -148,7 +148,8 @@ data = [('N_ang', int64),
         ('PV_fission', float64[:, :]),
         ('LOUD', int64),
         ('percent_to_print', float64),
-        ('last_print', float64)
+        ('last_print', float64),
+        ('fission_operator', int64)
         ]
 ##############################################################################
 #thermal couple, l scaling
@@ -233,6 +234,7 @@ class rhs_class():
         self.time_save_points = 100
         self.t_old_list = np.zeros(1)
         self.slope_limiter = False 
+        self.fission_operator = build.fission_operator
         
         # print(self.slope_limiter, 'slope limiter')
         self.wavefront_estimator = 0.0
@@ -632,9 +634,11 @@ class rhs_class():
                 # for j in range(self.M+1): 
                 #     PV_RT = np.sum(np.multiply(self.ws, V_old[:-1, space, :]))
                 PV = flux.scalar_flux_term
-                
-                fixed_source = flux.P_fixed[space, self.g, :]
+                if self.fixed_source_on == True and self.fission_operator == False:
+                    fixed_source = flux.P_fixed[space, self.g, :]
+                    # print(fixed_source)
 
+          
                 source.make_source(t, xL, xR, uncollided_sol)
                 S = source.S
                 H = transfer_class.H
@@ -714,6 +718,10 @@ class rhs_class():
                             # print(V_new[angle, space, :], 'V_new reflected', angle, t) 
 
                     # else: 
+                        if self.fixed_source_on == True and self.fission_operator == True:
+                            fixed_source = flux.input_source[angle, space, :]
+                            
+     
                 # else:
                     # psin = make_u_old(V_old[angle, :,:], self.edges_old, xL, xR, self.xs_quad, self.ws_quad, self.M) # projects psi back to the basis
                         if self.angular_derivative['diamond'] == True:
@@ -793,7 +801,9 @@ class rhs_class():
                                 RHS += PV2 * self.c
                             if self.fixed_source_on == True:
                                 RHS +=  fixed_source / self.sigma_t #* self.sigma_f[space] * self.nu[space] * self.chi / self.sigma_t #/ self.k_old # fixed fission source
-                            else:
+                            
+                            if self.fission_operator == True:
+
                                 if (self.nu > 0).any():
                                     
                                     fission_source = self.nu[space] * self.sigma_f[space] * flux.fission_source[space, self.g, :]

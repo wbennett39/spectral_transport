@@ -474,7 +474,7 @@ def sparsify_weak_dmd(ts_sparse, Y_minus, Y_plus, associated_time_vector):
 
 
 
-def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10, try_WDMD = False, source = False, sourcevec = np.zeros(10), N_ang = 0, xs = np.zeros(1), sparsify = False):
+def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time_points = 10, try_WDMD = False, source = False, sourcevec = np.zeros(10), N_ang = 0, xs = np.zeros(1), sparsify = False, target = None):
         ts =t
         Y_plus = np.zeros((Y_minus[:,0].size, t.size))
         # populate Y+ assuming Backward Euler 
@@ -497,7 +497,8 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         
 
         # This needs to take tfinal as an input
-        if integrator == 'Euler' or integrator == 'BDF_VODE' and sparsify == True:
+        if (integrator == 'Euler' or integrator == 'BDF_VODE') and sparsify == True:
+                assert 0
                 ts_sparse, Y_minus_sparse = sparsify_data_mat(ts, Y_minus, -5, np.log(100), sparse_time_points)
                 ts_sparse, Y_plus_sparse = sparsify_data_mat(ts, Y_plus, -5, np.log(100), sparse_time_points)
                 # weak_Yminus_sparse = sparsify_data_mat2( weak_Yminus, sparse_time_points)
@@ -530,7 +531,29 @@ def DMD_func3(Y_minus, t,  integrator, sigma_t, skip = 4, theta = 1, sparse_time
         #     # eigen_vals_DMD = np.sort(np.real(VDMD_func(Y_minus[:, :] + 1e-16, Y_plus[:, :]+ 1e-16, skip)) )
         #     eigen_vals_DMD = np.sort(np.real(theta_DMD(Y_minus[:, skip:], t[skip:]/sigma_t, theta = theta)))
         if integrator == 'Euler' or integrator == 'BDF_VODE':
-            eigen_vals, eigen_vectors, A_operator = VDMD_func(Y_minus[:, :] , Y_plus[:, :], skip)
+            print(sparse_time_points, 'sparse points')
+            print(ts.size, 'size of ts')
+            if target is None:
+                eigen_vals, eigen_vectors, A_operator = VDMD_func(Y_minus[:, :] , Y_plus[:, :], skip, rank = None)
+            else:
+                target_satisfied = False
+                eigen_vals, eigen_vectors, A_operator = VDMD_func(Y_minus[:, :] , Y_plus[:, :], skip, rank = None)
+                r = eigen_vals.size
+                while target_satisfied == False:
+                    if target == 'positive':
+                        if np.max(eigen_vals) > 0:
+                            target_satisfied = True
+                    elif target == 'negative':
+                        if np.max(eigen_vals) <0:
+                            target_satisfied = True
+                    if r-1 <=2:
+                        break
+                    eigen_vals, eigen_vectors, A_operator = VDMD_func(Y_minus[:, :] , Y_plus[:, :], skip, rank = r-1)
+                    print(r, 'r')
+                    r -=1
+
+                    
+
             # eigen_vals_DMD = np.sort(np.real(eigen_vals) )
         else:
             assert 0

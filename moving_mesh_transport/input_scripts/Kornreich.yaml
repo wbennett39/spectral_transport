@@ -8,13 +8,13 @@ all:
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
-  nu: 3.5
+  nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 20
+  - 25
   tnodes: 40
   Ms:
-  - 2
+  - 1
   N_runs: 1
   rt: 1e-9
   at: 1e-9
@@ -37,7 +37,7 @@ all:
   thick: false
   integrator: Euler
   Euler_dt_spacing: log
-  Euler_dt_num: 9
+  Euler_dt_num: 28
   geometry:
     slab: false
     sphere: true
@@ -46,6 +46,7 @@ all:
   kold: 0.8
   VDMD: true
   fixed_source: true
+  fission_operator: false
   legendre_moments: 1
   guess_steady_state: true
   angular_derivative:

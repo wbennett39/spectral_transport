@@ -11,10 +11,10 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 25
+  - 35
   tnodes: 40
   Ms:
-  - 1
+  - 2
   N_runs: 1
   rt: 1e-9
   at: 1e-9
@@ -37,13 +37,13 @@ all:
   thick: false
   integrator: Euler
   Euler_dt_spacing: log
-  Euler_dt_num: 28
+  Euler_dt_num: 12
   geometry:
     slab: false
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.37743311125411033
+  kold: 0.4238719186403884
   VDMD: true
   fixed_source: false
   fission_operator: false
@@ -53,6 +53,7 @@ all:
     finite_differences: false
     diamond: true
     Legendre: false
+  euler_dt_num: 60
 plane_IC:
   x0:
   - 1e-11
@@ -378,7 +379,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 2
+  - 16
   move_type:
   - 1
   - 0

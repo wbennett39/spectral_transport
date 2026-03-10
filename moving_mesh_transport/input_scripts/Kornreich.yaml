@@ -11,10 +11,10 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 25
+  - 15
   tnodes: 40
   Ms:
-  - 1
+  - 2
   N_runs: 1
   rt: 1e-9
   at: 1e-9
@@ -37,7 +37,7 @@ all:
   thick: false
   integrator: Euler
   Euler_dt_spacing: log
-  Euler_dt_num: 28
+  Euler_dt_num: 12
   geometry:
     slab: false
     sphere: true

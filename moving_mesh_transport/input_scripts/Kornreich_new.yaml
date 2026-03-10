@@ -11,7 +11,7 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 25
+  - 35
   tnodes: 40
   Ms:
   - 0
@@ -37,7 +37,7 @@ all:
   thick: false
   integrator: Euler
   Euler_dt_spacing: log
-  Euler_dt_num: 28
+  Euler_dt_num: 12
   geometry:
     slab: false
     sphere: true
@@ -378,7 +378,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 2
+  - 16
   move_type:
   - 1
   - 0

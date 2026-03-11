@@ -117,8 +117,8 @@ class scalar_flux(object):
         self.fission_source = np.zeros((self.N_space, self.N_groups, self.M+1))
         # print(normalize_phi(self.fixed_source_coeffs, edges, 2*self.ws, self.N_ang, self.M, self.N_space, self.N_groups), 'should be 1/(k) * chi')
         for space in range(self.N_space):
-            xL = edges[k]
-            xR = edges[k+1]
+            xL = edges[space]
+            xR = edges[space+1]
             u = V[:, space,:]
             for ig in range(self.N_groups):
                 # u = self.fixed_source_coeffs[ig*self.N_ang:(ig+1)*self.N_ang, k,:]
@@ -183,7 +183,7 @@ class scalar_flux(object):
                                         # print(self.PV)
                                         # print(self.PV_RT)
                                     elif self.lumping == False:
-                                        print(self.cs[space, k])
+                
                                         self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
                                         self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
                                         # self.PV_RT[i] += u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)

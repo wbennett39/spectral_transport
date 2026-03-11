@@ -572,7 +572,9 @@ class rhs_class():
         #         for ii in range(self.M+1):
         #             for k in range(self.N_space):
         #                 self.PV_fission[k, ii] = np.sum(np.multiply(V_old[:,k,ii],self.ws)) #* (self.c) 
-        if self.fixed_source_on == False and self.fission_operator == True:
+        # if self.fixed_source_on == True:
+        #     flux.make_fixed_phi(mesh.edges)
+        if self.fission_operator == True:
             flux.make_fission_source(mesh.edges, V_old)
         for space in range(0, self.N_space): 
             if self.angular_derivative['Legendre'] == True:
@@ -807,7 +809,9 @@ class rhs_class():
                                 if (self.nu > 0).any():
                                     
                                     fission_source = flux.fission_source[space, self.g, :]
-                                    # print(fission_source)
+                                    # if (np.abs(fission_source) >0).any():
+                                    #     assert 0
+  
                         
                                     RHS += fission_source / self.sigma_t
 

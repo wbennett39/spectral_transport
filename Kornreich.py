@@ -844,7 +844,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
 
 def fill_Kornreich_table(N_ang = 16):
      x0_list = [4.5]
-     nu_list = [1.5, 3.5]
+     nu_list = [1.5]
     #  x0_list = [4.6]
     #  nu_list = [3.5]
      for x0 in x0_list:

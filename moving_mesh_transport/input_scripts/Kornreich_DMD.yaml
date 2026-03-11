@@ -43,7 +43,7 @@ all:
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.37718180917003996
+  kold: 0.42210559076038534
   VDMD: true
   fixed_source: false
   fission_operator: false
@@ -379,7 +379,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 2
+  - 8
   move_type:
   - 1
   - 0

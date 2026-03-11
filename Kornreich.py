@@ -404,6 +404,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 11, skip
             data['all']['tfinal'] = 5000
             data['all']['guess_steady_state'] = False
             data['all']['euler_dt_num'] = VDMD_timesteps
+            data['all']['fission_operator'] = True
             # data['all']['Euler_dt_num'] = sparse_time_points
             with open('moving_mesh_transport/input_scripts/Kornreich_DMD.yaml', 'w') as file:
     # Use sort_keys=False to maintain a sensible order (optional)
@@ -844,7 +845,7 @@ def mesh_converge_Kornreich(cells_start = 20, N_angles = 96, max_cells = 200, tf
 
 def fill_Kornreich_table(N_ang = 16):
      x0_list = [4.5]
-     nu_list = [1.5]
+     nu_list = [1.5, 3.5]
     #  x0_list = [4.6]
     #  nu_list = [3.5]
      for x0 in x0_list:
@@ -893,7 +894,7 @@ def fill_Kornreich_table(N_ang = 16):
      
 def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space =15, M = 2):
     x0_list = [4.5]
-    nu_list = [1.5]
+    nu_list = [1.5, 3.5]
    
     for x0 in x0_list:
          for nu in nu_list:
@@ -987,6 +988,7 @@ def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space =15, M = 2):
                         
 
 # plot_results(N_ang_list = [2,4])
+# assert 0
 # plot_results(N_ang_list = [2,4,8])
 # assert 0
 fill_Kornreich_table(2)

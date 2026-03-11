@@ -559,6 +559,7 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 11, skip
         if np.max(eigen_vals_DMD) < 0:
             sigma = 1/np.max(eigen_vals_DMD)
             # sigma = None
+            # sigma = None
         # sigma = None
         else:
     # except:
@@ -566,6 +567,9 @@ def Kornreich_benchmark(prime = True, guess_k = 1, sparse_time_points = 11, skip
             print('DMD did not give a good guess for alpha')
         
         v0 = eigen_vectors_coeffs[:, max_DMD_alpha_coeffs_ind]
+        v0test = v0 * 0
+
+        # np.testing.assert_allclose(A.matvec(v0test), v0test, rtol = atol, atol = atol)
        
 
         #v0 = eigen_vectors[:,0] # will onlt be able to use this guess if VDMD is fed the coefficients, not psi
@@ -887,7 +891,7 @@ def fill_Kornreich_table(N_ang = 16):
 
 
      
-def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space =35, M = 2):
+def plot_results(N_ang_list = [2, 4, 8,16,32,64], N_space =15, M = 2):
     x0_list = [4.5]
     nu_list = [1.5]
    

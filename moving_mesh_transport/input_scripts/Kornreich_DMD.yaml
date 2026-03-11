@@ -11,7 +11,7 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 35
+  - 15
   tnodes: 40
   Ms:
   - 2
@@ -43,7 +43,7 @@ all:
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.4238719186403884
+  kold: 0.37718180917003996
   VDMD: true
   fixed_source: false
   fission_operator: false
@@ -379,7 +379,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 16
+  - 2
   move_type:
   - 1
   - 0

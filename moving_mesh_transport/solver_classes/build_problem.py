@@ -102,7 +102,9 @@ data = [('N_ang', int64),
         ('recalculate_sigma_coeffs', int64),
         ('k_old', float64),
         ('fixed_source', int64),
-        ('fission_operator', int64)
+        ('fission_operator', int64),
+        ('sigma_fbar', float64),
+        ('nubar', float64)
         ]
 ###############################################################################
 
@@ -192,6 +194,8 @@ class build(object):
         self.sigma_f =np.ones(self.N_space) * sigma_f
         self.nu = np.ones(self.N_space) * nu
         print(self.nu[0], 'nu')
+        self.nubar = nu
+        self.sigma_fbar = sigma_f
         
         # print(self.randomstart)
         # assert 0

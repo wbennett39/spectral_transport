@@ -567,13 +567,13 @@ class rhs_class():
         # flux.fixed_source_coeffs = V_old
         # flux.make_fixed_phi(mesh.edges)
 
-        if (self.nu > 0).any():
-            if self.fixed_source_on == False:
-                for ii in range(self.M+1):
-                    for k in range(self.N_space):
-                        self.PV_fission[k, ii] = np.sum(np.multiply(V_old[:,k,ii],self.ws)) #* (self.c) 
-        if self.fixed_source_on == False:
-            flux.make_fission_source(mesh.edges, self.PV_fission)
+        # if (self.nu > 0).any():
+        #     if self.fixed_source_on == False and self.fission_operator==True:
+        #         for ii in range(self.M+1):
+        #             for k in range(self.N_space):
+        #                 self.PV_fission[k, ii] = np.sum(np.multiply(V_old[:,k,ii],self.ws)) #* (self.c) 
+        if self.fixed_source_on == False and self.fission_operator == True:
+            flux.make_fission_source(mesh.edges, V_old)
         for space in range(0, self.N_space): 
             if self.angular_derivative['Legendre'] == True:
                 psi_moments, legendre_moments = calculate_psi_moments(self.legendre_moments, V_old[:,space,:], self.ws, self.M, self.N_ang, self.mus)
@@ -806,8 +806,9 @@ class rhs_class():
 
                                 if (self.nu > 0).any():
                                     
-                                    fission_source = self.nu[space] * self.sigma_f[space] * flux.fission_source[space, self.g, :]
+                                    fission_source = flux.fission_source[space, self.g, :]
                                     # print(fission_source)
+                                    print(self.nu[space]*self.sigma_f[space])
                                     RHS += fission_source / self.sigma_t
 
 
@@ -818,6 +819,7 @@ class rhs_class():
                             # time derivative of mass matrix
                             if const_crosssection == False:
                                 RHS = np.dot(Minv, RHS) # mass matrix 
+        
                             # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))
                             if self.angular_derivative['diamond'] == True:
                                 # if space != 0:

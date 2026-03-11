@@ -54,7 +54,10 @@ data = [('N_ang', int64),
         ('cross_section_data', float64[:,:]),
         ('g', int64),
         ('shift', float64),
-        ('csRT', float64[:, :])
+        ('csRT', float64[:, :]),
+        ('sigma_f', float64),
+        ('nu', float64),
+        ('csF', float64[:, :])
 
         ]
 
@@ -69,6 +72,8 @@ class sigma_integrator():
         # print(self.sigma_s,'sigma_s')
         self.sigma_a = self.sigma_t - self.sigma_s
         # print(self.sigma_a,'sigma_a')
+        self.sigma_f = build.sigma_fbar
+        self.nu = build.nubar
         self.sigma_func = build.sigma_func
         self.M = build.M
         self.a = 0.0137225
@@ -81,6 +86,7 @@ class sigma_integrator():
         self.cs = np.zeros((self.N_space, self.Msigma+ 1))
         self.csP = np.zeros((self.N_space, self.Msigma+ 1))
         self.csRT = np.zeros((self.N_space, self.Msigma+ 1))
+        self.csF = np.zeros((self.N_space, self.Msigma+ 1))
         self.VV = np.zeros(self.M+1)
         self.VP = np.zeros(self.M+1)
         self.AAA = np.zeros((self.M+1, self.M + 1, self.Msigma + 1))
@@ -120,11 +126,13 @@ class sigma_integrator():
         opacity = self.sigma_function(argument, t, T_old)
         opacityP = self.sigma_function(argument, t, T_old, True)
         opacityrt = self.sigma_function(argument, t, T_old, False, True)
+        opacityF = self.sigma_function(argument, t, T_old, False, False, True)
         # opacity = self.sigma_function(self.xs_quad, t, T_old)
         #  
         self.cs[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacity * 2.0 * normTn(j, argument, a, b)) 
         self.csP[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacityP * 2.0 * normTn(j, argument, a, b)) 
         self.csRT[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacityrt * 2.0 * normTn(j, argument, a, b)) 
+        self.csF[k, j] =  0.5 * (b-a) * np.sum(self.ws_quad * opacityrt * 2.0 * normTn(j, argument, a, b)) 
     # def integrate_moments_sphere_trap(self, a, b, j, k, t, T_old, T_eval_points, checkfunc = False):
     #     # self.ws_quad, self.xs_quad = quadrature(2*self.M+1, 'chebyshev')
     #     self.cs[k, j] = 0.5 * (b-a) 
@@ -227,7 +235,7 @@ class sigma_integrator():
                 return_array[ix] = 0.0
         return return_array
 
-    def sigma_function(self, x, t, T_old, scattering = False, RT = False):
+    def sigma_function(self, x, t, T_old, scattering = False, RT = False, fission = False):
 
         if self.sigma_func['constant'] == 1:
             if scattering == False:
@@ -406,7 +414,11 @@ class sigma_integrator():
                         res[ix] =  0.1 * self.sigma_t
                     elif moderator == True and scattering == True:
                         res[ix] = 0.8 * self.sigma_t
-
+                elif fission == True:
+                    if fuel == True:
+                        res[ix] = self.sigma_f * self.nu
+                    else:
+                        res[ix] == 0
                 else:
                     res[ix] = self.sigma_t
             # print(' --- --- --- ---')

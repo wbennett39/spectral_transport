@@ -38,6 +38,7 @@ data = [("P", float64[:]),
         ('N_ang', int64),
         ('Msigma', int64),
         ('cs', float64[:,:]),
+        ('csF', float64[:,:]),
         ('csRT', float64[:,:]),
         ('edges', float64),
         ('PV', float64[:]),
@@ -110,11 +111,12 @@ class scalar_flux(object):
                         # for l in range(self.N_ang):
                             # self.P_fixed[k, ig, i] +=  u[l, j] * self.ws[l] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
                             self.P_fixed[k, ig, i] +=  u[j] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
+    
     def make_fission_source(self, edges, V):
         # as of now, sigma_f must be constant
         self.fission_source = np.zeros((self.N_space, self.N_groups, self.M+1))
         # print(normalize_phi(self.fixed_source_coeffs, edges, 2*self.ws, self.N_ang, self.M, self.N_space, self.N_groups), 'should be 1/(k) * chi')
-        for k in range(self.N_space):
+        for space in range(self.N_space):
             xL = edges[k]
             xR = edges[k+1]
             for ig in range(self.N_groups):
@@ -122,11 +124,14 @@ class scalar_flux(object):
                 u = V[ k,:]
 
                 # u = U[ig*self.N_ang:(ig+1)*self.N_ang, k,:]
-                for i in range(self.M+1):
-                    for j in range(self.M+1):
-                        # for l in range(self.N_ang):
-                            # self.P_fixed[k, ig, i] +=  u[l, j] * self.ws[l] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
-                            self.fission_source[k, ig, i] +=  u[j] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
+                for l in range(self.N_ang):
+                    for i in range(self.M+1):
+                        for j in range(self.M+1):
+                            for k in range(self.Msigma + 1):
+                            # for l in range(self.N_ang):
+                                # self.P_fixed[k, ig, i] +=  u[l, j] * self.ws[l] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
+                                self.fission_source[space, ig, i] += self.csF[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
+                                # self.fission_source[k, ig, i] +=  u[j] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
 
 
 
@@ -177,6 +182,7 @@ class scalar_flux(object):
                                         # print(self.PV)
                                         # print(self.PV_RT)
                                     elif self.lumping == False:
+                                        print(self.cs[space, k])
                                         self.PV[i] += self.cs[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
                                         self.PV_RT[i] += self.csRT[space, k] * u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
                                         # self.PV_RT[i] += u[l,j] * self.ws[l] * VV_matrix(i, j,k, xL, xR) / (math.pi**1.5)
@@ -212,6 +218,7 @@ class scalar_flux(object):
     def get_coeffs(self, opacity_class):
         self.cs = opacity_class.csP
         self.csRT = opacity_class.csRT
+        self.csF = opacity_class.csF
         
 
 

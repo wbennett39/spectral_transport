@@ -119,9 +119,10 @@ class scalar_flux(object):
         for space in range(self.N_space):
             xL = edges[k]
             xR = edges[k+1]
+            u = V[:, space,:]
             for ig in range(self.N_groups):
                 # u = self.fixed_source_coeffs[ig*self.N_ang:(ig+1)*self.N_ang, k,:]
-                u = V[ k,:]
+      
 
                 # u = U[ig*self.N_ang:(ig+1)*self.N_ang, k,:]
                 for l in range(self.N_ang):

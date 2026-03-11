@@ -808,7 +808,7 @@ class rhs_class():
                                     
                                     fission_source = flux.fission_source[space, self.g, :]
                                     # print(fission_source)
-                                    print(self.nu[space]*self.sigma_f[space])
+                        
                                     RHS += fission_source / self.sigma_t
 
 

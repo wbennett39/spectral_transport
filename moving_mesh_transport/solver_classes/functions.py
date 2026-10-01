@@ -12,7 +12,7 @@ from functools import partial
 from scipy.special import roots_legendre
 import numpy.polynomial as poly
 import scipy.special as sps
-
+from numpy.polynomial.legendre import legval
 
 
 @njit 
@@ -1185,6 +1185,6 @@ def normalize_fission_source(VV, N_space, M, alpha, edges):
         a = edges[k]
         b = edges[k+1]
         for j in range(M+1):
-            norm = (1/ math.sqrt(2))**kronecker(j) * math.sqrt(1/(b-a)) * math.sqrt(2) / math.sqrt(math.pi)
-            new_coeffs[k, j] = VV[k,j] * alpha / norm / 2 
+            norm0 = 1.0 / math.sqrt(math.pi * (b - a))
+            new_coeffs[k, j] = VV[k, j] * alpha / (2.0 * norm0)
     return new_coeffs

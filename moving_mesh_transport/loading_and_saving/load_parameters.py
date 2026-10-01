@@ -54,6 +54,9 @@ class parameter_load_class:
         self.dense = int(mesh_parameters['dense'])
         self.VDMD = int(parameters['all']['VDMD'])
         self.fixed_source = int(parameters['all']['fixed_source'])
+        self.alpha_shift = float(
+    parameters['all'].get('alpha_shift', 0.0)
+)
 
         self.thick = int(parameters['all']['thick'])
         if self.thick == True:

@@ -1478,7 +1478,7 @@ class mesh_class(object):
             self.Dedges_const = self.Dedges
         else:
             self.edges = np.linspace(0, self.x0, self.N_space+1)
-            pos1 = np.argmin(self.edges - 2.5)
+            pos1 = np.argmin(np.abs(self.edges - 2.5))
             pos2 = np.argmin(np.abs(self.edges - 3.5))
             self.edges[pos1] = 2.5
             self.edges[pos2] = 3.5

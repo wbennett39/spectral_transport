@@ -5,16 +5,17 @@ all:
   epsilon_scaling: false
   epsilon: 1.0
   sigma_t: 1
+  alpha_shift: 0.0
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 15
+  - 5
   tnodes: 40
   Ms:
-  - 2
+  - 0
   N_runs: 1
   rt: 1e-9
   at: 1e-9
@@ -37,13 +38,13 @@ all:
   thick: false
   integrator: Euler
   Euler_dt_spacing: log
-  Euler_dt_num: 12
+  Euler_dt_num: 8
   geometry:
     slab: false
     sphere: true
   lumping: false
   N_groups: 1
-  kold: 0.42210559076038534
+  kold: 0.8
   VDMD: true
   fixed_source: true
   fission_operator: true
@@ -378,7 +379,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 8
+  - 4
   move_type:
   - 1
   - 0

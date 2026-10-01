@@ -149,7 +149,8 @@ data = [('N_ang', int64),
         ('LOUD', int64),
         ('percent_to_print', float64),
         ('last_print', float64),
-        ('fission_operator', int64)
+        ('fission_operator', int64),
+        ("alpha_shift", float64),
         ]
 ##############################################################################
 #thermal couple, l scaling
@@ -179,6 +180,7 @@ class rhs_class():
 
         self.thermal_couple = build.thermal_couple
         self.uncollided = build.uncollided
+        self.alpha_shift = 0.0
         self.test_dimensional_rhs = build.test_dimensional_rhs
         self.told = 0.0
         self.sigma_s = build.sigma_s
@@ -823,8 +825,11 @@ class rhs_class():
                             # time derivative of mass matrix
                             if const_crosssection == False:
                                 RHS = np.dot(Minv, RHS) # mass matrix 
-        
-                            # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))
+                
+                            RHS -= self.alpha_shift * U
+
+                            V_new[angle, space, :] = RHS
+                                                        # print(psi_moments[0,:], np.dot(Minv, 2*PV/ self.sigma_t ))
                             if self.angular_derivative['diamond'] == True:
                                 # if space != 0:
                                     if angle == 0:

@@ -129,7 +129,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
           eval_times, eval_array, boundary_on, boundary_source_strength, boundary_source, sigma_func, Msigma,
           finite_domain, domain_width, fake_sedov_v0, test_dimensional_rhs, epsilon, geometry, lumping, cross_section_data, 
           dense, shift, VDMD, fixed_source_coeffs, phi_coeffs, randomstart, chi, nu, sigma_f, legendre_moments, angular_derivative,
-          Euler_dt_spacing, Euler_dt_num, kold, fixed_source, first_step, guess_steady_state, precon_mat, fission_operator, input_source_coeffs):
+          Euler_dt_spacing, Euler_dt_num, kold, fixed_source, first_step, guess_steady_state, precon_mat, fission_operator, input_source_coeffs, alpha_shift=0):
 
     # if weights == "gauss_lobatto":
     #     mus = quadpy.c1.gauss_lobatto(N_ang).points
@@ -242,6 +242,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
     uncollided_sol = uncollided_solution(initialize)
     flux = scalar_flux(initialize)
     rhs = rhs_class(initialize)
+    rhs.alpha_shift = float(alpha_shift)
     transfer = T_function(initialize)
     sigma_class = sigma_integrator(initialize, cross_section_data)
     flux.load_AAA(sigma_class.AAA)
@@ -274,6 +275,9 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
         if randomstart == False:
             initialize.IC = phi_coeffs 
 
+       
+            sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points)
+            flux.get_coeffs(sigma_class) # pass scattering cross section expansion coefficients to scalar flux class
             flux.make_fixed_phi(mesh.edges)
         else:
             # flux.fixed_source_coeffs = initialize.IC.copy()
@@ -297,6 +301,8 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                 initialize.fixed_source_coeffs = flux.fixed_source_coeffs.copy() 
                 # initialize.IC = initialize.IC  #/ normalization
             # print(kold, 'k old in main')
+            sigma_class.sigma_moments(mesh.edges, 0.0, fake_T_old, fake_T_eval_points)
+            flux.get_coeffs(sigma_class) # p
             flux.make_fixed_phi(mesh.edges)
 
 
@@ -535,7 +541,7 @@ def solve(tfinal, N_space, N_ang, M, N_groups, x0, t0, sigma_t, sigma_s, t_nodes
                     itt = 0
                     Y = np.zeros((reshaped_IC.size, len(ts)))
                     
-                    while (change_from_ic >= at and itt <= ts.size-2) or itt <= 1:
+                    while (change_from_ic >= at and itt <= ts.size-2) or itt <= 2:
                         sol_temp  = backward_euler_sparse(RHS_wrap_jit, ts[itt:itt+2], reshaped_IC,  mesh, matrices, num_flux, source, uncollided_sol, flux, transfer, sigma_class, thermal_couple, N_ang, N_space, N_groups, M, rhs, tol = at, maxiter = maxiter_max, use_gmres=False)
                         # print(sol_temp.shape)
                         # print(sol_temp)

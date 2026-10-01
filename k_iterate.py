@@ -269,7 +269,8 @@ def power_iterate(kguess, transport_parameters, mesh_parameters, run, tol = 1e-1
                 with open('moving_mesh_transport/input_scripts/Kornreich.yaml', 'w') as file:
         # Use sort_keys=False to maintain a sensible order (optional)
                     yaml.dump(data, file, sort_keys=False)
-            run.load('Kornreich', mesh_parameters)
+            # run.load('Kornreich', mesh_parameters)
+            run.load(transport_parameters, mesh_parameters)
             run.parameters['all']['kold'] = kold
             new_phi_coeffs = transfer_coefficients(input_phi, M)
 

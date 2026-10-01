@@ -110,7 +110,7 @@ class scalar_flux(object):
                     for j in range(self.M+1):
                         # for l in range(self.N_ang):
                             # self.P_fixed[k, ig, i] +=  u[l, j] * self.ws[l] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
-                            self.P_fixed[k, ig, i] +=  u[j] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5)
+                            self.P_fixed[k, ig, i] += u[j] * VV_matrix(i, j, 0, xL, xR) / (math.pi**1.5) 
     
     def make_fission_source(self, edges, V):
         # as of now, sigma_f must be constant

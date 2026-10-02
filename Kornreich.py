@@ -44,6 +44,10 @@ MESH_YAML = INPUT_DIR / "mesh_parameters_Kornreich.yaml"
 MESH_DMD_YAML = INPUT_DIR / "mesh_parameters_Kornreich_DMD.yaml"
 RESULTS_DIR = Path("Kornreich_results")
 
+plt.rcParams['axes.spines.top'] = False
+plt.rcParams['axes.spines.right'] = False
+
+
 
 @dataclass(frozen=True)
 class BenchmarkValues:
@@ -709,7 +713,7 @@ def plot_k_convergence(k_result, benchmark: BenchmarkValues, *, x0: float, nu: f
 def Kornreich_benchmark(
     prime: bool = True,
     guess_k: float = 1.0,
-    sparse_time_points: int = 40,
+    sparse_time_points: int = 11,
     skip: int = 3,
     ktol: float = 5e-4,
     use_we: bool = False,
@@ -956,15 +960,25 @@ def fill_Kornreich_table(
 
 
 def plot_results(N_ang_list=(2, 4, 8, 16, 32, 64), N_space: int = 10, M: int = 2, *, show: bool = False) -> None:
-    """Plot stored angular-convergence results."""
+    """Plot stored angular-convergence results.
+
+    Alpha absolute errors for all available ``nu`` values are placed on one
+    figure. Line style identifies ``nu`` (dashed for 1.5, solid for 3.5),
+    while marker shape identifies the estimator. All data curves are black;
+    legend entries are generated with empty plots so individual curves do not
+    each require their own label.
+    """
     angle_dir = RESULTS_DIR / "angle_converge"
     angle_dir.mkdir(parents=True, exist_ok=True)
 
     for x0 in (4.5,):
+        stored = {}
+
         for nu in (1.5, 3.5):
             path = RESULTS_DIR / "data" / f"kalpha_x0={x0}_nu={nu}.h5"
             if not path.exists():
                 continue
+
             n_plot, k_values, alpha_values, dmd_values = [], [], [], []
             benchmark = get_benchmark(x0, nu)
             with h5py.File(path, "r") as handle:
@@ -980,16 +994,21 @@ def plot_results(N_ang_list=(2, 4, 8, 16, 32, 64), N_space: int = 10, M: int = 2
 
             if not n_plot:
                 continue
-            n_plot = np.asarray(n_plot)
-            k_values = np.asarray(k_values)
-            alpha_values = np.asarray(alpha_values)
-            dmd_values = np.asarray(dmd_values)
 
+            stored[nu] = {
+                "angles": np.asarray(n_plot),
+                "k": np.asarray(k_values),
+                "alpha": np.asarray(alpha_values),
+                "dmd": np.asarray(dmd_values),
+                "benchmark": benchmark,
+            }
+
+            # Keep the existing per-nu plots except alpha-error, which is
+            # intentionally combined below.
             figure_specs = [
-                ("kerr", np.abs(k_values - benchmark.k_eff), r"$k_\mathrm{eff}$ absolute error", True),
-                ("alphaerr", np.abs(alpha_values - benchmark.alpha), r"$\alpha$ absolute error", True),
-                ("k", k_values, r"$k_\mathrm{eff}$", False),
-                ("alpha", alpha_values, r"$\alpha$", False),
+                ("kerr", np.abs(stored[nu]["k"] - benchmark.k_eff), r"$k_\mathrm{eff}$ absolute error", True),
+                ("k", stored[nu]["k"], r"$k_\mathrm{eff}$", False),
+                ("alpha", stored[nu]["alpha"], r"$\alpha$", False),
             ]
             for name, values, ylabel, logarithmic_y in figure_specs:
                 fig, ax = plt.subplots()
@@ -997,17 +1016,13 @@ def plot_results(N_ang_list=(2, 4, 8, 16, 32, 64), N_space: int = 10, M: int = 2
                     ax.loglog(n_plot, values, "-o", mfc="none", label="iterative")
                 else:
                     ax.semilogx(n_plot, values, "-o", mfc="none", label="iterative")
-                if name.startswith("alpha"):
-                    ax.semilogx(n_plot, dmd_values, "-^", mfc="none", label="DMD")
-                    if logarithmic_y:
-                        # Replot DMD errors on the same log-log scale.
-                        ax.lines[-1].remove()
-                        ax.loglog(n_plot, np.abs(dmd_values - benchmark.alpha), "-^", mfc="none", label="DMD")
-                    else:
-                        ax.axhline(benchmark.alpha)
-                else:
-                    if not logarithmic_y:
-                        ax.axhline(benchmark.k_eff)
+
+                if name == "alpha":
+                    ax.semilogx(n_plot, stored[nu]["dmd"], "-^", mfc="none", label="DMD")
+                    ax.axhline(benchmark.alpha)
+                elif name == "k":
+                    ax.axhline(benchmark.k_eff)
+
                 ax.set_xlabel("angles")
                 ax.set_ylabel(ylabel)
                 if len(ax.get_legend_handles_labels()[0]) > 1:
@@ -1017,28 +1032,108 @@ def plot_results(N_ang_list=(2, 4, 8, 16, 32, 64), N_space: int = 10, M: int = 2
                     plt.show()
                 plt.close(fig)
 
+        if stored:
+            # Combined k-eigenvalue error plot: linestyle -> nu.
+            fig, ax = plt.subplots()
+            for nu, result in stored.items():
+                linestyle = "--" if np.isclose(nu, 1.5) else "-"
+                angles = result["angles"]
+                benchmark = result["benchmark"]
+                k_error = np.abs(result["k"] - benchmark.k_eff)
+
+                ax.loglog(
+                    angles,
+                    k_error,
+                    color="k",
+                    linestyle=linestyle,
+                    marker="o",
+                    mfc="none",
+                )
+
+            # Dummy artists: line style identifies nu without duplicating
+            # legend entries for every data curve.
+            ax.plot([], [], "k--", label=r"$\nu=1.5$")
+            ax.plot([], [], "k-", label=r"$\nu=3.5$")
+            ax.plot([], [], "ko", mfc="none", linestyle="None", label=r"$k$ iteration")
+
+            ax.set_xlabel("angles")
+            ax.set_ylabel(r"$k_\mathrm{eff}$ absolute error")
+            ax.legend()
+            fig.savefig(angle_dir / f"kerr_x0={x0}.pdf", bbox_inches="tight")
+            if show:
+                plt.show()
+            plt.close(fig)
+
+            # Combined alpha-error plot: linestyle -> nu, marker -> method.
+            # For the current Kornreich workflow, nu=1.5 is refined with IRAM
+            # and nu=3.5 is refined with the warm-started secant solve.
+            fig, ax = plt.subplots()
+            for nu, result in stored.items():
+                linestyle = "--" if np.isclose(nu, 1.5) else "-"
+                marker = "s" if np.isclose(nu, 1.5) else "o"
+                angles = result["angles"]
+                benchmark = result["benchmark"]
+                iterative_error = np.abs(result["alpha"] - benchmark.alpha)
+                dmd_error = np.abs(result["dmd"] - benchmark.alpha)
+
+                ax.loglog(
+                    angles,
+                    iterative_error,
+                    color="k",
+                    linestyle=linestyle,
+                    marker=marker,
+                    mfc="none",
+                )
+                ax.loglog(
+                    angles,
+                    dmd_error,
+                    color="k",
+                    linestyle=linestyle,
+                    marker="^",
+                    mfc="none",
+                )
+
+            # Dummy artists make a compact, semantic legend:
+            # line style -> nu; marker -> estimator.
+            ax.plot([], [], "k--", label=r"$\nu=1.5$")
+            ax.plot([], [], "k-", label=r"$\nu=3.5$")
+            ax.plot([], [], "k^", mfc="none", linestyle="None", label="DMD")
+            ax.plot([], [], "ks", mfc="none", linestyle="None", label="IRAM")
+            ax.plot([], [], "ko", mfc="none", linestyle="None", label="secant")
+
+            ax.set_xlabel("angles")
+            ax.set_ylabel(r"$\alpha$ absolute error")
+            ax.legend()
+            fig.savefig(angle_dir / f"alphaerr_x0={x0}.pdf", bbox_inches="tight")
+            if show:
+                plt.show()
+            plt.close(fig)
+
+
 
 def run_converge(
     *,
-    nspace: int = 25,
+    nspace: int = 50,
     degree: int = 3,
-    angles=(2, 4, 8, 16, 32, 64),
+    angles=(2, 4, 8, 16),
     verbose: bool = False,
     plot: bool = False,
+    solve: bool = True,
 ) -> None:
     """Run the standard angular-convergence study."""
     completed = []
     for n_angles in angles:
-        fill_Kornreich_table(
-            n_angles,
-            M=degree,
-            NSPACE=nspace,
-            verbose=verbose,
-            plot=plot,
-        )
+        if solve:
+            fill_Kornreich_table(
+                n_angles,
+                M=degree,
+                NSPACE=nspace,
+                verbose=verbose,
+                plot=plot,
+            )
         completed.append(n_angles)
         plot_results(completed, N_space=nspace, M=degree, show=False)
 
 
 if __name__ == "__main__":
-    run_converge(verbose=True)
+    run_converge(verbose=False)

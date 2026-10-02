@@ -312,8 +312,18 @@ def power_iterate_result(
     degree = int(run.parameters["all"]["Ms"][0])
     n_space = int(run.parameters["all"]["N_spaces"][0])
 
-    sigma_f_cells, nu_cells, _ = _prepare_material_vectors(run, material_model)
-    sigma_f_x, nu_x, _ = material_arrays_on_points(run.xs, run.parameters, material_model)
+    # ``run.load`` updates parameters, but moving_mesh_transport may not rebuild
+    # ``run.edges``/``run.xs`` until ``custom_source`` initializes the mesh.
+    # Material arrays are therefore synchronized with the live mesh below, after
+    # each solve that may rebuild it.  We only prepare them here when the loaded
+    # mesh already has the expected number of cells (needed for warm starts).
+    sigma_f_cells = nu_cells = None
+    sigma_f_x = nu_x = None
+    if getattr(run, "edges", np.empty(0)).size == n_space + 1:
+        sigma_f_cells, nu_cells, _ = _prepare_material_vectors(run, material_model)
+        sigma_f_x, nu_x, _ = material_arrays_on_points(
+            run.xs, run.parameters, material_model
+        )
 
     at = float(run.parameters["all"]["at"])
     rt = float(run.parameters["all"]["rt"])
@@ -332,6 +342,12 @@ def power_iterate_result(
     elif input_phi is not None:
         run.parameters["all"]["kold"] = float(kguess)
         phi_guess = transfer_coefficients(input_phi, degree)
+        if sigma_f_cells is None or len(sigma_f_cells) != n_space:
+            raise RuntimeError(
+                "Warm-start k iteration requires a mesh initialized with the "
+                f"loaded resolution ({n_space} cells), but run.edges currently "
+                f"contains {max(getattr(run, 'edges', np.empty(0)).size - 1, 0)} cells."
+            )
         transfer_source = make_fission_scalar_flux(
             phi_guess,
             run.edges,
@@ -359,6 +375,21 @@ def power_iterate_result(
         run.custom_source(randomstart=True, uncollided=0, moving=0)
 
     first_time = time.time() - start
+
+    # custom_source() is where the transport package actually initializes or
+    # rebuilds the mesh.  Refresh all material arrays from that live mesh now;
+    # this prevents stale arrays when a preceding priming/coarse solve used a
+    # different spatial resolution.
+    if run.edges.size != n_space + 1:
+        raise RuntimeError(
+            f"Transport solve returned {run.edges.size - 1} cells, but the loaded "
+            f"configuration requested {n_space}."
+        )
+    sigma_f_cells, nu_cells, _ = _prepare_material_vectors(run, material_model)
+    sigma_f_x, nu_x, _ = material_arrays_on_points(
+        run.xs, run.parameters, material_model
+    )
+
     coeffs_old = np.copy(
         run.sol_ob.y[:, -1].reshape((n_angles * n_groups, n_space, degree + 1))
     )
@@ -423,6 +454,16 @@ def power_iterate_result(
             input_A=precon_mat,
         )
         iteration_times.append(time.time() - start)
+
+        if run.edges.size != n_space + 1:
+            raise RuntimeError(
+                f"Transport solve changed the mesh to {run.edges.size - 1} cells; "
+                f"expected {n_space}."
+            )
+        sigma_f_cells, nu_cells, _ = _prepare_material_vectors(run, material_model)
+        sigma_f_x, nu_x, _ = material_arrays_on_points(
+            run.xs, run.parameters, material_model
+        )
 
         ts = run.sol_ob.t
         if len(ts) > 1:

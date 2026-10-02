@@ -9,10 +9,10 @@ all:
   sigma_s: 0.8
   sigma_f: 0.2
   chi: 1
-  nu: 1.5
+  nu: 3.5
   t0: 10000000000000.0
   N_spaces:
-  - 15
+  - 25
   tnodes: 40
   Ms:
   - 0
@@ -379,7 +379,7 @@ fixed_source:
   - 0
   - 1
   N_angles:
-  - 32
+  - 2
   move_type:
   - 1
   - 0

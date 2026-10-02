@@ -709,7 +709,7 @@ def plot_k_convergence(k_result, benchmark: BenchmarkValues, *, x0: float, nu: f
 def Kornreich_benchmark(
     prime: bool = True,
     guess_k: float = 1.0,
-    sparse_time_points: int = 11,
+    sparse_time_points: int = 40,
     skip: int = 3,
     ktol: float = 5e-4,
     use_we: bool = False,

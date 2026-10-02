@@ -12,10 +12,10 @@ all:
   nu: 1.5
   t0: 10000000000000.0
   N_spaces:
-  - 5
+  - 25
   tnodes: 40
   Ms:
-  - 0
+  - 3
   N_runs: 1
   rt: 1e-9
   at: 1e-9
